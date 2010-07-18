@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("s3piPlugins")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("DHARMA")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("s3piPlugins")]
-[assembly: AssemblyCopyright("Copyright © DHARMA 2010")]
+[assembly: AssemblyCopyright("Copyright ©  2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
