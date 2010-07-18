@@ -426,7 +426,7 @@ namespace EffectResource
             public abstract void UnParse(Stream s);
         }
         public abstract class AbstractEffectSection<TEffect>:AbstractEffectSection
-            where TEffect : AbstractEffect
+            where TEffect : AbstractEffect, IEquatable<TEffect>
         {
             protected AbstractEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version)
                 : base(apiVersion, handler,type,version)
@@ -609,8 +609,8 @@ namespace EffectResource
         #region Effects
         #region Nested Type: EffectList
         
-        public class EffectList<TEffect> : AResource.DependentList<AbstractEffect>
-            where TEffect : AbstractEffect
+        public class EffectList<TEffect> : AResource.DependentList<TEffect>
+            where TEffect : AbstractEffect, IEquatable<TEffect>
         {
 
             public EffectList(EventHandler handler)
@@ -633,9 +633,9 @@ namespace EffectResource
             {
                 return typeof(TEffect);
             }
-            protected override AbstractEffect CreateElement(Stream s)
+            protected override TEffect CreateElement(Stream s)
             {
-                return (AbstractEffect)Activator.CreateInstance(typeof(TEffect), new object[] {0,elementHandler,s});
+                return (TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s });
             }
 
             public override void Add()
@@ -643,7 +643,7 @@ namespace EffectResource
                 base.Add(new object[] { });
             }
 
-            protected override void WriteElement(Stream s, AbstractEffect element)
+            protected override void WriteElement(Stream s, TEffect element)
             {
                 element.UnParse(s);
             }
@@ -662,9 +662,8 @@ namespace EffectResource
                 basis.UnParse(ms);
                 ms.Position = 0L;
                 Parse(ms);
-            }            
+            }
             protected abstract void Parse(Stream stream);
-
             public abstract void UnParse(Stream stream);
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -722,7 +721,7 @@ namespace EffectResource
         #endregion
 
         #region Nested Type: DefaultEffect
-        public class DefaultEffect : AbstractEffect
+        public class DefaultEffect : AbstractEffect, IEquatable<DefaultEffect>
         {
             public DefaultEffect(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             public DefaultEffect(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
@@ -734,6 +733,11 @@ namespace EffectResource
             public override void UnParse(Stream stream)
             {
                 throw new NotImplementedException();
+            }
+
+            public bool Equals(DefaultEffect other)
+            {
+                return base.Equals(other);
             }
         }
         #endregion
@@ -935,7 +939,7 @@ namespace EffectResource
         #endregion
 
         #region Nested Type: ParticleEffect
-        public class ParticleEffect : AbstractEffect
+        public class ParticleEffect : AbstractEffect, IEquatable<ParticleEffect>
         {            
             public ParticleEffect(int apiVersion, EventHandler handler, ParticleEffect basis)
                 :base(apiVersion,handler,basis)
@@ -2091,11 +2095,16 @@ namespace EffectResource
 
                 s.Write(mByte08);
             }
+
+            public bool Equals(ParticleEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: MetaparticleEffect
-        public class MetaparticleEffect : AbstractEffect
+        public class MetaparticleEffect : AbstractEffect, IEquatable<MetaparticleEffect>
         {
 
             public MetaparticleEffect(int apiVersion, EventHandler handler, MetaparticleEffect basis)
@@ -3242,11 +3251,16 @@ namespace EffectResource
                 s.Write(mByteArray14);
             }
 
+
+            public bool Equals(MetaparticleEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: DecalEffect
-        public class DecalEffect : AbstractEffect
+        public class DecalEffect : AbstractEffect, IEquatable<DecalEffect>
         {
             public DecalEffect(int apiVersion, EventHandler handler, DecalEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3435,11 +3449,16 @@ namespace EffectResource
                 s.Write(mByte03);
             }
 
+
+            public bool Equals(DecalEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: SequenceEffect
-        public class SequenceEffect : AbstractEffect
+        public class SequenceEffect : AbstractEffect, IEquatable<SequenceEffect>
         {
             public SequenceEffect(int apiVersion, EventHandler handler, SequenceEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3585,11 +3604,16 @@ namespace EffectResource
                 s.Write(mInt01);
             }
 
+
+            public bool Equals(SequenceEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: SoundEffect
-        public class SoundEffect : AbstractEffect
+        public class SoundEffect : AbstractEffect, IEquatable<SoundEffect>
         {
             public SoundEffect(int apiVersion, EventHandler handler, SoundEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3655,11 +3679,16 @@ namespace EffectResource
                 s.Write(mFloat03);
             }
 
+
+            public bool Equals(SoundEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: ShakeEffect
-        public class ShakeEffect : AbstractEffect
+        public class ShakeEffect : AbstractEffect, IEquatable<ShakeEffect>
         {
             public ShakeEffect(int apiVersion, EventHandler handler, ShakeEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3756,11 +3785,16 @@ namespace EffectResource
                 s.Write(mFloat04);
             }
 
+
+            public bool Equals(ShakeEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: Camera Effect
-        public class CameraEffect : AbstractEffect
+        public class CameraEffect : AbstractEffect, IEquatable<CameraEffect>
         {
             public CameraEffect(int apiVersion, EventHandler handler, CameraEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3887,11 +3921,16 @@ namespace EffectResource
                 s.Write(mInt02);
                 s.Write(mByte01);
             }
+
+            public bool Equals(CameraEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: ModelEffect
-        public class ModelEffect : AbstractEffect
+        public class ModelEffect : AbstractEffect, IEquatable<ModelEffect>
         {
             public ModelEffect(int apiVersion, EventHandler handler, ModelEffect basis)
                 :base(apiVersion,handler,basis)
@@ -3999,11 +4038,16 @@ namespace EffectResource
                 s.Write(mByte01);
             }
 
+
+            public bool Equals(ModelEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: ScreenEffect
-        public class ScreenEffect : AbstractEffect
+        public class ScreenEffect : AbstractEffect, IEquatable<ScreenEffect>
         {
             public ScreenEffect(int apiVersion, EventHandler handler, ScreenEffect basis)
                 :base(apiVersion,handler,basis)
@@ -4108,11 +4152,16 @@ namespace EffectResource
                 s.Write(mByteArray02);
                 s.Write(mByteArray03);
             }
+
+            public bool Equals(ScreenEffect other)
+            {
+                return base.Equals(other);
+            }
         }
         #endregion
 
         #region Nested Type: Distribute Effect
-        public class DistributeEffect : AbstractEffect
+        public class DistributeEffect : AbstractEffect, IEquatable<DistributeEffect>
         {
             public DistributeEffect(int apiVersion, EventHandler handler, DistributeEffect basis)
                 :base(apiVersion,handler,basis)
@@ -4358,6 +4407,11 @@ namespace EffectResource
                 s.Write(mByteArray06);
                 s.Write(mByteArray07);
                 s.Write(mByteArray08);
+            }
+
+            public bool Equals(DistributeEffect other)
+            {
+                return base.Equals(other);
             }
         }
         #endregion
