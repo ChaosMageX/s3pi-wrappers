@@ -4,8 +4,9 @@ using System.IO;
 using s3pi.Interfaces;
 using System.ComponentModel;
 using System.Globalization;
-using EffectResource.IO;
-namespace EffectResource
+using s3piwrappers.IO;
+
+namespace s3piwrappers
 {
     public class EffectResource : AResource
     {

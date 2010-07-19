@@ -1,0 +1,1 @@
+C:\workspace\s3pi-wrappers\ExportContentResource\obj\Debug\ResolveAssemblyReference.cache

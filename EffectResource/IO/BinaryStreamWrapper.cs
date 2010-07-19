@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace EffectResource.IO
+namespace s3piwrappers.IO
 {
 
     public enum ByteOrder

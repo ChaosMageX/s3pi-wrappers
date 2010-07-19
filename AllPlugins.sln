@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EffectResource", "EffectResource\EffectResource.csproj", "{03CBE006-992A-4D0A-8CB9-FAE06EBBC524}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinToneResource", "SkinTone\SkinToneResource.csproj", "{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CASResources", "SkinTone\CASResources.csproj", "{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportContentResource", "ExportContentResource\ExportContentResource.csproj", "{52DDF6B9-FA59-4488-B699-E90F96363F50}"
 EndProject

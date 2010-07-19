@@ -8,7 +8,7 @@
     <ProjectGuid>{03CBE006-992A-4D0A-8CB9-FAE06EBBC524}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EffectResource</RootNamespace>
+    <RootNamespace>s3piwrappers</RootNamespace>
     <AssemblyName>EffectResource</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -32,15 +32,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.Interfaces">
-      <HintPath>..\..\..\..\..\ts3\util\s3pe\s3pi.Interfaces.dll</HintPath>
+    <Reference Include="s3pi.Interfaces, Version=1006.12.18.30722, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="s3pi.Settings">
-      <HintPath>..\..\..\..\..\ts3\util\s3pe\s3pi.Settings.dll</HintPath>
+    <Reference Include="s3pi.Settings, Version=1006.12.18.30722, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\s3pi.Settings.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Custom">
-      <HintPath>..\..\..\..\..\ts3\util\s3pe\System.Custom.dll</HintPath>
+    <Reference Include="System.Custom, Version=1006.12.18.30722, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
   </ItemGroup>

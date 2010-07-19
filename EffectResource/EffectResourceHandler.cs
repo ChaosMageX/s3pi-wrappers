@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using s3pi.Interfaces;
 
-namespace EffectResource
+namespace s3piwrappers
 {
     public class EffectResourceHandler :AResourceHandler
     {

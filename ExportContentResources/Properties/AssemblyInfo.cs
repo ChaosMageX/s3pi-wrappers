@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("s3piPlugins")]
+[assembly: AssemblyTitle("ExportContentResource")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("s3piPlugins")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCompany("DHARMA")]
+[assembly: AssemblyProduct("ExportContentResource")]
+[assembly: AssemblyCopyright("Copyright © DHARMA 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("ffcd570a-5ce1-48d6-adbb-260a6e4a5254")]
+[assembly: Guid("f6b9045b-c1f5-4cd5-8026-15ee2932bac9")]
 
 // Version information for an assembly consists of the following four values:
 //
