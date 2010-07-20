@@ -5441,11 +5441,11 @@ namespace s3piwrappers
         #region Fields
         private UInt16 mVersion = 0x00000002;
         private EffectSectionList mEffectSections;
-        private byte[] mByteArray01 = new byte[6];
-        private UInt32 mUint01;
-        private UInt16 mShort01;
-        private byte[] mByteArray02 = new byte[4];
-        private byte[] mByteArray03 = new byte[4];
+        private byte[] mByteArray01 = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private UInt32 mUint01 = 0x00000001;
+        private UInt16 mShort01 = 0x0000;
+        private byte[] mByteArray02 = new byte[4] { 0xFF, 0xFF, 0x00, 0x02 };
+        private byte[] mByteArray03 = new byte[4] { 0xFF, 0xFF, 0xFF, 0xFF };
         private ShaderList mEffectShaders;
         private CompilationList mEffectCompilations;
         private EffectHandleList mEffectHandles;
