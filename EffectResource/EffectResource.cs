@@ -1645,6 +1645,7 @@ namespace s3piwrappers
                 : base(apiVersion, handler)
             {
                 MemoryStream ms = new MemoryStream();
+                mVersion = basis.mVersion;
                 basis.UnParse(ms);
                 ms.Position = 0L;
                 Parse(ms);
@@ -1727,7 +1728,6 @@ namespace s3piwrappers
             }
         }
         #endregion
-
 
         #region Nested Type: ParticleEffect
         public class ParticleEffect : AbstractEffect, IEquatable<ParticleEffect>
