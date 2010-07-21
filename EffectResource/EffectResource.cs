@@ -5886,15 +5886,15 @@ namespace s3piwrappers
 
         #region Fields
         private UInt16 mVersion = 0x00000002;
-        private EffectSectionList mEffectSections;
+        private EffectSectionList mEffects;
         private byte[] mByteArray01 = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private UInt32 mUint01 = 0x00000001;
         private UInt16 mShort01 = 0x0000;
         private byte[] mByteArray02 = new byte[4] { 0xFF, 0xFF, 0x00, 0x02 };
         private byte[] mByteArray03 = new byte[4] { 0xFF, 0xFF, 0xFF, 0xFF };
-        private MaterialList mEffectShaders;
-        private CompilationList mEffectCompilations;
-        private EffectHandleList mEffectHandles;
+        private MaterialList mMaterials;
+        private CompilationList mCompilations;
+        private EffectHandleList mHandles;
         #endregion
 
         #region Properties
@@ -5905,10 +5905,10 @@ namespace s3piwrappers
             set { mVersion = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(2)]
-        public EffectSectionList EffectSections
+        public EffectSectionList Effects
         {
-            get { return mEffectSections; }
-            set { mEffectSections = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mEffects; }
+            set { mEffects = value; OnResourceChanged(this, new EventArgs()); }
         }
 
         [ElementPriority(6)]
@@ -5932,10 +5932,10 @@ namespace s3piwrappers
             set { mShort01 = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
-        public MaterialList EffectShaders
+        public MaterialList Materials
         {
-            get { return mEffectShaders; }
-            set { mEffectShaders = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mMaterials; }
+            set { mMaterials = value; OnResourceChanged(this, new EventArgs()); }
         }
 
         [ElementPriority(9)]
@@ -5952,16 +5952,16 @@ namespace s3piwrappers
             set { mByteArray03 = value; ; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
-        public CompilationList EffectCompilations
+        public CompilationList Compilations
         {
-            get { return mEffectCompilations; }
-            set { mEffectCompilations = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mCompilations; }
+            set { mCompilations = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
-        public EffectHandleList EffectHandles
+        public EffectHandleList Handles
         {
-            get { return mEffectHandles; }
-            set { mEffectHandles = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mHandles; }
+            set { mHandles = value; OnResourceChanged(this, new EventArgs()); }
         }
         #endregion
 
@@ -5983,15 +5983,15 @@ namespace s3piwrappers
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mVersion = s.ReadUInt16();
-            mEffectSections = new EffectSectionList(this.OnResourceChanged, stream);
+            mEffects = new EffectSectionList(this.OnResourceChanged, stream);
             mByteArray01 = s.ReadBytes(6);
             s.Read(out mUint01);
             s.Read(out mShort01);
-            mEffectShaders = new MaterialList(this.OnResourceChanged, stream);
+            mMaterials = new MaterialList(this.OnResourceChanged, stream);
             mByteArray02 = s.ReadBytes(4);
-            mEffectCompilations = new CompilationList(this.OnResourceChanged, stream);
+            mCompilations = new CompilationList(this.OnResourceChanged, stream);
             mByteArray03 = s.ReadBytes(4);
-            mEffectHandles = new EffectHandleList(this.OnResourceChanged, stream);
+            mHandles = new EffectHandleList(this.OnResourceChanged, stream);
         }
 
 
@@ -6000,19 +6000,19 @@ namespace s3piwrappers
             MemoryStream stream = new MemoryStream();
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mVersion);
-            if (mEffectSections == null) mEffectSections = new EffectSectionList(this.OnResourceChanged);
-            mEffectSections.UnParse(stream);
+            if (mEffects == null) mEffects = new EffectSectionList(this.OnResourceChanged);
+            mEffects.UnParse(stream);
             s.Write(mByteArray01);
             s.Write(mUint01);
             s.Write(mShort01);
-            if (this.mEffectShaders == null) this.mEffectShaders = new MaterialList(this.OnResourceChanged);
-            mEffectShaders.UnParse(stream);
+            if (this.mMaterials == null) this.mMaterials = new MaterialList(this.OnResourceChanged);
+            mMaterials.UnParse(stream);
             s.Write(mByteArray02);
-            if (mEffectCompilations == null) mEffectCompilations = new CompilationList(this.OnResourceChanged);
-            mEffectCompilations.UnParse(stream);
+            if (mCompilations == null) mCompilations = new CompilationList(this.OnResourceChanged);
+            mCompilations.UnParse(stream);
             s.Write(mByteArray03);
-            if (mEffectHandles == null) mEffectHandles = new EffectHandleList(this.OnResourceChanged);
-            mEffectHandles.UnParse(stream);
+            if (mHandles == null) mHandles = new EffectHandleList(this.OnResourceChanged);
+            mHandles.UnParse(stream);
             return stream;
         }
 
