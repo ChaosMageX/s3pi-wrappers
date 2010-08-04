@@ -1867,6 +1867,7 @@ namespace s3piwrappers
             private float mFloat48;
 
             #endregion
+
             #region Properties
 
             [ElementPriority(83)]
@@ -2339,7 +2340,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(16)]
-            public ColorList ColorList01
+            public ColorList ColorDeltas
             {
                 get { return mColorList01; }
                 set { mColorList01 = value; OnElementChanged(); }
@@ -2402,7 +2403,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(7)]
-            public FloatList FloatList02
+            public FloatList ScaleDeltas
             {
                 get { return mFloatList02; }
                 set { mFloatList02 = value; OnElementChanged(); }
@@ -2775,12 +2776,11 @@ namespace s3piwrappers
             private float mFloat30;
             private float mFloat31;
             private float mFloat32;
+
             private float mFloat33;
             private float mFloat34;
-
             private float mFloat35; //LE
             private float mFloat36; //LE
-
             private UInt64 mLong01;
             private UInt64 mLong02;
             private UInt64 mLong03;
