@@ -59,6 +59,14 @@ namespace s3piwrappers
 
             #region AHandlerElement
             public ShaderKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis)
+                : base(APIversion, handler)
+            {
+                MemoryStream ms = new MemoryStream();
+                basis.UnParse(ms);
+                ms.Position = 0L;
+                Parse(ms);
+            }
             public ShaderKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -173,6 +181,14 @@ namespace s3piwrappers
             #region AHandlerElement
 
             public TextureKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+            public TextureKey(int APIversion, EventHandler handler, TextureKey basis)
+                : base(APIversion, handler)
+            {
+                MemoryStream ms = new MemoryStream();
+                basis.UnParse(ms);
+                ms.Position = 0L;
+                Parse(ms);
+            }
             public TextureKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -202,7 +218,7 @@ namespace s3piwrappers
             public void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mAgeGenderFlags =(AgeGenderFlags) br.ReadUInt32();
+                mAgeGenderFlags = (AgeGenderFlags)br.ReadUInt32();
                 mTypeFlags = (DataTypeFlags)br.ReadUInt32();
                 mSpecularKeyIndex = br.ReadUInt32();
                 mDetailDarkKeyIndex = br.ReadUInt32();
@@ -227,6 +243,7 @@ namespace s3piwrappers
         #region Nested Type: ShaderKeyList
         public class ShaderKeyList : DependentList<ShaderKey>
         {
+            public ShaderKeyList(EventHandler handler) : base(handler) { }
             public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s) { }
             public override void Add()
             {
@@ -250,6 +267,7 @@ namespace s3piwrappers
         #region Nested Type: TextureKeyList
         public class TextureKeyList : DependentList<TextureKey>
         {
+            public TextureKeyList(EventHandler handler) : base(handler) { }
             public TextureKeyList(EventHandler handler, Stream s) : base(handler, s) { }
             public override void Add()
             {
@@ -332,7 +350,13 @@ namespace s3piwrappers
         public SkinToneResource(int apiVersion, Stream s)
             : base(apiVersion, s)
         {
-            Parse(s);
+            if (base.stream == null)
+            {
+                base.stream = this.UnParse();
+                this.OnResourceChanged(this, new EventArgs());
+            }
+            base.stream.Position = 0L;
+            Parse(base.stream);
         }
         private void Parse(Stream s)
         {
@@ -355,11 +379,14 @@ namespace s3piwrappers
             long pos = s.Position;
             bw.Write(0);
             bw.Write(0);
+            if (mShaderKeyList == null) mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
             bw.Write(mSkinRampIndex1);
             bw.Write(mSkinRampIndex2);
+            if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged);
             mTextureKeyList.UnParse(s);
             bw.Write(mIsDominant);
+            if (mReferences == null) mReferences = new TGIBlockList(OnResourceChanged, false);
             mReferences.UnParse(s, pos);
             return s;
         }

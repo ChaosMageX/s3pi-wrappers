@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HairToneResource", "HairTon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinToneResource", "SkinToneResource\SkinToneResource.csproj", "{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipResource", "ClipResource\ClipResource.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColourInfoResource", "ColourInfoResource\ColourInfoResource.csproj", "{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +29,14 @@ Global
 		{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B33F19DE-F211-4D32-8D03-43024B88F177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B33F19DE-F211-4D32-8D03-43024B88F177}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B33F19DE-F211-4D32-8D03-43024B88F177}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B33F19DE-F211-4D32-8D03-43024B88F177}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

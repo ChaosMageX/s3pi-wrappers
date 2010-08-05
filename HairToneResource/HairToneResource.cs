@@ -92,6 +92,13 @@ namespace s3piwrappers
 
             #region AHandlerElement
             public ShaderKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+            public ShaderKey(int APIversion, EventHandler handler,ShaderKey basis) : base(APIversion, handler)
+            {
+                MemoryStream ms = new MemoryStream();
+                basis.UnParse(ms);
+                ms.Position = 0L;
+                Parse(ms);
+            }
             public ShaderKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
 
 
@@ -153,6 +160,7 @@ namespace s3piwrappers
         #region Nested Type: ShaderKeyList
         public class ShaderKeyList : DependentList<ShaderKey>
         {
+            public ShaderKeyList(EventHandler handler) : base(handler) { }
             public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s) { }
             public override void Add()
             {
@@ -204,7 +212,13 @@ namespace s3piwrappers
         public HairToneResource(int apiVersion, Stream s)
             : base(apiVersion, s)
         {
-            Parse(s);
+	    if (base.stream == null)
+            {
+                base.stream = this.UnParse();
+                this.OnResourceChanged(this, new EventArgs());
+            }
+            base.stream.Position = 0L;
+            Parse(base.stream);
         }
         private void Parse(Stream s)
         {
@@ -218,6 +232,7 @@ namespace s3piwrappers
             Stream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(mVersion);
+            if(mShaderKeyList == null)mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
             bw.Write(mIsDominant);
             return s;
