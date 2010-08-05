@@ -9,6 +9,91 @@ namespace s3piwrappers
 {
     public class ColourInfoResource : AResource
     {
+        public class HSVBase : AHandlerElement,IEquatable<HSVBase>
+        {
+            private UInt32 mValue;
+            public HSVBase(int APIversion, EventHandler handler) : base(APIversion, handler)
+            {
+            }
+            public HSVBase(int APIversion, EventHandler handler, UInt32 value)
+                : base(APIversion, handler)
+            {
+                mValue = value;
+            }
+            public HSVBase(int APIversion, EventHandler handler, HSVBase basis)
+                : this(APIversion, handler, basis.mValue)
+            {
+
+            }
+            public HSVBase(int APIversion, EventHandler handler, Stream s)
+                : base(APIversion, handler)
+            {
+                Parse(s);
+            }
+            private void Parse(Stream s)
+            {
+                mValue = new BinaryReader(s).ReadUInt32();
+            }
+            public void UnParse(Stream s)
+            {
+                new BinaryWriter(s).Write(mValue);
+            }
+            [ElementPriority(1)]
+            public UInt32 Base
+            {
+                get { return mValue; }
+                set { mValue = value; OnElementChanged(); }
+            }
+
+            public bool Equals(HSVBase other)
+            {
+                return mValue.Equals(other.mValue);
+            }
+
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(0,GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
+        
+        }
+        public class HSVBaseList : DependentList<HSVBase>
+        {
+            public HSVBaseList(EventHandler handler)
+                : base(handler)
+            {
+            }
+
+            public HSVBaseList(EventHandler handler, Stream s)
+                : base(handler, s)
+            {
+            }
+
+            public override void Add()
+            {
+                base.Add(new object[] { });
+            }
+
+            protected override HSVBase CreateElement(Stream s)
+            {
+                return new HSVBase(0, elementHandler, s);
+            }
+
+            protected override void WriteElement(Stream s, HSVBase element)
+            {
+                element.UnParse(s);
+            }
+        }
         public class ARGB : AHandlerElement, IEquatable<ARGB>
         {
             private Int32 mValue;
@@ -98,20 +183,21 @@ namespace s3piwrappers
                 element.UnParse(s);
             }
         }
-        public class Entry : AHandlerElement, IEquatable<Entry>
+        public class FabricInfo : AHandlerElement, IEquatable<FabricInfo>
         {
             #region Fields
 
             private Byte mXmlIndex;
-            private ARGBList mColourList;
-            private UInt32 mUnknown01;
+            private ARGBList mColours;
+            private HSVBaseList mHSVBases;
             #endregion
 
-            public Entry(int APIversion, EventHandler handler) : base(APIversion, handler)
+            public FabricInfo(int APIversion, EventHandler handler) : base(APIversion, handler)
             {
-                mColourList = new ARGBList(handler);
+                mColours = new ARGBList(handler);
+                mHSVBases=new HSVBaseList(handler);
             }
-            public Entry(int APIversion, EventHandler handler,Entry basis)
+            public FabricInfo(int APIversion, EventHandler handler,FabricInfo basis)
                 : base(APIversion, handler)
             {
                 System.IO.Stream s = new MemoryStream();
@@ -119,7 +205,7 @@ namespace s3piwrappers
                 s.Position = 0L;
                 Parse(s);
             }
-            public Entry(int APIversion, EventHandler handler, Stream s)
+            public FabricInfo(int APIversion, EventHandler handler, Stream s)
                 : base(APIversion, handler)
             {
                 Parse(s);
@@ -131,35 +217,36 @@ namespace s3piwrappers
                 set { mXmlIndex = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public ARGBList ColourList1
+            public ARGBList Colours
             {
-                get { return mColourList; }
-                set { mColourList = value; OnElementChanged(); }
+                get { return mColours; }
+                set { mColours = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public uint Unknown01
+            public HSVBaseList HSVBases
             {
-                get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                get { return mHSVBases; }
+                set { mHSVBases = value; OnElementChanged(); }
             }
 
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mXmlIndex = br.ReadByte();
-                mColourList = new ARGBList(handler,s);
-                mUnknown01 = br.ReadUInt32();
+                mColours = new ARGBList(handler,s);
+                mHSVBases = new HSVBaseList(handler,s);
 
             }
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mXmlIndex);
-                if(mColourList == null) mColourList = new ARGBList(handler);
-                mColourList.UnParse(s);
-                bw.Write(mUnknown01);
+                if(mColours == null) mColours = new ARGBList(handler);
+                mColours.UnParse(s);
+                if(mHSVBases == null)mHSVBases = new HSVBaseList(handler);
+                mHSVBases.UnParse(s);
             }
-            public bool Equals(Entry other)
+            public bool Equals(FabricInfo other)
             {
                 return base.Equals(other);
             }
@@ -179,13 +266,13 @@ namespace s3piwrappers
                 get { return kRecommendedApiVersion; }
             }
         }
-        public class EntryList : DependentList<Entry>
+        public class FabricInfoList : DependentList<FabricInfo>
         {
-            public EntryList(EventHandler handler) : base(handler)
+            public FabricInfoList(EventHandler handler) : base(handler)
             {
             }
 
-            public EntryList(EventHandler handler, Stream s) : base(handler, s)
+            public FabricInfoList(EventHandler handler, Stream s) : base(handler, s)
             {
             }
 
@@ -194,22 +281,33 @@ namespace s3piwrappers
                 base.Add(new object[] {});
             }
 
-            protected override Entry CreateElement(Stream s)
+            protected override FabricInfo CreateElement(Stream s)
             {
-                return new Entry(0,elementHandler,s);
+                return new FabricInfo(0,elementHandler,s);
             }
 
-            protected override void WriteElement(Stream s, Entry element)
+            protected override void WriteElement(Stream s, FabricInfo element)
             {
                 element.UnParse(s);
             }
         }
-        
+        public enum eUsageSubCategory : ushort
+        {
+            MakeupBlush = 0x1,
+            MakeupEyebrow = 0x5,
+            MakeupEyeliner = 0x2,
+            MakeupEyeshadow = 0x3,
+            MakeupLipstick = 0x4,
+            None = 0x0
+        }
+
+ 
+
         #region Fields
         private UInt32 mVersion;
-        private UInt16 mUnknown01;
+        private eUsageSubCategory mUsageSubCategory;
         private ARGBList mColours;
-        private EntryList mEntries;
+        private FabricInfoList mFabrics;
         private CountedTGIBlockList mReferences;
 
         #endregion
@@ -222,10 +320,10 @@ namespace s3piwrappers
             set { mVersion = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(2)]
-        public ushort Unknown01
+        public eUsageSubCategory UsageSubCategory
         {
-            get { return mUnknown01; }
-            set { mUnknown01 = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mUsageSubCategory; }
+            set { mUsageSubCategory = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
         public ARGBList Colours
@@ -234,10 +332,10 @@ namespace s3piwrappers
             set { mColours = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
-        public EntryList Entries
+        public FabricInfoList Fabrics
         {
-            get { return mEntries; }
-            set { mEntries = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mFabrics; }
+            set { mFabrics = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
         public CountedTGIBlockList References
@@ -267,9 +365,9 @@ namespace s3piwrappers
             BinaryReader br = new BinaryReader(s);
             mVersion = br.ReadUInt32();
             long offset = br.ReadUInt32() + s.Position;
-            mUnknown01 = br.ReadUInt16();
+            mUsageSubCategory = (eUsageSubCategory)br.ReadUInt16();
             mColours = new ARGBList(this.OnResourceChanged,s);
-            mEntries = new EntryList(this.OnResourceChanged, s);
+            mFabrics = new FabricInfoList(this.OnResourceChanged, s);
             if (checking && (offset != s.Position))
             {
                 throw new InvalidDataException(string.Format("Position of TGIBlock read: 0x{0:X8}, actual: 0x{1:X8}", offset, s.Position));
@@ -284,11 +382,11 @@ namespace s3piwrappers
             bw.Write(mVersion);
             long pos = s.Position;
             bw.Write(0);
-            bw.Write(mUnknown01);
+            bw.Write((UInt16)mUsageSubCategory);
             if (mColours == null) mColours = new ARGBList(OnResourceChanged);
             mColours.UnParse(s);
-            if (mEntries == null) mEntries = new EntryList(OnResourceChanged);
-            mEntries.UnParse(s);
+            if (mFabrics == null) mFabrics = new FabricInfoList(OnResourceChanged);
+            mFabrics.UnParse(s);
             long tgiOffset = s.Position - (pos + sizeof(uint));
             if (mReferences == null) mReferences = new CountedTGIBlockList(OnResourceChanged,"IGT");
             bw.Write((byte)mReferences.Count);
