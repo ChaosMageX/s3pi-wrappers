@@ -53,11 +53,11 @@ namespace s3piwrappers
             private void Parse(ClipReadContext context)
             {
                 BinaryReader br = new BinaryReader(context.Stream);
-                ChannelReadContext trackContext = new ChannelReadContext(context);
+                ChannelReadContext channelContext = new ChannelReadContext(context);
                 long curveDataOffset = br.ReadUInt32();
                 mBoneHash = br.ReadUInt32();
-                trackContext.Offset = br.ReadSingle();
-                trackContext.Scalar = br.ReadSingle();
+                channelContext.Offset = br.ReadSingle();
+                channelContext.Scalar = br.ReadSingle();
                 UInt16 frameCount = br.ReadUInt16();
                 mType = br.ReadUInt16();
                 long pos = context.Stream.Position;
@@ -65,7 +65,7 @@ namespace s3piwrappers
                 mFrames = new List<Frame>();
                 for (int i = 0; i < frameCount; i++)
                 {
-                    Frame f = Frame.CreateInstance(trackContext, mType);
+                    Frame f = Frame.CreateInstance(channelContext, mType);
                     mFrames.Add(f);
                 }
                 context.Stream.Seek(pos, SeekOrigin.Begin);
@@ -79,7 +79,7 @@ namespace s3piwrappers
             public override string ToString()
             {
 
-                return string.Format("Channel: 0x{0:X8}({1})", mBoneHash,(ChannelType)mType);
+                return string.Format("Channel: 0x{0:X8}({1})[{2:0000}]", mBoneHash,(ChannelType)mType,mFrames.Count);
             }
         } 
         #endregion
@@ -119,6 +119,10 @@ namespace s3piwrappers
                 BinaryReader br = new BinaryReader(ctx.Stream);
                 mFrameIndex = br.ReadUInt16();
                 mFlags = br.ReadUInt16();
+                if (ExtraFlags != 0)
+                {
+                    Console.WriteLine("ExtraFlags: 0x{0:X2}", ExtraFlags);
+                }
             }
             public virtual void UnParse(Stream s)
             {
@@ -223,7 +227,7 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-                return base.ToString() + mRotation.ToString();
+                return base.ToString() + mRotation.Euler.ToString();
             }
         }
 

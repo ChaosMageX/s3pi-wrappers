@@ -9,16 +9,16 @@ namespace s3piwrappers
     public enum ClipEventType
     {
         None,
-        AttachObject,
+        Parent,
         UnParent,
-        PlaySound,
-        SACS,
-        PlayEffect,
-        Unk6,
+        Sound,
+        Script,
+        Effect,
+        Visibility,
         Unk7,
         Unk8,
         DestroyProp,
-        UnkA
+        StopEffect
 
     }
     /// <summary>
@@ -69,7 +69,10 @@ namespace s3piwrappers
                 s.Seek(511 - mActorName.Length, SeekOrigin.Current);
                 mSlotName = br.ReadZString();
             }
-
+            public override string ToString()
+            {
+                return String.Format("{0:X8}:{1},{2}",mIndex,mActorName,mSlotName);
+            }
         }
         public class ActorSlotTable : List<ActorSlotEntryList>
         {
@@ -145,13 +148,13 @@ namespace s3piwrappers
             {
                 switch (type)
                 {
-                    case ClipEventType.AttachObject: return new AttachObjectEvent(type,s);
+                    case ClipEventType.Parent: return new ParentEvent(type,s);
                     case ClipEventType.DestroyProp: return new DestroyPropEvent(type, s);
-                    case ClipEventType.PlayEffect:return new PlayEffectEvent(type,s);
-                    case ClipEventType.PlaySound: return new PlaySoundEvent(type, s);
-                    case ClipEventType.SACS: return new SACSEvent(type, s);
-                    case ClipEventType.Unk6: return new Event06(type, s);
-                    case ClipEventType.UnkA: return new Event0A(type, s);
+                    case ClipEventType.Effect:return new EffectEvent(type,s);
+                    case ClipEventType.Sound: return new SoundEvent(type, s);
+                    case ClipEventType.Script: return new ScriptEvent(type, s);
+                    case ClipEventType.Visibility: return new VisibilityEvent(type, s);
+                    case ClipEventType.StopEffect: return new StopEffectEvent(type, s);
                     case ClipEventType.UnParent: return new UnparentEvent(type, s);
                     default: throw new NotImplementedException(String.Format("Event type: {0} not implemented",type));
                 }
@@ -173,10 +176,14 @@ namespace s3piwrappers
             {
                 BinaryWriter bw = new BinaryWriter(s);
             }
+            public override string ToString()
+            {
+                return mType.ToString();
+            }
         }
-        public class AttachObjectEvent : Event
+        public class ParentEvent : Event
         {
-            internal AttachObjectEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal ParentEvent(ClipEventType type, Stream s) : base(type, s) { }
 
             private UInt32 mActorNameHash;
             private UInt32 mObjectNameHash;
@@ -207,9 +214,9 @@ namespace s3piwrappers
                 mObjectNameHash = br.ReadUInt32();
             }
         }
-        public class PlaySoundEvent : Event
+        public class SoundEvent : Event
         {
-            internal PlaySoundEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal SoundEvent(ClipEventType type, Stream s) : base(type, s) { }
             private String mSoundName;
             protected override void Parse(Stream s)
             {
@@ -219,18 +226,19 @@ namespace s3piwrappers
                 s.Seek(127 - mSoundName.Length, SeekOrigin.Current);
             }
         }
-        public class SACSEvent : Event
+        public class ScriptEvent : Event
         {
-            internal SACSEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal ScriptEvent(ClipEventType type, Stream s) : base(type, s) { }
         }
-        public class PlayEffectEvent : Event
+        public class EffectEvent : Event
         {
-            internal PlayEffectEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal EffectEvent(ClipEventType type, Stream s) : base(type, s) { }
             private UInt32 mUnknown01;
             private UInt32 mUnknown02;
             private UInt32 mEffectNameHash;
             private UInt32 mActorNameHash;
             private UInt32 mSlotNameHash;
+            private UInt32 mUnknown03;
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
@@ -240,34 +248,44 @@ namespace s3piwrappers
                 mEffectNameHash = br.ReadUInt32();
                 mActorNameHash = br.ReadUInt32();
                 mSlotNameHash = br.ReadUInt32();
+                mUnknown03 = br.ReadUInt32();
             }
 
         }
-        public class Event06 : Event
+        public class VisibilityEvent : Event
         {
-            internal Event06(ClipEventType type, Stream s) : base(type, s) { }
-            private Single mUnknown01;
+            internal VisibilityEvent(ClipEventType type, Stream s) : base(type, s) { }
+            private Single mVisibility;
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
-                mUnknown01 = br.ReadSingle();
+                mVisibility = br.ReadSingle();
             }
         }
         public class DestroyPropEvent : Event
         {
             internal DestroyPropEvent(ClipEventType type, Stream s) : base(type, s) { }
-            private UInt32 mObjectNameHash;
+            private UInt32 mPropNameHash;
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
-                mObjectNameHash = br.ReadUInt32();
+                mPropNameHash = br.ReadUInt32();
             }
         }
-        public class Event0A : Event
+        public class StopEffectEvent : Event
         {
-            internal Event0A(ClipEventType type, Stream s) : base(type, s) { }
+            private UInt32 mEffectNameHash;
+            private UInt32 mUnknown02;
+            internal StopEffectEvent(ClipEventType type, Stream s) : base(type, s) { }
+            protected override void Parse(Stream s)
+            {
+                base.Parse(s);
+                BinaryReader br = new BinaryReader(s);
+                mEffectNameHash = br.ReadUInt32();
+                mUnknown02 = br.ReadUInt32();
+            }
 
         }
         #endregion
@@ -320,10 +338,10 @@ namespace s3piwrappers
             Single w = br.ReadSingle();
             mQuat = new Quaternion(x, y, z, w);
 
-            s.Seek(clipOffset, SeekOrigin.Begin);
-            Stream clipStream = new MemoryStream(br.ReadBytes((int)clipSize));
-            clipStream.Position = 0L;
-            mClip = new S3Clip(clipStream);
+            //s.Seek(clipOffset, SeekOrigin.Begin);
+            //Stream clipStream = new MemoryStream(br.ReadBytes((int)clipSize));
+            //clipStream.Position = 0L;
+            //mClip = new S3Clip(clipStream);
 
             s.Seek(slotOffset, SeekOrigin.Begin);
             mActorSlotTable = new ActorSlotTable(s);
