@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
-using s3piwrappers.Geometry;
+using s3pi.Custom;
 
 namespace s3piwrappers
 {
@@ -265,9 +265,9 @@ namespace s3piwrappers
             mFrameDuration = br.ReadSingle();
             mFrameCount = br.ReadUInt16();
             mUnknown02 = br.ReadUInt16();
-            UInt32 trackCount = br.ReadUInt32();
+            UInt32 channelCount = br.ReadUInt32();
             UInt32 constFloatCount = br.ReadUInt32();
-            long trackOffset = br.ReadUInt32() + clipOffset;
+            long channelOffset = br.ReadUInt32() + clipOffset;
             long constFloatOffset = br.ReadUInt32() + clipOffset;
             long animNameOffset = br.ReadUInt32() + clipOffset;
             long srcNameOffset = br.ReadUInt32() + clipOffset;
@@ -278,11 +278,11 @@ namespace s3piwrappers
             {
                 context.FloatConstants[i] = br.ReadSingle();
             }
-            s.Seek(trackOffset, SeekOrigin.Begin);
-            for (uint i = 0; i < trackCount; i++)
+            s.Seek(channelOffset, SeekOrigin.Begin);
+            for (uint i = 0; i < channelCount; i++)
             {
-                Channel track = new Channel(context);
-                mTracks.Add(track);
+                Channel channel = new Channel(context);
+                mTracks.Add(channel);
             }
             s.Seek(animNameOffset, SeekOrigin.Begin);
             mAnimName = br.ReadZString();

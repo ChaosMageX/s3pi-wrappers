@@ -3,138 +3,371 @@ using System.Collections.Generic;
 using System.Text;
 using s3pi.Interfaces;
 using System.IO;
-using s3piwrappers.Geometry;
+using s3pi.Custom;
 namespace s3piwrappers
 {
     public enum ClipEventType
     {
-        None,
-        Parent,
-        UnParent,
-        Sound,
-        Script,
-        Effect,
-        Visibility,
-        Unk7,
-        Unk8,
-        DestroyProp,
-        StopEffect
+        Parent = 0x0001,
+        UnParent = 0x0002,
+        Sound = 0x0003,
+        Script = 0x0004,
+        Effect = 0x0005,
+        Visibility = 0x0006,
+        DestroyProp = 0x0009,
+        StopEffect = 0x000A
 
+    }
+    public abstract class DependentElement : AHandlerElement
+    {
+        protected DependentElement(int apiVersion, EventHandler handler)
+            : base(apiVersion, handler)
+        {
+
+        }
+        protected DependentElement(int apiVersion, EventHandler handler, Stream s)
+            : base(apiVersion, handler)
+        {
+            Parse(s);
+        }
+        protected DependentElement(int apiVersion, EventHandler handler, DependentElement basis)
+            : base(apiVersion, handler)
+        {
+            MemoryStream ms = new MemoryStream();
+            basis.UnParse(ms);
+            ms.Position = 0L;
+            Parse(ms);
+        }
+        protected abstract void Parse(Stream s);
+        public abstract void UnParse(Stream s);
+
+
+
+        public override AHandlerElement Clone(EventHandler handler)
+        {
+            MemoryStream ms = new MemoryStream();
+            UnParse(ms);
+            return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, ms });
+        }
+
+        public override List<string> ContentFields
+        {
+            get { return GetContentFields(0, GetType()); }
+        }
+
+        public override int RecommendedApiVersion
+        {
+            get { return 1; }
+        }
+    }
+
+    public class DependentElementList<T> : AResource.DependentList<T>
+        where T : DependentElement, IEquatable<T>
+    {
+        public DependentElementList(EventHandler handler) : base(handler) { }
+        public DependentElementList(EventHandler handler, Stream s) : base(handler, s) { }
+        public override void Add()
+        {
+            base.Add(new object[] { });
+        }
+
+        protected override T CreateElement(Stream s)
+        {
+            return (T)Activator.CreateInstance(typeof(T), new object[] { 0, elementHandler, s });
+        }
+
+        protected override void WriteElement(Stream s, T element)
+        {
+            element.UnParse(s);
+        }
     }
     /// <summary>
     /// Wrapper for the animation resource
     /// </summary>
-    /// <remarks>Incomplete; not S3PE-friendly at all yet, no saving</remarks>
     public class ClipResource : AResource
     {
-        #region ActorSlot
-        public class ActorSlotEntryList : List<ActorSlotEntry>
+
+        public class CountedOffsetItemList<T> : DependentElementList<T>
+            where T : DependentElement, IEquatable<T>
         {
-            public ActorSlotEntryList(Stream s)
+            public CountedOffsetItemList(EventHandler handler) : base(handler) { }
+            public CountedOffsetItemList(EventHandler handler, Stream s) : base(handler, s) { }
+            protected override void Parse(Stream s)
             {
-                Parse(s);
-            }
-            private void Parse(Stream s)
-            {
+                base.Clear();
                 BinaryReader br = new BinaryReader(s);
-                UInt32 padding = br.ReadUInt32(); //0x7e7e7e7e
-                uint count = br.ReadUInt32();
+                uint count = ReadCount(s);
                 long startOffset = s.Position;
-                long currentPos = startOffset;
+                long[] offsets = new long[count];
                 for (int i = 0; i < count; i++)
                 {
-                    long elementOffset = br.ReadUInt32() + startOffset;
-                    currentPos = s.Position;
-                    s.Seek(elementOffset, SeekOrigin.Begin);
-                    ActorSlotEntry entry = new ActorSlotEntry(s);
-                    Add(entry);
-                    s.Seek(currentPos, SeekOrigin.Begin);
+                    offsets[i] = br.ReadUInt32() + startOffset;
+                }
+                long endOffset = s.Position;
+                for (int i = 0; i < count; i++)
+                {
+                    s.Seek(offsets[i], SeekOrigin.Begin);
+                    ((IList<T>)this).Add(CreateElement(s));
                 }
             }
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                uint[] offsets = new uint[base.Count];
+                WriteCount(s, (uint)base.Count);
+                long startOffset = s.Position;
+                for (int i = 0; i < base.Count; i++) { bw.Write(offsets[i]); }
+                for (int i = 0; i < base.Count; i++)
+                {
+                    offsets[i] = (uint)(s.Position - startOffset);
+                    WriteElement(s, this[i]);
+                }
+                long endOffset = s.Position;
+                s.Seek(startOffset, SeekOrigin.Begin);
+                for (int i = 0; i < base.Count; i++) { bw.Write(offsets[i]); }
+                s.Seek(endOffset, SeekOrigin.Begin);
+            }
         }
-        public class ActorSlotEntry
+        #region ActorSlot
+
+        public class ActorSlotTable : DependentElement
+        {
+            private CountedOffsetItemList<ActorSlotTableEntry> mEntries;
+            public ActorSlotTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public ActorSlotTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+
+            public CountedOffsetItemList<ActorSlotTableEntry> Entries
+            {
+                get { return mEntries; }
+                set { mEntries = value; OnElementChanged(); }
+            }
+
+            protected override void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                mEntries = new CountedOffsetItemList<ActorSlotTableEntry>(handler, s);
+            }
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                mEntries.UnParse(s);
+            }
+        }
+        public class ActorSlotTableEntry : DependentElement, IEquatable<ActorSlotTableEntry>
+        {
+            private CountedOffsetItemList<ActorSlotEntry> mEntries;
+            public ActorSlotTableEntry(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+                mEntries = new CountedOffsetItemList<ActorSlotEntry>(handler);
+            }
+            public ActorSlotTableEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+
+            public ActorSlotTableEntry(int apiVersion, EventHandler handler, ActorSlotTableEntry basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public CountedOffsetItemList<ActorSlotEntry> Entries
+            {
+                get { return mEntries; }
+                set { mEntries = value; OnElementChanged(); }
+            }
+
+            protected override void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                UInt32 padding = br.ReadUInt32(); //7E7E7E7E padding
+                mEntries = new CountedOffsetItemList<ActorSlotEntry>(handler, s);
+            }
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
+                mEntries.UnParse(s);
+            }
+            public bool Equals(ActorSlotTableEntry other)
+            {
+                return base.Equals(other);
+            }
+
+        }
+        public class ActorSlotEntry : DependentElement, IEquatable<ActorSlotEntry>
         {
             private UInt32 mIndex;
-            private string mActorName;
-            private string mSlotName;
-            public ActorSlotEntry(Stream s)
+            private string mActorName = String.Empty;
+            private string mSlotName = String.Empty;
+            public ActorSlotEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public ActorSlotEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+
+            public ActorSlotEntry(int apiVersion, EventHandler handler, ActorSlotEntry basis) : base(apiVersion, handler, basis)
             {
-                Parse(s);
             }
-            private void Parse(Stream s)
+
+            [ElementPriority(1)]
+            public uint Index
+            {
+                get { return mIndex; }
+                set { mIndex = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public string ActorName
+            {
+                get { return mActorName; }
+                set { mActorName = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public string SlotName
+            {
+                get { return mSlotName; }
+                set { mSlotName = value; OnElementChanged(); }
+            }
+
+            protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mIndex = br.ReadUInt32();
-                mActorName = br.ReadZString();
-                s.Seek(511 - mActorName.Length, SeekOrigin.Current);
-                mSlotName = br.ReadZString();
+                mActorName = br.ReadZString(512);
+                mSlotName = br.ReadZString(512);
+            }
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mIndex);
+                bw.WriteZString(mActorName, 0x23, 512);
+                bw.WriteZString(mSlotName, 0x23, 512);
             }
             public override string ToString()
             {
-                return String.Format("{0:X8}:{1},{2}",mIndex,mActorName,mSlotName);
-            }
-        }
-        public class ActorSlotTable : List<ActorSlotEntryList>
-        {
-            public ActorSlotTable(Stream s)
-            {
-                Parse(s);
-            }
-            private void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                uint count = br.ReadUInt32();
-                long startOffset = s.Position;
-                long currentPos = startOffset;
-                for (int i = 0; i < count; i++)
-                {
-                    long elementOffset = br.ReadUInt32() + startOffset;
-                    currentPos = s.Position;
-                    s.Seek(elementOffset, SeekOrigin.Begin);
-                    ActorSlotEntryList list = new ActorSlotEntryList(s);
-                    Add(list);
-                    s.Seek(currentPos, SeekOrigin.Begin);
-                }
+                return String.Format("{0:X8}:{1},{2}", mIndex, mActorName, mSlotName);
             }
 
-        } 
+            public bool Equals(ActorSlotEntry other)
+            {
+                return mIndex.Equals(other.mIndex) && mActorName.Equals(other.mActorName) && mSlotName.Equals(other.mSlotName);
+            }
+        }
         #endregion
 
         #region Events
-        public class EventTable
+        public class EventTable : DependentElement
         {
             private UInt32 mVersion;
-            private List<Event> mEvents;
-            public EventTable(Stream s)
+            private EventList mEvents;
+            public EventTable(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
             {
-                mEvents = new List<Event>();
-                Parse(s);
+                mEvents = new EventList(handler);
             }
-            private void Parse(Stream s)
+            public EventTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            public EventTable(int apiVersion, EventHandler handler, EventTable basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+            public uint Version
+            {
+                get { return mVersion; }
+                set { mVersion = value; OnElementChanged(); }
+            }
+            public EventList Events
+            {
+                get { return mEvents; }
+                set { mEvents = value; OnElementChanged(); }
+            }
+
+
+            protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
-                if (magic != "=CE=") 
+                if (magic != "=CE=")
                     throw new Exception(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
                 mVersion = br.ReadUInt32();
-                uint count = br.ReadUInt32();
-                long endOffset = br.ReadUInt32();
-                long startOffset = br.ReadUInt32();
-                for (uint i = 0; i < count; i++)
-                {
-                    ClipEventType type = (ClipEventType)br.ReadUInt16();
-                    Event e = Event.CreateInstance(type, s);
-                    mEvents.Add(e);
-                }
+                mEvents = new EventList(handler, s);
             }
 
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(Encoding.ASCII.GetBytes("=CE="));
+                bw.Write(mVersion);
+                mEvents.UnParse(s);
+
+            }
         }
-        public abstract class Event
+        public class EventList : DependentElementList<Event>
         {
-            protected Event(ClipEventType type, Stream s)
+
+            public EventList(EventHandler handler) : base(handler) { }
+            public EventList(EventHandler handler, Stream s) : base(handler, s) { }
+            public override bool Add(params object[] fields)
+            {
+                if (fields.Length == 0) return false;
+                if (fields.Length == 1 && typeof(Event).IsAssignableFrom(fields[0].GetType()))
+                {
+                    ((IList<Event>)this).Add((Event)fields[0]);
+                    return true;
+                }
+                Add(Event.CreateInstance(0, this.handler, (ClipEventType)(int)fields[0]));
+                return true;
+            }
+            protected override void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                uint count = ReadCount(s);
+                long endOffset = br.ReadUInt32() + 4 + s.Position;
+                long startOffset = br.ReadUInt32();
+                if (checking && count > 0 && startOffset != 4)
+                    throw new Exception(String.Format("Expected startOffset of 4 at =CE= section, but got 0x{0:X8}", startOffset));
+                for (uint i = 0; i < count; i++) { ((IList<Event>)this).Add(CreateElement(s)); }
+                if (checking && s.Position != endOffset)
+                    throw new Exception(String.Format("Expected endOffset of 0x{0:X8} at =CE= section, but got 0x{1:X8}", endOffset, s.Position));
+            }
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                WriteCount(s, (uint)base.Count);
+                long offsetPos = s.Position;
+                bw.Write(0);
+                bw.Write(base.Count > 0 ? 4 : 0);
+                long startPos = s.Position;
+                for (int i = 0; i < base.Count; i++) { WriteElement(s, this[i]); }
+                long endPos = s.Position;
+                uint size = (uint)(endPos - startPos);
+                s.Seek(offsetPos, SeekOrigin.Begin);
+                bw.Write(size);
+                s.Seek(endPos, SeekOrigin.Begin);
+
+
+            }
+            protected override Event CreateElement(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                ClipEventType type = (ClipEventType)br.ReadUInt16();
+                return Event.CreateInstance(0, handler, type, s);
+            }
+            protected override void WriteElement(Stream s, Event element)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write((ushort)element.Type);
+                base.WriteElement(s, element);
+            }
+        }
+        public abstract class Event : DependentElement, IEquatable<Event>
+        {
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler)
             {
                 mType = type;
                 if (s != null) Parse(s);
+            }
+            protected Event(int apiVersion, EventHandler handler,Event basis)
+                : base(apiVersion, handler)
+            {
+                mType = basis.Type;
             }
             private ClipEventType mType;
             private UInt16 mShort01;
@@ -143,23 +376,75 @@ namespace s3piwrappers
             private Single mFloat01;
             private Single mFloat02;
             private UInt32 mInt01;
-            private String mEventName;
-            public static Event CreateInstance(ClipEventType type, Stream s)
+            private String mEventName = String.Empty;
+            [ElementPriority(0)]
+            public ClipEventType Type
+            {
+                get { return mType; }
+            }
+            [ElementPriority(1)]
+            public string EventName
+            {
+                get { return mEventName; }
+                set { mEventName = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Float01
+            {
+                get { return mFloat01; }
+                set { mFloat01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public float Float02
+            {
+                get { return mFloat02; }
+                set { mFloat02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(4)]
+            public uint Id
+            {
+                get { return mId; }
+                set { mId = value; OnElementChanged(); }
+            }
+            [ElementPriority(5)]
+            public uint Int01
+            {
+                get { return mInt01; }
+                set { mInt01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
+            public ushort Short01
+            {
+                get { return mShort01; }
+                set { mShort01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(7)]
+            public float Timecode
+            {
+                get { return mTimecode; }
+                set { mTimecode = value; OnElementChanged(); }
+            }
+            public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type)
+            {
+                return CreateInstance(apiVersion, handler, type, null);
+            }
+
+            public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
             {
                 switch (type)
                 {
-                    case ClipEventType.Parent: return new ParentEvent(type,s);
-                    case ClipEventType.DestroyProp: return new DestroyPropEvent(type, s);
-                    case ClipEventType.Effect:return new EffectEvent(type,s);
-                    case ClipEventType.Sound: return new SoundEvent(type, s);
-                    case ClipEventType.Script: return new ScriptEvent(type, s);
-                    case ClipEventType.Visibility: return new VisibilityEvent(type, s);
-                    case ClipEventType.StopEffect: return new StopEffectEvent(type, s);
-                    case ClipEventType.UnParent: return new UnparentEvent(type, s);
-                    default: throw new NotImplementedException(String.Format("Event type: {0} not implemented",type));
+                    case ClipEventType.Parent: return new ParentEvent(apiVersion, handler, type, s);
+                    case ClipEventType.DestroyProp: return new DestroyPropEvent(apiVersion, handler, type, s);
+                    case ClipEventType.Effect: return new EffectEvent(apiVersion, handler, type, s);
+                    case ClipEventType.Sound: return new SoundEvent(apiVersion, handler, type, s);
+                    case ClipEventType.Script: return new ScriptEvent(apiVersion, handler, type, s);
+                    case ClipEventType.Visibility: return new VisibilityEvent(apiVersion, handler, type, s);
+                    case ClipEventType.StopEffect: return new StopEffectEvent(apiVersion, handler, type, s);
+                    case ClipEventType.UnParent: return new UnparentEvent(apiVersion, handler, type, s);
+                    default: throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
                 }
             }
-            protected virtual void Parse(Stream s)
+            protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mShort01 = br.ReadUInt16();
@@ -172,24 +457,77 @@ namespace s3piwrappers
                 mEventName = br.ReadZString();
                 while ((s.Position % 4) != 0) br.ReadByte(); //padding to next DWORD
             }
-            public virtual void UnParse(Stream s)
+            public override void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mShort01);
+                bw.Write(mId);
+                bw.Write(mTimecode);
+                bw.Write(mFloat01);
+                bw.Write(mFloat02);
+                bw.Write(mInt01);
+                bw.Write(mEventName.Length);
+                bw.WriteZString(mEventName);
+                while ((s.Position % 4) != 0) bw.Write((byte)0x00); //padding to next DWORD
             }
             public override string ToString()
             {
                 return mType.ToString();
             }
+
+            public bool Equals(Event other)
+            {
+                return base.Equals(other);
+            }
         }
+        [ConstructorParameters(new object[] { ClipEventType.Parent })]
         public class ParentEvent : Event
         {
-            internal ParentEvent(ClipEventType type, Stream s) : base(type, s) { }
-
+            internal ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+                mMatrix4x4 = new Single[16];
+            }
+            public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private UInt32 mActorNameHash;
             private UInt32 mObjectNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown01;
             private Single[] mMatrix4x4;
+            [ElementPriority(8)]
+            public uint ActorNameHash
+            {
+                get { return mActorNameHash; }
+                set { mActorNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public uint ObjectNameHash
+            {
+                get { return mObjectNameHash; }
+                set { mObjectNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public uint SlotNameHash
+            {
+                get { return mSlotNameHash; }
+                set { mSlotNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(11)]
+            public uint Unknown01
+            {
+                get { return mUnknown01; }
+                set { mUnknown01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(12)]
+            public float[] Matrix4X4
+            {
+                get { return mMatrix4x4; }
+                set { mMatrix4x4 = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
@@ -200,45 +538,139 @@ namespace s3piwrappers
                 mUnknown01 = br.ReadUInt32();
                 mMatrix4x4 = new Single[16];
                 for (int i = 0; i < 16; i++) { mMatrix4x4[i] = br.ReadSingle(); }
-
+            }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mActorNameHash);
+                bw.Write(mObjectNameHash);
+                bw.Write(mSlotNameHash);
+                bw.Write(mUnknown01);
+                for (int i = 0; i < 16; i++) bw.Write(mMatrix4x4[i]);
             }
         }
+        [ConstructorParameters(new object[] { ClipEventType.UnParent })]
         public class UnparentEvent : Event
         {
-            internal UnparentEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+
+            public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private UInt32 mObjectNameHash;
+            [ElementPriority(8)]
+            public uint ObjectNameHash
+            {
+                get { return mObjectNameHash; }
+                set { mObjectNameHash = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
                 mObjectNameHash = br.ReadUInt32();
             }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mObjectNameHash);
+            }
         }
+        [ConstructorParameters(new object[] { ClipEventType.Sound })]
         public class SoundEvent : Event
         {
-            internal SoundEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal SoundEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+
+            public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private String mSoundName;
+            [ElementPriority(8)]
+            public string SoundName
+            {
+                get { return mSoundName; }
+                set { mSoundName = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
-                mSoundName = br.ReadZString();
-                s.Seek(127 - mSoundName.Length, SeekOrigin.Current);
+                mSoundName = br.ReadZString(128);
+            }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.WriteZString(mSoundName, 0x00, 128);
             }
         }
+        [ConstructorParameters(new object[] { ClipEventType.Script })]
         public class ScriptEvent : Event
         {
-            internal ScriptEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public ScriptEvent(int apiVersion, EventHandler handler, ScriptEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
         }
+
+        [ConstructorParameters(new object[] { ClipEventType.Effect })]
         public class EffectEvent : Event
         {
-            internal EffectEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal EffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private UInt32 mUnknown01;
             private UInt32 mUnknown02;
             private UInt32 mEffectNameHash;
             private UInt32 mActorNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown03;
+            [ElementPriority(8)]
+            public uint Unknown01
+            {
+                get { return mUnknown01; }
+                set { mUnknown01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public uint Unknown02
+            {
+                get { return mUnknown02; }
+                set { mUnknown02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public uint EffectNameHash
+            {
+                get { return mEffectNameHash; }
+                set { mEffectNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(11)]
+            public uint ActorNameHash
+            {
+                get { return mActorNameHash; }
+                set { mActorNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(12)]
+            public uint SlotNameHash
+            {
+                get { return mSlotNameHash; }
+                set { mSlotNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(13)]
+            public uint Unknown03
+            {
+                get { return mUnknown03; }
+                set { mUnknown03 = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
@@ -250,74 +682,285 @@ namespace s3piwrappers
                 mSlotNameHash = br.ReadUInt32();
                 mUnknown03 = br.ReadUInt32();
             }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mUnknown01);
+                bw.Write(mUnknown02);
+                bw.Write(mEffectNameHash);
+                bw.Write(mActorNameHash);
+                bw.Write(mSlotNameHash);
+                bw.Write(mUnknown03);
+            }
 
         }
+        [ConstructorParameters(new object[] { ClipEventType.Visibility })]
         public class VisibilityEvent : Event
         {
-            internal VisibilityEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public VisibilityEvent(int apiVersion, EventHandler handler, VisibilityEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private Single mVisibility;
+            [ElementPriority(8)]
+            public float Visibility
+            {
+                get { return mVisibility; }
+                set { mVisibility = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
                 mVisibility = br.ReadSingle();
             }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mVisibility);
+            }
         }
+
+        [ConstructorParameters(new object[] { ClipEventType.DestroyProp })]
         public class DestroyPropEvent : Event
         {
-            internal DestroyPropEvent(ClipEventType type, Stream s) : base(type, s) { }
+            internal DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
             private UInt32 mPropNameHash;
+            [ElementPriority(8)]
+            public uint PropNameHash
+            {
+                get { return mPropNameHash; }
+                set { mPropNameHash = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
                 mPropNameHash = br.ReadUInt32();
             }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mPropNameHash);
+            }
         }
+
+        [ConstructorParameters(new object[] { ClipEventType.StopEffect })]
         public class StopEffectEvent : Event
         {
             private UInt32 mEffectNameHash;
-            private UInt32 mUnknown02;
-            internal StopEffectEvent(ClipEventType type, Stream s) : base(type, s) { }
+            private UInt32 mUnknown01;
+            internal StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+            [ElementPriority(8)]
+            public uint EffectNameHash
+            {
+                get { return mEffectNameHash; }
+                set { mEffectNameHash = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public uint Unknown01
+            {
+                get { return mUnknown01; }
+                set { mUnknown01 = value; OnElementChanged(); }
+            }
+
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
                 mEffectNameHash = br.ReadUInt32();
-                mUnknown02 = br.ReadUInt32();
+                mUnknown01 = br.ReadUInt32();
+            }
+            public override void UnParse(Stream s)
+            {
+                base.UnParse(s);
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mEffectNameHash);
+                bw.Write(mUnknown01);
             }
 
         }
         #endregion
-
-        #region Constructors
-        public ClipResource(int apiVersion, Stream s):base(apiVersion,s)
+        public class ClipEndSection : DependentElement
         {
+            private Single mX;
+            private Single mY;
+            private Single mZ;
+            private Single mW;
+
+            public ClipEndSection(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
+            public ClipEndSection(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : base(apiVersion, handler, basis)
+            {
+            }
+            [ElementPriority(1)]
+            public float X
+            {
+                get { return mX; }
+                set { mX = value; OnElementChanged();}
+            }
+
+            [ElementPriority(2)]
+            public float Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+
+            [ElementPriority(3)]
+            public float Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+
+            [ElementPriority(4)]
+            public float W
+            {
+                get { return mW; }
+                set { mW = value; OnElementChanged(); }
+            }
+
+            protected override void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                mX = br.ReadSingle();
+                mY = br.ReadSingle();
+                mZ = br.ReadSingle();
+                mW = br.ReadSingle();
+            }
+
+            public override void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mX);
+                bw.Write(mY);
+                bw.Write(mZ);
+                bw.Write(mW);
+            }
+        }
+        #region Constructors
+        public ClipResource(int apiVersion, Stream s)
+            : base(apiVersion, s)
+        {
+            mS3Clip = new byte[0];
+            mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged);
+            mEventSectionTable = new EventTable(0, this.OnResourceChanged);
+            mEndSection = new ClipEndSection(0,this.OnResourceChanged);
+
             if (base.stream == null)
             {
                 base.stream = this.UnParse();
                 this.OnResourceChanged(this, new EventArgs());
             }
+            base.stream.Position = 0L;
             Parse(s);
         }
         #endregion
 
         #region Fields
-        private S3Clip mClip;
-        private ActorSlotTable mActorSlotTable;
-        private EventTable mEventTable;
-        private string mActorName;
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
-        private Quaternion mQuat; 
+        private byte[] mS3Clip;
+        private ActorSlotTable mActorSlotTable;
+        private string mActorName;
+        private EventTable mEventSectionTable;
+        private ClipEndSection mEndSection;
         #endregion
 
         #region I/O
+        [ElementPriority(1)]
+        public uint Unknown01
+        {
+            get { return mUnknown01; }
+            set { mUnknown01 = value; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(2)]
+        public uint Unknown02
+        {
+            get { return mUnknown02; }
+            set { mUnknown02 = value; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(3)]
+        public BinaryReader S3Clip
+        {
+            get
+            {
+                MemoryStream s = new MemoryStream(mS3Clip);
+                s.Position = 0L;
+                return new BinaryReader(s);
+            }
+            set
+            {
+                if (value.BaseStream.CanSeek)
+                {
+                    value.BaseStream.Position = 0L;
+                    mS3Clip = value.ReadBytes((int)value.BaseStream.Length);
+                }
+                else
+                {
+                    MemoryStream s = new MemoryStream();
+                    byte[] buffer = new byte[0x100000];
+                    for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
+                    {
+                        s.Write(buffer, 0, i);
+                    }
+                    mS3Clip = new BinaryReader(s).ReadBytes((int)s.Length);
+                }
+                OnResourceChanged(this, new EventArgs());
+            }
+        }
+        [ElementPriority(4)]
+        public ActorSlotTable ActorSlots
+        {
+            get { return mActorSlotTable; }
+            set { mActorSlotTable = value; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(5)]
+        public string ActorName
+        {
+            get { return mActorName; }
+            set { mActorName = value; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(6)]
+        public EventTable EventSection
+        {
+            get { return mEventSectionTable; }
+            set { mEventSectionTable = value; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(7)]
+        public ClipEndSection EndSection
+        {
+            get { return mEndSection; }
+            set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
+        }
+
         private void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
-            UInt32 typeId = br.ReadUInt32();
-            if (typeId != 0x6B20C4F3) throw new Exception("Not a valid CLIP resource");
+
+            //header
+            if (br.ReadUInt32() != 0x6B20C4F3) throw new Exception("Not a valid CLIP resource");
             long linkedClipOffset = br.ReadUInt32() + s.Position - 4;
             long clipSize = br.ReadUInt32();
             long clipOffset = br.ReadUInt32() + s.Position - 4;
@@ -327,30 +970,75 @@ namespace s3piwrappers
             mUnknown01 = br.ReadUInt32();
             mUnknown02 = br.ReadUInt32();
             long endOffset = br.ReadUInt32() + s.Position - 4;
+
+
+            s.Seek(clipOffset, SeekOrigin.Begin);
+            mS3Clip = new byte[(int)clipSize];
+            mS3Clip = br.ReadBytes((int)clipSize);
+
+
+            s.Seek(slotOffset, SeekOrigin.Begin);
+            mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged, s);
+
             s.Seek(actorOffset, SeekOrigin.Begin);
             mActorName = br.ReadZString();
 
+            s.Seek(eventOffset, SeekOrigin.Begin);
+            mEventSectionTable = new EventTable(0, this.OnResourceChanged, s);
 
             s.Seek(endOffset, SeekOrigin.Begin);
-            Single x = br.ReadSingle();
-            Single y = br.ReadSingle();
-            Single z = br.ReadSingle();
-            Single w = br.ReadSingle();
-            mQuat = new Quaternion(x, y, z, w);
-
-            //s.Seek(clipOffset, SeekOrigin.Begin);
-            //Stream clipStream = new MemoryStream(br.ReadBytes((int)clipSize));
-            //clipStream.Position = 0L;
-            //mClip = new S3Clip(clipStream);
-
-            s.Seek(slotOffset, SeekOrigin.Begin);
-            mActorSlotTable = new ActorSlotTable(s);
-            s.Seek(eventOffset, SeekOrigin.Begin);
-            mEventTable = new EventTable(s);
+            mEndSection = new ClipEndSection(0,this.OnResourceChanged,s);
         }
         protected override Stream UnParse()
         {
-            throw new NotImplementedException();
+            MemoryStream s = new MemoryStream();
+            BinaryWriter bw = new BinaryWriter(s);
+            bw.Write(0x6B20C4F3);
+            long mainOffsetList = s.Position;
+            long linkedClipOffset = 0;
+            long clipSize = 0;
+            long clipOffset = 0;
+            long slotOffset = 0;
+            long actorOffset = 0;
+            long eventOffset = 0;
+            long endOffset = 0;
+            s.Seek(52, SeekOrigin.Current);
+
+            clipSize = mS3Clip.Length;
+            clipOffset = s.Position;
+            bw.Write(mS3Clip);
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+
+            slotOffset = s.Position;
+            mActorSlotTable.UnParse(s);
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+
+            actorOffset = s.Position;
+            bw.WriteZString(mActorName);
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+
+            eventOffset = s.Position;
+            mEventSectionTable.UnParse(s);
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+
+
+            endOffset = s.Position;
+            mEndSection.UnParse(s);
+
+            //write header last
+            s.Seek(mainOffsetList, SeekOrigin.Begin);
+            bw.Write((uint)(0));
+            bw.Write((uint)clipSize);
+            bw.Write((uint)(clipOffset - s.Position ));
+            bw.Write((uint)(slotOffset - s.Position));
+            bw.Write((uint)(actorOffset - s.Position));
+            bw.Write((uint)(eventOffset - s.Position));
+            bw.Write(mUnknown01);
+            bw.Write(mUnknown02);
+            bw.Write((uint)(endOffset - s.Position));
+            bw.Write(new byte[16]);
+            s.Position = s.Length;
+            return s;
         }
         #endregion
 
