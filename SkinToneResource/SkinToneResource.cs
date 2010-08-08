@@ -341,7 +341,7 @@ namespace s3piwrappers
         public TGIBlockList References
         {
             get { return mReferences; }
-            set { mReferences = value; }
+            set { mReferences = value; OnResourceChanged(this, new EventArgs()); }
         }
 
         #endregion
