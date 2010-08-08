@@ -46,6 +46,20 @@ namespace s3piwrappers
                 mName = name;
                 mMatrix = matrix;
             }
+            public string Value
+            {
+                get 
+                { 
+                    StringBuilder s = new StringBuilder();
+                    s.AppendFormat("{0}\n", mName);
+                    s.AppendFormat("[{0,8:0.00000}{1,8:0.00000}{2,8:0.00000}]\n", mMatrix[0], mMatrix[1], mMatrix[2]);
+                    s.AppendFormat("[{0,8:0.00000}{1,8:0.00000}{2,8:0.00000}]\n", mMatrix[3], mMatrix[4], mMatrix[5]);
+                    s.AppendFormat("[{0,8:0.00000}{1,8:0.00000}{2,8:0.00000}]\n", mMatrix[6], mMatrix[7], mMatrix[8]);
+                    s.AppendFormat("[{0,8:0.00000}{1,8:0.00000}{2,8:0.00000}]\n", mMatrix[9], mMatrix[10], mMatrix[11]);
+
+                    return s.ToString();
+                }
+            }
             [ElementPriority(1)]
             public string Name
             {
@@ -95,6 +109,17 @@ namespace s3piwrappers
             Parse(base.stream);
         }
 
+        public String Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                sb.AppendFormat("\nEntries:\n");
+                for (int i = 0; i < mEntries.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mEntries[i].Value);
+                return sb.ToString();
+            }
+        }
         [ElementPriority(1)]
         public uint Version
         {

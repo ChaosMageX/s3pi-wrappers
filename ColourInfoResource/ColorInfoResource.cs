@@ -38,6 +38,11 @@ namespace s3piwrappers
             {
                 new BinaryWriter(s).Write(mValue);
             }
+
+            public string Value
+            {
+                get { return String.Format("HSV Base: {0}",mValue); }
+            }
             [ElementPriority(1)]
             public UInt32 Base
             {
@@ -124,17 +129,16 @@ namespace s3piwrappers
             {
                 new BinaryWriter(s).Write(mValue);
             }
+
+            public string Value
+            {
+                get { return Colour.ToString(); }
+            }
             [ElementPriority(1)]
             public Color Colour
             {
                 get { return System.Drawing.Color.FromArgb(mValue); }
                 set { mValue = value.ToArgb(); OnElementChanged(); }
-            }
-            [ElementPriority(2)]
-            public Int32 Raw
-            {
-                get { return mValue; }
-                set { mValue = value; OnElementChanged(); }
             }
 
             public bool Equals(ARGB other)
@@ -229,6 +233,20 @@ namespace s3piwrappers
                 set { mHSVBases = value; OnElementChanged(); }
             }
 
+            public string Value
+            {
+                get
+                {
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("XmlIndex: 0x{0:X8}\n", mXmlIndex);
+                    sb.AppendFormat("\nColours:\n");
+                    for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i].Value);
+                    sb.AppendFormat("\nHSV Bases:\n");
+                    for (int i = 0; i < mHSVBases.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mHSVBases[i].Value);
+                    return sb.ToString();
+                }
+            }
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
@@ -313,6 +331,24 @@ namespace s3piwrappers
         #endregion
 
         #region Properties
+        
+        public String Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                sb.AppendFormat("Usage: {0}\n", this["UsageSubCategory"]);
+
+                sb.AppendFormat("\nColours:\n");
+                for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i].Value);
+                sb.AppendFormat("\nFabrics:\n");
+                for (int i = 0; i < mFabrics.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mFabrics[i].Value);
+                sb.AppendFormat("\nReferences[{0}]:\n",mReferences.Count);
+                for (int i = 0; i < mReferences.Count;i++ ) sb.AppendFormat("[0x{0:X8}]{1}\n",i,mReferences[i].Value);
+                return sb.ToString();
+            }
+        }
         [ElementPriority(1)]
         public UInt32 Version
         {

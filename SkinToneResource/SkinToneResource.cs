@@ -25,6 +25,22 @@ namespace s3piwrappers
             #endregion
 
             #region Properties
+
+            public string Value
+            {
+                get
+                {
+                    string str = "";
+                    foreach (string field in this.ContentFields)
+                    {
+                        if (!field.Equals("Value"))
+                        {
+                            str = str + string.Format("{0}:\t{1}\n", field, this[field]);
+                        }
+                    }
+                    return str.Trim();
+                }
+            }
             [ElementPriority(1)]
             public AgeGenderFlags AgeGenderFlags
             {
@@ -129,6 +145,24 @@ namespace s3piwrappers
             #endregion
 
             #region Properties
+
+            public string Value
+            {
+                get
+                {
+                    string str = "";
+                    foreach (string field in this.ContentFields)
+                    {
+                        if (!field.Equals("Value"))
+                        {
+                            str = str + string.Format("{0}:\t{1}\n", field, this[field]);
+                        }
+                    }
+                    return str.Trim();
+                }
+            }
+ 
+
             [ElementPriority(1)]
             public AgeGenderFlags AgeGenderFlags
             {
@@ -343,7 +377,24 @@ namespace s3piwrappers
             get { return mReferences; }
             set { mReferences = value; OnResourceChanged(this, new EventArgs()); }
         }
-
+        public String Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                sb.AppendFormat("\nShaderKeys:\n");
+                for (int i = 0; i < mShaderKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                sb.AppendFormat("SkinRampIndex1:{0}\n", mReferences[(int)mSkinRampIndex1]);
+                sb.AppendFormat("SkinRampIndex2:{0}\n", mReferences[(int)mSkinRampIndex2]);
+                sb.AppendFormat("\nTextureKeys:\n");
+                for (int i = 0; i < mTextureKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mTextureKeyList[i].Value);
+                sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
+                sb.AppendFormat("\nReferences[{0}]:\n",mReferences.Count);
+                for (int i = 0; i < mReferences.Count;i++ ) sb.AppendFormat("[0x{0:X8}]{1}\n",i,mReferences[i].Value);
+                return sb.ToString();
+            }
+        }
         #endregion
 
 

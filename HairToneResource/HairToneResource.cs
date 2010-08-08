@@ -29,6 +29,22 @@ namespace s3piwrappers
             #endregion
 
             #region Properties
+
+            public string Value
+            {
+                get
+                {
+                    string str = "";
+                    foreach (string field in this.ContentFields)
+                    {
+                        if (!field.Equals("Value"))
+                        {
+                            str = str + string.Format("{0}:\t{1}\n", field, this[field]);
+                        }
+                    }
+                    return str.Trim();
+                }
+            }
             [ElementPriority(1)]
             public AgeGenderFlags AgeGenderFlags
             {
@@ -188,6 +204,19 @@ namespace s3piwrappers
         #endregion
 
         #region Properties
+
+        public String Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                sb.AppendFormat("\nShaderKeys:\n");
+                for (int i = 0; i < mShaderKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
+                return sb.ToString();
+            }
+        }
         [ElementPriority(1)]
         public UInt32 Version
         {
