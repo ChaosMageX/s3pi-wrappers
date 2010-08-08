@@ -486,7 +486,7 @@ namespace s3piwrappers
             internal ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
                 : base(apiVersion, handler, type, s)
             {
-                mMatrix4x4 = new Single[16];
+                if(s==null)mMatrix4x4 = new Single[16];
             }
             public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
                 : base(apiVersion, handler, basis)
@@ -882,6 +882,7 @@ namespace s3piwrappers
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
         private byte[] mS3Clip;
+        //private S3Clip mClip;
         private ActorSlotTable mActorSlotTable;
         private string mActorName;
         private EventTable mEventSectionTable;
@@ -954,6 +955,13 @@ namespace s3piwrappers
             get { return mEndSection; }
             set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
         }
+        //[ElementPriority(8)]
+        //[DataGridExpandable(true)]
+        //public S3Clip CLIP
+        //{
+        //    get { return mClip; }
+        //    set { mClip = value; OnResourceChanged(this, new EventArgs()); }
+        //}
 
         private void Parse(Stream s)
         {
@@ -961,7 +969,7 @@ namespace s3piwrappers
 
             //header
             if (br.ReadUInt32() != 0x6B20C4F3) throw new Exception("Not a valid CLIP resource");
-            long linkedClipOffset = br.ReadUInt32() + s.Position - 4;
+            long linkedClipOffset = br.ReadUInt32();
             long clipSize = br.ReadUInt32();
             long clipOffset = br.ReadUInt32() + s.Position - 4;
             long slotOffset = br.ReadUInt32() + s.Position - 4;
@@ -975,7 +983,7 @@ namespace s3piwrappers
             s.Seek(clipOffset, SeekOrigin.Begin);
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
-
+            //mClip = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
 
             s.Seek(slotOffset, SeekOrigin.Begin);
             mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged, s);
@@ -995,7 +1003,6 @@ namespace s3piwrappers
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(0x6B20C4F3);
             long mainOffsetList = s.Position;
-            long linkedClipOffset = 0;
             long clipSize = 0;
             long clipOffset = 0;
             long slotOffset = 0;
