@@ -35,10 +35,10 @@ namespace s3piwrappers
         public class GeometryState : AHandlerElement, IEquatable<GeometryState>
         {
             private UInt32 mStateNameHash;
-            private UInt32 mUnknown01;
-            private UInt32 mUnknown02;
-            private UInt32 mUnknown03;
-            private UInt32 mUnknown04;
+            private UInt32 mIBUFIndex;
+            private UInt32 mVBUFIndex;
+            private UInt32 mVertexCount;
+            private UInt32 mFaceCount;
 
             public GeometryState(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -48,10 +48,10 @@ namespace s3piwrappers
                 : base(APIversion, handler)
             {
                 mStateNameHash = basis.mStateNameHash;
-                mUnknown01 = basis.mUnknown01;
-                mUnknown02 = basis.mUnknown02;
-                mUnknown03 = basis.mUnknown03;
-                mUnknown04 = basis.mUnknown04;
+                mIBUFIndex = basis.mIBUFIndex;
+                mVBUFIndex = basis.mVBUFIndex;
+                mVertexCount = basis.mVertexCount;
+                mFaceCount = basis.mFaceCount;
             }
             public GeometryState(int APIversion, EventHandler handler, Stream s)
                 : base(APIversion, handler)
@@ -65,47 +65,47 @@ namespace s3piwrappers
                 set { mStateNameHash= value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public uint Unknown01
+            public uint IbufIndex
             {
-                get { return mUnknown01; }
-                set { mUnknown01= value; OnElementChanged(); }
+                get { return mIBUFIndex; }
+                set { mIBUFIndex= value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public uint Unknown02
+            public uint VbufIndex
             {
-                get { return mUnknown02; }
-                set { mUnknown02= value; OnElementChanged(); }
+                get { return mVBUFIndex; }
+                set { mVBUFIndex= value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public uint Unknown03
+            public uint VertexCount
             {
-                get { return mUnknown03; }
-                set { mUnknown03= value; OnElementChanged(); }
+                get { return mVertexCount; }
+                set { mVertexCount= value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public uint Unknown04
+            public uint FaceCount
             {
-                get { return mUnknown04; }
-                set { mUnknown04= value; OnElementChanged(); }
+                get { return mFaceCount; }
+                set { mFaceCount= value; OnElementChanged(); }
             }
 
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mStateNameHash = br.ReadUInt32();
-                mUnknown01 = br.ReadUInt32();
-                mUnknown02 = br.ReadUInt32();
-                mUnknown03 = br.ReadUInt32();
-                mUnknown04 = br.ReadUInt32();
+                mIBUFIndex = br.ReadUInt32();
+                mVBUFIndex = br.ReadUInt32();
+                mVertexCount = br.ReadUInt32();
+                mFaceCount = br.ReadUInt32();
             }
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mStateNameHash);
-                bw.Write(mUnknown01);
-                bw.Write(mUnknown02);
-                bw.Write(mUnknown03);
-                bw.Write(mUnknown04);
+                bw.Write(mIBUFIndex);
+                bw.Write(mVBUFIndex);
+                bw.Write(mVertexCount);
+                bw.Write(mFaceCount);
             }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -134,10 +134,10 @@ namespace s3piwrappers
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("StateNameHash: 0x{0:X8}\n", mStateNameHash);
-                    sb.AppendFormat("Unknown01: 0x{0:X8}\n", mUnknown01);
-                    sb.AppendFormat("Unknown02: 0x{0:X8}\n", mUnknown02);
-                    sb.AppendFormat("Unknown03: 0x{0:X8}\n", mUnknown03);
-                    sb.AppendFormat("Unknown04: 0x{0:X8}\n", mUnknown04);
+                    sb.AppendFormat("IBUF Index: 0x{0:X8}\n", mIBUFIndex);
+                    sb.AppendFormat("VBUF Index: 0x{0:X8}\n", mVBUFIndex);
+                    sb.AppendFormat("Vertex Count: 0x{0:X8}\n", mVertexCount);
+                    sb.AppendFormat("FaceCount: 0x{0:X8}\n", mFaceCount);
                     return sb.ToString();
                 }
             }
@@ -278,7 +278,7 @@ namespace s3piwrappers
             private Single mUnknown02;
             private Single mUnknown03;
             private Single mUnknown04;
-            private UInt32 mUnknown05;
+            private Single mUnknown05;
 
             
 
@@ -418,7 +418,7 @@ namespace s3piwrappers
                 set { mUnknown04 = value; OnElementChanged(); }
             }
             [ElementPriority(21)]
-            public uint Unknown05
+            public Single Unknown05
             {
                 get { return mUnknown05; }
                 set { mUnknown05 = value; OnElementChanged(); }
@@ -451,7 +451,7 @@ namespace s3piwrappers
                 mUnknown02 = br.ReadSingle();
                 mUnknown03 = br.ReadSingle();
                 mUnknown04 = br.ReadSingle();
-                mUnknown05 = br.ReadUInt32();
+                mUnknown05 = br.ReadSingle();
                 long actualSize = s.Position - start;
                 if (checking && actualSize != expectedSize) 
                     throw new Exception(String.Format("Expected end at {0}, actual end was {1}",expectedSize,actualSize));
@@ -526,7 +526,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Unknown02: {0,8:0.00000}\n", mUnknown02);
                     sb.AppendFormat("Unknown03: {0,8:0.00000}\n", mUnknown03);
                     sb.AppendFormat("Unknown04: {0,8:0.00000}\n", mUnknown04);
-                    sb.AppendFormat("Unknown05: 0x{0:X8}\n", mUnknown05);
+                    sb.AppendFormat("Unknown05: {0,8:0.00000}\n", mUnknown05);
                     return sb.ToString();
                 }
             }

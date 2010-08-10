@@ -53,6 +53,7 @@
     <Compile Include="SKIN.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="VRTF.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\s3pi\s3pi Wrappers\GenericRCOLResource\trunk\GenericRCOLResource.csproj">

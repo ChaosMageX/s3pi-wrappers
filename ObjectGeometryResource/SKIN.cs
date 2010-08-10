@@ -40,10 +40,9 @@ namespace s3piwrappers
                 mTransformationMatrix =
                 new Single[12]
                 {
-                    1,0,0,
-                    0,1,0,
-                    0,0,1,
-                    0,0,0
+                    1,0,0,0,
+                    0,1,0,0,
+                    0,0,1,0
                 };
             }
             public Joint(int APIversion, EventHandler handler, UInt32 joint, Single[] matrix)
@@ -63,10 +62,10 @@ namespace s3piwrappers
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("JointNameHash:\t0x{0:X8}\n", mJointNameHash);
                     sb.AppendFormat("Transformation:\n", mJointNameHash);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[0], mTransformationMatrix[1], mTransformationMatrix[2]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[3], mTransformationMatrix[4], mTransformationMatrix[5]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[6], mTransformationMatrix[7], mTransformationMatrix[8]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[9], mTransformationMatrix[10], mTransformationMatrix[11]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[0], mTransformationMatrix[4], mTransformationMatrix[8]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[1], mTransformationMatrix[5], mTransformationMatrix[9]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[2], mTransformationMatrix[6], mTransformationMatrix[10]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[3], mTransformationMatrix[7], mTransformationMatrix[11]);
                     return sb.ToString();
                 }
             }
