@@ -142,6 +142,18 @@ namespace s3piwrappers
                 set { mEntries = value; OnElementChanged(); }
             }
 
+            public string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < mEntries.Count; i++)
+                    {
+                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mEntries[i].Value);
+                    }
+                    return sb.ToString();
+                }
+            }
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
@@ -168,6 +180,18 @@ namespace s3piwrappers
             {
             }
 
+            public string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < mEntries.Count; i++)
+                    {
+                        sb.AppendFormat("[{0:00}]{1}\n", i, mEntries[i].Value);
+                    }
+                    return sb.ToString();
+                }
+            }
             public CountedOffsetItemList<ActorSlotEntry> Entries
             {
                 get { return mEntries; }
@@ -201,10 +225,21 @@ namespace s3piwrappers
             public ActorSlotEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             public ActorSlotEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-            public ActorSlotEntry(int apiVersion, EventHandler handler, ActorSlotEntry basis) : base(apiVersion, handler, basis)
+            public ActorSlotEntry(int apiVersion, EventHandler handler, ActorSlotEntry basis)
+                : base(apiVersion, handler, basis)
             {
             }
-
+            public string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Index:\t0x{0:X8}\n", mIndex);
+                    sb.AppendFormat("Actor:\t{0}\n", mActorName);
+                    sb.AppendFormat("Slot:\t{0}\n", mSlotName);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(1)]
             public uint Index
             {
@@ -266,11 +301,28 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
+
+            public string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
+                    sb.AppendFormat("Events:\n");
+                    for (int i = 0; i < mEvents.Count; i++)
+                    {
+                        sb.AppendFormat("==Event[{0}]==\n{1}\n", i, mEvents[i].Value);
+                    }
+                    return sb.ToString();
+                }
+            }
+            [ElementPriority(1)]
             public uint Version
             {
                 get { return mVersion; }
                 set { mVersion = value; OnElementChanged(); }
             }
+            [ElementPriority(2)]
             public EventList Events
             {
                 get { return mEvents; }
@@ -358,13 +410,21 @@ namespace s3piwrappers
         }
         public abstract class Event : DependentElement, IEquatable<Event>
         {
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type)
                 : base(apiVersion, handler)
             {
                 mType = type;
+                mFloat01 = -1f;
+                mFloat02 = -2f;
+                mShort01 = 0xC1E4;
+            }
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : this(apiVersion, handler,type)
+            {
                 if (s != null) Parse(s);
             }
-            protected Event(int apiVersion, EventHandler handler,Event basis)
+            protected Event(int apiVersion, EventHandler handler, Event basis)
                 : base(apiVersion, handler)
             {
                 mType = basis.Type;
@@ -377,6 +437,23 @@ namespace s3piwrappers
             private Single mFloat02;
             private UInt32 mInt01;
             private String mEventName = String.Empty;
+
+            public virtual string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("Type:\t{0}\n", mType);
+                    sb.AppendFormat("Unknown01:\t0x{0:X4}\n", mShort01);
+                    sb.AppendFormat("Id:\t0x{0:X4}\n", mId);
+                    sb.AppendFormat("Timecode:\t{0,8:0.00000}\n", mTimecode);
+                    sb.AppendFormat("Float01:\t{0,8:0.00000}\n", mFloat01);
+                    sb.AppendFormat("Float02:\t{0,8:0.00000}\n", mFloat02);
+                    sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mInt01);
+                    sb.AppendFormat("Event Name:\t{0}\n", mEventName);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(0)]
             public ClipEventType Type
             {
@@ -484,19 +561,43 @@ namespace s3piwrappers
         public class ParentEvent : Event
         {
             internal ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
-                : base(apiVersion, handler, type, s)
+                : base(apiVersion, handler, type)
             {
-                if(s==null)mMatrix4x4 = new Single[16];
+                 mMatrix4x4 = new Single[16];
+                 if (s != null) Parse(s);
             }
             public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
                 : base(apiVersion, handler, basis)
             {
             }
+
             private UInt32 mActorNameHash;
             private UInt32 mObjectNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown01;
             private Single[] mMatrix4x4;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Actor:\t0x{0:X8}\n", mActorNameHash);
+                    sb.AppendFormat("Object:\t0x{0:X8}\n", mObjectNameHash);
+                    sb.AppendFormat("Slot:\t0x{0:X8}\n", mSlotNameHash);
+                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                    sb.AppendFormat("Matrix:\n");
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
+                        , mMatrix4x4[0], mMatrix4x4[1], mMatrix4x4[2], mMatrix4x4[3]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
+                        , mMatrix4x4[4], mMatrix4x4[5], mMatrix4x4[6], mMatrix4x4[7]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
+                        , mMatrix4x4[8], mMatrix4x4[9], mMatrix4x4[10], mMatrix4x4[11]);
+                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
+                        , mMatrix4x4[12], mMatrix4x4[13], mMatrix4x4[14], mMatrix4x4[15]);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public uint ActorNameHash
             {
@@ -527,7 +628,6 @@ namespace s3piwrappers
                 get { return mMatrix4x4; }
                 set { mMatrix4x4 = value; OnElementChanged(); }
             }
-
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
@@ -560,6 +660,16 @@ namespace s3piwrappers
             {
             }
             private UInt32 mObjectNameHash;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Object:\t0x{0:X8}\n", mObjectNameHash);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public uint ObjectNameHash
             {
@@ -590,6 +700,16 @@ namespace s3piwrappers
             {
             }
             private String mSoundName;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Sound Name:\t{0}\n", mSoundName);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public string SoundName
             {
@@ -634,6 +754,21 @@ namespace s3piwrappers
             private UInt32 mActorNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown03;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                    sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
+                    sb.AppendFormat("Effect:\t0x{0:X8}\n", mEffectNameHash);
+                    sb.AppendFormat("Actor:\t0x{0:X8}\n", mActorNameHash);
+                    sb.AppendFormat("Slot:\t0x{0:X8}\n", mSlotNameHash);
+                    sb.AppendFormat("Unknown03:\t0x{0:X8}\n", mUnknown03);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public uint Unknown01
             {
@@ -704,6 +839,16 @@ namespace s3piwrappers
             {
             }
             private Single mVisibility;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Visibility:\t{0,8:0.00000}\n", mVisibility);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public float Visibility
             {
@@ -734,6 +879,16 @@ namespace s3piwrappers
             {
             }
             private UInt32 mPropNameHash;
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Prop:\t0x{0:X8}\n", mPropNameHash);
+                    return sb.ToString();
+                }
+            }
             [ElementPriority(8)]
             public uint PropNameHash
             {
@@ -764,6 +919,17 @@ namespace s3piwrappers
             public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis)
                 : base(apiVersion, handler, basis)
             {
+            }
+
+            public override string Value
+            {
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    sb.AppendFormat("Effect:\t0x{0:X8}\n", mEffectNameHash);
+                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                    return sb.ToString();
+                }
             }
             [ElementPriority(8)]
             public uint EffectNameHash
@@ -802,38 +968,38 @@ namespace s3piwrappers
             private Single mZ;
             private Single mW;
 
-            public ClipEndSection(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            public ClipEndSection(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
             {
             }
 
-            public ClipEndSection(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            public ClipEndSection(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler, s)
             {
             }
 
-            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : base(apiVersion, handler, basis)
+            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis)
+                : base(apiVersion, handler, basis)
             {
             }
             [ElementPriority(1)]
             public float X
             {
                 get { return mX; }
-                set { mX = value; OnElementChanged();}
+                set { mX = value; OnElementChanged(); }
             }
-
             [ElementPriority(2)]
             public float Y
             {
                 get { return mY; }
                 set { mY = value; OnElementChanged(); }
             }
-
             [ElementPriority(3)]
             public float Z
             {
                 get { return mZ; }
                 set { mZ = value; OnElementChanged(); }
             }
-
             [ElementPriority(4)]
             public float W
             {
@@ -841,6 +1007,10 @@ namespace s3piwrappers
                 set { mW = value; OnElementChanged(); }
             }
 
+            public string Value
+            {
+                get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{2,8:0.00000}]",mX,mY,mZ,mW); }
+            }
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
@@ -866,7 +1036,7 @@ namespace s3piwrappers
             mS3Clip = new byte[0];
             mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged);
-            mEndSection = new ClipEndSection(0,this.OnResourceChanged);
+            mEndSection = new ClipEndSection(0, this.OnResourceChanged);
 
             if (base.stream == null)
             {
@@ -890,6 +1060,21 @@ namespace s3piwrappers
         #endregion
 
         #region I/O
+        public string Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
+                sb.AppendFormat("Actor/Slot Table:\n{0}\n", mActorSlotTable.Value);
+                sb.AppendFormat("Actor:\t{0}\n", mActorName);
+                sb.AppendFormat("Event Table:\n{0}\n", mEventSectionTable.Value);
+                sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
+                return sb.ToString();
+
+            }
+        }
         [ElementPriority(1)]
         public uint Unknown01
         {
@@ -995,7 +1180,7 @@ namespace s3piwrappers
             mEventSectionTable = new EventTable(0, this.OnResourceChanged, s);
 
             s.Seek(endOffset, SeekOrigin.Begin);
-            mEndSection = new ClipEndSection(0,this.OnResourceChanged,s);
+            mEndSection = new ClipEndSection(0, this.OnResourceChanged, s);
         }
         protected override Stream UnParse()
         {
@@ -1036,7 +1221,7 @@ namespace s3piwrappers
             s.Seek(mainOffsetList, SeekOrigin.Begin);
             bw.Write((uint)(0));
             bw.Write((uint)clipSize);
-            bw.Write((uint)(clipOffset - s.Position ));
+            bw.Write((uint)(clipOffset - s.Position));
             bw.Write((uint)(slotOffset - s.Position));
             bw.Write((uint)(actorOffset - s.Position));
             bw.Write((uint)(eventOffset - s.Position));

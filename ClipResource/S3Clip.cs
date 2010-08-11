@@ -149,12 +149,6 @@ namespace s3piwrappers
                     base.Add(CreateElement(0, handler, context));
                 }
                 context.Stream.Seek(pos, SeekOrigin.Begin);
-                if(context.Floats.Count >0)
-                {
-                    double min = context.Floats.Min(x=>x);
-                    double max = context.Floats.Max(x => x);
-                    double avg = context.Floats.Average(x => x);
-                }
             }
 
             protected abstract Frame CreateElement(int apiVersion, EventHandler handler, ChannelReadContext context);
@@ -384,10 +378,6 @@ namespace s3piwrappers
                 mFrameIndex = basis.mFrameIndex;
                 mFlags = basis.mFlags;
                 mExtraFlags = basis.mExtraFlags;
-                if((mFlags >>4 ) >0)
-                {
-                    int i = 0;
-                }
             }
             public Frame(int apiVersion, EventHandler handler, ChannelReadContext ctx)
                 : base(apiVersion, handler)
@@ -464,9 +454,9 @@ namespace s3piwrappers
                 int signX = ((mFlags & 0x01) == 0x01 ? -1 : 1);
                 int signZ = ((mFlags & 0x02) == 0x02 ? -1 : 1);
                 int signY = ((mFlags & 0x04) == 0x04 ? -1 : 1);
-                mPos.X = ctx.Offset * signX + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
-                mPos.Z = ctx.Offset * signZ + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
-                mPos.Y = ctx.Offset * signY + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
+                mX = ctx.Offset * signX + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
+                mZ = ctx.Offset * signZ + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
+                mY = ctx.Offset * signY + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
 
             }
             public override void UnParse(ChannelWriteContext context)
@@ -493,13 +483,9 @@ namespace s3piwrappers
                 int signX = ((mFlags & 0x01) == 0x01 ? -1 : 1);
                 int signZ = ((mFlags & 0x02) == 0x02 ? -1 : 1);
                 int signY = ((mFlags & 0x04) == 0x04 ? -1 : 1);
-                mPos = new Vector3();
-                mPos.X = ctx.Offset * signX + ((double)((packed & 0x000003FF) >> 0) / 1023) * ctx.Scalar;
-                mPos.Z = ctx.Offset * signZ + ((double)((packed & 0x000FFC00) >> 10) / 1023) * ctx.Scalar;
-                mPos.Y = ctx.Offset * signY + ((double)((packed & 0x3FF00000) >> 20) / 1023)  * ctx.Scalar;
-                ctx.Floats.Add(mPos.X);
-                ctx.Floats.Add(mPos.Y);
-                ctx.Floats.Add(mPos.Z);
+                mX = ctx.Offset * signX + ((double)((packed & 0x000003FF) >> 0) / 1023) * ctx.Scalar;
+                mZ = ctx.Offset * signZ + ((double)((packed & 0x000FFC00) >> 10) / 1023) * ctx.Scalar;
+                mY = ctx.Offset * signY + ((double)((packed & 0x3FF00000) >> 20) / 1023)  * ctx.Scalar;
             }
             public override void UnParse(ChannelWriteContext context)
             {
@@ -513,21 +499,36 @@ namespace s3piwrappers
             protected Vector3Frame(int apiVersion, EventHandler handler, Vector3Frame basis)
                 : base(apiVersion, handler, basis)
             {
-                mPos = basis.mPos;
             }
             protected Vector3Frame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             protected Vector3Frame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
-
-            protected Vector3 mPos;
+            protected double mX;
+            protected double mY;
+            protected double mZ;
             [ElementPriority(4)]
-            public Vector3 Pos
+            public double X
             {
-                get { return mPos; }
-                set { mPos = value; OnElementChanged(); }
+                get { return mX; }
+                set { mX = value;OnElementChanged(); }
             }
+            [ElementPriority(5)]
+
+            public double Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
+
+            public double Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+
             public override string ToString()
             {
-                return base.ToString() + mPos.ToString();
+                return base.ToString() + String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]", mX, mY, mZ);
             }
         }
         public class RotationFrame : Frame
@@ -546,33 +547,30 @@ namespace s3piwrappers
             }
             public RotationFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             public RotationFrame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
+
             [ElementPriority(4)]
-            public Quaternion Quaternion
+            public double X
             {
-                get { return new Quaternion(mX, mY, mZ, mW); }
-                set
-                {
-                    mX = value.X;
-                    mY = value.Y;
-                    mZ = value.Z;
-                    mW = value.W;
-                    OnElementChanged();
-                }
+                get { return mX; }
+                set { mX = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public EulerAngle Euler
+            public double Y
             {
-
-                get { return new Quaternion(mX, mY, mZ, mW).ToEuler(); }
-                set
-                {
-                    Quaternion q = value.ToQuaternion();
-                    mX = q.X;
-                    mY = q.Y;
-                    mZ = q.Z;
-                    mW = q.W;
-                    OnElementChanged();
-                }
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
+            public double Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+            [ElementPriority(7)]
+            public double W
+            {
+                get { return mW; }
+                set { mW = value;OnElementChanged(); }
             }
 
             public override void Parse(ChannelReadContext ctx)
@@ -600,7 +598,7 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-                return base.ToString() + this.Quaternion.ToEuler().ToString();
+                return base.ToString() + String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]", mX, mY, mZ, mW);
             }
 
             public bool Equals(RotationFrame other)
@@ -654,7 +652,8 @@ namespace s3piwrappers
         {
             ClipReadContext context = new ClipReadContext(s);
             BinaryReader br = new BinaryReader(s);
-            if (br.ReadUInt64() != 0x5F5333436C69705FUL) throw new Exception("Bad clip header: Expected \"_S3Clip_\"");
+            if (FOURCC(br.ReadUInt64())!= "_S3Clip_") 
+                throw new Exception("Bad clip header: Expected \"_S3Clip_\"");
             mVersion = br.ReadUInt32();
             mUnknown01 = br.ReadUInt32();
             mFrameDuration = br.ReadSingle();
@@ -667,10 +666,11 @@ namespace s3piwrappers
             long animNameOffset = br.ReadUInt32();
             long srcNameOffset = br.ReadUInt32();
 
-            s.Seek(constFloatOffset, SeekOrigin.Begin);
-            for (int i = 0; i < constFloatCount; i++) { context.FloatConstants.Add(br.ReadSingle()); }
-            s.Seek(channelOffset, SeekOrigin.Begin);
-            mChannels = new ChannelList(handler, context);
+            //s.Seek(constFloatOffset, SeekOrigin.Begin);
+            //for (int i = 0; i < constFloatCount; i++) { context.FloatConstants.Add(br.ReadSingle()); }
+            //s.Seek(channelOffset, SeekOrigin.Begin);
+            //mChannels = new ChannelList(handler, context);
+
             s.Seek(animNameOffset, SeekOrigin.Begin);
             mAnimName = br.ReadZString();
             s.Seek(srcNameOffset, SeekOrigin.Begin);
@@ -683,12 +683,13 @@ namespace s3piwrappers
         {
             ClipWriteContext context = new ClipWriteContext(s);
             BinaryWriter bw = new BinaryWriter(s);
-            bw.Write(0x5F5333436C69705FUL); // _S3Clip_
+            bw.Write(FOURCC("_S3Clip_")); 
             bw.Write(mVersion);
             bw.Write(mUnknown01);
             bw.Write(mFrameDuration);
             int maxFrameCount = 0;
 
+            //Count frames, and index float constants...
             foreach (var channel in mChannels)
             {
                 if (channel.FrameCount > maxFrameCount) maxFrameCount = channel.FrameCount;
@@ -699,12 +700,12 @@ namespace s3piwrappers
                     foreach (var frame in pcc.Frames)
                     {
                         PositionConstFrame pcf = (PositionConstFrame) frame;
-                        if (!context.FloatConstants.Contains(pcf.Pos.X))
-                            context.FloatConstants.Add(pcf.Pos.X);
-                        if (!context.FloatConstants.Contains(pcf.Pos.Y))
-                            context.FloatConstants.Add(pcf.Pos.Y);
-                        if (!context.FloatConstants.Contains(pcf.Pos.Z))
-                            context.FloatConstants.Add(pcf.Pos.Z);
+                        if (!context.FloatConstants.Contains(pcf.X))
+                            context.FloatConstants.Add(pcf.X);
+                        if (!context.FloatConstants.Contains(pcf.Y))
+                            context.FloatConstants.Add(pcf.Y);
+                        if (!context.FloatConstants.Contains(pcf.Z))
+                            context.FloatConstants.Add(pcf.Z);
 
                     }
                 }
@@ -721,7 +722,7 @@ namespace s3piwrappers
             s.Seek(16L, SeekOrigin.Current); //skip over offsets
 
             channelOffset = s.Position;
-            s.Seek(20L * mChannels.Count, SeekOrigin.Current); //skip channels
+            s.Seek(20L * mChannels.Count, SeekOrigin.Current); //skip over channels
 
             animNameOffset = s.Position;
             bw.WriteZString(mAnimName);
@@ -765,7 +766,8 @@ namespace s3piwrappers
         public ChannelWriteContext(ClipWriteContext context)
             : base(context.Stream)
         {
-
+            FloatConstants = context.FloatConstants;
+            FrameDataMap = context.FrameDataMap;
         }
 
         public double Offset { get; set; }

@@ -7,44 +7,12 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers
 {
-    [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class Matrix3x3
-    {
-        public Vector3 M1 { get; set; }
-        public Vector3 M2 { get; set; }
-        public Vector3 M3 { get; set; }
-    }
-    [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class Matrix4x3
-    {
-        public Vector3 M1 { get; set; }
-        public Vector3 M2 { get; set; }
-        public Vector3 M3 { get; set; }
-        public Vector3 M4 { get; set; }
-    }
-    [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class Matrix4x4
-    {
-        public Vector4 M1 { get; set; }
-        public Vector4 M2 { get; set; }
-        public Vector4 M3 { get; set; }
-        public Vector4 M4 { get; set; }
-    }
-
+    [TypeConverter(typeof(EulerAngleTypeConverter))]
     public class EulerAngle : Vector3
     {
         public EulerAngle(){}
         public EulerAngle(double x, double y, double z) : base(x,y,z){}
 
-        public static EulerAngle Parse(string s)
-        {
-            string[] split =s.Replace("Euler", "").TrimStart('(').TrimEnd(')').Split(',');
-            double x, y, z;
-            if(!(double.TryParse(split[0],out x)&&double.TryParse(split[1],out y) && double.TryParse(split[2],out z))) 
-                throw new Exception("Unable to parse EulerAngle");
-            return new EulerAngle(x,y,z);
-
-        }
         public Quaternion ToQuaternion()
         {
             double c1 = Math.Cos(Geometry.DegToRad(Y) / 2);
@@ -104,8 +72,7 @@ namespace s3piwrappers
         {
             return string.Format("({0,6:0.0000},{1,6:0.0000},{2,6:0.0000},{3,6:0.0000})", X, Y, Z,W);
         }
-
-        public static Vector4 Parse(string s)
+        public static new Vector4 Parse(string s)
         {
             string[] split = s.TrimStart('(').TrimEnd(')').Split(',');
             double x, y, z,w;
@@ -115,6 +82,7 @@ namespace s3piwrappers
 
         }
     }
+    [TypeConverter(typeof(QuaternionTypeConverter))]
     public class Quaternion : Vector4
     {
         public Quaternion() {  }
@@ -151,6 +119,7 @@ namespace s3piwrappers
             return new EulerAngle(x,y,z);
 
         }
+         
         public double Magnitude
         {
             get { return Math.Sqrt(X * X + Y * Y + Z * Z + W * W); }
@@ -166,11 +135,6 @@ namespace s3piwrappers
     }
     public class Geometry
     {
-        public static double RadToRad(double rad)
-        {
-            return rad;
-        }
-
         public static double RadToDeg(double rad)
         {
             return (rad * 180D) / Math.PI;
@@ -196,6 +160,23 @@ namespace s3piwrappers
             return value.ToString();
         }
     }
+    public class EulerAngleTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (sourceType == typeof(string)) { return true; }
+            return base.CanConvertFrom(context, sourceType);
+        }
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            Vector3 v = Vector3.Parse(value.ToString());
+            return new EulerAngle(v.X, v.Y, v.Z);
+        }
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            return value.ToString();
+        }
+    }
     public class Vector4TypeConverter : TypeConverter
     {
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -206,6 +187,23 @@ namespace s3piwrappers
         public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
         {
             return Vector4.Parse(value.ToString());
+        }
+        public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+        {
+            return value.ToString();
+        }
+    }
+    public class QuaternionTypeConverter : TypeConverter
+    {
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+        {
+            if (sourceType == typeof(string)) { return true; }
+            return base.CanConvertFrom(context, sourceType);
+        }
+        public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+        {
+            Vector4 v = Vector4.Parse(value.ToString());
+            return new Quaternion(v.X,v.Y,v.Z,v.W);
         }
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
