@@ -8,6 +8,101 @@ using s3pi.GenericRCOLResource;
 using System.Drawing;
 namespace s3piwrappers
 {
+    public class MTNF : AHandlerElement
+    {
+        enum DataType
+        {
+            Float =0x00000001,
+            UInt32 = 0x00000004,
+        }
+        public class ShaderKey : AHandlerElement
+        {
+            public ShaderKey(int APIversion, EventHandler handler)
+                : base(APIversion, handler)
+            {
+            }
+            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis)
+                : base(APIversion, handler)
+            {
+            }
+            public ShaderKey(int APIversion, EventHandler handler, Stream s)
+                : base(APIversion, handler)
+            {
+            }
+
+            private MATD.FieldType mType;
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ShaderKey(0, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(0, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return 1; }
+            }
+
+        }
+
+        private const String Tag = "MTNF";
+        public MTNF(int APIversion, EventHandler handler)
+            : base(APIversion, handler)
+        {
+        }
+        public MTNF(int APIversion, EventHandler handler, MTNF basis)
+            : base(APIversion, handler)
+        {
+            MemoryStream ms = new MemoryStream();
+            basis.UnParse(ms);
+            ms.Position = 0L;
+            Parse(ms);
+        }
+        public MTNF(int APIversion, EventHandler handler, Stream s)
+            : base(APIversion, handler)
+        {
+            Parse(s);
+        }
+
+        private UInt32 mUnknown01;
+        private void Parse(Stream s)
+        {
+            BinaryReader br = new BinaryReader(s);
+            string tag = FOURCC(br.ReadUInt32());
+            if (tag != Tag)
+                throw new InvalidDataException(String.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{2:X8}", tag, Tag, s.Position));
+            mUnknown01 = br.ReadUInt32();
+            UInt32 dataLength = br.ReadUInt32();
+            UInt32 count = br.ReadUInt32();
+
+        }
+        public void UnParse(Stream s)
+        {
+            BinaryWriter bw = new BinaryWriter(s);
+            bw.Write((uint)FOURCC(Tag));
+            bw.Write(mUnknown01);
+        }
+        public override AHandlerElement Clone(EventHandler handler)
+        {
+            return new MTNF(0, handler, this);
+        }
+
+        public override List<string> ContentFields
+        {
+            get { return GetContentFields(0, GetType()); }
+        }
+
+        public override int RecommendedApiVersion
+        {
+            get { return 1; }
+        }
+        private const int kRecommendedApiVersion = 1;
+        private static bool checking = Settings.Checking;
+    }
     public class GEOM : ARCOLBlock
     {
         public enum VertexElementType
@@ -25,7 +120,7 @@ namespace s3piwrappers
         {
             Float = 1,
             Byte = 2,
-            ARGB =3,
+            ARGB = 3,
             UInt32 = 4
         }
         public class MaterialBlock : AHandlerElement
