@@ -1659,7 +1659,7 @@ namespace s3piwrappers
         }
         public override uint ResourceType
         {
-            get { return 0x00000000; }
+            get { return 0x015A1849; }
         }
 
         public override string Tag

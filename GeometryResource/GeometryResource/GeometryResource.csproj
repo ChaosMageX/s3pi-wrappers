@@ -32,21 +32,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="s3pi.GenericRCOLResource">
-      <HintPath>..\..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
+      <HintPath>..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.Interfaces">
-      <HintPath>..\..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
+      <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="s3pi.Settings">
-      <HintPath>..\..\lib\s3pi_current\s3pi.Settings.dll</HintPath>
+    <Reference Include="s3pi.Settings, Version=1007.21.17.29110, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\s3pi.Settings.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Custom">
-      <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
+    <Reference Include="System.Custom, Version=1007.21.17.29110, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GEOM.cs" />
