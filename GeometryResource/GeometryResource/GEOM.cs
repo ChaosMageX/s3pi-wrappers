@@ -4,105 +4,10 @@ using s3pi.Settings;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using s3pi.GenericRCOLResource;
 using System.Drawing;
+using s3pi.GenericRCOLResource;
 namespace s3piwrappers
 {
-    public class MTNF : AHandlerElement
-    {
-        enum DataType
-        {
-            Float =0x00000001,
-            UInt32 = 0x00000004,
-        }
-        public class ShaderKey : AHandlerElement
-        {
-            public ShaderKey(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
-            {
-            }
-            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis)
-                : base(APIversion, handler)
-            {
-            }
-            public ShaderKey(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
-            {
-            }
-
-            private MATD.FieldType mType;
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                return new ShaderKey(0, handler, this);
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(0, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return 1; }
-            }
-
-        }
-
-        private const String Tag = "MTNF";
-        public MTNF(int APIversion, EventHandler handler)
-            : base(APIversion, handler)
-        {
-        }
-        public MTNF(int APIversion, EventHandler handler, MTNF basis)
-            : base(APIversion, handler)
-        {
-            MemoryStream ms = new MemoryStream();
-            basis.UnParse(ms);
-            ms.Position = 0L;
-            Parse(ms);
-        }
-        public MTNF(int APIversion, EventHandler handler, Stream s)
-            : base(APIversion, handler)
-        {
-            Parse(s);
-        }
-
-        private UInt32 mUnknown01;
-        private void Parse(Stream s)
-        {
-            BinaryReader br = new BinaryReader(s);
-            string tag = FOURCC(br.ReadUInt32());
-            if (tag != Tag)
-                throw new InvalidDataException(String.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{2:X8}", tag, Tag, s.Position));
-            mUnknown01 = br.ReadUInt32();
-            UInt32 dataLength = br.ReadUInt32();
-            UInt32 count = br.ReadUInt32();
-
-        }
-        public void UnParse(Stream s)
-        {
-            BinaryWriter bw = new BinaryWriter(s);
-            bw.Write((uint)FOURCC(Tag));
-            bw.Write(mUnknown01);
-        }
-        public override AHandlerElement Clone(EventHandler handler)
-        {
-            return new MTNF(0, handler, this);
-        }
-
-        public override List<string> ContentFields
-        {
-            get { return GetContentFields(0, GetType()); }
-        }
-
-        public override int RecommendedApiVersion
-        {
-            get { return 1; }
-        }
-        private const int kRecommendedApiVersion = 1;
-        private static bool checking = Settings.Checking;
-    }
     public class GEOM : ARCOLBlock
     {
         public enum VertexElementType
@@ -125,8 +30,8 @@ namespace s3piwrappers
         }
         public class MaterialBlock : AHandlerElement
         {
-            private ShaderName mShader;
-            private byte[] mMaterialNameFile;
+            private MATD.ShaderType mShader;
+            private MTNF mMtnf;
             public MaterialBlock(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
@@ -146,33 +51,35 @@ namespace s3piwrappers
             }
             public string Value
             {
-                get { return ToString(); }
+                get { return String.Format("Shader:\t{0}\n{1}",mShader,mMtnf.Value); }
             }
             [ElementPriority(1)]
-            public ShaderName Shader
+            public MATD.ShaderType Shader
             {
                 get { return mShader; }
                 set { mShader = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public byte[] MaterialNameFile
+            public MTNF Mtnf
             {
-                get { return mMaterialNameFile; }
-                set { mMaterialNameFile = value; OnElementChanged(); }
+                get { return mMtnf; }
+                set { mMtnf = value; OnElementChanged(); }
             }
 
             protected void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mShader = (ShaderName)br.ReadUInt32();
-                if (mShader != ShaderName.None)
+                mShader = (MATD.ShaderType)br.ReadUInt32();
+                if (mShader != MATD.ShaderType.None)
                 {
                     int len = br.ReadInt32();
-                    mMaterialNameFile = br.ReadBytes(len);
+                    MemoryStream ms = new MemoryStream(br.ReadBytes(len));
+                    ms.Position = 0L;
+                    mMtnf = new MTNF(0,handler,ms);
                 }
                 else
                 {
-                    mMaterialNameFile = new byte[0];
+                    mMtnf = new MTNF(0,handler);
                 }
 
             }
@@ -180,11 +87,16 @@ namespace s3piwrappers
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write((UInt32)mShader);
-                if (mMaterialNameFile == null) mMaterialNameFile = new byte[0];
-                if (mShader != ShaderName.None)
+                if (mMtnf == null) mMtnf = mMtnf = new MTNF(0,handler);
+                if (mShader != MATD.ShaderType.None)
                 {
-                    bw.Write(mMaterialNameFile.Length);
-                    bw.Write(mMaterialNameFile);
+                    MemoryStream ms = new MemoryStream();
+                    mMtnf.UnParse(ms);
+                    ms.Position = 0L;
+                    bw.Write((uint)ms.Length);
+                    byte[] buffer = new byte[ms.Length];
+                    ms.Read(buffer, 0, buffer.Length);
+                    bw.Write(buffer);
                 }
             }
 
@@ -192,11 +104,17 @@ namespace s3piwrappers
             {
                 return new MaterialBlock(0, handler, this);
             }
-
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0, GetType()); }
+                get 
+                { 
+                    var fields = GetContentFields(kRecommendedApiVersion, GetType());
+                    if (mShader == (MATD.ShaderType.None)) fields.Remove("Mtnf");
+                    return fields;
+                }
+
             }
+
 
             public override int RecommendedApiVersion
             {
@@ -1509,10 +1427,11 @@ namespace s3piwrappers
             set { mIndexDataEntries = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(9)]
-        public UInt32 Unknown03
+        [TGIBlockListContentField("References")]
+        public UInt32 SkinControllerIndex
         {
-            get { return mUnknown03; }
-            set { mUnknown03 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mSkinControllerIndex; }
+            set { mSkinControllerIndex = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(10)]
         public JointReferenceList JointReferences
@@ -1559,7 +1478,7 @@ namespace s3piwrappers
                         sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mIndexDataEntries[i].Value);
                     }
                 }
-                sb.AppendFormat("Unknown03:\t0x{0:X8}\n", mUnknown03);
+                sb.AppendFormat("SkinControllerIndex:\t0x{0:X8}\n", mSkinControllerIndex);
                 if (mJointReferences.Count > 0)
                 {
                     sb.AppendFormat("Joint References:\n");
@@ -1587,7 +1506,7 @@ namespace s3piwrappers
         private VertexDataList mVertexDataEntries;
         private IndexDataFormat mIndexDataFormat;
         private IndexDataList mIndexDataEntries;
-        private UInt32 mUnknown03;
+        private UInt32 mSkinControllerIndex;
         private JointReferenceList mJointReferences;
         private AResource.TGIBlockList mReferences;
 
@@ -1613,7 +1532,7 @@ namespace s3piwrappers
             }
             mIndexDataFormat = new IndexDataFormat(0, handler, s);
             mIndexDataEntries = new IndexDataList(handler, s);
-            mUnknown03 = br.ReadUInt32();
+            mSkinControllerIndex = br.ReadUInt32();
             mJointReferences = new JointReferenceList(handler, s);
             mReferences = new AResource.TGIBlockList(handler, s, tgiOffset, tgiSize, false);
         }
@@ -1641,7 +1560,7 @@ namespace s3piwrappers
             mIndexDataFormat.UnParse(s);
             if (mIndexDataEntries == null) mIndexDataEntries = new IndexDataList(handler);
             mIndexDataEntries.UnParse(s);
-            bw.Write((uint)mUnknown03);
+            bw.Write((uint)mSkinControllerIndex);
             if (mJointReferences == null) mJointReferences = new JointReferenceList(handler);
             mJointReferences.UnParse(s);
             if (mReferences == null) mReferences = new AResource.TGIBlockList(handler, false);
