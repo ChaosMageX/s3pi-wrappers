@@ -11,60 +11,25 @@ using System.Globalization;
 namespace s3piwrappers
 {
 
-    public enum ChannelType
+    public enum TrackType
     {
-        PositionConst = 0x0103,
-        PositionStatic = 0x10B,
-        Position = 0x0112,
-        Rotation = 0x0214,
-        U0x20C = 0x20C,
-        U0x211 = 0x211
-
-    }
-    public class ClipReadContext
-    {
-        public Stream Stream { get; private set; }
-        public ClipReadContext(Stream s)
-        {
-            FloatConstants = new List<Single>();
-            Stream = s;
-        }
-
-        public UInt16 MaxFrameCount { get; set; }
-        public UInt32 ChannelCount { get; set; }
-        public List<Single> FloatConstants { get; set; }
+        Position = 0x01,
+        Orientation = 0x02
     }
 
-    public class ChannelReadContext : ClipReadContext
-    {
-        public ClipReadContext ClipContext { get; private set; }
-        public ChannelReadContext(ClipReadContext ctx)
-            : base(ctx.Stream)
-        {
-            ClipContext = ctx;
-            FloatConstants = ctx.FloatConstants;
-            Floats = new List<double>();
-        }
 
-        public List<double> Floats { get; set; }
-        public long FrameDataOffset { get; set; }
-        public uint FrameCount { get; set; }
-        public uint BoneHash { get; set; }
-        public Single Offset { get; set; }
-        public Single Scalar { get; set; }
-    }
     /// <summary>
     /// Animation frame data
     /// </summary>
     public class S3Clip : DependentElement
     {
-        public class ChannelList : AHandlerList<Channel>, IGenericAdd
+        public class TrackList : AHandlerList<Track>, IGenericAdd
         {
-            public ChannelList(EventHandler handler)
+            public TrackList(EventHandler handler)
                 : base(handler)
             {
             }
-            public ChannelList(EventHandler handler, ClipReadContext ctx)
+            public TrackList(EventHandler handler, ClipReadContext ctx)
                 : base(handler)
             {
                 Parse(ctx);
@@ -73,15 +38,16 @@ namespace s3piwrappers
             {
 
                 BinaryReader br = new BinaryReader(ctx.Stream);
-                for (int i = 0; i < ctx.ChannelCount; i++)
+                for (int i = 0; i < ctx.TrackCount; i++)
                 {
-                    ChannelReadContext channelContext = new ChannelReadContext(ctx);
-                    channelContext.FrameDataOffset = br.ReadUInt32();
-                    channelContext.BoneHash = br.ReadUInt32();
-                    channelContext.Offset = br.ReadSingle();
-                    channelContext.Scalar = br.ReadSingle();
-                    channelContext.FrameCount = br.ReadUInt16();
-                    Channel c = Channel.CreateInstance(0, base.handler, channelContext, (ChannelType)br.ReadUInt16());
+                    TrackReadContext trackContext = new TrackReadContext(ctx);
+                    trackContext.FrameDataOffset = br.ReadUInt32();
+                    trackContext.BoneHash = br.ReadUInt32();
+                    trackContext.Offset = br.ReadSingle();
+                    trackContext.Scalar = br.ReadSingle();
+                    trackContext.FrameCount = br.ReadUInt16();
+                    trackContext.Flags = new Track.DataFlags( br.ReadByte());
+                    Track c = Track.CreateInstance(0, base.handler, trackContext, (TrackType)br.ReadByte());
                     base.Add(c);
                 }
             }
@@ -93,14 +59,14 @@ namespace s3piwrappers
             public bool Add(params object[] fields)
             {
                 if (fields.Length == 0) return false;
-                if (fields.Length == 1 && typeof(Channel).IsAssignableFrom(fields[0].GetType()))
+                if (fields.Length == 1 && typeof(Track).IsAssignableFrom(fields[0].GetType()))
                 {
-                    base.Add((Channel)fields[0]);
+                    base.Add((Track)fields[0]);
                     return true;
                 }
-                if (fields.Length == 1 && typeof(ChannelType).IsAssignableFrom(fields[0].GetType()))
+                if (fields.Length == 1 && typeof(TrackType).IsAssignableFrom(fields[0].GetType()))
                 {
-                    base.Add((Channel)Activator.CreateInstance(typeof(Channel), new object[] { 0, handler, fields[0] }));
+                    base.Add((Track)Activator.CreateInstance(typeof(Track), new object[] { 0, handler, fields[0] }));
                 }
                 return false;
             }
@@ -110,19 +76,21 @@ namespace s3piwrappers
                 throw new NotImplementedException();
             }
         }
-        #region Nested Type: Channel
+        #region Nested Type: Track
         public class FrameList<TFrame> : FrameList
             where TFrame : Frame
         {
-            public FrameList(EventHandler handler) : base(handler)
+            public FrameList(EventHandler handler)
+                : base(handler)
             {
             }
 
-            public FrameList(EventHandler handler, ChannelReadContext ctx) : base(handler, ctx)
+            public FrameList(EventHandler handler, TrackReadContext ctx)
+                : base(handler, ctx)
             {
             }
 
-            protected override Frame CreateElement(int apiVersion, EventHandler handler, ChannelReadContext context)
+            protected override Frame CreateElement(int apiVersion, EventHandler handler, TrackReadContext context)
             {
                 return (TFrame)Activator.CreateInstance(typeof(TFrame), new object[] { 0, handler, context });
             }
@@ -134,12 +102,12 @@ namespace s3piwrappers
         public abstract class FrameList : AHandlerList<Frame>, IGenericAdd
         {
             public FrameList(EventHandler handler) : base(handler) { }
-            public FrameList(EventHandler handler, ChannelReadContext ctx)
+            public FrameList(EventHandler handler, TrackReadContext ctx)
                 : base(handler)
             {
                 Parse(ctx);
             }
-            private void Parse(ChannelReadContext context)
+            private void Parse(TrackReadContext context)
             {
                 long pos = context.Stream.Position;
                 context.Stream.Seek(context.FrameDataOffset, SeekOrigin.Begin);
@@ -151,8 +119,8 @@ namespace s3piwrappers
                 context.Stream.Seek(pos, SeekOrigin.Begin);
             }
 
-            protected abstract Frame CreateElement(int apiVersion, EventHandler handler, ChannelReadContext context);
-            public void UnParse(ChannelWriteContext context)
+            protected abstract Frame CreateElement(int apiVersion, EventHandler handler, TrackReadContext context);
+            public void UnParse(TrackWriteContext context)
             {
                 foreach (var f in this) { f.UnParse(context); }
             }
@@ -169,78 +137,38 @@ namespace s3piwrappers
 
             public abstract void Add();
         }
-        [ConstructorParameters(new object[] { ChannelType.Rotation })]
-        public class RotationChannel : Channel<RotationFrame>
+        [ConstructorParameters(new object[] { TrackType.Orientation })]
+        public class OrientationTrack : Track<OrientationFrame>
         {
-            public RotationChannel(int apiVersion, EventHandler handler, ChannelType type, RotationChannel basis)
+            public OrientationTrack(int apiVersion, EventHandler handler, TrackType type, OrientationTrack basis)
                 : base(apiVersion, handler, basis) { }
-            public RotationChannel(int apiVersion, EventHandler handler, ChannelType type)
+            public OrientationTrack(int apiVersion, EventHandler handler, TrackType type)
                 : base(apiVersion, handler, type) { }
-            public RotationChannel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
+            public OrientationTrack(int apiVersion, EventHandler handler, TrackType type, TrackReadContext context)
                 : base(apiVersion, handler, type, context) { }
         }
-        [ConstructorParameters(new object[] { ChannelType.PositionConst })]
-        public class PositionConstChannel : Channel<PositionConstFrame>
+        [ConstructorParameters(new object[] { TrackType.Position })]
+        public class PositionTrack : Track<PositionFrame>
         {
-            public PositionConstChannel(int apiVersion, EventHandler handler, ChannelType type, PositionConstChannel basis)
-                : base(apiVersion, handler, basis) { }
-            public PositionConstChannel(int apiVersion, EventHandler handler, ChannelType type)
+            public PositionTrack(int apiVersion, EventHandler handler, TrackType type)
                 : base(apiVersion, handler, type) { }
-            public PositionConstChannel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
-                : base(apiVersion, handler, type, context) { }
-        }
-        [ConstructorParameters(new object[] { ChannelType.PositionStatic })]
-        public class PositionStaticChannel : Channel<Frame>
-        {
-            public PositionStaticChannel(int apiVersion, EventHandler handler, ChannelType type)
-                : base(apiVersion, handler, type) { }
-            public PositionStaticChannel(int apiVersion, EventHandler handler, ChannelType type, PositionStaticChannel basis)
+            public PositionTrack(int apiVersion, EventHandler handler, TrackType type, PositionTrack basis)
                 : base(apiVersion, handler, basis) { }
-            public PositionStaticChannel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
-                : base(apiVersion, handler, type, context) { }
-        }
-        [ConstructorParameters(new object[] { ChannelType.Position })]
-        public class PositionChannel : Channel<PositionFrame>
-        {
-            public PositionChannel(int apiVersion, EventHandler handler, ChannelType type)
-                : base(apiVersion, handler, type) { }
-            public PositionChannel(int apiVersion, EventHandler handler, ChannelType type, PositionChannel basis)
-                : base(apiVersion, handler, basis) { }
-            public PositionChannel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
+            public PositionTrack(int apiVersion, EventHandler handler, TrackType type, TrackReadContext context)
                 : base(apiVersion, handler, type, context) { }
         }
 
-        [ConstructorParameters(new object[] { ChannelType.U0x211 })]
-        public class U0x211Channel : Channel<Frame>
-        {
-            public U0x211Channel(int apiVersion, EventHandler handler, ChannelType type, U0x211Channel basis)
-                : base(apiVersion, handler, basis) { }
-            public U0x211Channel(int apiVersion, EventHandler handler, ChannelType type)
-                : base(apiVersion, handler, type) { }
-            public U0x211Channel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
-                : base(apiVersion, handler, type, context) { }
-        }
-        [ConstructorParameters(new object[] { ChannelType.U0x20C })]
-        public class U0x20CChannel : Channel<Frame>
-        {
-            public U0x20CChannel(int apiVersion, EventHandler handler, ChannelType type, U0x20CChannel basis)
-                : base(apiVersion, handler, basis) { }
-            public U0x20CChannel(int apiVersion, EventHandler handler, ChannelType type)
-                : base(apiVersion, handler, type) { }
-            public U0x20CChannel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
-                : base(apiVersion, handler, type, context) { }
-        }
 
-        public abstract class Channel<TFrame> : Channel
+        public abstract class Track<TFrame> : Track
             where TFrame : Frame
         {
 
-            protected Channel(int apiVersion, EventHandler handler, ChannelType type)
+            protected Track(int apiVersion, EventHandler handler, TrackType type)
                 : base(apiVersion, handler, type)
             {
                 mFrames = new FrameList<TFrame>(handler);
             }
-            protected Channel(int apiVersion, EventHandler handler, Channel<TFrame> basis)
+            protected Track(int apiVersion, EventHandler handler, Track<TFrame> basis)
                 : base(apiVersion, handler, basis)
             {
                 mFrames = new FrameList<TFrame>(handler);
@@ -249,7 +177,7 @@ namespace s3piwrappers
                     mFrames.Add((TFrame)Activator.CreateInstance(typeof(TFrame), new object[] { 0, handler, frame }));
                 }
             }
-            public Channel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
+            public Track(int apiVersion, EventHandler handler, TrackType type, TrackReadContext context)
                 : base(apiVersion, handler, type, context) { }
             private FrameList<TFrame> mFrames;
             [ElementPriority(3)]
@@ -262,9 +190,12 @@ namespace s3piwrappers
             {
                 get { return mFrames.Count; }
             }
-            protected override void Parse(ChannelReadContext context)
+
+            private uint fcount;
+            protected override void Parse(TrackReadContext context)
             {
-                mFrames = new FrameList<TFrame>(handler, context);
+                fcount = context.FrameCount;
+                mFrames = new FrameList<TFrame>(handler);
             }
             public override void UnParse(Stream s)
             {
@@ -274,13 +205,47 @@ namespace s3piwrappers
             public override string ToString()
             {
 
-                return string.Format("Channel: 0x{0:X8}({1})[{2:0000}]", mBoneHash, (ChannelType)mType, mFrames.Count);
+                return string.Format("Track: 0x{0:X8}({1})[{2:0000}]", mBoneHash, (TrackType)mType, fcount);
             }
         }
-        public abstract class Channel : AHandlerElement, IEquatable<Channel>
+        public abstract class Track : AHandlerElement, IEquatable<Track>
         {
+            public enum DataType : byte
+            {
+                Float1 = 0x01,
+                Float2 = 0x02,
+                Float3 = 0x03,
+                Float4 = 0x04
+            }
+            public enum DataFormat : byte
+            {
+                Indexed = 0x00,
+                Static = 0x01,
+                Packed = 0x02
+            }
+            public struct DataFlags
+            {
+                public DataFlags(byte flags) : this()
+                {
+                    Type = (DataType)((flags & (byte)0x07) >> 0);
+                    Static = ((flags & (byte)0x08) >> 3) == 1?true:false;
+                    Format = (DataFormat)((flags & (byte)0xF0) >> 4);
+                }
+
+                public DataType Type { get; set; }
+                public Boolean Static { get; set; }
+                public DataFormat Format { get; set; }
+                public Byte Raw 
+                { 
+                    get { return (byte)((byte)Format<<4 | (byte)((Static?1:0)<<3) | (byte)Type<<0); } 
+                }
+
+            }
             protected UInt32 mBoneHash;
-            protected ChannelType mType;
+            protected TrackType mType;
+            protected DataFlags mFlags;
+
+
             [ElementPriority(1)]
             public uint BoneHash
             {
@@ -288,37 +253,42 @@ namespace s3piwrappers
                 set { mBoneHash = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public ChannelType Type
+            public DataFlags Flags
+            {
+                get { return mFlags; }
+                set { mFlags = value; }
+            }
+            [ElementPriority(3)]
+            public TrackType Type
             {
                 get { return mType; }
             }
-
+            public string Value
+            {
+                get { return ToString(); }
+            }
             public abstract Int32 FrameCount { get; }
-            public static Channel CreateInstance(int apiVersion, EventHandler handler, ChannelReadContext ctx, ChannelType type)
+            public static Track CreateInstance(int apiVersion, EventHandler handler, TrackReadContext ctx, TrackType type)
             {
                 switch (type)
                 {
-                    case ChannelType.PositionConst: return new PositionConstChannel(apiVersion, handler, type, ctx);
-                    case ChannelType.Position: return new PositionChannel(apiVersion, handler, type, ctx);
-                    case ChannelType.Rotation: return new RotationChannel(apiVersion, handler, type, ctx);
-                    case ChannelType.PositionStatic: return new PositionStaticChannel(apiVersion, handler, type, ctx);
-                    case ChannelType.U0x20C: return new U0x20CChannel(apiVersion, handler, type, ctx);
-                    case ChannelType.U0x211: return new U0x211Channel(apiVersion, handler, type, ctx);
+                    case TrackType.Position: return new PositionTrack(apiVersion, handler, type, ctx);
+                    case TrackType.Orientation: return new OrientationTrack(apiVersion, handler, type, ctx);
                     default: throw new NotImplementedException(String.Format("Frame type 0x{0} not implemented.", type));
                 }
             }
-            protected Channel(int apiVersion, EventHandler handler, ChannelType type)
+            protected Track(int apiVersion, EventHandler handler, TrackType type)
                 : base(apiVersion, handler)
             {
                 mType = type;
             }
-            protected Channel(int apiVersion, EventHandler handler, Channel basis)
+            protected Track(int apiVersion, EventHandler handler, Track basis)
                 : base(apiVersion, handler)
             {
                 mType = basis.mType;
                 mBoneHash = basis.mBoneHash;
             }
-            public Channel(int apiVersion, EventHandler handler, ChannelType type, ChannelReadContext context)
+            public Track(int apiVersion, EventHandler handler, TrackType type, TrackReadContext context)
                 : base(apiVersion, handler)
             {
                 if (context != null)
@@ -329,12 +299,12 @@ namespace s3piwrappers
                 }
             }
 
-            protected abstract void Parse(ChannelReadContext context);
+            protected abstract void Parse(TrackReadContext context);
             public abstract void UnParse(Stream s);
 
 
 
-            public bool Equals(Channel other)
+            public bool Equals(Track other)
             {
                 return base.Equals(other);
             }
@@ -356,7 +326,7 @@ namespace s3piwrappers
             public override string ToString()
             {
 
-                return string.Format("Channel: 0x{0:X8}({1})", mBoneHash, (ChannelType)mType);
+                return string.Format("Track: 0x{0:X8}({1})", mBoneHash, (TrackType)mType);
             }
         }
         #endregion
@@ -379,7 +349,7 @@ namespace s3piwrappers
                 mFlags = basis.mFlags;
                 mExtraFlags = basis.mExtraFlags;
             }
-            public Frame(int apiVersion, EventHandler handler, ChannelReadContext ctx)
+            public Frame(int apiVersion, EventHandler handler, TrackReadContext ctx)
                 : base(apiVersion, handler)
             {
                 Parse(ctx);
@@ -403,14 +373,14 @@ namespace s3piwrappers
                 set { mExtraFlags = value; OnElementChanged(); }
             }
 
-            public virtual void Parse(ChannelReadContext ctx)
+            public virtual void Parse(TrackReadContext ctx)
             {
                 BinaryReader br = new BinaryReader(ctx.Stream);
                 mFrameIndex = br.ReadUInt16();
                 mFlags = br.ReadByte();
                 mExtraFlags = br.ReadByte();
             }
-            public virtual void UnParse(ChannelWriteContext context)
+            public virtual void UnParse(TrackWriteContext context)
             {
                 BinaryWriter bw = new BinaryWriter(context.Stream);
                 bw.Write(mFrameIndex);
@@ -441,13 +411,16 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public class PositionConstFrame : Vector3Frame
+        public class PositionFrame : Vector3Frame
         {
-            public PositionConstFrame(int apiVersion, EventHandler handler, PositionConstFrame basis) : base(apiVersion, handler, basis) { }
-            public PositionConstFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public PositionConstFrame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
+            public PositionFrame(int apiVersion, EventHandler handler, PositionFrame basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+            public PositionFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public PositionFrame(int apiVersion, EventHandler handler, TrackReadContext ctx) : base(0, handler, ctx) { }
 
-            public override void Parse(ChannelReadContext ctx)
+            private void ReadIndexed(TrackReadContext ctx)
             {
                 base.Parse(ctx);
                 BinaryReader br = new BinaryReader(ctx.Stream);
@@ -457,27 +430,9 @@ namespace s3piwrappers
                 mX = ctx.Offset * signX + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
                 mZ = ctx.Offset * signZ + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
                 mY = ctx.Offset * signY + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
-
             }
-            public override void UnParse(ChannelWriteContext context)
+            private void ReadPacked(TrackReadContext ctx)
             {
-                base.UnParse(context);
-                BinaryWriter bw = new BinaryWriter(context.Stream);
-            }
-        }
-        public class PositionFrame : Vector3Frame
-        {
-            public PositionFrame(int apiVersion, EventHandler handler, PositionFrame basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
-            public PositionFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public PositionFrame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
-            
-
-            public override void Parse(ChannelReadContext ctx)
-            {
-                base.Parse(ctx);
                 BinaryReader br = new BinaryReader(ctx.Stream);
                 UInt32 packed = br.ReadUInt32();
                 int signX = ((mFlags & 0x01) == 0x01 ? -1 : 1);
@@ -485,9 +440,26 @@ namespace s3piwrappers
                 int signY = ((mFlags & 0x04) == 0x04 ? -1 : 1);
                 mX = ctx.Offset * signX + ((double)((packed & 0x000003FF) >> 0) / 1023) * ctx.Scalar;
                 mZ = ctx.Offset * signZ + ((double)((packed & 0x000FFC00) >> 10) / 1023) * ctx.Scalar;
-                mY = ctx.Offset * signY + ((double)((packed & 0x3FF00000) >> 20) / 1023)  * ctx.Scalar;
+                mY = ctx.Offset * signY + ((double)((packed & 0x3FF00000) >> 20) / 1023) * ctx.Scalar;
+
             }
-            public override void UnParse(ChannelWriteContext context)
+            public override void Parse(TrackReadContext ctx)
+            {
+                base.Parse(ctx);
+                switch(ctx.Flags.Format)
+                {
+                    case Track.DataFormat.Indexed:
+                        ReadIndexed(ctx);
+                        break;
+                    case Track.DataFormat.Packed:
+                        ReadPacked(ctx);
+                        break;
+                    default:
+                        throw new Exception("Unable to parse format "+ctx.Flags.Format.ToString());
+                }
+                
+            }
+            public override void UnParse(TrackWriteContext context)
             {
                 base.UnParse(context);
                 BinaryWriter bw = new BinaryWriter(context.Stream);
@@ -501,7 +473,7 @@ namespace s3piwrappers
             {
             }
             protected Vector3Frame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            protected Vector3Frame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
+            protected Vector3Frame(int apiVersion, EventHandler handler, TrackReadContext ctx) : base(0, handler, ctx) { }
             protected double mX;
             protected double mY;
             protected double mZ;
@@ -509,7 +481,7 @@ namespace s3piwrappers
             public double X
             {
                 get { return mX; }
-                set { mX = value;OnElementChanged(); }
+                set { mX = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
 
@@ -531,13 +503,13 @@ namespace s3piwrappers
                 return base.ToString() + String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]", mX, mY, mZ);
             }
         }
-        public class RotationFrame : Frame
+        public class OrientationFrame : Frame
         {
             private double mX;
             private double mY;
             private double mZ;
             private double mW;
-            public RotationFrame(int apiVersion, EventHandler handler, RotationFrame basis)
+            public OrientationFrame(int apiVersion, EventHandler handler, OrientationFrame basis)
                 : base(apiVersion, handler, basis)
             {
                 mX = basis.mX;
@@ -545,8 +517,8 @@ namespace s3piwrappers
                 mZ = basis.mZ;
                 mW = basis.mW;
             }
-            public RotationFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public RotationFrame(int apiVersion, EventHandler handler, ChannelReadContext ctx) : base(0, handler, ctx) { }
+            public OrientationFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public OrientationFrame(int apiVersion, EventHandler handler, TrackReadContext ctx) : base(0, handler, ctx) { }
 
             [ElementPriority(4)]
             public double X
@@ -570,10 +542,10 @@ namespace s3piwrappers
             public double W
             {
                 get { return mW; }
-                set { mW = value;OnElementChanged(); }
+                set { mW = value; OnElementChanged(); }
             }
 
-            public override void Parse(ChannelReadContext ctx)
+            public override void Parse(TrackReadContext ctx)
             {
                 base.Parse(ctx);
                 BinaryReader br = new BinaryReader(ctx.Stream);
@@ -591,7 +563,7 @@ namespace s3piwrappers
                 mW = ctx.Offset * signW + (packedW / 4095) * ctx.Scalar;
 
             }
-            public override void UnParse(ChannelWriteContext context)
+            public override void UnParse(TrackWriteContext context)
             {
                 base.UnParse(context);
                 BinaryWriter bw = new BinaryWriter(context.Stream);
@@ -601,7 +573,7 @@ namespace s3piwrappers
                 return base.ToString() + String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]", mX, mY, mZ, mW);
             }
 
-            public bool Equals(RotationFrame other)
+            public bool Equals(OrientationFrame other)
             {
                 return base.Equals(other);
             }
@@ -616,7 +588,9 @@ namespace s3piwrappers
         private ushort mUnknown02;
         private string mAnimName;
         private string mSrcName;
-        private ChannelList mChannels;
+        private TrackList mTracks;
+        #endregion
+        #region ContentFields
         [ElementPriority(1)]
         public UInt32 Version { get { return mVersion; } set { mVersion = value; OnElementChanged(); } }
         [ElementPriority(2)]
@@ -630,14 +604,36 @@ namespace s3piwrappers
         [ElementPriority(6)]
         public String SrcName { get { return mSrcName; } set { mSrcName = value; OnElementChanged(); } }
         [ElementPriority(7)]
-        public ChannelList Channels { get { return mChannels; } set { mChannels = value; OnElementChanged(); } }
+        public TrackList Tracks { get { return mTracks; } set { mTracks = value; OnElementChanged(); } }
+        public string Value
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
+                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                sb.AppendFormat("Frame Duration:\t{0:0.00000}\n", mFrameDuration);
+                sb.AppendFormat("Unknown02:\t0x{0:X4}\n", mUnknown02);
+                sb.AppendFormat("Animation Name:\t{0}\n", mAnimName);
+                sb.AppendFormat("Source Name:\t{0}\n", mSrcName);
+                if(mTracks.Count > 0)
+                {
+                    sb.AppendFormat("Tracks:\n");
+                    foreach (var c in mTracks) sb.AppendFormat("{0}\n", c.Value);
+                    
+                }
+                return sb.ToString();
+
+                
+            }
+        }
         #endregion
 
         #region Constructors
         public S3Clip(int apiVersion, EventHandler handler)
             : base(apiVersion, handler)
         {
-            mChannels = new ChannelList(handler);
+            mTracks = new TrackList(handler);
         }
         public S3Clip(int apiVersion, EventHandler handler, Stream s)
             : base(apiVersion, handler, s)
@@ -652,24 +648,24 @@ namespace s3piwrappers
         {
             ClipReadContext context = new ClipReadContext(s);
             BinaryReader br = new BinaryReader(s);
-            if (FOURCC(br.ReadUInt64())!= "_S3Clip_") 
+            if (FOURCC(br.ReadUInt64()) != "_pilC3S_")
                 throw new Exception("Bad clip header: Expected \"_S3Clip_\"");
             mVersion = br.ReadUInt32();
             mUnknown01 = br.ReadUInt32();
             mFrameDuration = br.ReadSingle();
             context.MaxFrameCount = br.ReadUInt16();
             mUnknown02 = br.ReadUInt16();
-            context.ChannelCount = br.ReadUInt32();
+            context.TrackCount = br.ReadUInt32();
             UInt32 constFloatCount = br.ReadUInt32();
-            long channelOffset = br.ReadUInt32();
+            long trackOffset = br.ReadUInt32();
             long constFloatOffset = br.ReadUInt32();
             long animNameOffset = br.ReadUInt32();
             long srcNameOffset = br.ReadUInt32();
 
-            //s.Seek(constFloatOffset, SeekOrigin.Begin);
-            //for (int i = 0; i < constFloatCount; i++) { context.FloatConstants.Add(br.ReadSingle()); }
-            //s.Seek(channelOffset, SeekOrigin.Begin);
-            //mChannels = new ChannelList(handler, context);
+            s.Seek(constFloatOffset, SeekOrigin.Begin);
+            for (int i = 0; i < constFloatCount; i++) { context.FloatConstants.Add(br.ReadSingle()); }
+            s.Seek(trackOffset, SeekOrigin.Begin);
+            mTracks = new TrackList(handler, context);
 
             s.Seek(animNameOffset, SeekOrigin.Begin);
             mAnimName = br.ReadZString();
@@ -683,46 +679,65 @@ namespace s3piwrappers
         {
             ClipWriteContext context = new ClipWriteContext(s);
             BinaryWriter bw = new BinaryWriter(s);
-            bw.Write(FOURCC("_S3Clip_")); 
+            bw.Write(FOURCC("_S3Clip_"));
             bw.Write(mVersion);
             bw.Write(mUnknown01);
             bw.Write(mFrameDuration);
             int maxFrameCount = 0;
 
             //Count frames, and index float constants...
-            foreach (var channel in mChannels)
+            foreach (var track in mTracks)
             {
-                if (channel.FrameCount > maxFrameCount) maxFrameCount = channel.FrameCount;
-                if (channel.Type == ChannelType.PositionConst)
+                if (track.FrameCount > maxFrameCount) maxFrameCount = track.FrameCount;
+                if (track.Flags.Format == Track.DataFormat.Indexed)
                 {
-                    PositionConstChannel pcc = (PositionConstChannel)channel;
-                    if (pcc.Frames.Count > maxFrameCount) maxFrameCount = pcc.Frames.Count;
-                    foreach (var frame in pcc.Frames)
+                    PositionTrack positionTrack = track as PositionTrack;
+                    if (positionTrack != null)
                     {
-                        PositionConstFrame pcf = (PositionConstFrame) frame;
-                        if (!context.FloatConstants.Contains(pcf.X))
-                            context.FloatConstants.Add(pcf.X);
-                        if (!context.FloatConstants.Contains(pcf.Y))
-                            context.FloatConstants.Add(pcf.Y);
-                        if (!context.FloatConstants.Contains(pcf.Z))
-                            context.FloatConstants.Add(pcf.Z);
+                        foreach (var frame in positionTrack.Frames)
+                        {
+                            PositionFrame positionFrame = (PositionFrame)frame;
+                            if (!context.FloatConstants.Contains(positionFrame.X))
+                                context.FloatConstants.Add(positionFrame.X);
+                            if (!context.FloatConstants.Contains(positionFrame.Y))
+                                context.FloatConstants.Add(positionFrame.Y);
+                            if (!context.FloatConstants.Contains(positionFrame.Z))
+                                context.FloatConstants.Add(positionFrame.Z);
 
+                        }
+                    }
+                    OrientationTrack orientationTrack = track as OrientationTrack;
+                    if (orientationTrack != null)
+                    {
+                        foreach (var frame in orientationTrack.Frames)
+                        {
+                            OrientationFrame orientationFrame = (OrientationFrame)frame;
+                            if (!context.FloatConstants.Contains(orientationFrame.X))
+                                context.FloatConstants.Add(orientationFrame.X);
+                            if (!context.FloatConstants.Contains(orientationFrame.Y))
+                                context.FloatConstants.Add(orientationFrame.Y);
+                            if (!context.FloatConstants.Contains(orientationFrame.Z))
+                                context.FloatConstants.Add(orientationFrame.Z);
+                            if (!context.FloatConstants.Contains(orientationFrame.W))
+                                context.FloatConstants.Add(orientationFrame.W);
+
+                        }
                     }
                 }
             }
             bw.Write(maxFrameCount);
             bw.Write(mUnknown02);
-            bw.Write(mChannels.Count);
+            bw.Write(mTracks.Count);
             bw.Write(context.FloatConstants.Count);
             long offsetStart = s.Position;
-            long channelOffset = 0;
+            long trackOffset = 0;
             long floatsOffset = 0;
             long animNameOffset = 0;
             long srcNameOffset = 0;
             s.Seek(16L, SeekOrigin.Current); //skip over offsets
 
-            channelOffset = s.Position;
-            s.Seek(20L * mChannels.Count, SeekOrigin.Current); //skip over channels
+            trackOffset = s.Position;
+            s.Seek(20L * mTracks.Count, SeekOrigin.Current); //skip over tracks
 
             animNameOffset = s.Position;
             bw.WriteZString(mAnimName);
@@ -735,12 +750,12 @@ namespace s3piwrappers
             {
                 bw.Write(context.FloatConstants[i]);
             }
-            for (int i = 0; i < mChannels.Count; i++)
+            for (int i = 0; i < mTracks.Count; i++)
             {
 
             }
             s.Seek(offsetStart, SeekOrigin.Begin);
-            bw.Write((uint)channelOffset);
+            bw.Write((uint)trackOffset);
             bw.Write((uint)floatsOffset);
             bw.Write((uint)animNameOffset);
             bw.Write((uint)srcNameOffset);
@@ -754,16 +769,16 @@ namespace s3piwrappers
         public ClipWriteContext(Stream s)
         {
             FloatConstants = new List<double>();
-            FrameDataMap = new Dictionary<S3Clip.Channel, long>();
+            FrameDataMap = new Dictionary<S3Clip.Track, long>();
             Stream = s;
         }
         public Stream Stream { get; private set; }
         public List<double> FloatConstants { get; set; }
-        public Dictionary<S3Clip.Channel, long> FrameDataMap { get; set; }
+        public Dictionary<S3Clip.Track, long> FrameDataMap { get; set; }
     }
-    public class ChannelWriteContext : ClipWriteContext
+    public class TrackWriteContext : ClipWriteContext
     {
-        public ChannelWriteContext(ClipWriteContext context)
+        public TrackWriteContext(ClipWriteContext context)
             : base(context.Stream)
         {
             FloatConstants = context.FloatConstants;
@@ -773,5 +788,38 @@ namespace s3piwrappers
         public double Offset { get; set; }
         public double Scalar { get; set; }
 
+    }
+    public class ClipReadContext
+    {
+        public Stream Stream { get; private set; }
+        public ClipReadContext(Stream s)
+        {
+            FloatConstants = new List<Single>();
+            Stream = s;
+        }
+
+        public UInt16 MaxFrameCount { get; set; }
+        public UInt32 TrackCount { get; set; }
+        public List<Single> FloatConstants { get; set; }
+    }
+
+    public class TrackReadContext : ClipReadContext
+    {
+        public ClipReadContext ClipContext { get; private set; }
+        public TrackReadContext(ClipReadContext ctx)
+            : base(ctx.Stream)
+        {
+            ClipContext = ctx;
+            FloatConstants = ctx.FloatConstants;
+            Floats = new List<double>();
+        }
+
+        public S3Clip.Track.DataFlags Flags { get; set; }
+        public List<double> Floats { get; set; }
+        public long FrameDataOffset { get; set; }
+        public uint FrameCount { get; set; }
+        public uint BoneHash { get; set; }
+        public Single Offset { get; set; }
+        public Single Scalar { get; set; }
     }
 }

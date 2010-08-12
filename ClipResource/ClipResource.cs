@@ -128,18 +128,18 @@ namespace s3piwrappers
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
         }
-        #region ActorSlot
+        #region IKInfo
 
-        public class ActorSlotTable : DependentElement
+        public class IKTargetTable : DependentElement
         {
-            private CountedOffsetItemList<ActorSlotTableEntry> mEntries;
-            public ActorSlotTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public ActorSlotTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            private CountedOffsetItemList<IKChainEntry> mIkChains;
+            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-            public CountedOffsetItemList<ActorSlotTableEntry> Entries
+            public CountedOffsetItemList<IKChainEntry> IKChains
             {
-                get { return mEntries; }
-                set { mEntries = value; OnElementChanged(); }
+                get { return mIkChains; }
+                set { mIkChains = value; OnElementChanged(); }
             }
 
             public string Value
@@ -147,9 +147,9 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mEntries.Count; i++)
+                    for (int i = 0; i < mIkChains.Count; i++)
                     {
-                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mEntries[i].Value);
+                        sb.AppendFormat("==IK Chain[{0}]==\n{1}\n", i, mIkChains[i].Value);
                     }
                     return sb.ToString();
                 }
@@ -157,25 +157,25 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mEntries = new CountedOffsetItemList<ActorSlotTableEntry>(handler, s);
+                mIkChains = new CountedOffsetItemList<IKChainEntry>(handler, s);
             }
             public override void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                mEntries.UnParse(s);
+                mIkChains.UnParse(s);
             }
         }
-        public class ActorSlotTableEntry : DependentElement, IEquatable<ActorSlotTableEntry>
+        public class IKChainEntry : DependentElement, IEquatable<IKChainEntry>
         {
-            private CountedOffsetItemList<ActorSlotEntry> mEntries;
-            public ActorSlotTableEntry(int apiVersion, EventHandler handler)
+            private CountedOffsetItemList<IKTarget> mIkTargets;
+            public IKChainEntry(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
-                mEntries = new CountedOffsetItemList<ActorSlotEntry>(handler);
+                mIkTargets = new CountedOffsetItemList<IKTarget>(handler);
             }
-            public ActorSlotTableEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            public IKChainEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-            public ActorSlotTableEntry(int apiVersion, EventHandler handler, ActorSlotTableEntry basis)
+            public IKChainEntry(int apiVersion, EventHandler handler, IKChainEntry basis)
                 : base(apiVersion, handler, basis)
             {
             }
@@ -185,47 +185,47 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mEntries.Count; i++)
+                    for (int i = 0; i < mIkTargets.Count; i++)
                     {
-                        sb.AppendFormat("[{0:00}]{1}\n", i, mEntries[i].Value);
+                        sb.AppendFormat("Target[{0:00}]\n{1}\n", i, mIkTargets[i].Value);
                     }
                     return sb.ToString();
                 }
             }
-            public CountedOffsetItemList<ActorSlotEntry> Entries
+            public CountedOffsetItemList<IKTarget> IKTargets
             {
-                get { return mEntries; }
-                set { mEntries = value; OnElementChanged(); }
+                get { return mIkTargets; }
+                set { mIkTargets = value; OnElementChanged(); }
             }
 
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 UInt32 padding = br.ReadUInt32(); //7E7E7E7E padding
-                mEntries = new CountedOffsetItemList<ActorSlotEntry>(handler, s);
+                mIkTargets = new CountedOffsetItemList<IKTarget>(handler, s);
             }
 
             public override void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
-                mEntries.UnParse(s);
+                mIkTargets.UnParse(s);
             }
-            public bool Equals(ActorSlotTableEntry other)
+            public bool Equals(IKChainEntry other)
             {
                 return base.Equals(other);
             }
 
         }
-        public class ActorSlotEntry : DependentElement, IEquatable<ActorSlotEntry>
+        public class IKTarget : DependentElement, IEquatable<IKTarget>
         {
             private UInt32 mIndex;
-            private string mActorName = String.Empty;
-            private string mSlotName = String.Empty;
-            public ActorSlotEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public ActorSlotEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            private string mTargetNamespace = String.Empty;
+            private string mTargetName = String.Empty;
+            public IKTarget(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public IKTarget(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-            public ActorSlotEntry(int apiVersion, EventHandler handler, ActorSlotEntry basis)
+            public IKTarget(int apiVersion, EventHandler handler, IKTarget basis)
                 : base(apiVersion, handler, basis)
             {
             }
@@ -235,8 +235,8 @@ namespace s3piwrappers
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Index:\t0x{0:X8}\n", mIndex);
-                    sb.AppendFormat("Actor:\t{0}\n", mActorName);
-                    sb.AppendFormat("Slot:\t{0}\n", mSlotName);
+                    sb.AppendFormat("Target Namespace:\t{0}\n", mTargetNamespace);
+                    sb.AppendFormat("Target:\t{0}\n", mTargetName);
                     return sb.ToString();
                 }
             }
@@ -247,41 +247,41 @@ namespace s3piwrappers
                 set { mIndex = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public string ActorName
+            public string TargetNamespace
             {
-                get { return mActorName; }
-                set { mActorName = value; OnElementChanged(); }
+                get { return mTargetNamespace; }
+                set { mTargetNamespace = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public string SlotName
+            public string TargetName
             {
-                get { return mSlotName; }
-                set { mSlotName = value; OnElementChanged(); }
+                get { return mTargetName; }
+                set { mTargetName = value; OnElementChanged(); }
             }
 
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mIndex = br.ReadUInt32();
-                mActorName = br.ReadZString(512);
-                mSlotName = br.ReadZString(512);
+                mTargetNamespace = br.ReadZString(512);
+                mTargetName = br.ReadZString(512);
             }
 
             public override void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mIndex);
-                bw.WriteZString(mActorName, 0x23, 512);
-                bw.WriteZString(mSlotName, 0x23, 512);
+                bw.WriteZString(mTargetNamespace, 0x23, 512);
+                bw.WriteZString(mTargetName, 0x23, 512);
             }
             public override string ToString()
             {
-                return String.Format("{0:X8}:{1},{2}", mIndex, mActorName, mSlotName);
+                return String.Format("{0:X8}:{1},{2}", mIndex, mTargetNamespace, mTargetName);
             }
 
-            public bool Equals(ActorSlotEntry other)
+            public bool Equals(IKTarget other)
             {
-                return mIndex.Equals(other.mIndex) && mActorName.Equals(other.mActorName) && mSlotName.Equals(other.mSlotName);
+                return mIndex.Equals(other.mIndex) && mTargetNamespace.Equals(other.mTargetNamespace) && mTargetName.Equals(other.mTargetName);
             }
         }
         #endregion
@@ -1034,7 +1034,7 @@ namespace s3piwrappers
             : base(apiVersion, s)
         {
             mS3Clip = new byte[0];
-            mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged);
+            mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged);
             mEndSection = new ClipEndSection(0, this.OnResourceChanged);
 
@@ -1052,8 +1052,8 @@ namespace s3piwrappers
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
         private byte[] mS3Clip;
-        //private S3Clip mClip;
-        private ActorSlotTable mActorSlotTable;
+        private S3Clip mAnimation;
+        private IKTargetTable mIKTargetInfo;
         private string mActorName;
         private EventTable mEventSectionTable;
         private ClipEndSection mEndSection;
@@ -1067,10 +1067,11 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
                 sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                sb.AppendFormat("Actor/Slot Table:\n{0}\n", mActorSlotTable.Value);
+                sb.AppendFormat("IK Target Info Table:\n{0}\n", mIKTargetInfo.Value);
                 sb.AppendFormat("Actor:\t{0}\n", mActorName);
                 sb.AppendFormat("Event Table:\n{0}\n", mEventSectionTable.Value);
                 sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
+                sb.AppendFormat("Animation Data:\n{0}\n", mAnimation.Value);
                 return sb.ToString();
 
             }
@@ -1117,10 +1118,10 @@ namespace s3piwrappers
             }
         }
         [ElementPriority(4)]
-        public ActorSlotTable ActorSlots
+        public IKTargetTable IKTargetInfo
         {
-            get { return mActorSlotTable; }
-            set { mActorSlotTable = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mIKTargetInfo; }
+            set { mIKTargetInfo = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
         public string ActorName
@@ -1140,13 +1141,13 @@ namespace s3piwrappers
             get { return mEndSection; }
             set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
         }
-        //[ElementPriority(8)]
-        //[DataGridExpandable(true)]
-        //public S3Clip CLIP
-        //{
-        //    get { return mClip; }
-        //    set { mClip = value; OnResourceChanged(this, new EventArgs()); }
-        //}
+        [ElementPriority(8)]
+        [DataGridExpandable(true)]
+        public S3Clip Animation
+        {
+            get { return mAnimation; }
+            set { mAnimation = value; OnResourceChanged(this, new EventArgs()); }
+        }
 
         private void Parse(Stream s)
         {
@@ -1168,10 +1169,10 @@ namespace s3piwrappers
             s.Seek(clipOffset, SeekOrigin.Begin);
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
-            //mClip = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
+            mAnimation = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
 
             s.Seek(slotOffset, SeekOrigin.Begin);
-            mActorSlotTable = new ActorSlotTable(0, this.OnResourceChanged, s);
+            mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
 
             s.Seek(actorOffset, SeekOrigin.Begin);
             mActorName = br.ReadZString();
@@ -1202,7 +1203,7 @@ namespace s3piwrappers
             while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
 
             slotOffset = s.Position;
-            mActorSlotTable.UnParse(s);
+            mIKTargetInfo.UnParse(s);
             while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
 
             actorOffset = s.Position;
