@@ -1460,24 +1460,24 @@ namespace s3piwrappers
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
                 sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
                 sb.AppendFormat("\nVertex Format:\n{0}\n", mVertexFormat.Value);
-                if (mVertexDataEntries.Count > 0)
-                {
-                    sb.AppendFormat("Vertex Data:\n");
-                    for (int i = 0; i < mVertexDataEntries.Count; i++)
-                    {
-                        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mVertexDataEntries[i].Value);
-                    }
-                }
+                //if (mVertexDataEntries.Count > 0)
+                //{
+                //    sb.AppendFormat("Vertex Data:\n");
+                //    for (int i = 0; i < mVertexDataEntries.Count; i++)
+                //    {
+                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mVertexDataEntries[i].Value);
+                //    }
+                //}
 
-                sb.AppendFormat("Index Format:\n{0}\n", mIndexDataFormat.Value);
-                if (mIndexDataEntries.Count > 0)
-                {
-                    sb.AppendFormat("Index Data:\n");
-                    for (int i = 0; i < mIndexDataEntries.Count; i++)
-                    {
-                        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mIndexDataEntries[i].Value);
-                    }
-                }
+                //sb.AppendFormat("Index Format:\n{0}\n", mIndexDataFormat.Value);
+                //if (mIndexDataEntries.Count > 0)
+                //{
+                //    sb.AppendFormat("Index Data:\n");
+                //    for (int i = 0; i < mIndexDataEntries.Count; i++)
+                //    {
+                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mIndexDataEntries[i].Value);
+                //    }
+                //}
                 sb.AppendFormat("SkinControllerIndex:\t0x{0:X8}\n", mSkinControllerIndex);
                 if (mJointReferences.Count > 0)
                 {
