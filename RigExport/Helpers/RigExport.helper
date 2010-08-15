@@ -1,0 +1,6 @@
+// Visual proxy files, using the editor supplied with s3pe
+ResourceType: 0x8EAF13DE
+Label: Export Rig
+Command: RigExport
+Arguments: "{}"
+Desc: Exports skeletal data from RIG resource
