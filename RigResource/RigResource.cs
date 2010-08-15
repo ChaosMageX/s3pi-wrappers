@@ -174,11 +174,13 @@ namespace s3piwrappers
         }
         public class IkChainList : DependentList<IkChain>
         {
-            public IkChainList(EventHandler handler) : base(handler)
+            public IkChainList(EventHandler handler)
+                : base(handler)
             {
             }
 
-            public IkChainList(EventHandler handler, Stream s) : base(handler, s)
+            public IkChainList(EventHandler handler, Stream s)
+                : base(handler, s)
             {
             }
 
@@ -194,7 +196,7 @@ namespace s3piwrappers
                 long startOffset = s.Position;
                 for (int i = 0; i < count; i++)
                 {
-                    offsets[i] = startOffset+ br.ReadUInt32();
+                    offsets[i] = startOffset + br.ReadUInt32();
                 }
                 for (int i = 0; i < count; i++)
                 {
@@ -258,8 +260,8 @@ namespace s3piwrappers
             private Int32 mInfoNode10;
             private Int32 mInfoRoot;
             private UInt32 mUnknown04;
-            private IkLinkList mLinks;            
-            
+            private IkLinkList mLinks;
+
             [ElementPriority(1)]
             public uint Unknown01
             {
@@ -525,7 +527,7 @@ namespace s3piwrappers
         private Boolean mHasIkData;
         private UInt32 mUnknown01;
         private Byte[] mUnknown02;
-        private GrannyRigData mGranny2Data;
+        private RigData mRigData;
         private IkChainList mIkChains;
         private Byte[] mUnknown03;
         private GrannyBoneReferenceList mIkTargets;
@@ -537,7 +539,7 @@ namespace s3piwrappers
             get
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("===Skeleton Data===\n{0}\n", mGranny2Data.Value);
+                if (hasGranny2Dll) sb.AppendFormat("===Skeleton Data===\n{0}\n", mRigData.Value);
                 if (!HasIkData) return sb.ToString();
                 sb.AppendLine("===IK Data===");
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
@@ -547,14 +549,14 @@ namespace s3piwrappers
                     sb.AppendFormat("{0:X2}", mUnknown02[i]);
                 }
                 sb.Append("\n");
-                if(mIkChains.Count > 0)
+                if (mIkChains.Count > 0)
                 {
                     sb.AppendFormat("Ik Chains:\n");
                     for (int i = 0; i < mIkChains.Count; i++)
                     {
                         var ikc = mIkChains[i];
                         sb.AppendFormat("==Ik Chain[0x{0:X8}]==\n", i);
-                        sb.AppendFormat("Unknown01:\t0x{0:X8}\n", ikc.Unknown01); 
+                        sb.AppendFormat("Unknown01:\t0x{0:X8}\n", ikc.Unknown01);
                         sb.AppendFormat("Unknown02:\n");
                         for (int j = 0; j < mIkChains[i].Unknown02.Length; j++)
                         {
@@ -579,8 +581,6 @@ namespace s3piwrappers
                         sb.AppendFormat("InfoNode09:\t{0}\n", GetBoneIndexName(ikc.InfoNode09));
                         sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
                         sb.AppendFormat("InfoRoot:\t{0}\n", GetBoneIndexName(ikc.InfoRoot));
-                        sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
-                        sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
                         sb.AppendFormat("Unknown04:\t0x{0:X8}\n", ikc.Unknown04);
                         if (ikc.Links.Count > 0)
                         {
@@ -640,20 +640,24 @@ namespace s3piwrappers
         private string GetBoneIndexName(Int32 Index)
         {
             if (Index == -1) return "NULL";
-            if (Index >= mGranny2Data.Skeleton.Bones.Count) return "INVALID";
-            return mGranny2Data.Skeleton.Bones[Index].Name;
+            if (!hasGranny2Dll) return "0x" + Index.ToString("X8");
+            GrannyRigData grd = mRigData as GrannyRigData;
+            if (Index >= grd.Skeleton.Bones.Count) return "INVALID";
+            return grd.Skeleton.Bones[Index].Name;
         }
-        [ElementPriority(0)]
+
+
+        [ElementPriority(1)]
         public bool HasIkData
         {
             get { return mHasIkData; }
             set { mHasIkData = value; OnResourceChanged(this, new EventArgs()); }
         }
-        [ElementPriority(1)]
-        public GrannyRigData Granny2Data
+        [ElementPriority(2)]
+        public RigData RigData
         {
-            get { return mGranny2Data; }
-            set { mGranny2Data = value;OnResourceChanged(this,new EventArgs()); }
+            get { return mRigData; }
+            set { mRigData = value; OnResourceChanged(this, new EventArgs()); }
         }
 
         [ElementPriority(3)]
@@ -721,8 +725,9 @@ namespace s3piwrappers
                 mInfoNodes = new GrannyBoneReferenceList(this.OnResourceChanged);
                 mCompressNodes = new GrannyBoneReferenceList(this.OnResourceChanged);
                 mBones = new GrannyBoneReferenceList(this.OnResourceChanged);
+
                 s.Position = 0L;
-                mGranny2Data = new GrannyRigData(0,this.OnResourceChanged,s);
+                mRigData = CreateRigData(0, this.OnResourceChanged, s);
                 return;
             }
             mUnknown01 = br.ReadUInt32();
@@ -736,11 +741,14 @@ namespace s3piwrappers
             mUnknown02 = br.ReadBytes(16);
             if (checking && s.Position != grannyOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", grannyOffset, s.Position));
-            mGranny2Data = new GrannyRigData(0,OnResourceChanged,new MemoryStream(br.ReadBytes(grannySize)));
-            s.Seek(4-(s.Position % 4), SeekOrigin.Current); //correct pos
+
+            byte[] buffer = br.ReadBytes(grannySize);
+            mRigData = CreateRigData(0, OnResourceChanged, new MemoryStream(buffer));
+
+            s.Seek(4 - (s.Position % 4), SeekOrigin.Current); //correct pos
             if (checking && s.Position != ikChainsOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", ikChainsOffset, s.Position));
-            mIkChains = new IkChainList(this.OnResourceChanged,s);
+            mIkChains = new IkChainList(this.OnResourceChanged, s);
             mUnknown03 = br.ReadBytes(56);
             if (checking && s.Position != ikTargetsOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", ikTargetsOffset, s.Position));
@@ -754,15 +762,15 @@ namespace s3piwrappers
             if (checking && s.Position != fullBoneListOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", fullBoneListOffset, s.Position));
             mBones = new GrannyBoneReferenceList(this.OnResourceChanged, s);
-            
+
 
         }
         protected override Stream UnParse()
         {
-            if (mGranny2Data == null) mGranny2Data = new GrannyRigData(0,OnResourceChanged);
+            if (mRigData == null) mRigData = RigResource.CreateRigData(0, OnResourceChanged);
             if (!mHasIkData)
             {
-                return mGranny2Data.UnParse();
+                return mRigData.UnParse();
             }
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
@@ -783,19 +791,24 @@ namespace s3piwrappers
 
             bw.Write(0x8EAF13DE);
             bw.Write(mUnknown01);
+            byte[] buffer = null;
 
-            Stream gr2 = mGranny2Data.UnParse();
-            byte[] buffer = new byte[gr2.Length];
+
+            Stream gr2 = mRigData.UnParse();
+            buffer = new byte[gr2.Length];
             gr2.Read(buffer, 0, buffer.Length);
             gr2.Close();
-
             bw.Write(buffer.Length);
+
+
             long offsetPosition = s.Position;
             s.Seek(24, SeekOrigin.Current);
             bw.Write(mUnknown02);
 
             grannyOffset = s.Position;
+
             bw.Write(buffer);
+
             bw.Write(new byte[4 - (s.Position % 4)]);
 
 
@@ -837,14 +850,29 @@ namespace s3piwrappers
             {
                 if (!mHasIkData)
                 {
-                    return new List<string>() { "Granny2Data", "HasIkData" };
+                    return new List<string>() { "RigData", "HasIkData" };
                 }
                 else
                 {
-                    return base.ContentFields;
+                    var contentFields = GetContentFields(0, GetType());
+                    return contentFields;
                 }
             }
         }
+        static RigData CreateRigData(int apiVersion, EventHandler handler, Stream s)
+        {
+            return hasGranny2Dll ? (RigData)new GrannyRigData(apiVersion, handler, s) : (RigData)new RawRigData(apiVersion, handler, s);
+        }
+        static RigData CreateRigData(int apiVersion, EventHandler handler)
+        {
+            return hasGranny2Dll ? (RigData)new GrannyRigData(apiVersion, handler) : (RigData)new RawRigData(apiVersion, handler);
+        }
+        static RigResource()
+        {
+            string dir = Path.GetDirectoryName(typeof(RigResource).Assembly.Location);
+            hasGranny2Dll = File.Exists(Path.Combine(dir, "granny2.dll"));
+        }
+        private static bool hasGranny2Dll = false;
         private const int kRecommendedApiVersion = 1;
         private static bool checking = Settings.Checking;
     }

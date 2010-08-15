@@ -5,12 +5,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 using s3pi.Interfaces;
 using System.IO;
-using s3pi.Settings;
 
 namespace s3piwrappers
 {
-
-    public class GrannyRigData : AHandlerElement
+    public class GrannyRigData : RigData
     {
         [DataGridExpandable(true)]
         public class Triple : GrannyDataElement<Granny2.Triple>
@@ -739,7 +737,7 @@ namespace s3piwrappers
         {
             return mFromFileName.ToString();
         }
-        public string Value
+        public override string Value
         {
             get
             {
@@ -783,19 +781,16 @@ namespace s3piwrappers
             mSkeleton = new SkeletonElement(0, handler);
         }
         public GrannyRigData(int APIversion, EventHandler handler, GrannyRigData basis)
-            : this(APIversion, handler)
+            : base(APIversion, handler, basis)
         {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
+            
         }
         public GrannyRigData(int APIversion, EventHandler handler, Stream s)
-            : this(APIversion, handler)
+            : base(APIversion, handler, s)
         {
-            Parse(s);
         }
 
-        private void Parse(Stream s)
+        protected override void Parse(Stream s)
         {
             IntPtr pFile = Granny2.IO.FromMemory(s);
             IntPtr pFileInfo = Granny2.IO.GetFileInfo(pFile);
@@ -808,7 +803,7 @@ namespace s3piwrappers
 
         }
 
-        public Stream UnParse()
+        public override Stream UnParse()
         {
             var file = new Granny2.GrannyFileInfo();
             var artToolInfo = mArtToolInfo.UnParse();
@@ -915,37 +910,5 @@ namespace s3piwrappers
             }
         }
         #endregion
-
-        [ElementPriority(0)]
-        public BinaryReader Data
-        {
-            get
-            {
-                return new BinaryReader(UnParse());
-            }
-            set
-            {
-                if (value.BaseStream.CanSeek)
-                {
-                    value.BaseStream.Position = 0L;
-                    Parse(value.BaseStream);
-                }
-                else
-                {
-                    MemoryStream s = new MemoryStream();
-                    byte[] buffer = new byte[0x100000];
-                    for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
-                    {
-                        s.Write(buffer, 0, i);
-                    }
-
-                    Parse(value.BaseStream);
-                }
-                OnElementChanged();
-            }
-        }
-        private static bool checking = Settings.Checking;
-        private const int kRecommendedApiVersion = 1;
-
     }
 }

@@ -58,6 +58,7 @@
     <Compile Include="Granny2\GrannyFileInfo.cs" />
     <Compile Include="Granny2\Logging.cs" />
     <Compile Include="Granny2\Variant.cs" />
+    <Compile Include="RigData.cs" />
     <Compile Include="MarshalHelpers.cs" />
     <Compile Include="Granny2\ArtToolInfo.cs" />
     <Compile Include="Granny2\Model.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Granny2\Skeleton.cs" />
     <Compile Include="GrannyRigData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawRigData.cs" />
     <Compile Include="RigResource.cs" />
     <Compile Include="RigResourceHandler.cs" />
   </ItemGroup>
