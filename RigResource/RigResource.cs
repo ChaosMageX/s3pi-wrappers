@@ -37,7 +37,7 @@ namespace s3piwrappers
         }
         public class GrannyBoneReference : AHandlerElement, IEquatable<GrannyBoneReference>
         {
-            private BoneIndex mIndex;
+            private Int32 mIndex;
 
             public GrannyBoneReference(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -55,7 +55,7 @@ namespace s3piwrappers
                 Parse(s);
             }
             [ElementPriority(1)]
-            public BoneIndex Index
+            public Int32 Index
             {
                 get { return mIndex; }
                 set { mIndex = value; OnElementChanged(); }
@@ -63,11 +63,11 @@ namespace s3piwrappers
 
             private void Parse(Stream s)
             {
-                mIndex = (BoneIndex)new BinaryReader(s).ReadUInt32();
+                mIndex = new BinaryReader(s).ReadInt32();
             }
             public void UnParse(Stream s)
             {
-                new BinaryWriter(s).Write((uint)mIndex);
+                new BinaryWriter(s).Write(mIndex);
             }
             public override AHandlerElement Clone(EventHandler handler)
             {
@@ -114,8 +114,8 @@ namespace s3piwrappers
         public class IkLink : AHandlerElement, IEquatable<IkLink>
         {
             private UInt32 mUnknown;
-            private BoneIndex mEnd;
-            private BoneIndex mStart;
+            private Int32 mEnd;
+            private Int32 mStart;
 
             public IkLink(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -125,24 +125,14 @@ namespace s3piwrappers
                 : this(APIversion, handler, basis.mUnknown, basis.mEnd, basis.mStart)
             {
             }
-            public IkLink(int APIversion, EventHandler handler, UInt32 unk, BoneIndex end, BoneIndex start)
+            public IkLink(int APIversion, EventHandler handler, UInt32 unk, Int32 end, Int32 start)
                 : base(APIversion, handler)
             {
                 mUnknown = unk;
                 mEnd = end;
                 mStart = start;
             }
-            public string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Unknown:\t0x{0:X8}\n", mUnknown);
-                    sb.AppendFormat("End:\t{0}\n", mEnd);
-                    sb.AppendFormat("Start:\t{0}\n", mStart);
-                    return sb.ToString();
-                }
-            }
+
             [ElementPriority(1)]
             public uint Unknown
             {
@@ -150,13 +140,13 @@ namespace s3piwrappers
                 set { mUnknown = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public BoneIndex End
+            public Int32 End
             {
                 get { return mEnd; }
                 set { mEnd = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public BoneIndex Start
+            public Int32 Start
             {
                 get { return mStart; }
                 set { mStart = value; OnElementChanged(); }
@@ -249,65 +239,27 @@ namespace s3piwrappers
         {
             private UInt32 mUnknown01;
             private Byte[] mUnknown02;
-            private BoneIndex mIkPole;
-            private BoneIndex mIkPoleRoot;
-            private BoneIndex mSlotInfo;
-            private BoneIndex mSlotInfoRoot;
-            private BoneIndex mSlotOffset;
-            private BoneIndex mSlotOffsetRoot;
+            private Int32 mIkPole;
+            private Int32 mIkPoleRoot;
+            private Int32 mSlotInfo;
+            private Int32 mSlotInfoRoot;
+            private Int32 mSlotOffset;
+            private Int32 mSlotOffsetRoot;
             private UInt32 mUnknown03;
-            private BoneIndex mInfoNode01;
-            private BoneIndex mInfoNode02;
-            private BoneIndex mInfoNode03;
-            private BoneIndex mInfoNode04;
-            private BoneIndex mInfoNode05;
-            private BoneIndex mInfoNode06;
-            private BoneIndex mInfoNode07;
-            private BoneIndex mInfoNode08;
-            private BoneIndex mInfoNode09;
-            private BoneIndex mInfoNode10;
-            private BoneIndex mInfoRoot;
+            private Int32 mInfoNode01;
+            private Int32 mInfoNode02;
+            private Int32 mInfoNode03;
+            private Int32 mInfoNode04;
+            private Int32 mInfoNode05;
+            private Int32 mInfoNode06;
+            private Int32 mInfoNode07;
+            private Int32 mInfoNode08;
+            private Int32 mInfoNode09;
+            private Int32 mInfoNode10;
+            private Int32 mInfoRoot;
             private UInt32 mUnknown04;
-            private IkLinkList mLinks;
-            public String Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var field in ContentFields)
-                    {
-                        if (field == "Unknown02")
-                        {
-                            sb.AppendFormat("Unknown02:\n");
-                            for (int i = 0; i < mUnknown02.Length; i++)
-                            {
-                                sb.AppendFormat("{0:X2}", mUnknown02[i]);
-                            }
-                            sb.Append("\n");
-                        }
-                        else if (field == "Links")
-                        {
-                            if (mLinks.Count > 0)
-                            {
-                                sb.AppendFormat("Ik Links:\n");
-                                for (int i = 0; i < mLinks.Count; i++)
-                                {
-                                    sb.AppendFormat("==Link[{0}]==\n{1}", i, mLinks[i].Value);
-                                }
-                            }
-                        }
-                        else if(field == "Value")
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            sb.AppendFormat("{0}:\t{1}\n",field,this[field]);
-                        }
-                    }
-                    return sb.ToString();
-                }
-            }
+            private IkLinkList mLinks;            
+            
             [ElementPriority(1)]
             public uint Unknown01
             {
@@ -321,37 +273,37 @@ namespace s3piwrappers
                 set { mUnknown02 = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public BoneIndex IkPole
+            public Int32 IkPole
             {
                 get { return mIkPole; }
                 set { mIkPole = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public BoneIndex IkPoleRoot
+            public Int32 IkPoleRoot
             {
                 get { return mIkPoleRoot; }
                 set { mIkPoleRoot = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public BoneIndex SlotInfo
+            public Int32 SlotInfo
             {
                 get { return mSlotInfo; }
                 set { mSlotInfo = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
-            public BoneIndex SlotInfoRoot
+            public Int32 SlotInfoRoot
             {
                 get { return mSlotInfoRoot; }
                 set { mSlotInfoRoot = value; OnElementChanged(); }
             }
             [ElementPriority(7)]
-            public BoneIndex SlotOffset
+            public Int32 SlotOffset
             {
                 get { return mSlotOffset; }
                 set { mSlotOffset = value; OnElementChanged(); }
             }
             [ElementPriority(8)]
-            public BoneIndex SlotOffsetRoot
+            public Int32 SlotOffsetRoot
             {
                 get { return mSlotOffsetRoot; }
                 set { mSlotOffsetRoot = value; OnElementChanged(); }
@@ -363,67 +315,67 @@ namespace s3piwrappers
                 set { mUnknown03 = value; OnElementChanged(); }
             }
             [ElementPriority(10)]
-            public BoneIndex InfoNode01
+            public Int32 InfoNode01
             {
                 get { return mInfoNode01; }
                 set { mInfoNode01 = value; OnElementChanged(); }
             }
             [ElementPriority(11)]
-            public BoneIndex InfoNode02
+            public Int32 InfoNode02
             {
                 get { return mInfoNode02; }
                 set { mInfoNode02 = value; OnElementChanged(); }
             }
             [ElementPriority(12)]
-            public BoneIndex InfoNode03
+            public Int32 InfoNode03
             {
                 get { return mInfoNode03; }
                 set { mInfoNode03 = value; OnElementChanged(); }
             }
             [ElementPriority(13)]
-            public BoneIndex InfoNode04
+            public Int32 InfoNode04
             {
                 get { return mInfoNode04; }
                 set { mInfoNode04 = value; OnElementChanged(); }
             }
             [ElementPriority(14)]
-            public BoneIndex InfoNode05
+            public Int32 InfoNode05
             {
                 get { return mInfoNode05; }
                 set { mInfoNode05 = value; OnElementChanged(); }
             }
             [ElementPriority(15)]
-            public BoneIndex InfoNode06
+            public Int32 InfoNode06
             {
                 get { return mInfoNode06; }
                 set { mInfoNode06 = value; OnElementChanged(); }
             }
             [ElementPriority(16)]
-            public BoneIndex InfoNode07
+            public Int32 InfoNode07
             {
                 get { return mInfoNode07; }
                 set { mInfoNode07 = value; OnElementChanged(); }
             }
             [ElementPriority(17)]
-            public BoneIndex InfoNode08
+            public Int32 InfoNode08
             {
                 get { return mInfoNode08; }
                 set { mInfoNode08 = value; OnElementChanged(); }
             }
             [ElementPriority(18)]
-            public BoneIndex InfoNode09
+            public Int32 InfoNode09
             {
                 get { return mInfoNode09; }
                 set { mInfoNode09 = value; OnElementChanged(); }
             }
             [ElementPriority(19)]
-            public BoneIndex InfoNode10
+            public Int32 InfoNode10
             {
                 get { return mInfoNode10; }
                 set { mInfoNode10 = value; OnElementChanged(); }
             }
             [ElementPriority(20)]
-            public BoneIndex InfoRoot
+            public Int32 InfoRoot
             {
                 get { return mInfoRoot; }
                 set { mInfoRoot = value; OnElementChanged(); }
@@ -447,24 +399,24 @@ namespace s3piwrappers
                 mUnknown01 = br.ReadUInt32();
                 uint linkCount = br.ReadUInt32();
                 mUnknown02 = br.ReadBytes(32);
-                mIkPole = (BoneIndex)br.ReadUInt32();
-                mIkPoleRoot = (BoneIndex)br.ReadUInt32();
-                mSlotInfo = (BoneIndex)br.ReadUInt32();
-                mSlotInfoRoot = (BoneIndex)br.ReadUInt32();
-                mSlotOffset = (BoneIndex)br.ReadUInt32();
-                mSlotOffsetRoot = (BoneIndex)br.ReadUInt32();
+                mIkPole = br.ReadInt32();
+                mIkPoleRoot = br.ReadInt32();
+                mSlotInfo = br.ReadInt32();
+                mSlotInfoRoot = br.ReadInt32();
+                mSlotOffset = br.ReadInt32();
+                mSlotOffsetRoot = br.ReadInt32();
                 mUnknown03 = br.ReadUInt32();
-                mInfoNode01 = (BoneIndex)br.ReadUInt32();
-                mInfoNode02 = (BoneIndex)br.ReadUInt32();
-                mInfoNode03 = (BoneIndex)br.ReadUInt32();
-                mInfoNode04 = (BoneIndex)br.ReadUInt32();
-                mInfoNode05 = (BoneIndex)br.ReadUInt32();
-                mInfoNode06 = (BoneIndex)br.ReadUInt32();
-                mInfoNode07 = (BoneIndex)br.ReadUInt32();
-                mInfoNode08 = (BoneIndex)br.ReadUInt32();
-                mInfoNode09 = (BoneIndex)br.ReadUInt32();
-                mInfoNode10 = (BoneIndex)br.ReadUInt32();
-                mInfoRoot = (BoneIndex)br.ReadUInt32();
+                mInfoNode01 = br.ReadInt32();
+                mInfoNode02 = br.ReadInt32();
+                mInfoNode03 = br.ReadInt32();
+                mInfoNode04 = br.ReadInt32();
+                mInfoNode05 = br.ReadInt32();
+                mInfoNode06 = br.ReadInt32();
+                mInfoNode07 = br.ReadInt32();
+                mInfoNode08 = br.ReadInt32();
+                mInfoNode09 = br.ReadInt32();
+                mInfoNode10 = br.ReadInt32();
+                mInfoRoot = br.ReadInt32();
                 mLinks = new IkLinkList(handler);
                 uint[] linkUnks = new uint[linkCount];
                 for (int i = 0; i < linkCount; i++)
@@ -474,8 +426,8 @@ namespace s3piwrappers
                 mUnknown04 = br.ReadUInt32();
                 for (int i = 0; i < linkCount; i++)
                 {
-                    BoneIndex end = (BoneIndex)br.ReadUInt32();
-                    BoneIndex start = (BoneIndex)br.ReadUInt32();
+                    Int32 end = br.ReadInt32();
+                    Int32 start = br.ReadInt32();
                     mLinks.Add(new IkLink(0, handler, linkUnks[i], end, start));
                 }
             }
@@ -485,24 +437,24 @@ namespace s3piwrappers
                 bw.Write(mUnknown01);
                 bw.Write(mLinks.Count);
                 bw.Write(mUnknown02);
-                bw.Write((UInt32)mIkPole);
-                bw.Write((UInt32)mIkPoleRoot);
-                bw.Write((UInt32)mSlotInfo);
-                bw.Write((UInt32)mSlotInfoRoot);
-                bw.Write((UInt32)mSlotOffset);
-                bw.Write((UInt32)mSlotOffsetRoot);
-                bw.Write((UInt32)mUnknown03);
-                bw.Write((UInt32)mInfoNode01);
-                bw.Write((UInt32)mInfoNode02);
-                bw.Write((UInt32)mInfoNode03);
-                bw.Write((UInt32)mInfoNode04);
-                bw.Write((UInt32)mInfoNode05);
-                bw.Write((UInt32)mInfoNode06);
-                bw.Write((UInt32)mInfoNode07);
-                bw.Write((UInt32)mInfoNode08);
-                bw.Write((UInt32)mInfoNode09);
-                bw.Write((UInt32)mInfoNode10);
-                bw.Write((UInt32)mInfoRoot);
+                bw.Write(mIkPole);
+                bw.Write(mIkPoleRoot);
+                bw.Write(mSlotInfo);
+                bw.Write(mSlotInfoRoot);
+                bw.Write(mSlotOffset);
+                bw.Write(mSlotOffsetRoot);
+                bw.Write(mUnknown03);
+                bw.Write(mInfoNode01);
+                bw.Write(mInfoNode02);
+                bw.Write(mInfoNode03);
+                bw.Write(mInfoNode04);
+                bw.Write(mInfoNode05);
+                bw.Write(mInfoNode06);
+                bw.Write(mInfoNode07);
+                bw.Write(mInfoNode08);
+                bw.Write(mInfoNode09);
+                bw.Write(mInfoNode10);
+                bw.Write(mInfoRoot);
                 for (int i = 0; i < mLinks.Count; i++)
                 {
                     bw.Write(mLinks[i].Unknown);
@@ -573,7 +525,7 @@ namespace s3piwrappers
         private Boolean mHasIkData;
         private UInt32 mUnknown01;
         private Byte[] mUnknown02;
-        private Byte[] mGranny2Data;
+        private GrannyRigData mGranny2Data;
         private IkChainList mIkChains;
         private Byte[] mUnknown03;
         private GrannyBoneReferenceList mIkTargets;
@@ -584,9 +536,11 @@ namespace s3piwrappers
         {
             get
             {
-                if (!HasIkData) return String.Empty;
                 StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Unknown01:\t0x{0:X8}", mUnknown01);
+                sb.AppendFormat("===Skeleton Data===\n{0}\n", mGranny2Data.Value);
+                if (!HasIkData) return sb.ToString();
+                sb.AppendLine("===IK Data===");
+                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
                 sb.AppendFormat("Unknown02:\n");
                 for (int i = 0; i < mUnknown02.Length; i++)
                 {
@@ -598,7 +552,48 @@ namespace s3piwrappers
                     sb.AppendFormat("Ik Chains:\n");
                     for (int i = 0; i < mIkChains.Count; i++)
                     {
-                        sb.AppendFormat("==Ik Chain[0x{0:X8}]==\n{1}\n", i, mIkChains[i].Value);
+                        var ikc = mIkChains[i];
+                        sb.AppendFormat("==Ik Chain[0x{0:X8}]==\n", i);
+                        sb.AppendFormat("Unknown01:\t0x{0:X8}\n", ikc.Unknown01); 
+                        sb.AppendFormat("Unknown02:\n");
+                        for (int j = 0; j < mIkChains[i].Unknown02.Length; j++)
+                        {
+                            sb.AppendFormat("{0:X2}", ikc.Unknown02[j]);
+                        }
+                        sb.Append("\n");
+                        sb.AppendFormat("IkPole:\t{0}\n", GetBoneIndexName(ikc.IkPole));
+                        sb.AppendFormat("IkPoleRoot:\t{0}\n", GetBoneIndexName(ikc.IkPoleRoot));
+                        sb.AppendFormat("SlotInfo:\t{0}\n", GetBoneIndexName(ikc.SlotInfo));
+                        sb.AppendFormat("SlotInfoRoot:\t{0}\n", GetBoneIndexName(ikc.SlotInfoRoot));
+                        sb.AppendFormat("SlotOffset:\t{0}\n", GetBoneIndexName(ikc.SlotOffset));
+                        sb.AppendFormat("SlotOffsetRoot:\t{0}\n", GetBoneIndexName(ikc.SlotOffsetRoot));
+                        sb.AppendFormat("Unknown03:\t0x{0:X8}\n", ikc.Unknown03);
+                        sb.AppendFormat("InfoNode01:\t{0}\n", GetBoneIndexName(ikc.InfoNode01));
+                        sb.AppendFormat("InfoNode02:\t{0}\n", GetBoneIndexName(ikc.InfoNode02));
+                        sb.AppendFormat("InfoNode03:\t{0}\n", GetBoneIndexName(ikc.InfoNode03));
+                        sb.AppendFormat("InfoNode04:\t{0}\n", GetBoneIndexName(ikc.InfoNode04));
+                        sb.AppendFormat("InfoNode05:\t{0}\n", GetBoneIndexName(ikc.InfoNode05));
+                        sb.AppendFormat("InfoNode06:\t{0}\n", GetBoneIndexName(ikc.InfoNode06));
+                        sb.AppendFormat("InfoNode07:\t{0}\n", GetBoneIndexName(ikc.InfoNode07));
+                        sb.AppendFormat("InfoNode08:\t{0}\n", GetBoneIndexName(ikc.InfoNode08));
+                        sb.AppendFormat("InfoNode09:\t{0}\n", GetBoneIndexName(ikc.InfoNode09));
+                        sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
+                        sb.AppendFormat("InfoRoot:\t{0}\n", GetBoneIndexName(ikc.InfoRoot));
+                        sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
+                        sb.AppendFormat("InfoNode10:\t{0}\n", GetBoneIndexName(ikc.InfoNode10));
+                        sb.AppendFormat("Unknown04:\t0x{0:X8}\n", ikc.Unknown04);
+                        if (ikc.Links.Count > 0)
+                        {
+                            sb.AppendFormat("Ik Links:\n");
+                            for (int j = 0; j < ikc.Links.Count; j++)
+                            {
+                                var ikcl = ikc.Links[j];
+                                sb.AppendFormat("==Link[{0}]==", j);
+                                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", ikcl.Unknown);
+                                sb.AppendFormat("End:\t{0}\n", GetBoneIndexName(ikcl.End));
+                                sb.AppendFormat("Start:\t{0}\n", GetBoneIndexName(ikcl.Start));
+                            }
+                        }
                     }
                 }
                 sb.AppendFormat("Unknown03:\n");
@@ -612,7 +607,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Ik Targets:\n");
                     for (int i = 0; i < mIkTargets.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, mIkTargets[i].Index);
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mIkTargets[i].Index));
                     }
                 }
                 if (mInfoNodes.Count > 0)
@@ -620,7 +615,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Info Nodes:\n");
                     for (int i = 0; i < mInfoNodes.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, mInfoNodes[i].Index);
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mInfoNodes[i].Index));
                     }
                 }
                 if (mCompressNodes.Count > 0)
@@ -628,7 +623,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Compress Nodes:\n");
                     for (int i = 0; i < mCompressNodes.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, mCompressNodes[i].Index);
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mCompressNodes[i].Index));
                     }
                 }
                 if (mBones.Count > 0)
@@ -636,48 +631,31 @@ namespace s3piwrappers
                     sb.AppendFormat("Bones:\n");
                     for (int i = 0; i < mBones.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, mBones[i].Index);
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mBones[i].Index));
                     }
                 }
                 return sb.ToString();
             }
         }
-        [ElementPriority(1)]
+        private string GetBoneIndexName(Int32 Index)
+        {
+            if (Index == -1) return "NULL";
+            if (Index >= mGranny2Data.Skeleton.Bones.Count) return "INVALID";
+            return mGranny2Data.Skeleton.Bones[Index].Name;
+        }
+        [ElementPriority(0)]
         public bool HasIkData
         {
             get { return mHasIkData; }
             set { mHasIkData = value; OnResourceChanged(this, new EventArgs()); }
         }
-
-        [ElementPriority(2)]
-        public BinaryReader Granny2Data
+        [ElementPriority(1)]
+        public GrannyRigData Granny2Data
         {
-            get
-            {
-                MemoryStream s = new MemoryStream(mGranny2Data);
-                s.Position = 0L;
-                return new BinaryReader(s);
-            }
-            set
-            {
-                if (value.BaseStream.CanSeek)
-                {
-                    value.BaseStream.Position = 0L;
-                    mGranny2Data = value.ReadBytes((int)value.BaseStream.Length);
-                }
-                else
-                {
-                    MemoryStream s = new MemoryStream();
-                    byte[] buffer = new byte[0x100000];
-                    for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
-                    {
-                        s.Write(buffer, 0, i);
-                    }
-                    mGranny2Data = new BinaryReader(s).ReadBytes((int)s.Length);
-                }
-                OnResourceChanged(this, new EventArgs());
-            }
+            get { return mGranny2Data; }
+            set { mGranny2Data = value;OnResourceChanged(this,new EventArgs()); }
         }
+
         [ElementPriority(3)]
         public uint Unknown01
         {
@@ -735,8 +713,16 @@ namespace s3piwrappers
             mHasIkData = type == 0x8EAF13DE;
             if (!mHasIkData)
             {
+
+                mUnknown02 = new byte[16];
+                mUnknown03 = new byte[56];
+                mIkChains = new IkChainList(this.OnResourceChanged);
+                mIkTargets = new GrannyBoneReferenceList(this.OnResourceChanged);
+                mInfoNodes = new GrannyBoneReferenceList(this.OnResourceChanged);
+                mCompressNodes = new GrannyBoneReferenceList(this.OnResourceChanged);
+                mBones = new GrannyBoneReferenceList(this.OnResourceChanged);
                 s.Position = 0L;
-                mGranny2Data = br.ReadBytes((int)s.Length);
+                mGranny2Data = new GrannyRigData(0,this.OnResourceChanged,s);
                 return;
             }
             mUnknown01 = br.ReadUInt32();
@@ -750,7 +736,7 @@ namespace s3piwrappers
             mUnknown02 = br.ReadBytes(16);
             if (checking && s.Position != grannyOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", grannyOffset, s.Position));
-            mGranny2Data = br.ReadBytes(grannySize);
+            mGranny2Data = new GrannyRigData(0,OnResourceChanged,new MemoryStream(br.ReadBytes(grannySize)));
             s.Seek(4-(s.Position % 4), SeekOrigin.Current); //correct pos
             if (checking && s.Position != ikChainsOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", ikChainsOffset, s.Position));
@@ -773,15 +759,13 @@ namespace s3piwrappers
         }
         protected override Stream UnParse()
         {
-            MemoryStream s = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(s);
-            if (mGranny2Data == null) mGranny2Data = new byte[0];
+            if (mGranny2Data == null) mGranny2Data = new GrannyRigData(0,OnResourceChanged);
             if (!mHasIkData)
             {
-                s.Position = 0L;
-                bw.Write(mGranny2Data);
-                return s;
+                return mGranny2Data.UnParse();
             }
+            MemoryStream s = new MemoryStream();
+            BinaryWriter bw = new BinaryWriter(s);
 
             long grannyOffset = 0L;
             long ikChainsOffset = 0L;
@@ -790,7 +774,7 @@ namespace s3piwrappers
             long compressNodesOffset = 0L;
             long fullBoneListOffset = 0L;
             if (mUnknown02 == null) mUnknown02 = new byte[16];
-            if (mUnknown03 == null) mUnknown02 = new byte[56];
+            if (mUnknown03 == null) mUnknown03 = new byte[56];
             if (mIkChains == null) mIkChains = new IkChainList(this.OnResourceChanged);
             if (mIkTargets == null) mIkTargets = new GrannyBoneReferenceList(this.OnResourceChanged);
             if (mInfoNodes == null) mInfoNodes = new GrannyBoneReferenceList(this.OnResourceChanged);
@@ -799,13 +783,19 @@ namespace s3piwrappers
 
             bw.Write(0x8EAF13DE);
             bw.Write(mUnknown01);
-            bw.Write(mGranny2Data.Length);
+
+            Stream gr2 = mGranny2Data.UnParse();
+            byte[] buffer = new byte[gr2.Length];
+            gr2.Read(buffer, 0, buffer.Length);
+            gr2.Close();
+
+            bw.Write(buffer.Length);
             long offsetPosition = s.Position;
             s.Seek(24, SeekOrigin.Current);
             bw.Write(mUnknown02);
 
             grannyOffset = s.Position;
-            bw.Write(mGranny2Data);
+            bw.Write(buffer);
             bw.Write(new byte[4 - (s.Position % 4)]);
 
 

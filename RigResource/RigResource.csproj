@@ -47,11 +47,33 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BoneIndex.cs" />
+    <Compile Include="Granny2\Matrix4x4.cs" />
+    <Compile Include="Granny2\Quad.cs" />
+    <Compile Include="Granny2\Transform.cs" />
+    <Compile Include="Granny2\Triple.cs" />
+    <Compile Include="Granny2\Constants.cs" />
+    <Compile Include="Granny2\DataTreeWriter.cs" />
+    <Compile Include="Granny2\FileBuilder.cs" />
+    <Compile Include="Granny2\IO.cs" />
+    <Compile Include="Granny2\GrannyFileInfo.cs" />
+    <Compile Include="Granny2\Logging.cs" />
+    <Compile Include="Granny2\Variant.cs" />
+    <Compile Include="MarshalHelpers.cs" />
+    <Compile Include="Granny2\ArtToolInfo.cs" />
+    <Compile Include="Granny2\Model.cs" />
+    <Compile Include="Granny2\Bone.cs" />
+    <Compile Include="Granny2\Skeleton.cs" />
+    <Compile Include="GrannyRigData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RigResource.cs" />
     <Compile Include="RigResourceHandler.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="granny2.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
