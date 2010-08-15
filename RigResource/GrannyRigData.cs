@@ -735,7 +735,6 @@ namespace s3piwrappers
         private SkeletonElement mSkeleton;
         private ModelElement mModel;
         private string mFromFileName;
-        private byte[] mRaw;
         public override string ToString()
         {
             return mFromFileName.ToString();
@@ -793,9 +792,6 @@ namespace s3piwrappers
         public GrannyRigData(int APIversion, EventHandler handler, Stream s)
             : this(APIversion, handler)
         {
-            mRaw = new byte[s.Length];
-            s.Read(mRaw, 0, mRaw.Length);
-            s.Position = 0L;
             Parse(s);
         }
 
@@ -919,15 +915,13 @@ namespace s3piwrappers
             }
         }
         #endregion
+
         [ElementPriority(0)]
         public BinaryReader Data
         {
             get
             {
-                MemoryStream s = new MemoryStream(mRaw);
-
-                s.Position = 0L;
-                return new BinaryReader(s);
+                return new BinaryReader(UnParse());
             }
             set
             {

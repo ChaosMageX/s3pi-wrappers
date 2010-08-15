@@ -195,17 +195,21 @@ namespace s3piwrappers
             protected override void Parse(TrackReadContext context)
             {
                 fcount = context.FrameCount;
-                mFrames = new FrameList<TFrame>(handler);
+                mFrames = new FrameList<TFrame>(handler,context);
+                Calc(context);
             }
             public override void UnParse(Stream s)
             {
                 throw new NotImplementedException();
             }
-
-            public override string ToString()
+            public override string Value
             {
-
-                return string.Format("Track: 0x{0:X8}({1})[{2:0000}]", mBoneHash, (TrackType)mType, fcount);
+                get
+                {
+                    StringBuilder sb = new StringBuilder(base.Value);
+                    foreach(var f in mFrames)sb.AppendFormat("\n{0}",f.ToString());
+                    return sb.ToString();
+                }
             }
         }
         public abstract class Track : AHandlerElement, IEquatable<Track>
@@ -220,8 +224,7 @@ namespace s3piwrappers
             public enum DataFormat : byte
             {
                 Indexed = 0x00,
-                Static = 0x01,
-                Packed = 0x02
+                Packed = 0x01
             }
             public struct DataFlags
             {
@@ -263,7 +266,7 @@ namespace s3piwrappers
             {
                 get { return mType; }
             }
-            public string Value
+            public  virtual string Value
             {
                 get { return ToString(); }
             }
@@ -286,6 +289,7 @@ namespace s3piwrappers
                 : base(apiVersion, handler)
             {
                 mType = basis.mType;
+                mFlags = basis.mFlags;
                 mBoneHash = basis.mBoneHash;
             }
             public Track(int apiVersion, EventHandler handler, TrackType type, TrackReadContext context)
@@ -295,6 +299,7 @@ namespace s3piwrappers
                 {
                     mType = type;
                     mBoneHash = context.BoneHash;
+                    mFlags = context.Flags;
                     Parse(context);
                 }
             }
@@ -325,8 +330,9 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-
-                return string.Format("Track: 0x{0:X8}({1})", mBoneHash, (TrackType)mType);
+                String s = string.Format("Track: 0x{0:X8}({1})({2})", mBoneHash, mType, mFlags.Format);
+                if (mFlags.Static) s += "(Static)";
+                return s;
             }
         }
         #endregion
@@ -379,6 +385,10 @@ namespace s3piwrappers
                 mFrameIndex = br.ReadUInt16();
                 mFlags = br.ReadByte();
                 mExtraFlags = br.ReadByte();
+                if (mExtraFlags != 0)
+                {
+                    int i = 1;
+                }
             }
             public virtual void UnParse(TrackWriteContext context)
             {
@@ -411,6 +421,43 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
+
+        static void Calc(TrackReadContext ctx)
+        {
+            var values = ctx.Floats;
+            var max = values.Max();
+            var maxAbs = Math.Abs(max);
+            var sclMax = max / max;
+            var sclMaxAbs = Math.Abs(sclMax);
+
+            var min = values.Min();
+            var minAbs = Math.Abs(min);
+            var sclMin = min / max;
+            var sclMinAbs = Math.Abs(min)/max;
+
+            var rng = max - min;
+            var rngAbs = maxAbs - minAbs;
+            var sclRng = sclMax - sclMin;
+            var sclAbsRng = sclMaxAbs - sclMinAbs;
+
+            var med = rng / 2D;
+            var medAbs = rngAbs / 2D;
+            var sclMed = sclRng / 2D;
+            var sclAbsMed = sclAbsRng / 2D;
+            
+
+            var avg = values.Average(x => x);
+            var absAvg = values.Average(x => Math.Abs(x));
+            var sclAvg = values.Average(x => x / max);
+            var sclAbsAvg = values.Average(x => Math.Abs(x / max));
+
+            var var = med - avg;
+            var varAbs = medAbs - absAvg;
+            var sclVar = sclMed - sclAvg;
+            var sclAbsVar = sclAbsMed - sclAbsAvg;
+            
+
+        }
         public class PositionFrame : Vector3Frame
         {
             public PositionFrame(int apiVersion, EventHandler handler, PositionFrame basis)
@@ -420,6 +467,13 @@ namespace s3piwrappers
             public PositionFrame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             public PositionFrame(int apiVersion, EventHandler handler, TrackReadContext ctx) : base(0, handler, ctx) { }
 
+
+            //stub until recompression code is implemented
+            private UInt32 mPacked;
+            private UInt16 mIndexed0;
+            private UInt16 mIndexed1;
+            private UInt16 mIndexed2;
+            
             private void ReadIndexed(TrackReadContext ctx)
             {
                 base.Parse(ctx);
@@ -427,14 +481,23 @@ namespace s3piwrappers
                 int signX = ((mFlags & 0x01) == 0x01 ? -1 : 1);
                 int signZ = ((mFlags & 0x02) == 0x02 ? -1 : 1);
                 int signY = ((mFlags & 0x04) == 0x04 ? -1 : 1);
-                mX = ctx.Offset * signX + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
-                mZ = ctx.Offset * signZ + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
-                mY = ctx.Offset * signY + ctx.FloatConstants[br.ReadUInt16()] * ctx.Scalar;
+                ushort index0 = br.ReadUInt16();
+                ushort index1 = br.ReadUInt16();
+                ushort index2 = br.ReadUInt16();
+                mX = ctx.Offset * signX + ctx.FloatConstants[index0] * ctx.Scalar;
+                mZ = ctx.Offset * signZ + ctx.FloatConstants[index1] * ctx.Scalar;
+                mY = ctx.Offset * signY + ctx.FloatConstants[index2] * ctx.Scalar;
+
+                //stub until recompression code is implemented
+                mIndexed0 = index0;
+                mIndexed1 = index1;
+                mIndexed2 = index2;
             }
             private void ReadPacked(TrackReadContext ctx)
             {
                 BinaryReader br = new BinaryReader(ctx.Stream);
                 UInt32 packed = br.ReadUInt32();
+                
                 int signX = ((mFlags & 0x01) == 0x01 ? -1 : 1);
                 int signZ = ((mFlags & 0x02) == 0x02 ? -1 : 1);
                 int signY = ((mFlags & 0x04) == 0x04 ? -1 : 1);
@@ -442,6 +505,24 @@ namespace s3piwrappers
                 mZ = ctx.Offset * signZ + ((double)((packed & 0x000FFC00) >> 10) / 1023) * ctx.Scalar;
                 mY = ctx.Offset * signY + ((double)((packed & 0x3FF00000) >> 20) / 1023) * ctx.Scalar;
 
+
+                //stub until recompression code is implemented
+                mPacked = packed;
+
+            }
+            private void WriteIndexed(TrackWriteContext ctx)
+            {
+                //stub until recompression code is implemented
+                BinaryWriter bw = new BinaryWriter(ctx.Stream);
+                bw.Write(mIndexed0);
+                bw.Write(mIndexed1);
+                bw.Write(mIndexed2);
+            }
+            private void WritePacked(TrackWriteContext ctx)
+            {
+                //stub until recompression code is implemented
+                BinaryWriter bw = new BinaryWriter(ctx.Stream);
+                bw.Write(mPacked);
             }
             public override void Parse(TrackReadContext ctx)
             {
@@ -457,12 +538,28 @@ namespace s3piwrappers
                     default:
                         throw new Exception("Unable to parse format "+ctx.Flags.Format.ToString());
                 }
+
+                //for testing only
+                ctx.Floats.Add(mX);
+                ctx.Floats.Add(mY);
+                ctx.Floats.Add(mZ);
                 
             }
             public override void UnParse(TrackWriteContext context)
             {
                 base.UnParse(context);
                 BinaryWriter bw = new BinaryWriter(context.Stream);
+                switch (context.Flags.Format)
+                {
+                    case Track.DataFormat.Indexed:
+                        WriteIndexed(context);
+                        break;
+                    case Track.DataFormat.Packed:
+                        WritePacked(context);
+                        break;
+                    default:
+                        throw new Exception("Unable to parse format " + ctx.Flags.Format.ToString());
+                }
             }
 
         }
@@ -562,6 +659,12 @@ namespace s3piwrappers
                 mZ = ctx.Offset * signZ + (packedZ / 4095) * ctx.Scalar;
                 mW = ctx.Offset * signW + (packedW / 4095) * ctx.Scalar;
 
+
+                ctx.Floats.Add(mX);
+                ctx.Floats.Add(mY);
+                ctx.Floats.Add(mZ);
+                ctx.Floats.Add(mW);
+
             }
             public override void UnParse(TrackWriteContext context)
             {
@@ -620,6 +723,7 @@ namespace s3piwrappers
                 {
                     sb.AppendFormat("Tracks:\n");
                     foreach (var c in mTracks) sb.AppendFormat("{0}\n", c.Value);
+
                     
                 }
                 return sb.ToString();
@@ -787,6 +891,7 @@ namespace s3piwrappers
 
         public double Offset { get; set; }
         public double Scalar { get; set; }
+        public S3Clip.Track.DataFlags Flags { get; set; }
 
     }
     public class ClipReadContext

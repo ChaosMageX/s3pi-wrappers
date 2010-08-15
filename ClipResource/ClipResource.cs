@@ -4,6 +4,7 @@ using System.Text;
 using s3pi.Interfaces;
 using System.IO;
 using s3pi.Custom;
+using System.Linq;
 namespace s3piwrappers
 {
     public enum ClipEventType
@@ -1052,14 +1053,14 @@ namespace s3piwrappers
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
         private byte[] mS3Clip;
-        private S3Clip mAnimation;
+        //private S3Clip mAnimation;
         private IKTargetTable mIKTargetInfo;
         private string mActorName;
         private EventTable mEventSectionTable;
         private ClipEndSection mEndSection;
         #endregion
 
-        #region I/O
+        #region Properties
         public string Value
         {
             get
@@ -1071,7 +1072,7 @@ namespace s3piwrappers
                 sb.AppendFormat("Actor:\t{0}\n", mActorName);
                 sb.AppendFormat("Event Table:\n{0}\n", mEventSectionTable.Value);
                 sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
-                sb.AppendFormat("Animation Data:\n{0}\n", mAnimation.Value);
+                //sb.AppendFormat("Animation Data:\n{0}\n", mAnimation.Value);
                 return sb.ToString();
 
             }
@@ -1141,14 +1142,16 @@ namespace s3piwrappers
             get { return mEndSection; }
             set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
         }
-        [ElementPriority(8)]
-        [DataGridExpandable(true)]
-        public S3Clip Animation
-        {
-            get { return mAnimation; }
-            set { mAnimation = value; OnResourceChanged(this, new EventArgs()); }
-        }
+        //[ElementPriority(8)]
+        //[DataGridExpandable(true)]
+        //public S3Clip Animation
+        //{
+        //    get { return mAnimation; }
+        //    set { mAnimation = value; OnResourceChanged(this, new EventArgs()); }
+        //} 
+        #endregion
 
+        #region I/O
         private void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
@@ -1169,7 +1172,7 @@ namespace s3piwrappers
             s.Seek(clipOffset, SeekOrigin.Begin);
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
-            mAnimation = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
+            //mAnimation = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
 
             s.Seek(slotOffset, SeekOrigin.Begin);
             mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
@@ -1243,6 +1246,7 @@ namespace s3piwrappers
         static bool checking = s3pi.Settings.Settings.Checking;
         const int kRecommendedApiVersion = 1;
         #endregion
+
 
     }
 }
