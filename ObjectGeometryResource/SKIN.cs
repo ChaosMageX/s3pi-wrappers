@@ -22,12 +22,12 @@ namespace s3piwrappers
 
             protected override Joint CreateElement(Stream s)
             {
-                throw new NotImplementedException();
+                throw new Exception();
             }
 
             protected override void WriteElement(Stream s, Joint element)
             {
-                throw new NotImplementedException();
+                throw new Exception();
             }
         }
         public class Joint : AHandlerElement, IEquatable<Joint>
@@ -90,7 +90,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0, GetType()); }
+                get { return GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion

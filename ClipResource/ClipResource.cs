@@ -53,7 +53,7 @@ namespace s3piwrappers
 
         public override List<string> ContentFields
         {
-            get { return GetContentFields(0, GetType()); }
+            get { return GetContentFields(base.requestedApiVersion, GetType()); }
         }
 
         public override int RecommendedApiVersion
@@ -519,7 +519,7 @@ namespace s3piwrappers
                     case ClipEventType.Visibility: return new VisibilityEvent(apiVersion, handler, type, s);
                     case ClipEventType.StopEffect: return new StopEffectEvent(apiVersion, handler, type, s);
                     case ClipEventType.UnParent: return new UnparentEvent(apiVersion, handler, type, s);
-                    default: throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
+                    default: throw new InvalidDataException(String.Format("Event type: {0} not implemented", type));
                 }
             }
             protected override void Parse(Stream s)

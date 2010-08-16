@@ -58,12 +58,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new HSVBase(base.requestedApiVersion, handler, this);
             }
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0,GetType()); }
+                get { return GetContentFields(base.requestedApiVersion,GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -149,12 +149,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new ARGB(base.requestedApiVersion, handler, this);
             }
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0,GetType()); }
+                get { return GetContentFields(base.requestedApiVersion,GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -271,12 +271,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                throw new FabricInfo(base.requestedApiVersion, handler, this);
             }
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0,GetType()); }
+                get { return GetContentFields(base.requestedApiVersion,GetType()); }
             }
 
             public override int RecommendedApiVersion

@@ -162,7 +162,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(0,GetType()); }
+                get { return GetContentFields(base.requestedApiVersion,GetType()); }
             }
 
             public override int RecommendedApiVersion

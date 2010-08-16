@@ -630,7 +630,6 @@ namespace s3piwrappers
         {
             private String mName;
             private ElementList<Bone> mBones;
-            private Granny2.SkeletonLod mLODType;
 
 
             public SkeletonElement(int APIversion, EventHandler handler)
@@ -660,18 +659,10 @@ namespace s3piwrappers
                 get { return mBones; }
                 set { mBones = value; OnElementChanged(); }
             }
-            [ElementPriority(3)]
-            public Granny2.SkeletonLod LodType
-            {
-                get { return mLODType; }
-                set { mLODType = value; OnElementChanged(); }
-            }
-
             protected override void Parse(Granny2.Skeleton data)
             {
                 mBones = new ElementList<Bone>(handler);
                 mName = data.Name;
-                mLODType = data.LODType;
                 Int32 count = data.BoneCount;
                 Int32 elementSize = Marshal.SizeOf(typeof(Granny2.Bone));
                 IntPtr pCur = data.Bones;
@@ -687,7 +678,6 @@ namespace s3piwrappers
             {
                 Granny2.Skeleton s = new Granny2.Skeleton();
                 s.Name = mName;
-                s.LODType = mLODType;
                 s.BoneCount = mBones.Count;
                 Int32 elementSize = Marshal.SizeOf(typeof(Granny2.Bone));
                 IntPtr pBones = Marshal.AllocHGlobal(mBones.Count * elementSize);
@@ -707,8 +697,6 @@ namespace s3piwrappers
 
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Name:\t{0}\n", mName);
-                    sb.AppendFormat("LOD Type:\t{0}\n", mLODType);
-
                     sb.AppendFormat("Bones:\n");
                     for (int i = 0; i < mBones.Count; i++)
                     {

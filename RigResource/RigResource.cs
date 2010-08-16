@@ -854,7 +854,7 @@ namespace s3piwrappers
                 }
                 else
                 {
-                    var contentFields = GetContentFields(0, GetType());
+                    var contentFields = GetContentFields(base.requestedApiVersion, GetType());
                     return contentFields;
                 }
             }

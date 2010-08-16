@@ -167,12 +167,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new Vector3(base.requestedApiVersion, handler, this);
             }
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, typeof(Vector3)); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(Vector3)); }
             }
 
             public override int RecommendedApiVersion
@@ -298,12 +298,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new Color(base.requestedApiVersion, handler, this);
             }
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, typeof(Color)); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(Color)); }
             }
 
             public override int RecommendedApiVersion
@@ -463,12 +463,12 @@ namespace s3piwrappers
             }
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                throw new Exception();
             }
 
             public override List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -603,7 +603,7 @@ namespace s3piwrappers
 
             public void Add()
             {
-                throw new NotImplementedException();
+                throw new Exception();
             }
         }
         #endregion
@@ -708,7 +708,7 @@ namespace s3piwrappers
 
                 public override List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -956,7 +956,7 @@ namespace s3piwrappers
 
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1071,12 +1071,12 @@ namespace s3piwrappers
                 }
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new ItemA(base.requestedApiVersion, handler, this);
                 }
 
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1235,12 +1235,12 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new ItemB(base.requestedApiVersion, handler, this);
                 }
 
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1321,12 +1321,12 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new ItemC(base.requestedApiVersion, handler, this);
                 }
 
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1454,7 +1454,7 @@ namespace s3piwrappers
                 }
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1469,7 +1469,7 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new ItemD(base.requestedApiVersion, handler, this);
                 }
             }
             public class ItemDList : AResource.DependentList<ItemD>
@@ -1588,7 +1588,7 @@ namespace s3piwrappers
                 }
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -1603,7 +1603,7 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new ItemE(base.requestedApiVersion, handler, this);
                 }
             }
             public class ItemEList : AResource.DependentList<ItemE>
@@ -1655,12 +1655,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { base.requestedApiVersion, handler, this });
             }
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -1714,12 +1714,12 @@ namespace s3piwrappers
             public DefaultEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
             protected override void Parse(Stream stream)
             {
-                throw new NotImplementedException();
+                throw new InvalidDataException();
             }
 
             public override void UnParse(Stream stream)
             {
-                throw new NotImplementedException();
+                throw new InvalidDataException();
             }
 
             public bool Equals(DefaultEffect other)
@@ -4000,9 +4000,9 @@ namespace s3piwrappers
                     throw new NotImplementedException();
                 }
 
-                public override System.Collections.Generic.List<string> ContentFields
+                public override List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -5025,7 +5025,7 @@ namespace s3piwrappers
 
                 public override System.Collections.Generic.List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -5183,7 +5183,7 @@ namespace s3piwrappers
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -5608,12 +5608,12 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    throw new NotImplementedException();
+                    return new Index(base.requestedApiVersion, handler, s);
                 }
 
                 public override List<string> ContentFields
                 {
-                    get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
                 }
 
                 public override int RecommendedApiVersion
@@ -5657,12 +5657,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new Compilation(base.requestedApiVersion, handler, this);
             }
 
             public override List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -5813,12 +5813,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new NotImplementedException();
+                return new EffectHandle(base.requestedApiVersion, handler, this);
             }
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(RecommendedApiVersion, GetType()); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
