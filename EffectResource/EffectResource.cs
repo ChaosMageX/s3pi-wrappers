@@ -5608,7 +5608,7 @@ namespace s3piwrappers
 
                 public override AHandlerElement Clone(EventHandler handler)
                 {
-                    return new Index(base.requestedApiVersion, handler, s);
+                    return new Index(base.requestedApiVersion, handler, this);
                 }
 
                 public override List<string> ContentFields

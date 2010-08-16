@@ -271,7 +271,7 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new FabricInfo(base.requestedApiVersion, handler, this);
+                return new FabricInfo(base.requestedApiVersion, handler, this);
             }
 
             public override List<string> ContentFields
