@@ -35,10 +35,10 @@ namespace s3piwrappers
         public class GeometryState : AHandlerElement, IEquatable<GeometryState>
         {
             private UInt32 mStateNameHash;
-            private UInt32 mIBUFIndex;
-            private UInt32 mVBUFIndex;
-            private UInt32 mVertexCount;
-            private UInt32 mFaceCount;
+            private Int32 mIBUFIndex;
+            private Int32 mVBUFIndex;
+            private Int32 mVertexCount;
+            private Int32 mFaceCount;
 
             public GeometryState(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -65,25 +65,25 @@ namespace s3piwrappers
                 set { mStateNameHash= value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public uint IbufIndex
+            public int IbufIndex
             {
                 get { return mIBUFIndex; }
                 set { mIBUFIndex= value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public uint VbufIndex
+            public int VbufIndex
             {
                 get { return mVBUFIndex; }
                 set { mVBUFIndex= value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public uint VertexCount
+            public int VertexCount
             {
                 get { return mVertexCount; }
                 set { mVertexCount= value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public uint FaceCount
+            public int FaceCount
             {
                 get { return mFaceCount; }
                 set { mFaceCount= value; OnElementChanged(); }
@@ -93,10 +93,10 @@ namespace s3piwrappers
             {
                 BinaryReader br = new BinaryReader(s);
                 mStateNameHash = br.ReadUInt32();
-                mIBUFIndex = br.ReadUInt32();
-                mVBUFIndex = br.ReadUInt32();
-                mVertexCount = br.ReadUInt32();
-                mFaceCount = br.ReadUInt32();
+                mIBUFIndex = br.ReadInt32();
+                mVBUFIndex = br.ReadInt32();
+                mVertexCount = br.ReadInt32();
+                mFaceCount = br.ReadInt32();
             }
             public void UnParse(Stream s)
             {
@@ -134,10 +134,10 @@ namespace s3piwrappers
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("StateNameHash: 0x{0:X8}\n", mStateNameHash);
-                    sb.AppendFormat("IBUF Index: 0x{0:X8}\n", mIBUFIndex);
-                    sb.AppendFormat("VBUF Index: 0x{0:X8}\n", mVBUFIndex);
-                    sb.AppendFormat("Vertex Count: 0x{0:X8}\n", mVertexCount);
-                    sb.AppendFormat("FaceCount: 0x{0:X8}\n", mFaceCount);
+                    sb.AppendFormat("IBUF Index:\t{0}\n", mIBUFIndex);
+                    sb.AppendFormat("VBUF Index:\t{0}\n", mVBUFIndex);
+                    sb.AppendFormat("Vertex Count:\t{0}\n", mVertexCount);
+                    sb.AppendFormat("Face Count:\t{0}\n", mFaceCount);
                     return sb.ToString();
                 }
             }
