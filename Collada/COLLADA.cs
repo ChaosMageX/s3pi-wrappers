@@ -50,7 +50,7 @@ namespace s3piwrappers.Collada
         public COLLADAScene Scene { get; set; }
 
         [XmlElement("extra")]
-        public List<Extra> ExtendedData { get; set; }
+        public IList<Extra> Extra { get; set; }
 
         public void Save(Stream s)
         {

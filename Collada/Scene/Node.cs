@@ -41,12 +41,12 @@ namespace s3piwrappers.Collada.Scene
 
 
         [XmlAttribute("sid", DataType = "NCName")]
-        public string SID { get; set; }
+        public string Sid { get; set; }
 
 
         public override string GetUri()
         {
-            return String.Format("{0}/{1}", Id, SID);
+            return String.Format("{0}/{1}", Id, Sid);
         }
     }
 }

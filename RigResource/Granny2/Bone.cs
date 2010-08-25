@@ -11,7 +11,7 @@ namespace s3piwrappers.Granny2
         public Transform LocalTransform;
         public Matrix4x4 InverseWorld4x4;
         public Single LODError;
-        public Variant ExtendedData;
+        public Variant Extra;
         
     }
 }

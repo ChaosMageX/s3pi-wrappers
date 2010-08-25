@@ -534,8 +534,6 @@ namespace s3piwrappers
             private Int32 mParentIndex;
             private Transform mLocalTransform;
             private Matrix4x4 mInverseWorld4x4;
-            private Single mLODError;
-
 
             public Bone(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -578,12 +576,6 @@ namespace s3piwrappers
                 get { return mInverseWorld4x4; }
                 set { mInverseWorld4x4 = value; OnElementChanged(); }
             }
-            [ElementPriority(5)]
-            public float LodError
-            {
-                get { return mLODError; }
-                set { mLODError = value; OnElementChanged(); }
-            }
 
             protected override void Parse(Granny2.Bone data)
             {
@@ -591,7 +583,6 @@ namespace s3piwrappers
                 mParentIndex = data.ParentIndex;
                 mLocalTransform = new Transform(0, handler, data.LocalTransform);
                 mInverseWorld4x4 = new Matrix4x4(0, handler, data.InverseWorld4x4);
-                mLODError = data.LODError;
             }
 
             public override Granny2.Bone UnParse()
@@ -601,7 +592,6 @@ namespace s3piwrappers
                 b.ParentIndex = mParentIndex;
                 b.LocalTransform = mLocalTransform.UnParse();
                 b.InverseWorld4x4 = mInverseWorld4x4.UnParse();
-                b.LODError = mLODError;
                 return b;
             }
             public override string ToString()
@@ -617,7 +607,6 @@ namespace s3piwrappers
                     sb.AppendFormat("ParentIndex:\t0x{0:X8}\n", mParentIndex);
                     sb.AppendFormat("LocalTransform:\n{0}\n", mLocalTransform.Value);
                     sb.AppendFormat("InverseWorld4x4:\n{0}\n", mInverseWorld4x4.Value);
-                    sb.AppendFormat("LODError:\t{0,8:0.00000}\n", mLODError);
                     return sb.ToString();
                 }
             }
@@ -666,7 +655,6 @@ namespace s3piwrappers
                 Int32 count = data.BoneCount;
                 Int32 elementSize = Marshal.SizeOf(typeof(Granny2.Bone));
                 IntPtr pCur = data.Bones;
-
                 for (int i = 0; i < count; i++)
                 {
                     mBones.Add(new Bone(0, handler, pCur.S<Granny2.Bone>()));

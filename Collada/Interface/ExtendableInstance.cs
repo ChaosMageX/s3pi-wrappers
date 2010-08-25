@@ -9,15 +9,15 @@ namespace s3piwrappers.Collada.Interface
     {
         public ExtendableInstance()
         {
-            ExtendedData = new List<Extra>();
+            Extra = new List<Extra>();
         }
 
         public ExtendableInstance(TTarget src) : base(src)
         {
-            ExtendedData = new List<Extra>();
+            Extra = new List<Extra>();
         }
 
         [XmlElement("extra")]
-        public List<Extra> ExtendedData { get; set; }
+        public IList<Extra> Extra { get; set; }
     }
 }

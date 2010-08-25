@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
 using s3piwrappers.Collada.Interface;
+using System.Collections;
 
 namespace s3piwrappers.Collada.Common
 {
@@ -14,8 +15,12 @@ namespace s3piwrappers.Collada.Common
             Items = new List<T>();
         }
         [XmlIgnore]
-        public List<T> Items { get; private set; }
-
+        public IList<T> Items { get; private set; }
+        IList IColladaArray.Items
+        {
+            get { return (IList)this.Items; }
+            set { this.Items = (IList<T>)value; }
+        }
         [XmlAttribute("count")]
         public Int32 Count { get { return Items.Count; }set{} }
 

@@ -14,6 +14,6 @@ namespace s3piwrappers.Granny2
         public Triple RightVector;
         public Triple UpVector;
         public Triple BackVector;
-        public Variant ExtendedData;
+        public Variant Extra;
     }
 }

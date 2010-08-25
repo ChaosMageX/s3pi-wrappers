@@ -27,7 +27,7 @@ namespace s3piwrappers.Granny2
         public IntPtr TrackGroups;
         public Int32 AnimationCount;
         public IntPtr Animations;
-        public Variant ExtendedData;
+        public Variant Extra;
 
         public void Save(string filename, CompressionType c)
         {

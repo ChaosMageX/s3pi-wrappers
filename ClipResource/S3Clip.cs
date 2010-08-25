@@ -76,7 +76,6 @@ namespace s3piwrappers
                 throw new NotImplementedException();
             }
         }
-        #region Nested Type: Track
         public class FrameList<TFrame> : FrameList
             where TFrame : Frame
         {
@@ -137,6 +136,7 @@ namespace s3piwrappers
 
             public abstract void Add();
         }
+        #region Nested Type: Track
         [ConstructorParameters(new object[] { TrackType.Orientation })]
         public class OrientationTrack : Track<OrientationFrame>
         {
@@ -330,7 +330,7 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-                String s = string.Format("Track: 0x{0:X8}({1})({2})", mBoneHash, mType, mFlags.Format);
+                String s = string.Format("Track: {0}({1})({2})", Bones.Instance[mBoneHash], mType, mFlags.Format);
                 if (mFlags.Static) s += "(Static)";
                 return s;
             }
@@ -425,6 +425,7 @@ namespace s3piwrappers
         static void Calc(TrackReadContext ctx)
         {
             var values = ctx.Floats;
+            if (values.Count == 0) return;
             var max = values.Max();
             var maxAbs = Math.Abs(max);
             var sclMax = max / max;
@@ -558,7 +559,7 @@ namespace s3piwrappers
                         WritePacked(context);
                         break;
                     default:
-                        throw new Exception("Unable to parse format " + ctx.Flags.Format.ToString());
+                        throw new Exception("Unable to parse format " + context.Flags.Format.ToString());
                 }
             }
 
