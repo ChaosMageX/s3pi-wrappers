@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{6FC9AB8B-9495-4392-A82A-C9BFE04AA4E6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>s3piwrappers.Collada</RootNamespace>
+    <AssemblyName>Collada</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Animation\Animation.cs" />
+    <Compile Include="Animation\AnimationClip.cs" />
+    <Compile Include="Animation\AnimationClipLibrary.cs" />
+    <Compile Include="Animation\AnimationLibrary.cs" />
+    <Compile Include="COLLADA.cs" />
+    <Compile Include="COLLADAScene.cs" />
+    <Compile Include="Common\Accessor.cs" />
+    <Compile Include="Common\BoolArray.cs" />
+    <Compile Include="Common\Extra.cs" />
+    <Compile Include="Common\FloatArray.cs" />
+    <Compile Include="Common\IdRefArray.cs" />
+    <Compile Include="Common\InputGlobal.cs" />
+    <Compile Include="Common\InputLocal.cs" />
+    <Compile Include="Common\InputLocalOffset.cs" />
+    <Compile Include="Common\IntArray.cs" />
+    <Compile Include="Common\NameArray.cs" />
+    <Compile Include="Common\Param.cs" />
+    <Compile Include="Common\Primitive.cs" />
+    <Compile Include="Common\SidRefArray.cs" />
+    <Compile Include="Common\Source.cs" />
+    <Compile Include="Common\TargetableFloat.cs" />
+    <Compile Include="Common\TargetableFloat3.cs" />
+    <Compile Include="Common\TargetableFloat4.cs" />
+    <Compile Include="Common\Technique.cs" />
+    <Compile Include="Common\TechniqueCommon.cs" />
+    <Compile Include="Common\TokenArray.cs" />
+    <Compile Include="Controllers\Controller.cs" />
+    <Compile Include="Controllers\ControllerData.cs" />
+    <Compile Include="Controllers\ControllerInstance.cs" />
+    <Compile Include="Controllers\ControllerLibrary.cs" />
+    <Compile Include="Controllers\Joint.cs" />
+    <Compile Include="Controllers\JointAxis.cs" />
+    <Compile Include="Controllers\JointAxisConstraint.cs" />
+    <Compile Include="Controllers\JointInstance.cs" />
+    <Compile Include="Controllers\JointLibrary.cs" />
+    <Compile Include="Controllers\JointLimit.cs" />
+    <Compile Include="Controllers\JointLimits.cs" />
+    <Compile Include="Controllers\SkinController.cs" />
+    <Compile Include="Controllers\SkinJoints.cs" />
+    <Compile Include="Controllers\SkinWeights.cs" />
+    <Compile Include="DocumentVersion.cs" />
+    <Compile Include="Geometry\Geometry.cs" />
+    <Compile Include="Geometry\GeometryData.cs" />
+    <Compile Include="Geometry\GeometryInstance.cs" />
+    <Compile Include="Geometry\GeometryLibrary.cs" />
+    <Compile Include="Geometry\Mesh.cs" />
+    <Compile Include="Geometry\MeshElement.cs" />
+    <Compile Include="Geometry\MorphController.cs" />
+    <Compile Include="Geometry\MorphMethod.cs" />
+    <Compile Include="Geometry\MorphTargets.cs" />
+    <Compile Include="Geometry\Triangles.cs" />
+    <Compile Include="Geometry\Vertices.cs" />
+    <Compile Include="Interface\AssetComponent.cs" />
+    <Compile Include="Common\ColladaArray.cs" />
+    <Compile Include="Interface\ExtendableComponent.cs" />
+    <Compile Include="Interface\ExtendableInstance.cs" />
+    <Compile Include="Common\IColladaArray.cs" />
+    <Compile Include="Interface\INamed.cs" />
+    <Compile Include="Interface\NamedExtendableComponent.cs" />
+    <Compile Include="Interface\TargetableNamedExtendableComponent.cs" />
+    <Compile Include="Interface\ExtendedTargetableComponent.cs" />
+    <Compile Include="Interface\IExtendable.cs" />
+    <Compile Include="Interface\Instance.cs" />
+    <Compile Include="Interface\ITargetable.cs" />
+    <Compile Include="Interface\NamedComponent.cs" />
+    <Compile Include="Interface\TargetableNamedComponent.cs" />
+    <Compile Include="Interface\TargetableNamedSubComponent.cs" />
+    <Compile Include="Interface\TargetableComponent.cs" />
+    <Compile Include="Interface\TargetableSubComponent.cs" />
+    <Compile Include="Metadata\AltitudeType.cs" />
+    <Compile Include="Metadata\Asset.cs" />
+    <Compile Include="Metadata\Contributor.cs" />
+    <Compile Include="Metadata\Coverage.cs" />
+    <Compile Include="Metadata\CoverageMode.cs" />
+    <Compile Include="Metadata\LocationType.cs" />
+    <Compile Include="Metadata\UnitType.cs" />
+    <Compile Include="Metadata\UpAxis.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scene\LookAt.cs" />
+    <Compile Include="Scene\Matrix.cs" />
+    <Compile Include="Scene\Node.cs" />
+    <Compile Include="Scene\NodeInstance.cs" />
+    <Compile Include="Scene\NodeLibrary.cs" />
+    <Compile Include="Scene\NodeTransformer.cs" />
+    <Compile Include="Scene\NodeType.cs" />
+    <Compile Include="Scene\Rotate.cs" />
+    <Compile Include="Scene\Scale.cs" />
+    <Compile Include="Scene\Skew.cs" />
+    <Compile Include="Scene\VisualScene.cs" />
+    <Compile Include="Scene\VisualSceneInstance.cs" />
+    <Compile Include="Scene\VisualSceneLibrary.cs" />
+    <Compile Include="Scene\Translate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Interfaces.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
