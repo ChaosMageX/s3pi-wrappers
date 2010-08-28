@@ -226,24 +226,27 @@ namespace s3piwrappers
         #region GroupList
         public class GroupList : AResource.DependentList<Group>
         {
-            public GroupList(EventHandler handler)
+            private MLOD mOwner;
+            public GroupList(EventHandler handler,MLOD owner)
                 : base(handler)
             {
+                mOwner = owner;
             }
 
-            public GroupList(EventHandler handler, Stream s)
-                : base(handler, s)
+            public GroupList(EventHandler handler,MLOD owner, Stream s)
+                : this(handler, owner)
             {
+                Parse(s);
             }
 
             public override void Add()
             {
-                base.Add(new object[] { });
+                ((IList<Group>)this).Add(new Group(0, this.elementHandler, mOwner));
             }
 
             protected override Group CreateElement(Stream s)
             {
-                return new Group(0, handler, s);
+                return new Group(0, handler,mOwner, s);
             }
 
             protected override void WriteElement(Stream s, Group element)
@@ -279,24 +282,26 @@ namespace s3piwrappers
             private Single mUnknown03;
             private Single mUnknown04;
             private Single mUnknown05;
-
+            private MLOD mOwner;
             
 
-            public Group(int APIversion, EventHandler handler)
+            public Group(int APIversion, EventHandler handler,MLOD owner)
                 : base(APIversion, handler)
             {
+                mOwner = owner;
                 mBounds = new BoundingBox(0, handler);
                 mJointReferences = new JointReferenceList(handler);
                 mGeometryStates = new GeometryStateList(handler);
             }
-            public Group(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
+            public Group(int APIversion, EventHandler handler, MLOD owner, Stream s)
+                : this(APIversion, handler,owner)
             {
                 Parse(s);
             }
             public Group(int APIversion, EventHandler handler, Group basis)
                 : base(APIversion, handler)
             {
+                mOwner = basis.mOwner;
                 Stream s = new MemoryStream();
                 basis.UnParse(s);
                 s.Position = 0L;
@@ -429,32 +434,43 @@ namespace s3piwrappers
 
             private void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
-                long expectedSize = br.ReadUInt32();
-                long start = s.Position;
-                mGroupNameHash = br.ReadUInt32();
-                mMATDIndex01 = br.ReadUInt32();
-                mVRTFIndex = br.ReadUInt32();
-                mVBUFIndex = br.ReadUInt32();
-                mIBUFIndex = br.ReadUInt32();
-                mVBUFType = br.ReadUInt32();
-                mVBUFOffset = br.ReadUInt64();
-                mIBUFOffset = br.ReadUInt64();
-                mVBUFCount = br.ReadUInt32();
-                mIBUFCount = br.ReadUInt32();
-                mBounds = new BoundingBox(0, handler, s);
-                mSKINIndex = br.ReadUInt32();
-                mJointReferences = new JointReferenceList(handler, s);
-                mMATDIndex02 = br.ReadUInt32();
-                mGeometryStates = new GeometryStateList(handler, s);
-                mUnknown01 = br.ReadSingle();
-                mUnknown02 = br.ReadSingle();
-                mUnknown03 = br.ReadSingle();
-                mUnknown04 = br.ReadSingle();
-                mUnknown05 = br.ReadSingle();
-                long actualSize = s.Position - start;
-                if (checking && actualSize != expectedSize) 
-                    throw new Exception(String.Format("Expected end at {0}, actual end was {1}",expectedSize,actualSize));
+                try
+                {
+                    BinaryReader br = new BinaryReader(s);
+                    long expectedSize = br.ReadUInt32();
+                    long start = s.Position;
+                    mGroupNameHash = br.ReadUInt32();
+                    mMATDIndex01 = br.ReadUInt32();
+                    mVRTFIndex = br.ReadUInt32();
+                    mVBUFIndex = br.ReadUInt32();
+                    mIBUFIndex = br.ReadUInt32();
+                    mVBUFType = br.ReadUInt32();
+                    mVBUFOffset = br.ReadUInt64();
+                    mIBUFOffset = br.ReadUInt64();
+                    mVBUFCount = br.ReadUInt32();
+                    mIBUFCount = br.ReadUInt32();
+                    mBounds = new BoundingBox(0, handler, s);
+                    mSKINIndex = br.ReadUInt32();
+                    mJointReferences = new JointReferenceList(handler, s);
+                    mMATDIndex02 = br.ReadUInt32();
+                    mGeometryStates = new GeometryStateList(handler, s);
+                    if (mOwner.Version > 0x00000201)
+                    {
+                        mUnknown01 = br.ReadSingle();
+                        mUnknown02 = br.ReadSingle();
+                        mUnknown03 = br.ReadSingle();
+                        mUnknown04 = br.ReadSingle();
+                        mUnknown05 = br.ReadSingle();
+                    }
+                    long actualSize = s.Position - start;
+                    if (checking && actualSize != expectedSize)
+                        throw new Exception(String.Format("Expected end at {0}, actual end was {1}", expectedSize,
+                                                          actualSize));
+                }
+                catch(Exception e)
+                {
+                    throw;
+                }
 
             }
             public void UnParse(Stream s)
@@ -478,11 +494,14 @@ namespace s3piwrappers
                 mJointReferences.UnParse(s);
                 bw.Write(mMATDIndex02);
                 mGeometryStates.UnParse(s);
-                bw.Write(mUnknown01);
-                bw.Write(mUnknown02);
-                bw.Write(mUnknown03);
-                bw.Write(mUnknown04);
-                bw.Write(mUnknown05);
+                if (mOwner.Version > 0x00000201)
+                {
+                    bw.Write(mUnknown01);
+                    bw.Write(mUnknown02);
+                    bw.Write(mUnknown03);
+                    bw.Write(mUnknown04);
+                    bw.Write(mUnknown05);
+                }
                 long end = s.Position;
                 long size = end - start;
                 s.Seek(sizeOffset, SeekOrigin.Begin);
@@ -538,7 +557,19 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
+                get
+                {
+                    var fields = GetContentFields(base.requestedApiVersion, GetType());
+                    if(mOwner.Version <0x00000202)
+                    {
+                        fields.Remove("Unknown01");
+                        fields.Remove("Unknown02");
+                        fields.Remove("Unknown03");
+                        fields.Remove("Unknown04");
+                        fields.Remove("Unknown05");
+                    }
+                    return fields; 
+                }
             }
 
             public override int RecommendedApiVersion
@@ -563,8 +594,8 @@ namespace s3piwrappers
         public MLOD(int APIversion, EventHandler handler)
             : base(APIversion, handler, null)
         {
-            mVersion = 0x00000230;
-            mGroups = new GroupList(handler);
+            mVersion = 0x00000203;
+            mGroups = new GroupList(handler,this);
         }
         public MLOD(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)
@@ -613,7 +644,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mGroups = new GroupList(handler, s);
+            mGroups = new GroupList(handler,this, s);
         }
 
         public override Stream UnParse()
@@ -622,7 +653,7 @@ namespace s3piwrappers
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            if (mGroups == null) mGroups = new GroupList(handler);
+            if (mGroups == null) mGroups = new GroupList(handler,this);
             mGroups.UnParse(s);
             return s;
         }

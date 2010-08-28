@@ -7,6 +7,28 @@ using s3pi.Interfaces;
 using s3pi.Settings;
 namespace s3piwrappers
 {
+    public class VBUF2:VBUF
+    {
+        public VBUF2(int apiVersion, EventHandler handler, VBUF basis) : base(apiVersion, handler, basis)
+        {
+        }
+
+        public VBUF2(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+        {
+        }
+
+        public VBUF2(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+        {
+        }
+
+        public override uint ResourceType
+        {
+            get
+            {
+                return 0x0229684B;
+            }
+        }
+    }
     public class VBUF :ARCOLBlock
     {
         private UInt32 mVersion;
@@ -28,7 +50,7 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                sb.AppendFormat("VMAPIndex:\t0x{0:X8}\n", mVmapIndex);
+                sb.AppendFormat("VMAP Index:\t0x{0:X8}\n", mVmapIndex);
                 sb.AppendFormat("Buffer[{0}]\n", mBuffer.Length);
                 return sb.ToString();
             }
