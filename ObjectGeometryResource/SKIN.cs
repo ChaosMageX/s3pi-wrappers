@@ -145,7 +145,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Joints:\n");
                     for (int i = 0; i < mJoints.Count; i++)
                     {
-                        sb.AppendFormat("=={0}==\n{1}\n", i, mJoints[i].Value);
+                        sb.AppendFormat("[0x{0:X8}]\t{1}\n", i, mJoints[i].Value);
                     }
                 }
                 return sb.ToString();

@@ -133,7 +133,7 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("StateNameHash: 0x{0:X8}\n", mStateNameHash);
+                    sb.AppendFormat("State Name Hash: 0x{0:X8}\n", mStateNameHash);
                     sb.AppendFormat("IBUF Index:\t{0}\n", mIBUFIndex);
                     sb.AppendFormat("VBUF Index:\t{0}\n", mVBUFIndex);
                     sb.AppendFormat("Vertex Count:\t{0}\n", mVertexCount);
@@ -258,7 +258,7 @@ namespace s3piwrappers
         public class Group : AHandlerElement, IEquatable<Group>
         {
             private UInt32 mGroupNameHash;
-            private UInt32 mMATDIndex;
+            private UInt32 mMATDIndex01;
             private UInt32 mVRTFIndex;
             private UInt32 mVBUFIndex;
             private UInt32 mIBUFIndex;
@@ -268,7 +268,7 @@ namespace s3piwrappers
             private UInt32 mVBUFCount;
             private UInt32 mIBUFCount;
             private UInt32 mSKINIndex;
-            private UInt32 mUnknown00;
+            private UInt32 mMATDIndex02;
 
 
             private JointReferenceList mJointReferences;
@@ -309,10 +309,10 @@ namespace s3piwrappers
                 set { mGroupNameHash = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public uint MatdIndex
+            public uint MatdIndex01
             {
-                get { return mMATDIndex; }
-                set { mMATDIndex = value; OnElementChanged(); }
+                get { return mMATDIndex01; }
+                set { mMATDIndex01 = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
             public uint VrtfIndex
@@ -376,10 +376,10 @@ namespace s3piwrappers
             }
 
             [ElementPriority(14)]
-            public uint Unknown00
+            public uint MatdIndex02
             {
-                get { return mUnknown00; }
-                set { mUnknown00 = value; }
+                get { return mMATDIndex02; }
+                set { mMATDIndex02 = value; }
             }
             [ElementPriority(15)]
             public JointReferenceList JointReferences
@@ -418,7 +418,7 @@ namespace s3piwrappers
                 set { mUnknown04 = value; OnElementChanged(); }
             }
             [ElementPriority(21)]
-            public Single Unknown05
+            public float Unknown05
             {
                 get { return mUnknown05; }
                 set { mUnknown05 = value; OnElementChanged(); }
@@ -433,7 +433,7 @@ namespace s3piwrappers
                 long expectedSize = br.ReadUInt32();
                 long start = s.Position;
                 mGroupNameHash = br.ReadUInt32();
-                mMATDIndex = br.ReadUInt32();
+                mMATDIndex01 = br.ReadUInt32();
                 mVRTFIndex = br.ReadUInt32();
                 mVBUFIndex = br.ReadUInt32();
                 mIBUFIndex = br.ReadUInt32();
@@ -445,7 +445,7 @@ namespace s3piwrappers
                 mBounds = new BoundingBox(0, handler, s);
                 mSKINIndex = br.ReadUInt32();
                 mJointReferences = new JointReferenceList(handler, s);
-                mUnknown00 = br.ReadUInt32();
+                mMATDIndex02 = br.ReadUInt32();
                 mGeometryStates = new GeometryStateList(handler, s);
                 mUnknown01 = br.ReadSingle();
                 mUnknown02 = br.ReadSingle();
@@ -464,7 +464,7 @@ namespace s3piwrappers
                 bw.Write(0);
                 long start = s.Position;
                 bw.Write(mGroupNameHash);
-                bw.Write(mMATDIndex);
+                bw.Write(mMATDIndex01);
                 bw.Write(mVRTFIndex);
                 bw.Write(mVBUFIndex);
                 bw.Write(mIBUFIndex);
@@ -476,7 +476,7 @@ namespace s3piwrappers
                 mBounds.UnParse(s);
                 bw.Write(mSKINIndex);
                 mJointReferences.UnParse(s);
-                bw.Write(mUnknown00);
+                bw.Write(mMATDIndex02);
                 mGeometryStates.UnParse(s);
                 bw.Write(mUnknown01);
                 bw.Write(mUnknown02);
@@ -495,13 +495,13 @@ namespace s3piwrappers
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Name: 0x{0:X8}\n", mGroupNameHash);
-                    sb.AppendFormat("MATD: 0x{0:X8}\n", mMATDIndex);
+                    sb.AppendFormat("Material01 Index: 0x{0:X8}\n", mMATDIndex01);
                     sb.AppendFormat("VRTF: 0x{0:X8}\n", mVRTFIndex);
                     sb.AppendFormat("VBUF: 0x{0:X8}\n", mVBUFIndex);
                     sb.AppendFormat("VBUF Offset: 0x{0:X16}\n", mVBUFOffset);
                     sb.AppendFormat("IBUF Offset: 0x{0:X16}\n", mIBUFOffset);
-                    sb.AppendFormat("Vertex Count: 0x{0:X8}\n", mVBUFCount);
-                    sb.AppendFormat("Face Count: 0x{0:X8}\n", mIBUFCount);
+                    sb.AppendFormat("Vertex Count: {0}\n", mVBUFCount);
+                    sb.AppendFormat("Face Count: {0}\n", mIBUFCount);
                     sb.AppendFormat("Bounds:\n{0}\n", mBounds.Value);
                     sb.AppendFormat("SKIN: 0x{0:X8}\n", mSKINIndex);
 
@@ -510,16 +510,16 @@ namespace s3piwrappers
                         sb.AppendFormat("Joint References:\n");
                         for (int i = 0; i < mJointReferences.Count; i++)
                         {
-                            sb.AppendFormat("[{0:00}]{1}\n", i, mJointReferences[i].Value);
+                            sb.AppendFormat("[{0:00}]\t{1}\n", i, mJointReferences[i].Value);
                         }
                     }
-                    sb.AppendFormat("Unknown00: 0x{0:X8}\n", mUnknown00);
+                    sb.AppendFormat("Material02 Index: 0x{0:X8}\n", mMATDIndex02);
                     if (mGeometryStates.Count > 0)
                     {
                         sb.AppendFormat("Geometry States:\n");
                         for (int i = 0; i < mGeometryStates.Count; i++)
                         {
-                            sb.AppendFormat("=State[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
+                            sb.AppendFormat("=Geometry State[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
                         }
                     }
                     sb.AppendFormat("Unknown01: {0,8:0.00000}\n", mUnknown01);
