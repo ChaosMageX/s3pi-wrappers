@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipResource", "ClipResource\ClipResource.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColourInfoResource", "ColourInfoResource\ColourInfoResource.csproj", "{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}"

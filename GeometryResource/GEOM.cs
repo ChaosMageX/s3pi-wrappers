@@ -107,8 +107,8 @@ namespace s3piwrappers
             public override List<string> ContentFields
             {
                 get 
-                { 
-                    var fields = GetContentFields(kRecommendedApiVersion, GetType());
+                {
+                    var fields = GetContentFields(base.requestedApiVersion, GetType());
                     if (mShader == (MATD.ShaderType.None)) fields.Remove("Mtnf");
                     return fields;
                 }

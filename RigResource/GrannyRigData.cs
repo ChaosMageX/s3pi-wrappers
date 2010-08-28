@@ -812,7 +812,7 @@ namespace s3piwrappers
 
         public override List<string> ContentFields
         {
-            get { return GetContentFields(kRecommendedApiVersion, GetType()); }
+            get { return GetContentFields(base.requestedApiVersion, GetType()); }
         }
 
         public override int RecommendedApiVersion
@@ -875,7 +875,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(kRecommendedApiVersion, GetType()); }
+                get { return GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public abstract string Value { get; }

@@ -41,7 +41,7 @@ namespace s3piwrappers
 
         public override System.Collections.Generic.List<string> ContentFields
         {
-            get { return GetContentFields(kRecommendedApiVersion,GetType()); }
+            get { return GetContentFields(base.requestedApiVersion,GetType()); }
         }
 
         public override int RecommendedApiVersion

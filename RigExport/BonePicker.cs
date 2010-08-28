@@ -68,7 +68,7 @@ namespace RigExport
                         if (clbBones.GetItemChecked(i))
                         {
                             var bone = (GrannyRigData.Bone) clbBones.Items[i];
-                            sb.AppendFormat("\"{0}\" \"{1}\" {2,8:0.000000} {3,8:0.000000} {4,8:0.000000} {5}\n", bone.Name,
+                            sb.AppendFormat("\"{0}\" \"{1}\" {2,8:0.000000} {3,8:0.000000} {4,8:0.000000} {5}\r\n", bone.Name,
                                             bone.ParentIndex == -1
                                                 ? "unparented"
                                                 : grd.Skeleton.Bones[bone.ParentIndex].Name,
@@ -115,9 +115,25 @@ namespace RigExport
             sqZ = Math.Pow(q.Z, 2D);
             sqW = Math.Pow(q.W, 2D);
             double poleTest = q.X * q.Y + q.Z * q.W;
-            x = Math.Atan2(2D * q.X * q.W - 2 * q.Y * q.Z, 1 - 2 * sqX - 2 * sqZ);
-            y = Math.Asin(2 * poleTest);
-            z = Math.Atan2(2D * q.Y * q.W - 2 * q.X * q.Z, 1 - 2 * sqY - 2 * sqZ);
+            if (poleTest > 0.49999)
+            {
+                y = 2 * Math.Atan2(q.X, q.W);
+                z = Math.PI / 2;
+                x = 0;
+            }
+            else if (poleTest < -0.49999)
+            {
+                y = -2 * Math.Atan2(q.X, q.W);
+                z = -Math.PI / 2;
+                x = 0;
+            }
+            else
+            {
+
+                x = Math.Atan2(2D * q.X * q.W - 2 * q.Y * q.Z, 1 - 2 * sqX - 2 * sqZ);
+                y = Math.Asin(2 * poleTest);
+                z = Math.Atan2(2D * q.Y * q.W - 2 * q.X * q.Z, 1 - 2 * sqY - 2 * sqZ);
+            }
             return string.Format("{0,8:0.000000} {1,8:0.000000} {2,8:0.000000}", x, y, z);
 
         }

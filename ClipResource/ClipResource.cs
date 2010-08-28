@@ -445,12 +445,11 @@ namespace s3piwrappers
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Type:\t{0}\n", mType);
-                    sb.AppendFormat("Unknown01:\t0x{0:X4}\n", mShort01);
                     sb.AppendFormat("Id:\t0x{0:X4}\n", mId);
                     sb.AppendFormat("Timecode:\t{0,8:0.00000}\n", mTimecode);
                     sb.AppendFormat("Float01:\t{0,8:0.00000}\n", mFloat01);
                     sb.AppendFormat("Float02:\t{0,8:0.00000}\n", mFloat02);
-                    sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mInt01);
+                    sb.AppendFormat("Unknown:\t0x{0:X8}\n", mInt01);
                     sb.AppendFormat("Event Name:\t{0}\n", mEventName);
                     return sb.ToString();
                 }
@@ -1010,7 +1009,7 @@ namespace s3piwrappers
 
             public string Value
             {
-                get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{2,8:0.00000}]",mX,mY,mZ,mW); }
+                get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]",mX,mY,mZ,mW); }
             }
             protected override void Parse(Stream s)
             {

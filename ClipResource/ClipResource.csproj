@@ -53,12 +53,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3Clip.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Bones\Bones.csproj">
-      <Project>{A42A522C-486E-4FEB-9A80-9233CAE6D6A2}</Project>
-      <Name>Bones</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

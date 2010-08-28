@@ -76,7 +76,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(kRecommendedApiVersion, GetType()); }
+                get { return GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -159,7 +159,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(kRecommendedApiVersion, GetType()); }
+                get { return GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -487,7 +487,7 @@ namespace s3piwrappers
 
             public IkChain(int APIversion, EventHandler handler, Stream s)
                 : base(APIversion, handler)
-            {
+            {                
                 Parse(s);
             }
             public override AHandlerElement Clone(EventHandler handler)
@@ -497,7 +497,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(kRecommendedApiVersion, GetType()); }
+                get { return GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion

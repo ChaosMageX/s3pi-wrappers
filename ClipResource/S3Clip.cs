@@ -330,7 +330,7 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-                String s = string.Format("Track: {0}({1})({2})", Bones.Instance[mBoneHash], mType, mFlags.Format);
+                String s = string.Format("Track: 0x{0:X8}({1})({2})", mBoneHash, mType, mFlags.Format);
                 if (mFlags.Static) s += "(Static)";
                 return s;
             }
