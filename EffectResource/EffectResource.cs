@@ -10,8 +10,63 @@ namespace s3piwrappers
 {
     public class EffectResource : AResource
     {
+        #region Nested Type: FloatValue
+        public class FloatValue : AHandlerElement, IEquatable<FloatValue>
+        {
+            public FloatValue(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public FloatValue(int apiVersion, EventHandler handler, FloatValue basis) : this(apiVersion, handler, basis.mData) { }
+            public FloatValue(int apiVersion, EventHandler handler, float r)
+                : base(apiVersion, handler)
+            {
+                mData = r;
+            }
+            public FloatValue(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+
+            private void Parse(Stream s )
+            {
+                new BinaryStreamWrapper(s).Read(out mData,ByteOrder.BigEndian);
+            }
+            public void UnParse(Stream s)
+            {
+                new BinaryStreamWrapper(s).Write(mData,ByteOrder.BigEndian);
+                
+            }
+            private float mData;
+            [ElementPriority(1)]
+            public float Data
+            {
+                get { return mData; }
+                set { mData = value; OnElementChanged(); }
+            }
+
+            public bool Equals(FloatValue other)
+            {
+                return mData == other.mData;
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new FloatValue(base.requestedApiVersion, handler, this);
+            }
+
+            public override System.Collections.Generic.List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+        }
+        #endregion
+
         #region Nested Type: FloatList
-        public class FloatList : AResource.DependentList<float>
+        public class FloatList : AResource.DependentList<FloatValue>
         {
             public FloatList(EventHandler handler) : base(handler) { }
             public FloatList(EventHandler handler, Stream s) : base(handler, s) { }
@@ -28,56 +83,22 @@ namespace s3piwrappers
 
             public override void Add()
             {
-                base.Add(0f);
+                base.Add(new object[]{});
             }
 
-            protected override float CreateElement(Stream s)
+            protected override FloatValue CreateElement(Stream s)
             {
-                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadFloat();
+                return new FloatValue(0,handler,s);
             }
 
-            protected override void WriteElement(Stream s, float element)
+            protected override void WriteElement(Stream s, FloatValue element)
             {
-                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write(element);
+                element.UnParse(s);
             }
         }
         #endregion
-
-        #region Nested Type: FloatListLE
-        public class FloatListLE : AResource.DependentList<float>
-        {
-
-            public FloatListLE(EventHandler handler) : base(handler) { }
-            public FloatListLE(EventHandler handler, Stream s) : base(handler, s) { }
-
-            protected override uint ReadCount(Stream s)
-            {
-                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
-            }
-            protected override void WriteCount(Stream s, uint count)
-            {
-                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
-            }
-
-            public override void Add()
-            {
-                base.Add(0f);
-            }
-
-            protected override float CreateElement(Stream s)
-            {
-                return new BinaryStreamWrapper(s, ByteOrder.LittleEndian).ReadFloat();
-            }
-
-            protected override void WriteElement(Stream s, float element)
-            {
-                new BinaryStreamWrapper(s, ByteOrder.LittleEndian).Write(element);
-            }
-        }
-        #endregion
-
+        
         #region Nested Type: Vector3
-        [TypeConverter(typeof(ExpandableObjectConverter))]
         public class Vector3 : AHandlerElement, IEquatable<Vector3>
         {
             private float mX, mY, mZ;
@@ -172,7 +193,7 @@ namespace s3piwrappers
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(Vector3)); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -259,7 +280,6 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: ColorRgb
-        [TypeConverter(typeof(ExpandableObjectConverter))]
         public class Color : AHandlerElement, IEquatable<Color>
         {
             public Color(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
@@ -660,7 +680,6 @@ namespace s3piwrappers
         public abstract class AbstractEffect : AHandlerElement, IEquatable<AbstractEffect>
         {
 
-            [TypeConverter(typeof(ExpandableObjectConverter))]
             public class ParticleResourceKey : AHandlerElement
             {
                 public ParticleResourceKey(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
@@ -771,7 +790,6 @@ namespace s3piwrappers
                 }
             }
 
-            [TypeConverter(typeof(ExpandableObjectConverter))]
             public class ParticleParams : AHandlerElement
             {
                 public ParticleParams(int apiVersion, EventHandler handler)
@@ -1757,7 +1775,7 @@ namespace s3piwrappers
 
 
             }
-            public ParticleEffect(int apiVersion, EventHandler handler, Stream s, ushort version) 
+            public ParticleEffect(int apiVersion, EventHandler handler, Stream s, ushort version)
                 : base(apiVersion, handler, s, version) { }
 
             #region Fields
@@ -2561,10 +2579,10 @@ namespace s3piwrappers
                 }
 
                 //Version 3+
-                if(mVersion>= 0x0003)s.Read(out mByte14);
+                if (mVersion >= 0x0003) s.Read(out mByte14);
 
                 //Version 4+
-                if(mVersion>= 0x0004)s.Read(out mFloat48);
+                if (mVersion >= 0x0004) s.Read(out mFloat48);
 
             }
             public override void UnParse(Stream stream)
@@ -3589,9 +3607,9 @@ namespace s3piwrappers
             public override void UnParse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                
-            s.Write( mInt01);
-                s.Write( mInt02);
+
+                s.Write(mInt01);
+                s.Write(mInt02);
                 mParticleParameters.UnParse(stream);
                 mFloatList01.UnParse(stream);
                 s.Write(mFloat01);
@@ -3613,8 +3631,8 @@ namespace s3piwrappers
                 s.Write(mFloat12, ByteOrder.LittleEndian); //LE
                 mFloatList06.UnParse(stream);
                 s.Write(mFloat13);
-                s.Write( mBaseEffectName, StringType.ZeroDelimited);
-                s.Write( mDeathEffectName, StringType.ZeroDelimited);
+                s.Write(mBaseEffectName, StringType.ZeroDelimited);
+                s.Write(mDeathEffectName, StringType.ZeroDelimited);
                 s.Write(mByte01);
                 s.Write(mFloat14, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat15, ByteOrder.LittleEndian); //LE
@@ -3652,9 +3670,9 @@ namespace s3piwrappers
                 s.Write(mFloat35, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat36, ByteOrder.LittleEndian); //LE
 
-                s.Write( mLong01);
-                s.Write( mLong02);
-                s.Write( mLong03);
+                s.Write(mLong01);
+                s.Write(mLong02);
+                s.Write(mLong03);
 
                 s.Write(mFloat37, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat38, ByteOrder.LittleEndian); //LE
