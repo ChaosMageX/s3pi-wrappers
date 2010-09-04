@@ -454,7 +454,7 @@ namespace s3piwrappers
                 : base(apiVersion, handler, type, version)
             {
                 mVersion = version;
-                mList = new EffectList<TEffect>(handler);
+                mList = new EffectList<TEffect>(handler,this);
             }
             protected AbstractEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
                 : base(apiVersion, handler, type, version, s)
@@ -462,7 +462,7 @@ namespace s3piwrappers
                 mVersion = version;
                 if (s == null)
                 {
-                    mList = new EffectList<TEffect>(handler);
+                    mList = new EffectList<TEffect>(handler,this);
                 }
                 else { Parse(s); }
             }
@@ -475,7 +475,7 @@ namespace s3piwrappers
             }
             private void Parse(Stream s)
             {
-                mList = new EffectList<TEffect>(handler, s, mVersion);
+                mList = new EffectList<TEffect>(handler, s, this);
             }
             public override void UnParse(Stream s)
             {
@@ -483,7 +483,7 @@ namespace s3piwrappers
             }
             public override AHandlerElement Clone(EventHandler handler)
             {
-                throw new Exception();
+                throw new NotSupportedException();
             }
 
             public override List<string> ContentFields
@@ -623,7 +623,7 @@ namespace s3piwrappers
 
             public void Add()
             {
-                throw new Exception();
+                throw new NotSupportedException();
             }
         }
         #endregion
@@ -636,14 +636,17 @@ namespace s3piwrappers
         public class EffectList<TEffect> : AResource.DependentList<TEffect>
             where TEffect : AbstractEffect, IEquatable<TEffect>
         {
-            private ushort mVersion;
-            public EffectList(EventHandler handler)
-                : this(handler, null, 1) { }
-            public EffectList(EventHandler handler, Stream s, ushort version)
+            private AbstractEffectSection mSection;
+            public EffectList(EventHandler handler, Stream s, AbstractEffectSection section)
+                : this(handler,section)
+            {
+                if (s != null) Parse(s);
+            }
+
+            public EffectList(EventHandler handler, AbstractEffectSection section)
                 : base(handler)
             {
-                mVersion = version;
-                if (s != null) Parse(s);
+                mSection = section;
             }
 
             protected override uint ReadCount(Stream s)
@@ -660,13 +663,13 @@ namespace s3piwrappers
             }
             protected override TEffect CreateElement(Stream s)
             {
-                var e = (TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mVersion });
+                var e = (TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mSection });
                 return e;
             }
 
             public override void Add()
             {
-                base.Add(new object[] { });
+                ((IList<TEffect>)this).Add((TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, mSection }));
             }
 
             protected override void WriteElement(Stream s, TEffect element)
@@ -679,117 +682,7 @@ namespace s3piwrappers
         #region Nested Type: AbstractEffect
         public abstract class AbstractEffect : AHandlerElement, IEquatable<AbstractEffect>
         {
-
-            public class ParticleResourceKey : AHandlerElement
-            {
-                public ParticleResourceKey(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-                public ParticleResourceKey(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
-                private UInt64 mLong01;
-                private byte mByte01;
-                private byte mByte02;
-                private UInt32 mInt01; //if Byte02 & 0x80
-                private byte mByte03;
-                private byte mByte04;
-                private UInt16 mShort01;
-                private UInt32 mInt02;
-                private UInt64 mLong02;
-                protected void Parse(Stream stream)
-                {
-                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Read(out mLong01);
-                    s.Read(out mByte01);
-                    s.Read(out mByte02);
-                    if ((Byte02 & 0x80) == 0x80) s.Read(out mInt01);
-                    s.Read(out mByte03);
-                    s.Read(out mByte04);
-                    s.Read(out mShort01);
-                    s.Read(out mInt02);
-                    s.Read(out mLong02);
-                }
-                public void UnParse(Stream stream)
-                {
-                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Write(Instance);
-                    s.Write(Byte01);
-                    s.Write(Byte02);
-                    if ((Byte02 & 0x80) == 0x80) s.Write(Int01);
-                    s.Write(Byte03);
-                    s.Write(Byte04);
-                    s.Write(Short01);
-                    s.Write(Int02);
-                    s.Write(Long02);
-                }
-
-                public override AHandlerElement Clone(EventHandler handler)
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override List<string> ContentFields
-                {
-                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
-                }
-
-                public override int RecommendedApiVersion
-                {
-                    get { return kRecommendedAPIVersion; }
-                }
-                [ElementPriority(1)]
-                public ulong Instance
-                {
-                    get { return mLong01; }
-                    set { mLong01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(2)]
-                public byte Byte01
-                {
-                    get { return mByte01; }
-                    set { mByte01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(3)]
-                public byte Byte02
-                {
-                    get { return mByte02; }
-                    set { mByte02 = value; OnElementChanged(); }
-                }
-                [ElementPriority(4)]
-                public uint Int01
-                {
-                    get { return mInt01; }
-                    set { mInt01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(5)]
-                public byte Byte03
-                {
-                    get { return mByte03; }
-                    set { mByte03 = value; OnElementChanged(); }
-                }
-                [ElementPriority(6)]
-                public byte Byte04
-                {
-                    get { return mByte04; }
-                    set { mByte04 = value; OnElementChanged(); }
-                }
-                [ElementPriority(7)]
-                public ushort Short01
-                {
-                    get { return mShort01; }
-                    set { mShort01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(8)]
-                public uint Int02
-                {
-                    get { return mInt02; }
-                    set { mInt02 = value; OnElementChanged(); }
-                }
-                [ElementPriority(9)]
-                public ulong Long02
-                {
-                    get { return mLong02; }
-                    set { mLong02 = value; OnElementChanged(); }
-                }
-            }
-
+            #region Nested Type: ParticleParams
             public class ParticleParams : AHandlerElement
             {
                 public ParticleParams(int apiVersion, EventHandler handler)
@@ -981,8 +874,10 @@ namespace s3piwrappers
                 {
                     get { return kRecommendedAPIVersion; }
                 }
-            }
+            } 
+            #endregion
 
+            #region Nested Type: ItemA
             public class ItemA : AHandlerElement, IEquatable<ItemA>
             {
                 private float mFloat01;
@@ -1106,7 +1001,10 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            }
+            } 
+            #endregion
+
+            #region Nested Type: ItemAList
             public class ItemAList : AResource.DependentList<ItemA>
             {
                 public ItemAList(EventHandler handler) : base(handler) { }
@@ -1132,7 +1030,10 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            }
+            } 
+            #endregion
+
+            #region Nested Type: ItemB
             public class ItemB : AHandlerElement, IEquatable<ItemB>
             {
                 private byte[] mByteArray01 = new byte[4];
@@ -1270,8 +1171,10 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            }
+            } 
+            #endregion
 
+            #region Nested Type: ItemBList
             public class ItemBList : AResource.DependentList<ItemB>
             {
                 public ItemBList(EventHandler handler) : base(handler) { }
@@ -1297,8 +1200,10 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            }
+            } 
+            #endregion
 
+            #region Nested Type: ItemC
             public class ItemC : AHandlerElement, IEquatable<ItemC>
             {
                 public ItemC(int apiVersion, EventHandler handler, ItemC basis)
@@ -1356,7 +1261,10 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            }
+            } 
+            #endregion
+
+            #region Nested Type: ItemCList
             public class ItemCList : AResource.DependentList<ItemC>
             {
 
@@ -1383,8 +1291,10 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            }
+            } 
+            #endregion
 
+            #region Nested Type: ItemD
             public class ItemD : AHandlerElement, IEquatable<ItemD>
             {
                 public ItemD(int apiVersion, EventHandler handler, ItemD basis)
@@ -1489,7 +1399,10 @@ namespace s3piwrappers
                 {
                     return new ItemD(base.requestedApiVersion, handler, this);
                 }
-            }
+            } 
+            #endregion
+
+            #region Nested Type: ItemDList
             public class ItemDList : AResource.DependentList<ItemD>
             {
 
@@ -1516,9 +1429,10 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            }
+            } 
+            #endregion
 
-
+            #region Nested Type: ItemE
             public class ItemE : AHandlerElement, IEquatable<ItemE>
             {
                 public ItemE(int apiVersion, EventHandler handler, ItemE basis)
@@ -1623,7 +1537,10 @@ namespace s3piwrappers
                 {
                     return new ItemE(base.requestedApiVersion, handler, this);
                 }
-            }
+            } 
+            #endregion
+
+            #region Nested Type: ItemEList
             public class ItemEList : AResource.DependentList<ItemE>
             {
 
@@ -1650,20 +1567,25 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            }
-            protected ushort mVersion;
-            protected AbstractEffect(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            protected AbstractEffect(int apiVersion, EventHandler handler, Stream s, ushort version)
+            } 
+            #endregion
+
+            protected AbstractEffectSection mSection;
+            protected AbstractEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) 
                 : base(apiVersion, handler)
             {
-                mVersion = version;
+                mSection = section;
+            }
+            protected AbstractEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section)
+                : this(apiVersion, handler,section)
+            {
                 if (s != null) Parse(s);
             }
             protected AbstractEffect(int apiVersion, EventHandler handler, AbstractEffect basis)
                 : base(apiVersion, handler)
             {
                 MemoryStream ms = new MemoryStream();
-                mVersion = basis.mVersion;
+                mSection = basis.mSection;
                 basis.UnParse(ms);
                 ms.Position = 0L;
                 Parse(ms);
@@ -1676,7 +1598,7 @@ namespace s3piwrappers
                 return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { base.requestedApiVersion, handler, this });
             }
 
-            public override System.Collections.Generic.List<string> ContentFields
+            public override List<string> ContentFields
             {
                 get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
@@ -1728,16 +1650,16 @@ namespace s3piwrappers
         #region Nested Type: DefaultEffect
         public class DefaultEffect : AbstractEffect, IEquatable<DefaultEffect>
         {
-            public DefaultEffect(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public DefaultEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public DefaultEffect(int apiVersion, EventHandler handler,AbstractEffectSection section) : base(apiVersion, handler,section) { }
+            public DefaultEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
             protected override void Parse(Stream stream)
             {
-                throw new InvalidDataException();
+                throw new NotSupportedException();
             }
 
             public override void UnParse(Stream stream)
             {
-                throw new InvalidDataException();
+                throw new NotSupportedException();
             }
 
             public bool Equals(DefaultEffect other)
@@ -1750,14 +1672,127 @@ namespace s3piwrappers
         #region Nested Type: ParticleEffect
         public class ParticleEffect : AbstractEffect, IEquatable<ParticleEffect>
         {
+            #region Nested Type: ParticleResourceKey
+            public class ParticleResourceKey : AHandlerElement
+            {
+                public ParticleResourceKey(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+                public ParticleResourceKey(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+                private UInt64 mLong01;
+                private byte mByte01;
+                private byte mByte02;
+                private UInt32 mInt01; //if Byte02 & 0x80
+                private byte mByte03;
+                private byte mByte04;
+                private UInt16 mShort01;
+                private UInt32 mInt02;
+                private UInt64 mLong02;
+                protected void Parse(Stream stream)
+                {
+                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Read(out mLong01);
+                    s.Read(out mByte01);
+                    s.Read(out mByte02);
+                    if ((Byte02 & 0x80) == 0x80) s.Read(out mInt01);
+                    s.Read(out mByte03);
+                    s.Read(out mByte04);
+                    s.Read(out mShort01);
+                    s.Read(out mInt02);
+                    s.Read(out mLong02);
+                }
+                public void UnParse(Stream stream)
+                {
+                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Write(Instance);
+                    s.Write(Byte01);
+                    s.Write(Byte02);
+                    if ((Byte02 & 0x80) == 0x80) s.Write(Int01);
+                    s.Write(Byte03);
+                    s.Write(Byte04);
+                    s.Write(Short01);
+                    s.Write(Int02);
+                    s.Write(Long02);
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override List<string> ContentFields
+                {
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+                [ElementPriority(1)]
+                public ulong Instance
+                {
+                    get { return mLong01; }
+                    set { mLong01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(2)]
+                public byte Byte01
+                {
+                    get { return mByte01; }
+                    set { mByte01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(3)]
+                public byte Byte02
+                {
+                    get { return mByte02; }
+                    set { mByte02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(4)]
+                public uint Int01
+                {
+                    get { return mInt01; }
+                    set { mInt01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(5)]
+                public byte Byte03
+                {
+                    get { return mByte03; }
+                    set { mByte03 = value; OnElementChanged(); }
+                }
+                [ElementPriority(6)]
+                public byte Byte04
+                {
+                    get { return mByte04; }
+                    set { mByte04 = value; OnElementChanged(); }
+                }
+                [ElementPriority(7)]
+                public ushort Short01
+                {
+                    get { return mShort01; }
+                    set { mShort01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(8)]
+                public uint Int02
+                {
+                    get { return mInt02; }
+                    set { mInt02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(9)]
+                public ulong Long02
+                {
+                    get { return mLong02; }
+                    set { mLong02 = value; OnElementChanged(); }
+                }
+            } 
+            #endregion
+
             public ParticleEffect(int apiVersion, EventHandler handler, ParticleEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
-            public ParticleEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public ParticleEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler, section)
             {
-                ParticleParameters = new ParticleParams(RecommendedApiVersion, handler);
+                mParticleParameters = new ParticleParams(0, handler);
+                mResourceKey = new ParticleResourceKey(0, handler);
                 mItemAList01 = new ItemAList(handler);
                 mItemBList01 = new ItemBList(handler);
                 mItemDList01 = new ItemDList(handler);
@@ -1775,8 +1810,8 @@ namespace s3piwrappers
 
 
             }
-            public ParticleEffect(int apiVersion, EventHandler handler, Stream s, ushort version)
-                : base(apiVersion, handler, s, version) { }
+            public ParticleEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section)
+                : base(apiVersion, handler, s, section) { }
 
             #region Fields
             private UInt32 mInt01;
@@ -2570,7 +2605,7 @@ namespace s3piwrappers
                 mItemDList01 = new ItemDList(handler, stream);
 
                 //Version 2+
-                if (mVersion >= 0x0002)
+                if (mSection.Version >= 0x0002)
                 {
                     s.Read(out mFloat45, ByteOrder.LittleEndian); //LE
                     s.Read(out mFloat46, ByteOrder.LittleEndian); //LE
@@ -2579,10 +2614,10 @@ namespace s3piwrappers
                 }
 
                 //Version 3+
-                if (mVersion >= 0x0003) s.Read(out mByte14);
+                if (mSection.Version >= 0x0003) s.Read(out mByte14);
 
                 //Version 4+
-                if (mVersion >= 0x0004) s.Read(out mFloat48);
+                if (mSection.Version >= 0x0004) s.Read(out mFloat48);
 
             }
             public override void UnParse(Stream stream)
@@ -2682,7 +2717,7 @@ namespace s3piwrappers
                 mItemDList01.UnParse(stream);
 
                 //Version 2+
-                if (mVersion >= 0x0002)
+                if (mSection.Version >= 0x0002)
                 {
                     s.Write(mFloat45, ByteOrder.LittleEndian); //LE
                     s.Write(mFloat46, ByteOrder.LittleEndian); //LE
@@ -2691,10 +2726,10 @@ namespace s3piwrappers
                 }
 
                 //Version 3+
-                if (mVersion >= 0x0003) s.Write(mByte14);
+                if (mSection.Version >= 0x0003) s.Write(mByte14);
 
                 //Version 4+
-                if (mVersion >= 0x0004) s.Write(mFloat48);
+                if (mSection.Version >= 0x0004) s.Write(mFloat48);
 
             }
 
@@ -2713,11 +2748,10 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public MetaparticleEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public MetaparticleEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
-                this.ParticleParameters = new ParticleParams(0, handler);
-                this.ItemCList01 = new ItemCList(handler);
+                ParticleParameters = new ParticleParams(0, handler);
                 FloatList01 = new FloatList(handler);
                 FloatList02 = new FloatList(handler);
                 FloatList03 = new FloatList(handler);
@@ -2726,16 +2760,19 @@ namespace s3piwrappers
                 FloatList06 = new FloatList(handler);
                 FloatList07 = new FloatList(handler);
                 FloatList08 = new FloatList(handler);
+                FloatList09 = new FloatList(handler);
+                FloatList10 = new FloatList(handler);
                 ColorList01 = new ColorList(handler);
-
-                this.ItemBList01 = new ItemBList(handler);
-
+                Vector3List01 = new Vector3ListLE(handler);
+                ItemBList01 = new ItemBList(handler);
+                ItemCList01 = new ItemCList(handler);
+                ItemDList01 = new ItemDList(handler);
                 Float08 = -1000000000.0f;
                 Float09 = 0f;
                 Float10 = -10000.0f;
                 Float11 = 10000.0f;
             }
-            public MetaparticleEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public MetaparticleEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
             #region Fields
             private UInt32 mInt01;
@@ -3730,8 +3767,8 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public DecalEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public DecalEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler, section)
             {
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
@@ -3743,7 +3780,7 @@ namespace s3piwrappers
                 mByteArray03 = new byte[8];
                 mByteArray04 = new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
             }
-            public DecalEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public DecalEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             #region Fields
@@ -3928,12 +3965,12 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public SequenceEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public SequenceEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
                 mElements = new ElementList(handler);
             }
-            public SequenceEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public SequenceEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
             public class ElementList : AResource.DependentList<SequenceElement>
             {
                 public ElementList(EventHandler handler) : base(handler) { }
@@ -4083,8 +4120,8 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public SoundEffect(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public SoundEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public SoundEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) : base(apiVersion, handler,section) { }
+            public SoundEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             private UInt32 mUint01;
@@ -4158,13 +4195,13 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public ShakeEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public ShakeEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
             }
-            public ShakeEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public ShakeEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             private float mFloat01;
@@ -4264,8 +4301,8 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public CameraEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public CameraEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
@@ -4273,7 +4310,7 @@ namespace s3piwrappers
                 mFloatList04 = new FloatList(handler);
                 mByteArray01 = new Byte[17];
             }
-            public CameraEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public CameraEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
             private UInt32 mInt01;
             private UInt16 mShort01;
@@ -4400,14 +4437,14 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public ModelEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public ModelEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler, section)
             {
                 mByteArray01 = new byte[12];
                 mByteArray02 = new byte[4];
                 mByteArray03 = new byte[8];
             }
-            public ModelEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public ModelEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             private byte[] mByteArray01;
@@ -4517,13 +4554,13 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public ScreenEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public ScreenEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
                 mVector3List01 = new Vector3ListLE(handler);
                 mVector3List02 = new Vector3List(handler);
             }
-            public ScreenEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public ScreenEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             private byte mByte01;
@@ -4631,8 +4668,8 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
-            public DistributeEffect(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public DistributeEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
+                : base(apiVersion, handler,section)
             {
                 mByteArray01 = new byte[5];
                 mByteArray02 = new byte[2];
@@ -4643,7 +4680,7 @@ namespace s3piwrappers
                 mByteArray07 = new byte[8];
                 mByteArray08 = new byte[5];
             }
-            public DistributeEffect(int apiVersion, EventHandler handler, Stream s, ushort version) : base(apiVersion, handler, s, version) { }
+            public DistributeEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
             private UInt32 mInt01;

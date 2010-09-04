@@ -636,8 +636,11 @@ namespace s3piwrappers.IO
 
         public void WriteZDString(String input, Encoding encoding, ByteOrder order)
         {
-            foreach (var c in input)
-                WriteChar(c, encoding, order);
+            if (!String.IsNullOrEmpty(input))
+            {
+                foreach (var c in input)
+                    WriteChar(c, encoding, order);
+            }
             Write((byte) 0);
         }
 
