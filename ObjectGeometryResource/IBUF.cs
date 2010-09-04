@@ -7,6 +7,10 @@ using System.IO;
 using s3pi.Settings;
 namespace s3piwrappers
 {
+    /// <summary>
+    /// Index Buffer when VRTF is not present
+    /// </summary>
+    /// <remarks>TypeId:0x0229684F</remarks>
     public class IBUF2: IBUF
     {
         public IBUF2(int apiVersion, EventHandler handler, IBUF basis) : base(apiVersion, handler, basis)
@@ -29,6 +33,10 @@ namespace s3piwrappers
             }
         }
     }
+    /// <summary>
+    /// Index Buffer when VRTF is present
+    /// </summary>
+    /// <remarks>TypeId:0x01D0E70F</remarks>
     public class IBUF : ARCOLBlock
     {
         public class Triangle : AHandlerElement, IEquatable<Triangle>,IComparable<Triangle>

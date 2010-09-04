@@ -7,6 +7,10 @@ using s3pi.Interfaces;
 using s3pi.Settings;
 namespace s3piwrappers
 {
+    /// <summary>
+    /// Vertex Buffer when VRTF is not present
+    /// </summary>
+    /// <remarks>TypeId:0x0229684B</remarks>
     public class VBUF2:VBUF
     {
         public VBUF2(int apiVersion, EventHandler handler, VBUF basis) : base(apiVersion, handler, basis)
@@ -29,6 +33,10 @@ namespace s3piwrappers
             }
         }
     }
+    /// <summary>
+    /// Vertex Buffer when VRTF is present
+    /// </summary>
+    /// <remarks>TypeId:0x01D0E6FB</remarks>
     public class VBUF :ARCOLBlock
     {
         private UInt32 mVersion;
