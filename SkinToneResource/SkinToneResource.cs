@@ -135,6 +135,7 @@ namespace s3piwrappers
         public class TextureKey : AHandlerElement, IEquatable<TextureKey>
         {
             #region Fields
+            private SkinToneResource mOwner;
             private AgeGenderFlags mAgeGenderFlags;
             private DataTypeFlags mTypeFlags;
             private UInt32 mSpecularKeyIndex;
@@ -153,7 +154,7 @@ namespace s3piwrappers
                     string str = "";
                     foreach (string field in this.ContentFields)
                     {
-                        if (!field.Equals("Value"))
+                        if (!field.Equals("Value") && !field.Equals("References"))
                         {
                             str = str + string.Format("{0}:\t{1}\n", field, this[field]);
                         }
@@ -176,45 +177,54 @@ namespace s3piwrappers
                 set { mTypeFlags = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            //[TGIBlockListContentField("References")]
+            [TGIBlockListContentField("References")]
             public UInt32 SpecularKeyIndex
             {
                 get { return mSpecularKeyIndex; }
                 set { mSpecularKeyIndex = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            //[TGIBlockListContentField("References")]
+            [TGIBlockListContentField("References")]
             public UInt32 DetailDarkKeyIndex
             {
                 get { return mDetailDarkKeyIndex; }
                 set { mDetailDarkKeyIndex = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            //[TGIBlockListContentField("References")]
+            [TGIBlockListContentField("References")]
             public UInt32 DetailLightKeyIndex
             {
                 get { return mDetailLightKeyIndex; }
                 set { mDetailLightKeyIndex = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
-            //[TGIBlockListContentField("References")]
+            [TGIBlockListContentField("References")]
             public UInt32 NormalMapKeyIndex
             {
                 get { return mNormalMapKeyIndex; }
                 set { mNormalMapKeyIndex = value; OnElementChanged(); }
             }
             [ElementPriority(7)]
-            //[TGIBlockListContentField("References")]
+            [TGIBlockListContentField("References")]
             public UInt32 OverlayKeyIndex
             {
                 get { return mOverlayKeyIndex; }
                 set { mOverlayKeyIndex = value; OnElementChanged(); }
             }
+            //Note: this is only here so elements can use TGIBlockListContentFieldAttribute
+            public TGIBlockList References
+            {
+                get { return mOwner.References; }
+                set { mOwner.References = value; }
+            }
             #endregion
 
             #region AHandlerElement
 
-            public TextureKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+            public TextureKey(int APIversion, EventHandler handler,SkinToneResource owner) : base(APIversion, handler)
+            {
+                mOwner = owner;
+            }
             public TextureKey(int APIversion, EventHandler handler, TextureKey basis)
                 : base(APIversion, handler)
             {
@@ -223,7 +233,7 @@ namespace s3piwrappers
                 ms.Position = 0L;
                 Parse(ms);
             }
-            public TextureKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
+            public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner) : this(APIversion, handler,owner) { Parse(s); }
 
             public override AHandlerElement Clone(EventHandler handler)
             {
@@ -301,16 +311,23 @@ namespace s3piwrappers
         #region Nested Type: TextureKeyList
         public class TextureKeyList : DependentList<TextureKey>
         {
-            public TextureKeyList(EventHandler handler) : base(handler) { }
-            public TextureKeyList(EventHandler handler, Stream s) : base(handler, s) { }
+            private SkinToneResource mOwner;
+            public TextureKeyList(EventHandler handler,SkinToneResource owner) : base(handler)
+            {
+                mOwner = owner;
+            }
+            public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner) : this(handler,owner)
+            {
+                Parse(s);
+            }
             public override void Add()
             {
-                this.Add(new TextureKey(0, null));
+                this.Add(new TextureKey(0, null,mOwner));
             }
 
             protected override TextureKey CreateElement(Stream s)
             {
-                TextureKey obj = new TextureKey(0, null);
+                TextureKey obj = new TextureKey(0, null,mOwner);
                 obj.Parse(s);
                 return obj;
             }
@@ -418,7 +435,7 @@ namespace s3piwrappers
             mShaderKeyList = new ShaderKeyList(this.OnResourceChanged, s);
             mSkinRampIndex1 = br.ReadUInt32();
             mSkinRampIndex2 = br.ReadUInt32();
-            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s);
+            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s,this);
             mIsDominant = br.ReadByte();
             mReferences = new TGIBlockList(this.OnResourceChanged, s, tgioffset, tgisize);
         }
@@ -434,7 +451,7 @@ namespace s3piwrappers
             mShaderKeyList.UnParse(s);
             bw.Write(mSkinRampIndex1);
             bw.Write(mSkinRampIndex2);
-            if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged);
+            if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged,this);
             mTextureKeyList.UnParse(s);
             bw.Write(mIsDominant);
             if (mReferences == null) mReferences = new TGIBlockList(OnResourceChanged, false);
