@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 using s3pi.Interfaces;
 using System.IO;
 using s3pi.Custom;
 using System.Linq;
+using s3pi.Settings;
 namespace s3piwrappers
 {
     public enum ClipEventType
@@ -107,7 +109,9 @@ namespace s3piwrappers
                 long endOffset = s.Position;
                 for (int i = 0; i < count; i++)
                 {
-                    s.Seek(offsets[i], SeekOrigin.Begin);
+                    //s.Seek(offsets[i], SeekOrigin.Begin);
+                    if (s.Position != offsets[i])
+                        throw new InvalidDataException(String.Format("Bad Offset: Expected 0x{0:X8}, but got 0x{1:X8}.", offsets[i], s.Position));
                     ((IList<T>)this).Add(CreateElement(s));
                 }
             }
@@ -202,7 +206,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                UInt32 padding = br.ReadUInt32(); //7E7E7E7E padding
+                if (br.ReadUInt32() != 0x7E7E7E7E) throw new InvalidDataException(String.Format("Expected 0x7E7E7E7E Padding at 0x{0:X8}", s.Position - 4)); //7E7E7E7E padding
                 mIkTargets = new CountedOffsetItemList<IKTarget>(handler, s);
             }
 
@@ -336,7 +340,7 @@ namespace s3piwrappers
                 BinaryReader br = new BinaryReader(s);
                 string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
                 if (magic != "=CE=")
-                    throw new Exception(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
+                    throw new InvalidDataException(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
                 mVersion = br.ReadUInt32();
                 mEvents = new EventList(handler, s);
             }
@@ -421,7 +425,7 @@ namespace s3piwrappers
                 mShort01 = 0xC1E4;
             }
             protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
-                : this(apiVersion, handler,type)
+                : this(apiVersion, handler, type)
             {
                 if (s != null) Parse(s);
             }
@@ -563,8 +567,8 @@ namespace s3piwrappers
             internal ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
                 : base(apiVersion, handler, type)
             {
-                 mMatrix4x4 = new Single[16];
-                 if (s != null) Parse(s);
+                mMatrix4x4 = new Single[16];
+                if (s != null) Parse(s);
             }
             public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
                 : base(apiVersion, handler, basis)
@@ -1009,7 +1013,7 @@ namespace s3piwrappers
 
             public string Value
             {
-                get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]",mX,mY,mZ,mW); }
+                get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]", mX, mY, mZ, mW); }
             }
             protected override void Parse(Stream s)
             {
@@ -1067,11 +1071,10 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
                 sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                sb.AppendFormat("IK Target Info Table:\n{0}\n", mIKTargetInfo.Value);
+                sb.AppendFormat("IK Target Info Table:\n{0}", mIKTargetInfo.Value);
                 sb.AppendFormat("Actor:\t{0}\n", mActorName);
-                sb.AppendFormat("Event Table:\n{0}\n", mEventSectionTable.Value);
+                sb.AppendFormat("Event Table:\n{0}", mEventSectionTable.Value);
                 sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
-                //sb.AppendFormat("Animation Data:\n{0}\n", mAnimation.Value);
                 return sb.ToString();
 
             }
@@ -1141,13 +1144,6 @@ namespace s3piwrappers
             get { return mEndSection; }
             set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
         }
-        //[ElementPriority(8)]
-        //[DataGridExpandable(true)]
-        //public S3Clip Animation
-        //{
-        //    get { return mAnimation; }
-        //    set { mAnimation = value; OnResourceChanged(this, new EventArgs()); }
-        //} 
         #endregion
 
         #region I/O
@@ -1156,34 +1152,84 @@ namespace s3piwrappers
             BinaryReader br = new BinaryReader(s);
 
             //header
-            if (br.ReadUInt32() != 0x6B20C4F3) throw new Exception("Not a valid CLIP resource");
-            long linkedClipOffset = br.ReadUInt32();
+            if (br.ReadUInt32() != 0x6B20C4F3) throw new
+                InvalidDataException("Not a valid CLIP resource: Expected CLIP ID(0x6B20C4F3)");
+            uint offset;
+            offset = br.ReadUInt32();
+            long linkedClipOffset = offset > 0 ? s.Position + offset - 4 : 0;
             long clipSize = br.ReadUInt32();
-            long clipOffset = br.ReadUInt32() + s.Position - 4;
-            long slotOffset = br.ReadUInt32() + s.Position - 4;
-            long actorOffset = br.ReadUInt32() + s.Position - 4;
-            long eventOffset = br.ReadUInt32() + s.Position - 4;
+            offset = br.ReadUInt32();
+            long clipOffset = offset > 0 ? s.Position + offset - 4 : 0;
+            offset = br.ReadUInt32();
+            long ikOffset = offset > 0 ? s.Position + offset - 4 : 0;
+            offset = br.ReadUInt32();
+            long actorOffset = offset > 0 ? s.Position + offset - 4 : 0;
+            offset = br.ReadUInt32();
+            long eventOffset = offset > 0 ? s.Position + offset - 4 : 0;
             mUnknown01 = br.ReadUInt32();
             mUnknown02 = br.ReadUInt32();
-            long endOffset = br.ReadUInt32() + s.Position - 4;
+            offset = br.ReadUInt32();
+            long endOffset = offset > 0 ? s.Position + offset - 4 : 0;
 
+            if (checking && linkedClipOffset != 0)
+                throw new NotSupportedException("Linked clip not supported.");
+            if (checking && clipOffset == 0)
+                throw new InvalidDataException("No Clip offset found");
+            if (checking && actorOffset == 0)
+                throw new InvalidDataException("No Actor offset found");
+            if (checking && eventOffset == 0)
+                throw new InvalidDataException("No Event offset found");
+            if (checking && endOffset == 0)
+                throw new InvalidDataException("No End offset found");
+            for (int i = 0; i < 16; i++)
+            {
+                if (br.ReadByte() != 0 && checking)
+                    throw new InvalidDataException("Expected 0x00");
+            }
 
-            s.Seek(clipOffset, SeekOrigin.Begin);
+            if (checking && s.Position != clipOffset)
+                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", clipOffset, s.Position));
+
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
-            //mAnimation = new s3piwrappers.S3Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
+            while ((s.Position % 4) != 0)
+                if (br.ReadByte() != 0x7E && checking)
+                    throw new InvalidDataException("Expected padding char 0x7E");
 
-            s.Seek(slotOffset, SeekOrigin.Begin);
-            mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
-
-            s.Seek(actorOffset, SeekOrigin.Begin);
+            if (ikOffset > 0)
+            {
+                if (checking && s.Position != ikOffset)
+                    throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", ikOffset, s.Position));
+                mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
+                while ((s.Position % 4) != 0)
+                    if (br.ReadByte() != 0x7E && checking)
+                        throw new InvalidDataException("Expected padding char 0x7E");
+            }
+            else
+            {
+                mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
+            }
+            if (checking && s.Position != actorOffset)
+                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", actorOffset, s.Position));
             mActorName = br.ReadZString();
+            while ((s.Position % 4) != 0)
+                if (br.ReadByte() != 0x7E && checking)
+                    throw new InvalidDataException("Expected padding char 0x7E");
 
-            s.Seek(eventOffset, SeekOrigin.Begin);
+            if (checking && s.Position != eventOffset)
+                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", eventOffset, s.Position));
             mEventSectionTable = new EventTable(0, this.OnResourceChanged, s);
+            while ((s.Position % 4) != 0)
+                if (br.ReadByte() != 0x7E && checking)
+                    throw new InvalidDataException("Expected padding char 0x7E");
 
-            s.Seek(endOffset, SeekOrigin.Begin);
+            if (checking && s.Position != endOffset)
+                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", endOffset, s.Position));
             mEndSection = new ClipEndSection(0, this.OnResourceChanged, s);
+
+            if (checking && s.Position != s.Length)
+                throw new InvalidDataException("Unexpected end of data.");
+
         }
         protected override Stream UnParse()
         {
@@ -1193,10 +1239,11 @@ namespace s3piwrappers
             long mainOffsetList = s.Position;
             long clipSize = 0;
             long clipOffset = 0;
-            long slotOffset = 0;
+            long ikOffset = 0;
             long actorOffset = 0;
             long eventOffset = 0;
             long endOffset = 0;
+            bool hasIkData = mIKTargetInfo.IKChains.Count > 0;
             s.Seek(52, SeekOrigin.Current);
 
             clipSize = mS3Clip.Length;
@@ -1204,10 +1251,12 @@ namespace s3piwrappers
             bw.Write(mS3Clip);
             while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
 
-            slotOffset = s.Position;
-            mIKTargetInfo.UnParse(s);
-            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
-
+            if (hasIkData)
+            {
+                ikOffset = s.Position;
+                mIKTargetInfo.UnParse(s);
+                while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+            }
             actorOffset = s.Position;
             bw.WriteZString(mActorName);
             while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
@@ -1215,7 +1264,6 @@ namespace s3piwrappers
             eventOffset = s.Position;
             mEventSectionTable.UnParse(s);
             while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
-
 
             endOffset = s.Position;
             mEndSection.UnParse(s);
@@ -1225,7 +1273,7 @@ namespace s3piwrappers
             bw.Write((uint)(0));
             bw.Write((uint)clipSize);
             bw.Write((uint)(clipOffset - s.Position));
-            bw.Write((uint)(slotOffset - s.Position));
+            bw.Write((uint)(hasIkData ? ikOffset - s.Position : 0));
             bw.Write((uint)(actorOffset - s.Position));
             bw.Write((uint)(eventOffset - s.Position));
             bw.Write(mUnknown01);
@@ -1237,15 +1285,12 @@ namespace s3piwrappers
         }
         #endregion
 
-        #region s3pi
         public override int RecommendedApiVersion
         {
             get { return kRecommendedApiVersion; }
         }
-        static bool checking = s3pi.Settings.Settings.Checking;
+        static bool checking = Settings.Checking;
         const int kRecommendedApiVersion = 1;
-        #endregion
-
 
     }
 }
