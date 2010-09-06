@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Text;
 using s3pi.Interfaces;
 using System.IO;
-using s3pi.Custom;
 using System.Linq;
 using s3pi.Settings;
 namespace s3piwrappers
@@ -157,7 +156,7 @@ namespace s3piwrappers
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < mIkChains.Count; i++)
                     {
-                        sb.AppendFormat("==IK Chain[{0}]==\n{1}\n", i, mIkChains[i].Value);
+                        sb.AppendFormat("==IK Chain[{0}]==\n{1}", i, mIkChains[i].Value);
                     }
                     return sb.ToString();
                 }
@@ -195,7 +194,7 @@ namespace s3piwrappers
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < mIkTargets.Count; i++)
                     {
-                        sb.AppendFormat("Target[{0:00}]\n{1}\n", i, mIkTargets[i].Value);
+                        sb.AppendFormat("Target[{0:00}]{1}\n", i, mIkTargets[i].Value);
                     }
                     return sb.ToString();
                 }
@@ -239,14 +238,7 @@ namespace s3piwrappers
             }
             public string Value
             {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Index:\t0x{0:X8}\n", mIndex);
-                    sb.AppendFormat("Target Namespace:\t{0}\n", mTargetNamespace);
-                    sb.AppendFormat("Target:\t{0}\n", mTargetName);
-                    return sb.ToString();
-                }
+                get { return ToString(); }
             }
             [ElementPriority(1)]
             public uint Index
@@ -284,7 +276,7 @@ namespace s3piwrappers
             }
             public override string ToString()
             {
-                return String.Format("{0:X8}:{1},{2}", mIndex, mTargetNamespace, mTargetName);
+                return String.Format("(0x{0:X8}){1}:{2}", mIndex, mTargetNamespace, mTargetName);
             }
 
             public bool Equals(IKTarget other)
@@ -1074,9 +1066,15 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
                 sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                sb.AppendFormat("IK Target Info Table:\n{0}", mIKTargetInfo.Value);
+                if (mIKTargetInfo.IKChains.Count > 0)
+                {
+                    sb.AppendFormat("IK Target Info Table:\n{0}", mIKTargetInfo.Value);
+                }
                 sb.AppendFormat("Actor:\t{0}\n", mActorName);
-                sb.AppendFormat("Event Table:\n{0}", mEventSectionTable.Value);
+                if (mEventSectionTable.Events.Count > 0)
+                {
+                    sb.AppendFormat("Event Table:\n{0}", mEventSectionTable.Value);
+                }
                 sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
                 return sb.ToString();
 
