@@ -138,7 +138,10 @@ namespace s3piwrappers
         public class IKTargetTable : DependentElement
         {
             private CountedOffsetItemList<IKChainEntry> mIkChains;
-            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mIkChains = new CountedOffsetItemList<IKChainEntry>(base.handler);
+            }
             public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
             public CountedOffsetItemList<IKChainEntry> IKChains
@@ -421,7 +424,7 @@ namespace s3piwrappers
             {
                 mType = type;
                 mFloat01 = -1f;
-                mFloat02 = -2f;
+                mFloat02 = -1f;
                 mShort01 = 0xC1E4;
             }
             protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
