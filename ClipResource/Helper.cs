@@ -5,7 +5,7 @@ using System.IO;
 
 namespace s3piwrappers
 {
-    internal static class ClipIOExtensions
+    public static class ClipIOExtensions
     {
         public static string ReadZString(this BinaryReader br)
         {

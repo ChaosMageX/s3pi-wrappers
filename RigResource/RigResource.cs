@@ -247,7 +247,7 @@ namespace s3piwrappers
             private Int32 mSlotInfoRoot;
             private Int32 mSlotOffset;
             private Int32 mSlotOffsetRoot;
-            private UInt32 mUnknown03;
+            private UInt32 mInfoNodeFlags;
             private Int32 mInfoNode01;
             private Int32 mInfoNode02;
             private Int32 mInfoNode03;
@@ -311,10 +311,10 @@ namespace s3piwrappers
                 set { mSlotOffsetRoot = value; OnElementChanged(); }
             }
             [ElementPriority(9)]
-            public uint Unknown03
+            public uint InfoNodeFlags
             {
-                get { return mUnknown03; }
-                set { mUnknown03 = value; OnElementChanged(); }
+                get { return mInfoNodeFlags; }
+                set { mInfoNodeFlags = value; OnElementChanged(); }
             }
             [ElementPriority(10)]
             public Int32 InfoNode01
@@ -407,7 +407,7 @@ namespace s3piwrappers
                 mSlotInfoRoot = br.ReadInt32();
                 mSlotOffset = br.ReadInt32();
                 mSlotOffsetRoot = br.ReadInt32();
-                mUnknown03 = br.ReadUInt32();
+                mInfoNodeFlags = br.ReadUInt32();
                 mInfoNode01 = br.ReadInt32();
                 mInfoNode02 = br.ReadInt32();
                 mInfoNode03 = br.ReadInt32();
@@ -445,7 +445,7 @@ namespace s3piwrappers
                 bw.Write(mSlotInfoRoot);
                 bw.Write(mSlotOffset);
                 bw.Write(mSlotOffsetRoot);
-                bw.Write(mUnknown03);
+                bw.Write(mInfoNodeFlags);
                 bw.Write(mInfoNode01);
                 bw.Write(mInfoNode02);
                 bw.Write(mInfoNode03);
@@ -569,7 +569,7 @@ namespace s3piwrappers
                         sb.AppendFormat("SlotInfoRoot:\t{0}\n", GetBoneIndexName(ikc.SlotInfoRoot));
                         sb.AppendFormat("SlotOffset:\t{0}\n", GetBoneIndexName(ikc.SlotOffset));
                         sb.AppendFormat("SlotOffsetRoot:\t{0}\n", GetBoneIndexName(ikc.SlotOffsetRoot));
-                        sb.AppendFormat("Unknown03:\t0x{0:X8}\n", ikc.Unknown03);
+                        sb.AppendFormat("InfoNodeFlags:\t0x{0:X8}\n", ikc.InfoNodeFlags);
                         sb.AppendFormat("InfoNode01:\t{0}\n", GetBoneIndexName(ikc.InfoNode01));
                         sb.AppendFormat("InfoNode02:\t{0}\n", GetBoneIndexName(ikc.InfoNode02));
                         sb.AppendFormat("InfoNode03:\t{0}\n", GetBoneIndexName(ikc.InfoNode03));

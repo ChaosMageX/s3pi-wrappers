@@ -7,19 +7,21 @@ namespace s3piwrappers
 {
     public class MLOD : ARCOLBlock
     {
-        public class GeometryStateList: AResource.DependentList<GeometryState>
+        public class GeometryStateList : AResource.DependentList<GeometryState>
         {
-            public GeometryStateList(EventHandler handler) : base(handler)
+            public GeometryStateList(EventHandler handler)
+                : base(handler)
             {
             }
 
-            public GeometryStateList(EventHandler handler, Stream s) : base(handler, s)
+            public GeometryStateList(EventHandler handler, Stream s)
+                : base(handler, s)
             {
             }
 
             public override void Add()
             {
-                Add(new object[] {});
+                Add(new object[] { });
             }
 
             protected override GeometryState CreateElement(Stream s)
@@ -62,31 +64,31 @@ namespace s3piwrappers
             public uint StateNameHash
             {
                 get { return mStateNameHash; }
-                set { mStateNameHash= value; OnElementChanged(); }
+                set { mStateNameHash = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
             public int IbufIndex
             {
                 get { return mIBUFIndex; }
-                set { mIBUFIndex= value; OnElementChanged(); }
+                set { mIBUFIndex = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
             public int VbufIndex
             {
                 get { return mVBUFIndex; }
-                set { mVBUFIndex= value; OnElementChanged(); }
+                set { mVBUFIndex = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
             public int VertexCount
             {
                 get { return mVertexCount; }
-                set { mVertexCount= value; OnElementChanged(); }
+                set { mVertexCount = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
             public int FaceCount
             {
                 get { return mFaceCount; }
-                set { mFaceCount= value; OnElementChanged(); }
+                set { mFaceCount = value; OnElementChanged(); }
             }
 
             private void Parse(Stream s)
@@ -227,13 +229,13 @@ namespace s3piwrappers
         public class GroupList : AResource.DependentList<Group>
         {
             private MLOD mOwner;
-            public GroupList(EventHandler handler,MLOD owner)
+            public GroupList(EventHandler handler, MLOD owner)
                 : base(handler)
             {
                 mOwner = owner;
             }
 
-            public GroupList(EventHandler handler,MLOD owner, Stream s)
+            public GroupList(EventHandler handler, MLOD owner, Stream s)
                 : this(handler, owner)
             {
                 Parse(s);
@@ -246,7 +248,7 @@ namespace s3piwrappers
 
             protected override Group CreateElement(Stream s)
             {
-                return new Group(0, handler,mOwner, s);
+                return new Group(0, handler, mOwner, s);
             }
 
             protected override void WriteElement(Stream s, Group element)
@@ -283,9 +285,9 @@ namespace s3piwrappers
             private Single mUnknown04;
             private Single mUnknown05;
             private MLOD mOwner;
-            
 
-            public Group(int APIversion, EventHandler handler,MLOD owner)
+
+            public Group(int APIversion, EventHandler handler, MLOD owner)
                 : base(APIversion, handler)
             {
                 mOwner = owner;
@@ -294,7 +296,7 @@ namespace s3piwrappers
                 mGeometryStates = new GeometryStateList(handler);
             }
             public Group(int APIversion, EventHandler handler, MLOD owner, Stream s)
-                : this(APIversion, handler,owner)
+                : this(APIversion, handler, owner)
             {
                 Parse(s);
             }
@@ -434,43 +436,36 @@ namespace s3piwrappers
 
             private void Parse(Stream s)
             {
-                try
+                BinaryReader br = new BinaryReader(s);
+                long expectedSize = br.ReadUInt32();
+                long start = s.Position;
+                mGroupNameHash = br.ReadUInt32();
+                mMATDIndex01 = br.ReadUInt32();
+                mVRTFIndex = br.ReadUInt32();
+                mVBUFIndex = br.ReadUInt32();
+                mIBUFIndex = br.ReadUInt32();
+                mVBUFType = br.ReadUInt32();
+                mVBUFOffset = br.ReadUInt64();
+                mIBUFOffset = br.ReadUInt64();
+                mVBUFCount = br.ReadUInt32();
+                mIBUFCount = br.ReadUInt32();
+                mBounds = new BoundingBox(0, handler, s);
+                mSKINIndex = br.ReadUInt32();
+                mJointReferences = new JointReferenceList(handler, s);
+                mMATDIndex02 = br.ReadUInt32();
+                mGeometryStates = new GeometryStateList(handler, s);
+                if (mOwner.Version > 0x00000201)
                 {
-                    BinaryReader br = new BinaryReader(s);
-                    long expectedSize = br.ReadUInt32();
-                    long start = s.Position;
-                    mGroupNameHash = br.ReadUInt32();
-                    mMATDIndex01 = br.ReadUInt32();
-                    mVRTFIndex = br.ReadUInt32();
-                    mVBUFIndex = br.ReadUInt32();
-                    mIBUFIndex = br.ReadUInt32();
-                    mVBUFType = br.ReadUInt32();
-                    mVBUFOffset = br.ReadUInt64();
-                    mIBUFOffset = br.ReadUInt64();
-                    mVBUFCount = br.ReadUInt32();
-                    mIBUFCount = br.ReadUInt32();
-                    mBounds = new BoundingBox(0, handler, s);
-                    mSKINIndex = br.ReadUInt32();
-                    mJointReferences = new JointReferenceList(handler, s);
-                    mMATDIndex02 = br.ReadUInt32();
-                    mGeometryStates = new GeometryStateList(handler, s);
-                    if (mOwner.Version > 0x00000201)
-                    {
-                        mUnknown01 = br.ReadSingle();
-                        mUnknown02 = br.ReadSingle();
-                        mUnknown03 = br.ReadSingle();
-                        mUnknown04 = br.ReadSingle();
-                        mUnknown05 = br.ReadSingle();
-                    }
-                    long actualSize = s.Position - start;
-                    if (checking && actualSize != expectedSize)
-                        throw new Exception(String.Format("Expected end at {0}, actual end was {1}", expectedSize,
-                                                          actualSize));
+                    mUnknown01 = br.ReadSingle();
+                    mUnknown02 = br.ReadSingle();
+                    mUnknown03 = br.ReadSingle();
+                    mUnknown04 = br.ReadSingle();
+                    mUnknown05 = br.ReadSingle();
                 }
-                catch(Exception e)
-                {
-                    throw;
-                }
+                long actualSize = s.Position - start;
+                if (checking && actualSize != expectedSize)
+                    throw new Exception(String.Format("Expected end at {0}, actual end was {1}", expectedSize,
+                                                      actualSize));
 
             }
             public void UnParse(Stream s)
@@ -505,7 +500,7 @@ namespace s3piwrappers
                 long end = s.Position;
                 long size = end - start;
                 s.Seek(sizeOffset, SeekOrigin.Begin);
-                bw.Write((uint) size);
+                bw.Write((uint)size);
                 s.Seek(end, SeekOrigin.Begin);
             }
             public string Value
@@ -560,7 +555,7 @@ namespace s3piwrappers
                 get
                 {
                     var fields = GetContentFields(base.requestedApiVersion, GetType());
-                    if(mOwner.Version <0x00000202)
+                    if (mOwner.Version < 0x00000202)
                     {
                         fields.Remove("Unknown01");
                         fields.Remove("Unknown02");
@@ -568,7 +563,7 @@ namespace s3piwrappers
                         fields.Remove("Unknown04");
                         fields.Remove("Unknown05");
                     }
-                    return fields; 
+                    return fields;
                 }
             }
 
@@ -595,7 +590,7 @@ namespace s3piwrappers
             : base(APIversion, handler, null)
         {
             mVersion = 0x00000203;
-            mGroups = new GroupList(handler,this);
+            mGroups = new GroupList(handler, this);
         }
         public MLOD(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)
@@ -644,7 +639,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mGroups = new GroupList(handler,this, s);
+            mGroups = new GroupList(handler, this, s);
         }
 
         public override Stream UnParse()
@@ -653,7 +648,7 @@ namespace s3piwrappers
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            if (mGroups == null) mGroups = new GroupList(handler,this);
+            if (mGroups == null) mGroups = new GroupList(handler, this);
             mGroups.UnParse(s);
             return s;
         }

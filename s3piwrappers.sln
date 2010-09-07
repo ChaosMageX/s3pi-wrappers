@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipResource", "ClipResource\ClipResource.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColourInfoResource", "ColourInfoResource\ColourInfoResource.csproj", "{8B5BD201-21D4-44CB-A62D-CC734ECF2E28}"
@@ -22,6 +22,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigResource", "RigResource\RigResource.csproj", "{96239738-405A-437E-903A-C51B9521912D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigExport", "RigExport\RigExport.csproj", "{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackMaskResource", "TrackMaskResource\TrackMaskResource.csproj", "{B075928C-0D4F-4E83-81CD-1972F726B1E2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,10 +131,21 @@ Global
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|x86.ActiveCfg = Debug|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|x86.Build.0 = Debug|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Any CPU.ActiveCfg = Release|x86
+		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Any CPU.Build.0 = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Mixed Platforms.Build.0 = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.ActiveCfg = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.Build.0 = Release|x86
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

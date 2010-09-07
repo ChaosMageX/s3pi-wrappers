@@ -21,7 +21,7 @@ namespace s3piwrappers
             private bool mIsGenetic;
             private Color mDiffuseColour;
             private Color mRootColour;
-            private Color mHighlightColor;
+            private Color mHighlightColour;
             private Color mTipColour;
             private Color mHaloHighColour;
             private Color mHaloLowColour;
@@ -70,10 +70,10 @@ namespace s3piwrappers
                 set { mRootColour = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public Color HighlightColor
+            public Color HighlightColour
             {
-                get { return mHighlightColor; }
-                set { mHighlightColor = value; OnElementChanged(); }
+                get { return mHighlightColour; }
+                set { mHighlightColour = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
             public Color TipColour
@@ -149,7 +149,7 @@ namespace s3piwrappers
                 mIsGenetic = br.ReadBoolean();
                 mDiffuseColour = Color.FromArgb(br.ReadInt32());
                 mRootColour = Color.FromArgb(br.ReadInt32());
-                mHighlightColor = Color.FromArgb(br.ReadInt32());
+                mHighlightColour = Color.FromArgb(br.ReadInt32());
                 mTipColour = Color.FromArgb(br.ReadInt32());
                 mHaloHighColour = Color.FromArgb(br.ReadInt32());
                 mHaloLowColour = Color.FromArgb(br.ReadInt32());
@@ -163,7 +163,7 @@ namespace s3piwrappers
                 bw.Write(mIsGenetic);
                 bw.Write(mDiffuseColour.ToArgb());
                 bw.Write(mRootColour.ToArgb());
-                bw.Write(mHighlightColor.ToArgb());
+                bw.Write(mHighlightColour.ToArgb());
                 bw.Write(mTipColour.ToArgb());
                 bw.Write(mHaloHighColour.ToArgb());
                 bw.Write(mHaloLowColour.ToArgb());

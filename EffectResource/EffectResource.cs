@@ -371,6 +371,7 @@ namespace s3piwrappers
         #endregion
 
         #region Effect Sections
+
         #region Nested Type: EffectSection
 
         public abstract class AbstractEffectSection : AHandlerElement, IEquatable<AbstractEffectSection>
@@ -427,8 +428,9 @@ namespace s3piwrappers
                 mVersion = version;
             }
 
-            private UInt16 mType;
-            private UInt16 mVersion;
+            protected UInt16 mType;
+            protected UInt16 mVersion;
+            protected EffectList mList;
             [ElementPriority(1)]
             public UInt16 BlockTypeId
             {
@@ -440,6 +442,12 @@ namespace s3piwrappers
                 get { return mVersion; }
                 set { mVersion = value; OnElementChanged(); }
             }
+            [ElementPriority(3)]
+            public EffectList Items
+            {
+                get { return mList; }
+                set { mList = value; OnElementChanged(); }
+            }
             public bool Equals(AbstractEffectSection other)
             {
                 return mType.Equals(other.mType);
@@ -449,7 +457,6 @@ namespace s3piwrappers
         public abstract class AbstractEffectSection<TEffect> : AbstractEffectSection
             where TEffect : AbstractEffect, IEquatable<TEffect>
         {
-            private ushort mVersion;
             protected AbstractEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version)
                 : base(apiVersion, handler, type, version)
             {
@@ -465,13 +472,6 @@ namespace s3piwrappers
                     mList = new EffectList<TEffect>(handler,this);
                 }
                 else { Parse(s); }
-            }
-            private EffectList<TEffect> mList;
-            [ElementPriority(3)]
-            public EffectList<TEffect> Items
-            {
-                get { return mList; }
-                set { mList = value; OnElementChanged(); }
             }
             private void Parse(Stream s)
             {
@@ -632,11 +632,33 @@ namespace s3piwrappers
 
         #region Effects
         #region Nested Type: EffectList
-
-        public class EffectList<TEffect> : AResource.DependentList<TEffect>
+        public class EffectList<TEffect> : EffectList
             where TEffect : AbstractEffect, IEquatable<TEffect>
         {
-            private AbstractEffectSection mSection;
+            public EffectList(EventHandler handler, Stream s, AbstractEffectSection section) : base(handler, s, section)
+            {
+            }
+
+            public EffectList(EventHandler handler, AbstractEffectSection section) : base(handler, section)
+            {
+            }
+
+            protected override Type GetElementType(params object[] fields)
+            {
+                return typeof(TEffect);
+            }
+            protected override AbstractEffect CreateElement(Stream s)
+            {
+                return (AbstractEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mSection });
+            }
+            public override void Add()
+            {
+                ((IList<AbstractEffect>)this).Add((AbstractEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, mSection }));
+            }
+        }
+        public abstract class EffectList : AResource.DependentList<AbstractEffect>
+        {
+            protected AbstractEffectSection mSection;
             public EffectList(EventHandler handler, Stream s, AbstractEffectSection section)
                 : this(handler,section)
             {
@@ -657,22 +679,11 @@ namespace s3piwrappers
             {
                 new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
             }
-            protected override Type GetElementType(params object[] fields)
-            {
-                return typeof(TEffect);
-            }
-            protected override TEffect CreateElement(Stream s)
-            {
-                var e = (TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mSection });
-                return e;
-            }
 
-            public override void Add()
-            {
-                ((IList<TEffect>)this).Add((TEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, mSection }));
-            }
+            protected abstract override AbstractEffect CreateElement(Stream s);
+            public abstract override void Add();
 
-            protected override void WriteElement(Stream s, TEffect element)
+            protected override void WriteElement(Stream s, AbstractEffect element)
             {
                 element.UnParse(s);
             }
