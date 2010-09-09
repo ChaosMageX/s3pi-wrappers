@@ -7,7 +7,7 @@ namespace s3piwrappers
     {
         public ColourInfoResourceHandler()
         {
-            Add(typeof(ColourInfoResource), new List<string>(new string[] { "0x063261DA", "0x06302271", "0x3A65AF29", "0x6326213" }));
+            Add(typeof(ColourInfoResource), new List<string>(new string[] { "0x063261DA", "0x06302271", "0x3A65AF29", "0x06326213" }));
         }
     }
 }
