@@ -8,14 +8,10 @@ namespace s3piwrappers.Granny2
     {
         NoCompression,
         Oodle0Compression,
-        Oodle1Compression,
-        OnePastLastCompressionType,
+        Oodle1Compression
     }
     public class IO
     {
-        [DllImport("granny2.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "GrannyGetTemporaryDirectory")]
-        public static extern string GetTemporaryDirectory();
-        
         public static IntPtr FromMemory(Stream s)
         {
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace s3piwrappers.Granny2
 {
@@ -31,9 +32,10 @@ namespace s3piwrappers.Granny2
 
         public void Save(string filename, CompressionType c)
         {
+            string tempDir = Path.GetTempPath();
             IntPtr pFileInfo = Marshal.AllocHGlobal(Marshal.SizeOf(this));
             Marshal.StructureToPtr(this,pFileInfo,false);
-            IntPtr Builder = FileBuilder.BeginFile(1, 0x8000001C, Constants.GrannyFileMV_Old, IO.GetTemporaryDirectory(), "_gr2");
+            IntPtr Builder = FileBuilder.BeginFile(1, 0x8000001C, Constants.GrannyFileMV_Old, tempDir, "_gr2");
             IntPtr Writer = DataTreeWriter.BeginFileDataTreeWriting(Constants.GrannyFileInfoType, pFileInfo, 0, 0);
             FileBuilder.SetFileSectionFormat(Builder, 0, c, 4);
             if(!DataTreeWriter.WriteDataTreeToFileBuilder(Writer, Builder))
