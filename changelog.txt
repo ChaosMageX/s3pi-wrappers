@@ -1,0 +1,8 @@
+2010-09-10:
+RigResource:
+	*Removed platform-specific code to resolve problem in Windows7
+EffectResource:
+	*Updated spec(thanks to Rick's source code)
+ColourInfoResource:
+	*fixed typo that stopped type 0x06326213 from being handled
+
