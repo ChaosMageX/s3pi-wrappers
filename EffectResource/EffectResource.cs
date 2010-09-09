@@ -4,12 +4,186 @@ using System.IO;
 using s3pi.Interfaces;
 using System.ComponentModel;
 using System.Globalization;
-using s3piwrappers.IO;
+using s3piwrappers.Effects.IO;
 
-namespace s3piwrappers
+namespace s3piwrappers.Effects
 {
     public class EffectResource : AResource
     {
+        #region Nested Type: Transform
+        public class Transform : AHandlerElement, IEquatable<Transform>
+        {
+
+            public Transform(int apiVersion, EventHandler handler, Transform basis)
+                : base(apiVersion, handler)
+            {
+                MemoryStream ms = new MemoryStream();
+                basis.UnParse(ms);
+                ms.Position = 0L;
+                Parse(ms);
+            }
+            public Transform(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public Transform(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+                mOrientation = new Matrix3x3LE(0, handler);
+                mPosition = new Vector3LE(0, handler);
+            }
+
+            #region Fields
+            private ushort mShort01;
+            private float mFloat01;
+            private Matrix3x3LE mOrientation;
+            private Vector3LE mPosition;
+            #endregion
+
+            #region Properties
+            [ElementPriority(1)]
+            public ushort Short01
+            {
+                get { return mShort01; }
+                set { mShort01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Float01
+            {
+                get { return mFloat01; }
+                set { mFloat01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public Matrix3x3LE Orientation
+            {
+                get { return mOrientation; }
+                set { mOrientation = value; OnElementChanged(); }
+            }
+            [ElementPriority(4)]
+            public Vector3LE Position
+            {
+                get { return mPosition; }
+                set { mPosition = value; OnElementChanged(); }
+            }
+            #endregion
+
+            protected void Parse(Stream stream)
+            {
+                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Read(out mShort01);
+                s.Read(out mFloat01);
+                mOrientation = new Matrix3x3LE(0, handler, stream);
+                mPosition = new Vector3LE(0, handler, stream);
+
+            }
+
+            public void UnParse(Stream stream)
+            {
+                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Write(mShort01);
+                s.Write(mFloat01);
+                mOrientation.UnParse(stream);
+                mPosition.UnParse(stream);
+            }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Transform(base.requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+
+            public bool Equals(Transform other)
+            {
+                return base.Equals(other);
+            }
+        }
+        #endregion
+
+        #region Nested Type: Matrix3x3LE
+        public class Matrix3x3LE : AHandlerElement, IEquatable<Matrix3x3LE>
+        {
+            protected Vector3LE mX, mY, mZ;
+            [ElementPriority(1)]
+            public Vector3LE X
+            {
+                get { return mX; }
+                set { mX = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public Vector3LE Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public Vector3LE Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+
+            public Matrix3x3LE(int apiVersion, EventHandler handler, Matrix3x3LE basis)
+                : this(apiVersion, handler, basis.X, basis.Y, basis.Z) { }
+            public Matrix3x3LE(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+                mX = new Vector3LE(0, handler);
+                mY = new Vector3LE(0, handler);
+                mZ = new Vector3LE(0, handler);
+            }
+            public Matrix3x3LE(int apiVersion, EventHandler handler, Vector3LE X, Vector3LE Y, Vector3LE Z)
+                : base(apiVersion, handler)
+            {
+                mX = (Vector3LE)X.Clone(handler);
+                mY = (Vector3LE)Y.Clone(handler);
+                mZ = (Vector3LE)Z.Clone(handler);
+            }
+            public Matrix3x3LE(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+            protected virtual void Parse(Stream stream)
+            {
+                mX = new Vector3LE(0,handler, stream);
+                mY = new Vector3LE(0, handler, stream);
+                mZ = new Vector3LE(0, handler, stream);
+            }
+            public virtual void UnParse(Stream stream)
+            {
+                mX.UnParse(stream);
+                mY.UnParse(stream);
+                mZ.UnParse(stream);
+            }
+
+
+            public bool Equals(Matrix3x3LE other)
+            {
+                return mX.Equals(other.mX) && mY.Equals(other.mY) && mZ.Equals(other.mZ);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Matrix3x3LE(base.requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+        }
+        #endregion
+
         #region Nested Type: FloatValue
         public class FloatValue : AHandlerElement, IEquatable<FloatValue>
         {
@@ -26,14 +200,14 @@ namespace s3piwrappers
                 Parse(s);
             }
 
-            private void Parse(Stream s )
+            private void Parse(Stream s)
             {
-                new BinaryStreamWrapper(s).Read(out mData,ByteOrder.BigEndian);
+                new BinaryStreamWrapper(s).Read(out mData, ByteOrder.BigEndian);
             }
             public void UnParse(Stream s)
             {
-                new BinaryStreamWrapper(s).Write(mData,ByteOrder.BigEndian);
-                
+                new BinaryStreamWrapper(s).Write(mData, ByteOrder.BigEndian);
+
             }
             private float mData;
             [ElementPriority(1)]
@@ -83,12 +257,12 @@ namespace s3piwrappers
 
             public override void Add()
             {
-                base.Add(new object[]{});
+                base.Add(new object[] { });
             }
 
             protected override FloatValue CreateElement(Stream s)
             {
-                return new FloatValue(0,handler,s);
+                return new FloatValue(0, handler, s);
             }
 
             protected override void WriteElement(Stream s, FloatValue element)
@@ -97,11 +271,207 @@ namespace s3piwrappers
             }
         }
         #endregion
+
+        #region Nested Type: Vector2
+        public class Vector2 : AHandlerElement, IEquatable<Vector2>
+        {
+            protected float mX, mY;
+            [ElementPriority(1)]
+            public float X
+            {
+                get { return mX; }
+                set { mX = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+
+            public Vector2(int apiVersion, EventHandler handler, Vector2 basis)
+                : this(apiVersion, handler, basis.X, basis.Y) { }
+            public Vector2(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler) { }
+            public Vector2(int apiVersion, EventHandler handler, float X, float Y)
+                : base(apiVersion, handler)
+            {
+                this.mX = X;
+                this.mY = Y;
+            }
+            public Vector2(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+            protected virtual void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Read(out mX);
+                s.Read(out mY);
+            }
+            public virtual void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Write(mX);
+                s.Write(mY);
+            }
+
+            public bool Equals(Vector2 other)
+            {
+                return mX.Equals(other.mX) && mY.Equals(other.mY);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Vector2(base.requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+        }
+        #endregion
+
+        #region Nested Type: Vector2List
+        public class Vector2List : AResource.DependentList<Vector2>
+        {
+            public Vector2List(EventHandler handler) : base(handler) { }
+            public Vector2List(EventHandler handler, Stream s) : base(handler, s) { }
+            protected override uint ReadCount(Stream s)
+            {
+                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+            }
+            protected override void WriteCount(Stream s, uint count)
+            {
+                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
+            }
+
+            public override void Add()
+            {
+                base.Add(new object[0] { });
+            }
+
+            protected override Vector2 CreateElement(Stream stream)
+            {
+                return new Vector2(0, handler, stream);
+            }
+
+            protected override void WriteElement(Stream stream, Vector2 element)
+            {
+                element.UnParse(stream);
+            }
+        }
+        #endregion
         
+        #region Nested Type: Vector2LE
+        public class Vector2LE : AHandlerElement, IEquatable<Vector2LE>
+        {
+            protected float mX, mY;
+            [ElementPriority(1)]
+            public float X
+            {
+                get { return mX; }
+                set { mX = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+
+            public Vector2LE(int apiVersion, EventHandler handler, Vector2LE basis)
+                : this(apiVersion, handler, basis.X, basis.Y) { }
+            public Vector2LE(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler) { }
+            public Vector2LE(int apiVersion, EventHandler handler, float X, float Y)
+                : base(apiVersion, handler)
+            {
+                this.mX = X;
+                this.mY = Y;
+            }
+            public Vector2LE(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+            protected virtual void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
+                s.Read(out mX);
+                s.Read(out mY);
+            }
+            public virtual void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
+                s.Write(mX);
+                s.Write(mY);
+            }
+
+            public bool Equals(Vector2LE other)
+            {
+                return mX.Equals(other.mX) && mY.Equals(other.mY);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Vector2LE(base.requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+        }
+        #endregion
+
+        #region Nested Type: Vector2LEList
+        public class Vector2LEList : AResource.DependentList<Vector2LE>
+        {
+            public Vector2LEList(EventHandler handler) : base(handler) { }
+            public Vector2LEList(EventHandler handler, Stream s) : base(handler, s) { }
+            protected override uint ReadCount(Stream s)
+            {
+                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+            }
+            protected override void WriteCount(Stream s, uint count)
+            {
+                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
+            }
+
+            public override void Add()
+            {
+                base.Add(new object[0] { });
+            }
+
+            protected override Vector2LE CreateElement(Stream stream)
+            {
+                return new Vector2LE(0, handler, stream);
+            }
+
+            protected override void WriteElement(Stream stream, Vector2LE element)
+            {
+                element.UnParse(stream);
+            }
+        }
+        #endregion
+
         #region Nested Type: Vector3
         public class Vector3 : AHandlerElement, IEquatable<Vector3>
         {
-            private float mX, mY, mZ;
+            protected float mX, mY, mZ;
             [ElementPriority(1)]
             public float X
             {
@@ -121,8 +491,10 @@ namespace s3piwrappers
                 set { mZ = value; OnElementChanged(); }
             }
 
-            public Vector3(int apiVersion, EventHandler handler, Vector3 basis) : this(apiVersion, handler, basis.X, basis.Y, basis.Z) { }
-            public Vector3(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public Vector3(int apiVersion, EventHandler handler, Vector3 basis)
+                : this(apiVersion, handler, basis.X, basis.Y, basis.Z) { }
+            public Vector3(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler) { }
             public Vector3(int apiVersion, EventHandler handler, float X, float Y, float Z)
                 : base(apiVersion, handler)
             {
@@ -130,54 +502,24 @@ namespace s3piwrappers
                 this.mY = Y;
                 this.mZ = Z;
             }
-
-            public override bool Equals(object obj)
+            public Vector3(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
             {
-                if ((obj == null) || (obj.GetType() != base.GetType()))
-                {
-                    return false;
-                }
-                Vector3 vector = (Vector3)obj;
-                return (((X == vector.X) && (Y == vector.Y)) && (Z == vector.Z));
+                Parse(s);
             }
-
-            public override int GetHashCode()
+            protected virtual void Parse(Stream stream)
             {
-                return ((X.GetHashCode() ^ Y.GetHashCode()) ^ Z.GetHashCode());
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Read(out mX);
+                s.Read(out mY);
+                s.Read(out mZ);
             }
-
-            public override string ToString()
+            public virtual void UnParse(Stream stream)
             {
-                return String.Format("({0:0.000},{1:0.000},{2:0.000})", X, Y, Z);
-            }
-            public static bool TryParse(string values, out Vector3 vector3)
-            {
-                vector3 = null;
-                if (values == null)
-                {
-                    return false;
-                }
-                NumberFormatInfo format = CultureInfo.CurrentCulture.NumberFormat;
-                float x, y, z;
-                string[] strArray = values.Replace(" ", "").Replace("f", "").Split(new char[] { ',' });
-                if (strArray.Length != 3)
-                {
-                    return false;
-                }
-                if (!float.TryParse(strArray[0], NumberStyles.Float, format, out x))
-                {
-                    return false;
-                }
-                if (!float.TryParse(strArray[1], NumberStyles.Float, format, out y))
-                {
-                    return false;
-                }
-                if (!float.TryParse(strArray[2], NumberStyles.Float, format, out z))
-                {
-                    return false;
-                }
-                vector3 = new Vector3(0, null, x, y, z);
-                return true;
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Write(mX);
+                s.Write(mY);
+                s.Write(mZ);
             }
 
 
@@ -191,7 +533,7 @@ namespace s3piwrappers
                 return new Vector3(base.requestedApiVersion, handler, this);
             }
 
-            public override System.Collections.Generic.List<string> ContentFields
+            public override List<string> ContentFields
             {
                 get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
             }
@@ -224,28 +566,98 @@ namespace s3piwrappers
 
             protected override Vector3 CreateElement(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                float x = s.ReadFloat();
-                float y = s.ReadFloat();
-                float z = s.ReadFloat();
-                return new Vector3(0, elementHandler, x, y, z);
+                return new Vector3(0, handler, stream);
             }
 
             protected override void WriteElement(Stream stream, Vector3 element)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(element.X);
-                s.Write(element.Y);
-                s.Write(element.Z);
+                element.UnParse(stream);
             }
         }
         #endregion
 
-        #region Nested Type: Vector3ListLE
-        public class Vector3ListLE : AResource.DependentList<Vector3>
+        #region Nested Type: Vector3LE
+        public class Vector3LE : AHandlerElement, IEquatable<Vector3LE>
         {
-            public Vector3ListLE(EventHandler handler) : base(handler) { }
-            public Vector3ListLE(EventHandler handler, Stream s) : base(handler, s) { }
+            protected float mX, mY, mZ;
+            [ElementPriority(1)]
+            public float X
+            {
+                get { return mX; }
+                set { mX = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Y
+            {
+                get { return mY; }
+                set { mY = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public float Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+
+            public Vector3LE(int apiVersion, EventHandler handler, Vector3LE basis)
+                : this(apiVersion, handler, basis.X, basis.Y, basis.Z) { }
+            public Vector3LE(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler) { }
+            public Vector3LE(int apiVersion, EventHandler handler, float X, float Y, float Z)
+                : base(apiVersion, handler)
+            {
+                this.mX = X;
+                this.mY = Y;
+                this.mZ = Z;
+            }
+            public Vector3LE(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+            protected virtual void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
+                s.Read(out mX);
+                s.Read(out mY);
+                s.Read(out mZ);
+            }
+            public virtual void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
+                s.Write(mX);
+                s.Write(mY);
+                s.Write(mZ);
+            }
+
+
+            public bool Equals(Vector3LE other)
+            {
+                return mX.Equals(other.mX) && mY.Equals(other.mY) && mZ.Equals(other.mZ);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Vector3LE(base.requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedAPIVersion; }
+            }
+        }
+        #endregion
+
+        #region Nested Type: Vector3LEList
+        public class Vector3LEList : AResource.DependentList<Vector3LE>
+        {
+            public Vector3LEList(EventHandler handler) : base(handler) { }
+            public Vector3LEList(EventHandler handler, Stream s) : base(handler, s) { }
             protected override uint ReadCount(Stream s)
             {
                 return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
@@ -260,31 +672,24 @@ namespace s3piwrappers
                 base.Add(new object[0] { });
             }
 
-            protected override Vector3 CreateElement(Stream stream)
+            protected override Vector3LE CreateElement(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
-                float x = s.ReadFloat();
-                float y = s.ReadFloat();
-                float z = s.ReadFloat();
-                return new Vector3(0, elementHandler, x, y, z);
+                return new Vector3LE(0, handler, stream);
             }
 
-            protected override void WriteElement(Stream stream, Vector3 element)
+            protected override void WriteElement(Stream stream, Vector3LE element)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
-                s.Write(element.X);
-                s.Write(element.Y);
-                s.Write(element.Z);
+                element.UnParse(stream);
             }
         }
         #endregion
 
-        #region Nested Type: ColorRgb
-        public class Color : AHandlerElement, IEquatable<Color>
+        #region Nested Type: Colour
+        public class Colour : AHandlerElement, IEquatable<Colour>
         {
-            public Color(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public Color(int apiVersion, EventHandler handler, Color basis) : this(apiVersion, handler, basis.Red, basis.Green, basis.Blue) { }
-            public Color(int apiVersion, EventHandler handler, float r, float g, float b)
+            public Colour(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public Colour(int apiVersion, EventHandler handler, Colour basis) : this(apiVersion, handler, basis.Red, basis.Green, basis.Blue) { }
+            public Colour(int apiVersion, EventHandler handler, float r, float g, float b)
                 : base(apiVersion, handler)
             {
                 mRed = r;
@@ -311,19 +716,19 @@ namespace s3piwrappers
                 set { mBlue = value; OnElementChanged(); }
             }
 
-            public bool Equals(Color other)
+            public bool Equals(Colour other)
             {
                 return mRed == other.mRed && mGreen == other.mGreen && mBlue == other.mBlue;
             }
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new Color(base.requestedApiVersion, handler, this);
+                return new Colour(base.requestedApiVersion, handler, this);
             }
 
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(Color)); }
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(Colour)); }
             }
 
             public override int RecommendedApiVersion
@@ -333,11 +738,11 @@ namespace s3piwrappers
         }
         #endregion
 
-        #region Nested Type: ColorList
-        public class ColorList : AResource.DependentList<Color>
+        #region Nested Type: ColourList
+        public class ColourList : AResource.DependentList<Colour>
         {
-            public ColorList(EventHandler handler) : base(handler) { }
-            public ColorList(EventHandler handler, Stream s) : base(handler, s) { }
+            public ColourList(EventHandler handler) : base(handler) { }
+            public ColourList(EventHandler handler, Stream s) : base(handler, s) { }
 
             protected override uint ReadCount(Stream s)
             {
@@ -354,13 +759,13 @@ namespace s3piwrappers
                 base.Add(new object[0] { });
             }
 
-            protected override Color CreateElement(Stream s)
+            protected override Colour CreateElement(Stream s)
             {
                 var bw = new BinaryStreamWrapper(s, ByteOrder.LittleEndian);
-                return new Color(0, elementHandler, bw.ReadFloat(), bw.ReadFloat(), bw.ReadFloat());
+                return new Colour(0, elementHandler, bw.ReadFloat(), bw.ReadFloat(), bw.ReadFloat());
             }
 
-            protected override void WriteElement(Stream s, Color element)
+            protected override void WriteElement(Stream s, Colour element)
             {
                 var bw = new BinaryStreamWrapper(s, ByteOrder.LittleEndian);
                 bw.Write(element.Red);
@@ -370,7 +775,55 @@ namespace s3piwrappers
         }
         #endregion
 
-        #region Effect Sections
+        #region Nested Type: EffectSectionList
+        public class EffectSectionList : AHandlerList<AbstractEffectSection>, IGenericAdd
+        {
+            public EffectSectionList(EventHandler handler) : base(handler) { }
+            public EffectSectionList(EventHandler handler, Stream s) : base(handler) { Parse(s); }
+            protected void Parse(Stream stream)
+            {
+                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                UInt16 blockType;
+                blockType = s.ReadUInt16();
+                while (blockType != 0xFFFF)
+                {
+                    UInt16 blockVersion = s.ReadUInt16();
+                    AbstractEffectSection blocklist = AbstractEffectSection.CreateInstance(0, handler, blockType, blockVersion, stream);
+                    base.Add(blocklist);
+                    blockType = s.ReadUInt16();
+                }
+            }
+
+            public void UnParse(Stream stream)
+            {
+                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                foreach (var list in this)
+                {
+                    s.Write(list.BlockTypeId);
+                    s.Write(list.Version);
+                    list.UnParse(stream);
+                }
+                s.Write((ushort)0xFFFF);
+            }
+
+            public bool Add(params object[] fields)
+            {
+                if (fields.Length == 0) return false;
+                if (fields.Length == 1 && typeof(AbstractEffectSection).IsAssignableFrom(fields[0].GetType()))
+                {
+                    base.Add((AbstractEffectSection)fields[0]);
+                    return true;
+                }
+                Add(AbstractEffectSection.CreateInstance(0, this.handler, (ushort)(int)fields[0], (ushort)(int)fields[1]));
+                return true;
+            }
+
+            public void Add()
+            {
+                throw new NotSupportedException();
+            }
+        }
+        #endregion
 
         #region Nested Type: EffectSection
 
@@ -455,13 +908,13 @@ namespace s3piwrappers
             public abstract void UnParse(Stream s);
         }
         public abstract class AbstractEffectSection<TEffect> : AbstractEffectSection
-            where TEffect : AbstractEffect, IEquatable<TEffect>
+            where TEffect : Effect, IEquatable<TEffect>
         {
             protected AbstractEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version)
                 : base(apiVersion, handler, type, version)
             {
                 mVersion = version;
-                mList = new EffectList<TEffect>(handler,this);
+                mList = new EffectList<TEffect>(handler, this);
             }
             protected AbstractEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
                 : base(apiVersion, handler, type, version, s)
@@ -469,7 +922,7 @@ namespace s3piwrappers
                 mVersion = version;
                 if (s == null)
                 {
-                    mList = new EffectList<TEffect>(handler,this);
+                    mList = new EffectList<TEffect>(handler, this);
                 }
                 else { Parse(s); }
             }
@@ -499,6 +952,7 @@ namespace s3piwrappers
         }
         #endregion
 
+        #region Effect Sections
         [ConstructorParameters(new object[] { 0x0001, 0x0003 })]
         public class ParticleEffectSection : AbstractEffectSection<ParticleEffect>
         {
@@ -577,69 +1031,20 @@ namespace s3piwrappers
             internal RibbonEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
                 : base(apiVersion, handler, type, version, s) { }
         }
-
-        #region Nested Type: EffectSectionList
-        public class EffectSectionList : AHandlerList<AbstractEffectSection>, IGenericAdd
-        {
-            public EffectSectionList(EventHandler handler) : base(handler) { }
-            public EffectSectionList(EventHandler handler, Stream s) : base(handler) { Parse(s); }
-            protected void Parse(Stream stream)
-            {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                UInt16 blockType;
-                blockType = s.ReadUInt16();
-                while (blockType != 0xFFFF)
-                {
-                    UInt16 blockVersion = s.ReadUInt16();
-                    AbstractEffectSection blocklist = AbstractEffectSection.CreateInstance(0, handler, blockType, blockVersion, stream);
-                    base.Add(blocklist);
-                    blockType = s.ReadUInt16();
-                }
-            }
-
-            public void UnParse(Stream stream)
-            {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                foreach (var list in this)
-                {
-                    s.Write(list.BlockTypeId);
-                    s.Write(list.Version);
-                    list.UnParse(stream);
-                }
-                s.Write((ushort)0xFFFF);
-            }
-
-            public bool Add(params object[] fields)
-            {
-                if (fields.Length == 0) return false;
-                if (fields.Length == 1 && typeof(AbstractEffectSection).IsAssignableFrom(fields[0].GetType()))
-                {
-                    base.Add((AbstractEffectSection)fields[0]);
-                    return true;
-                }
-                Add(AbstractEffectSection.CreateInstance(0, this.handler, (ushort)(int)fields[0], (ushort)(int)fields[1]));
-                return true;
-            }
-
-            public void Add()
-            {
-                throw new NotSupportedException();
-            }
-        }
-        #endregion
-
         #endregion
 
         #region Effects
         #region Nested Type: EffectList
         public class EffectList<TEffect> : EffectList
-            where TEffect : AbstractEffect, IEquatable<TEffect>
+            where TEffect : Effect, IEquatable<TEffect>
         {
-            public EffectList(EventHandler handler, Stream s, AbstractEffectSection section) : base(handler, s, section)
+            public EffectList(EventHandler handler, Stream s, AbstractEffectSection section)
+                : base(handler, s, section)
             {
             }
 
-            public EffectList(EventHandler handler, AbstractEffectSection section) : base(handler, section)
+            public EffectList(EventHandler handler, AbstractEffectSection section)
+                : base(handler, section)
             {
             }
 
@@ -647,20 +1052,20 @@ namespace s3piwrappers
             {
                 return typeof(TEffect);
             }
-            protected override AbstractEffect CreateElement(Stream s)
+            protected override Effect CreateElement(Stream s)
             {
-                return (AbstractEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mSection });
+                return (Effect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, s, mSection });
             }
             public override void Add()
             {
-                ((IList<AbstractEffect>)this).Add((AbstractEffect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, mSection }));
+                ((IList<Effect>)this).Add((Effect)Activator.CreateInstance(typeof(TEffect), new object[] { 0, elementHandler, mSection }));
             }
         }
-        public abstract class EffectList : AResource.DependentList<AbstractEffect>
+        public abstract class EffectList : AResource.DependentList<Effect>
         {
             protected AbstractEffectSection mSection;
             public EffectList(EventHandler handler, Stream s, AbstractEffectSection section)
-                : this(handler,section)
+                : this(handler, section)
             {
                 if (s != null) Parse(s);
             }
@@ -680,19 +1085,136 @@ namespace s3piwrappers
                 new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
             }
 
-            protected abstract override AbstractEffect CreateElement(Stream s);
+            protected abstract override Effect CreateElement(Stream s);
             public abstract override void Add();
 
-            protected override void WriteElement(Stream s, AbstractEffect element)
+            protected override void WriteElement(Stream s, Effect element)
             {
                 element.UnParse(s);
             }
         }
         #endregion
 
-        #region Nested Type: AbstractEffect
-        public abstract class AbstractEffect : AHandlerElement, IEquatable<AbstractEffect>
+        #region Nested Type: Effect
+        public abstract class Effect : AHandlerElement, IEquatable<Effect>
         {
+
+            #region Nested Type: Resource
+            public class Resource : AHandlerElement
+            {
+                public Resource(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+                public Resource(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+
+                #region Fields
+                private UInt64 mLong01;
+                private byte mByte01;
+                private byte mByte02;
+                private UInt32 mInt01; //if Byte02 & 0x80
+                private byte mByte03;
+                private byte mByte04;
+                private UInt16 mShort01;
+                private UInt32 mInt02;
+                private UInt64 mLong02;
+                #endregion
+
+                protected void Parse(Stream stream)
+                {
+                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Read(out mLong01);
+                    s.Read(out mByte01);
+                    s.Read(out mByte02);
+                    if ((Byte02 & 0x80) == 0x80) s.Read(out mInt01);
+                    s.Read(out mByte03);
+                    s.Read(out mByte04);
+                    s.Read(out mShort01);
+                    s.Read(out mInt02);
+                    s.Read(out mLong02);
+                }
+                public void UnParse(Stream stream)
+                {
+                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Write(Instance);
+                    s.Write(Byte01);
+                    s.Write(Byte02);
+                    if ((Byte02 & 0x80) == 0x80) s.Write(Int01);
+                    s.Write(Byte03);
+                    s.Write(Byte04);
+                    s.Write(Short01);
+                    s.Write(Int02);
+                    s.Write(Long02);
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override List<string> ContentFields
+                {
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+                [ElementPriority(1)]
+                public ulong Instance
+                {
+                    get { return mLong01; }
+                    set { mLong01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(2)]
+                public byte Byte01
+                {
+                    get { return mByte01; }
+                    set { mByte01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(3)]
+                public byte Byte02
+                {
+                    get { return mByte02; }
+                    set { mByte02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(4)]
+                public uint Int01
+                {
+                    get { return mInt01; }
+                    set { mInt01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(5)]
+                public byte Byte03
+                {
+                    get { return mByte03; }
+                    set { mByte03 = value; OnElementChanged(); }
+                }
+                [ElementPriority(6)]
+                public byte Byte04
+                {
+                    get { return mByte04; }
+                    set { mByte04 = value; OnElementChanged(); }
+                }
+                [ElementPriority(7)]
+                public ushort Short01
+                {
+                    get { return mShort01; }
+                    set { mShort01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(8)]
+                public uint Int02
+                {
+                    get { return mInt02; }
+                    set { mInt02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(9)]
+                public ulong Long02
+                {
+                    get { return mLong02; }
+                    set { mLong02 = value; OnElementChanged(); }
+                }
+            }
+            #endregion
+
             #region Nested Type: ParticleParams
             public class ParticleParams : AHandlerElement
             {
@@ -885,7 +1407,7 @@ namespace s3piwrappers
                 {
                     get { return kRecommendedAPIVersion; }
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemA
@@ -1012,7 +1534,7 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemAList
@@ -1041,7 +1563,7 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemB
@@ -1056,7 +1578,7 @@ namespace s3piwrappers
                 private UInt64 mLong01;
                 private String mString01 = string.Empty;
                 private String mString02 = string.Empty;
-                private Vector3ListLE mVector3List01;
+                private Vector3LEList mVector3List01;
 
                 public ItemB(int apiVersion, EventHandler handler, ItemB basis)
                     : base(apiVersion, handler)
@@ -1070,7 +1592,7 @@ namespace s3piwrappers
                 public ItemB(int apiVersion, EventHandler handler)
                     : base(apiVersion, handler)
                 {
-                    mVector3List01 = new Vector3ListLE(handler);
+                    mVector3List01 = new Vector3LEList(handler);
                 }
                 [ElementPriority(1)]
                 public UInt32 Int01
@@ -1127,7 +1649,7 @@ namespace s3piwrappers
                     set { mString02 = value; OnElementChanged(); }
                 }
                 [ElementPriority(10)]
-                public Vector3ListLE Vector3List01
+                public Vector3LEList Vector3List01
                 {
                     get { return mVector3List01; }
                     set { mVector3List01 = value; OnElementChanged(); }
@@ -1145,7 +1667,7 @@ namespace s3piwrappers
                     s.Read(out mByteArray01, 4);
                     s.Read(out mString01, StringType.ZeroDelimited);
                     s.Read(out mString02, StringType.ZeroDelimited);
-                    mVector3List01 = new Vector3ListLE(handler, stream);
+                    mVector3List01 = new Vector3LEList(handler, stream);
                 }
 
                 public void UnParse(Stream stream)
@@ -1182,7 +1704,7 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemBList
@@ -1211,7 +1733,7 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemC
@@ -1272,7 +1794,7 @@ namespace s3piwrappers
                 {
                     return base.Equals(other);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemCList
@@ -1302,7 +1824,7 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemD
@@ -1410,7 +1932,7 @@ namespace s3piwrappers
                 {
                     return new ItemD(base.requestedApiVersion, handler, this);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemDList
@@ -1440,7 +1962,7 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemE
@@ -1548,7 +2070,7 @@ namespace s3piwrappers
                 {
                     return new ItemE(base.requestedApiVersion, handler, this);
                 }
-            } 
+            }
             #endregion
 
             #region Nested Type: ItemEList
@@ -1578,21 +2100,21 @@ namespace s3piwrappers
                 {
                     new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
                 }
-            } 
+            }
             #endregion
 
             protected AbstractEffectSection mSection;
-            protected AbstractEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) 
+            protected Effect(int apiVersion, EventHandler handler, AbstractEffectSection section)
                 : base(apiVersion, handler)
             {
                 mSection = section;
             }
-            protected AbstractEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section)
-                : this(apiVersion, handler,section)
+            protected Effect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section)
+                : this(apiVersion, handler, section)
             {
                 if (s != null) Parse(s);
             }
-            protected AbstractEffect(int apiVersion, EventHandler handler, AbstractEffect basis)
+            protected Effect(int apiVersion, EventHandler handler, Effect basis)
                 : base(apiVersion, handler)
             {
                 MemoryStream ms = new MemoryStream();
@@ -1619,7 +2141,7 @@ namespace s3piwrappers
                 get { return kRecommendedAPIVersion; }
             }
 
-            public bool Equals(AbstractEffect other)
+            public bool Equals(Effect other)
             {
                 return base.Equals(other);
             }
@@ -1659,9 +2181,9 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: DefaultEffect
-        public class DefaultEffect : AbstractEffect, IEquatable<DefaultEffect>
+        public class DefaultEffect : Effect, IEquatable<DefaultEffect>
         {
-            public DefaultEffect(int apiVersion, EventHandler handler,AbstractEffectSection section) : base(apiVersion, handler,section) { }
+            public DefaultEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) : base(apiVersion, handler, section) { }
             public DefaultEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
             protected override void Parse(Stream stream)
             {
@@ -1681,119 +2203,8 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: ParticleEffect
-        public class ParticleEffect : AbstractEffect, IEquatable<ParticleEffect>
+        public class ParticleEffect : Effect, IEquatable<ParticleEffect>
         {
-            #region Nested Type: ParticleResourceKey
-            public class ParticleResourceKey : AHandlerElement
-            {
-                public ParticleResourceKey(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-                public ParticleResourceKey(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
-                private UInt64 mLong01;
-                private byte mByte01;
-                private byte mByte02;
-                private UInt32 mInt01; //if Byte02 & 0x80
-                private byte mByte03;
-                private byte mByte04;
-                private UInt16 mShort01;
-                private UInt32 mInt02;
-                private UInt64 mLong02;
-                protected void Parse(Stream stream)
-                {
-                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Read(out mLong01);
-                    s.Read(out mByte01);
-                    s.Read(out mByte02);
-                    if ((Byte02 & 0x80) == 0x80) s.Read(out mInt01);
-                    s.Read(out mByte03);
-                    s.Read(out mByte04);
-                    s.Read(out mShort01);
-                    s.Read(out mInt02);
-                    s.Read(out mLong02);
-                }
-                public void UnParse(Stream stream)
-                {
-                    BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Write(Instance);
-                    s.Write(Byte01);
-                    s.Write(Byte02);
-                    if ((Byte02 & 0x80) == 0x80) s.Write(Int01);
-                    s.Write(Byte03);
-                    s.Write(Byte04);
-                    s.Write(Short01);
-                    s.Write(Int02);
-                    s.Write(Long02);
-                }
-
-                public override AHandlerElement Clone(EventHandler handler)
-                {
-                    throw new NotImplementedException();
-                }
-
-                public override List<string> ContentFields
-                {
-                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
-                }
-
-                public override int RecommendedApiVersion
-                {
-                    get { return kRecommendedAPIVersion; }
-                }
-                [ElementPriority(1)]
-                public ulong Instance
-                {
-                    get { return mLong01; }
-                    set { mLong01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(2)]
-                public byte Byte01
-                {
-                    get { return mByte01; }
-                    set { mByte01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(3)]
-                public byte Byte02
-                {
-                    get { return mByte02; }
-                    set { mByte02 = value; OnElementChanged(); }
-                }
-                [ElementPriority(4)]
-                public uint Int01
-                {
-                    get { return mInt01; }
-                    set { mInt01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(5)]
-                public byte Byte03
-                {
-                    get { return mByte03; }
-                    set { mByte03 = value; OnElementChanged(); }
-                }
-                [ElementPriority(6)]
-                public byte Byte04
-                {
-                    get { return mByte04; }
-                    set { mByte04 = value; OnElementChanged(); }
-                }
-                [ElementPriority(7)]
-                public ushort Short01
-                {
-                    get { return mShort01; }
-                    set { mShort01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(8)]
-                public uint Int02
-                {
-                    get { return mInt02; }
-                    set { mInt02 = value; OnElementChanged(); }
-                }
-                [ElementPriority(9)]
-                public ulong Long02
-                {
-                    get { return mLong02; }
-                    set { mLong02 = value; OnElementChanged(); }
-                }
-            } 
-            #endregion
 
             public ParticleEffect(int apiVersion, EventHandler handler, ParticleEffect basis)
                 : base(apiVersion, handler, basis)
@@ -1803,7 +2214,7 @@ namespace s3piwrappers
                 : base(apiVersion, handler, section)
             {
                 mParticleParameters = new ParticleParams(0, handler);
-                mResourceKey = new ParticleResourceKey(0, handler);
+                mResource = new Resource(0, handler);
                 mItemAList01 = new ItemAList(handler);
                 mItemBList01 = new ItemBList(handler);
                 mItemDList01 = new ItemDList(handler);
@@ -1815,9 +2226,9 @@ namespace s3piwrappers
                 mFloatList06 = new FloatList(handler);
                 mFloatList07 = new FloatList(handler);
                 mFloatList08 = new FloatList(handler);
-                mColorList01 = new ColorList(handler);
-                mVector3List01 = new Vector3ListLE(handler);
-                mVector3List02 = new Vector3ListLE(handler);
+                mColourList01 = new ColourList(handler);
+                mVector3List01 = new Vector3LEList(handler);
+                mVector3List02 = new Vector3LEList(handler);
 
 
             }
@@ -1840,11 +2251,11 @@ namespace s3piwrappers
             private FloatList mFloatList04;
             private FloatList mFloatList05;
             private float mFloat07;
-            private ColorList mColorList01;
+            private ColourList mColourList01;
             private float mFloat08; //LE
             private float mFloat09; //LE
             private float mFloat10; //LE
-            private ParticleResourceKey mResourceKey;
+            private Resource mResource;
 
             private Byte mByte01;
             private Byte mByte02;
@@ -1877,7 +2288,7 @@ namespace s3piwrappers
             private Byte mByte10;
             private Byte mByte11;
             private Byte mByte12;
-            private Vector3ListLE mVector3List01;
+            private Vector3LEList mVector3List01;
             private FloatList mFloatList06;
             private ItemBList mItemBList01;
             private float mFloat24;
@@ -1922,7 +2333,7 @@ namespace s3piwrappers
             private float mFloat45; //LE
             private float mFloat46; //LE
             private float mFloat47; //LE
-            private Vector3ListLE mVector3List02;
+            private Vector3LEList mVector3List02;
 
             //Version 3+
             private Byte mByte14;
@@ -1949,7 +2360,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(81)]
-            public Vector3ListLE Vector3List02
+            public Vector3LEList Vector3List02
             {
                 get { return mVector3List02; }
                 set { mVector3List02 = value; OnElementChanged(); }
@@ -2187,7 +2598,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(47)]
-            public Vector3ListLE Vector3List01
+            public Vector3LEList Vector3List01
             {
                 get { return mVector3List01; }
                 set { mVector3List01 = value; OnElementChanged(); }
@@ -2376,10 +2787,10 @@ namespace s3piwrappers
             }
 
             [ElementPriority(20)]
-            public ParticleResourceKey ResourceKey
+            public Resource ResourceKey
             {
-                get { return mResourceKey; }
-                set { mResourceKey = value; OnElementChanged(); }
+                get { return mResource; }
+                set { mResource = value; OnElementChanged(); }
             }
 
             [ElementPriority(19)]
@@ -2404,10 +2815,10 @@ namespace s3piwrappers
             }
 
             [ElementPriority(16)]
-            public ColorList ColorDeltas
+            public ColourList ColourDeltas
             {
-                get { return mColorList01; }
-                set { mColorList01 = value; OnElementChanged(); }
+                get { return mColourList01; }
+                set { mColourList01 = value; OnElementChanged(); }
             }
 
             [ElementPriority(15)]
@@ -2517,8 +2928,6 @@ namespace s3piwrappers
 
             #endregion
 
-
-
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -2537,11 +2946,11 @@ namespace s3piwrappers
                 mFloatList04 = new FloatList(handler, stream);
                 mFloatList05 = new FloatList(handler, stream);
                 s.Read(out mFloat07);
-                mColorList01 = new ColorList(handler, stream);
+                mColourList01 = new ColourList(handler, stream);
                 s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
-                mResourceKey = new ParticleResourceKey(0, handler, stream);
+                mResource = new Resource(0, handler, stream);
 
                 s.Read(out mByte01);
                 s.Read(out mByte02);
@@ -2574,7 +2983,7 @@ namespace s3piwrappers
                 s.Read(out mByte10);
                 s.Read(out mByte11);
                 s.Read(out mByte12);
-                mVector3List01 = new Vector3ListLE(handler, stream);
+                mVector3List01 = new Vector3LEList(handler, stream);
                 mFloatList06 = new FloatList(handler, stream);
                 mItemBList01 = new ItemBList(handler, stream);
                 s.Read(out mFloat24);
@@ -2621,7 +3030,7 @@ namespace s3piwrappers
                     s.Read(out mFloat45, ByteOrder.LittleEndian); //LE
                     s.Read(out mFloat46, ByteOrder.LittleEndian); //LE
                     s.Read(out mFloat47, ByteOrder.LittleEndian); //LE
-                    mVector3List02 = new Vector3ListLE(handler, stream);
+                    mVector3List02 = new Vector3LEList(handler, stream);
                 }
 
                 //Version 3+
@@ -2649,11 +3058,11 @@ namespace s3piwrappers
                 mFloatList04.UnParse(stream);
                 mFloatList05.UnParse(stream);
                 s.Write(mFloat07);
-                mColorList01.UnParse(stream);
+                mColourList01.UnParse(stream);
                 s.Write(mFloat08, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat09, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat10, ByteOrder.LittleEndian); //LE
-                mResourceKey.UnParse(stream);
+                mResource.UnParse(stream);
 
                 s.Write(mByte01);
                 s.Write(mByte02);
@@ -2752,7 +3161,7 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: MetaparticleEffect
-        public class MetaparticleEffect : AbstractEffect, IEquatable<MetaparticleEffect>
+        public class MetaparticleEffect : Effect, IEquatable<MetaparticleEffect>
         {
 
             public MetaparticleEffect(int apiVersion, EventHandler handler, MetaparticleEffect basis)
@@ -2760,7 +3169,7 @@ namespace s3piwrappers
             {
             }
             public MetaparticleEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
                 ParticleParameters = new ParticleParams(0, handler);
                 FloatList01 = new FloatList(handler);
@@ -2773,8 +3182,8 @@ namespace s3piwrappers
                 FloatList08 = new FloatList(handler);
                 FloatList09 = new FloatList(handler);
                 FloatList10 = new FloatList(handler);
-                ColorList01 = new ColorList(handler);
-                Vector3List01 = new Vector3ListLE(handler);
+                ColourList01 = new ColourList(handler);
+                Vector3List01 = new Vector3LEList(handler);
                 ItemBList01 = new ItemBList(handler);
                 ItemCList01 = new ItemCList(handler);
                 ItemDList01 = new ItemDList(handler);
@@ -2803,7 +3212,7 @@ namespace s3piwrappers
             private float mFloat07;
             private float mFloat08;
             private float mFloat09;
-            private ColorList mColorList01;
+            private ColourList mColourList01;
             private float mFloat10; //LE
             private float mFloat11; //LE
             private float mFloat12; //LE
@@ -2834,7 +3243,7 @@ namespace s3piwrappers
             private byte mByte03;
             private byte mByte04;
             private byte mByte05;
-            private Vector3ListLE mVector3List01;
+            private Vector3LEList mVector3List01;
             private FloatList mFloatList07;
             private ItemBList mItemBList01; //25
             private float mFloat28;
@@ -3016,10 +3425,10 @@ namespace s3piwrappers
             }
 
             [ElementPriority(17)]
-            public ColorList ColorList01
+            public ColourList ColourList01
             {
-                get { return mColorList01; }
-                set { mColorList01 = value; OnElementChanged(); }
+                get { return mColourList01; }
+                set { mColourList01 = value; OnElementChanged(); }
             }
 
             [ElementPriority(18)]
@@ -3212,7 +3621,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(45)]
-            public Vector3ListLE Vector3List01
+            public Vector3LEList Vector3List01
             {
                 get { return mVector3List01; }
                 set { mVector3List01 = value; OnElementChanged(); }
@@ -3562,7 +3971,7 @@ namespace s3piwrappers
                 s.Read(out mFloat07);
                 s.Read(out mFloat08);
                 s.Read(out mFloat09);
-                mColorList01 = new ColorList(handler, stream);
+                mColourList01 = new ColourList(handler, stream);
                 s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat11, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat12, ByteOrder.LittleEndian); //LE
@@ -3593,7 +4002,7 @@ namespace s3piwrappers
                 s.Read(out mByte03);
                 s.Read(out mByte04);
                 s.Read(out mByte05);
-                mVector3List01 = new Vector3ListLE(handler, stream);
+                mVector3List01 = new Vector3LEList(handler, stream);
                 FloatList07 = new FloatList(handler, stream);
                 mItemBList01 = new ItemBList(handler, stream);
                 s.Read(out mFloat28);
@@ -3673,7 +4082,7 @@ namespace s3piwrappers
                 s.Write(mFloat07);
                 s.Write(mFloat08);
                 s.Write(mFloat09);
-                mColorList01.UnParse(stream);
+                mColourList01.UnParse(stream);
                 s.Write(mFloat10, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat11, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat12, ByteOrder.LittleEndian); //LE
@@ -3772,7 +4181,7 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: DecalEffect
-        public class DecalEffect : AbstractEffect, IEquatable<DecalEffect>
+        public class DecalEffect : Effect, IEquatable<DecalEffect>
         {
             public DecalEffect(int apiVersion, EventHandler handler, DecalEffect basis)
                 : base(apiVersion, handler, basis)
@@ -3784,12 +4193,8 @@ namespace s3piwrappers
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
                 mFloatList03 = new FloatList(handler);
-                mVector3List01 = new Vector3ListLE(handler);
-                mVector3List02 = new Vector3List(handler);
-                mByteArray01 = new byte[6];
-                mByteArray02 = new byte[4];
-                mByteArray03 = new byte[8];
-                mByteArray04 = new byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+                mColourList01 = new ColourList(handler);
+                mFloatList04 = new FloatList(handler);
             }
             public DecalEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
@@ -3798,55 +4203,64 @@ namespace s3piwrappers
 
             private UInt32 mUint01;
             private UInt64 mDdsResource;
-            private UInt16 mInt01;
-            private UInt32 mInt02;
-            private byte[] mByteArray01;
+            private Byte mByte01;
             private float mFloat01;
+            private Byte mByte02;
+            private float mFloat02;
             private FloatList mFloatList01;
             private FloatList mFloatList02;
             private FloatList mFloatList03;
-            private Vector3ListLE mVector3List01;
-            private Vector3List mVector3List02;
-            private byte[] mByteArray02;
-            private float mFloat02;
-            private byte[] mByteArray03;
-            private byte[] mByteArray04;
-            private byte mByte03;
+            private ColourList mColourList01;
+            private FloatList mFloatList04;
+            private float mFloat04;
+            private float mFloat05;
+            private float mFloat06;
+            private float mFloat07;
+            private float mFloat08; //LE
+            private float mFloat09; //LE
+            private UInt64 mLong01;
+            private byte mByte03; //version 2+
 
             #endregion
 
             #region Properties
             [ElementPriority(1)]
-            public UInt32 Uint01
+            public uint Uint02
             {
                 get { return mUint01; }
                 set { mUint01 = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public ulong Decal
+            public ulong DdsResource
             {
                 get { return mDdsResource; }
                 set { mDdsResource = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public UInt16 Int01
+            public byte Byte01
             {
-                get { return mInt01; }
-                set { mInt01 = value; OnElementChanged(); }
+                get { return mByte01; }
+                set { mByte01 = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public UInt32 Int02
-            {
-                get { return mInt02; }
-                set { mInt02 = value; OnElementChanged(); }
-            }
-            [ElementPriority(5)]
             public float Float01
             {
                 get { return mFloat01; }
                 set { mFloat01 = value; OnElementChanged(); }
             }
+            [ElementPriority(5)]
+            public byte Byte02
+            {
+                get { return mByte02; }
+                set { mByte02 = value; OnElementChanged(); }
+            }
             [ElementPriority(6)]
+            public float Float02
+            {
+                get { return mFloat02; }
+                set { mFloat02 = value; OnElementChanged(); }
+            }
+
             public FloatList FloatList01
             {
                 get { return mFloatList01; }
@@ -3865,74 +4279,89 @@ namespace s3piwrappers
                 set { mFloatList03 = value; OnElementChanged(); }
             }
             [ElementPriority(9)]
-            public Vector3ListLE MapEmitColor
+            public ColourList ColourList01
             {
-                get { return mVector3List01; }
-                set { mVector3List01 = value; OnElementChanged(); }
+                get { return mColourList01; }
+                set { mColourList01 = value; OnElementChanged(); }
             }
             [ElementPriority(10)]
-            public Vector3List Vector3List02
+            public FloatList FloatList04
             {
-                get { return mVector3List02; }
-                set { mVector3List02 = value; OnElementChanged(); }
+                get { return mFloatList04; }
+                set { mFloatList04 = value; OnElementChanged(); }
             }
             [ElementPriority(11)]
-            public byte[] ByteArray02
+            public float Float04
             {
-                get { return mByteArray02; }
-                set { mByteArray02 = value; OnElementChanged(); }
+                get { return mFloat04; }
+                set { mFloat04 = value; OnElementChanged(); }
             }
             [ElementPriority(12)]
-            public float Float02
+            public float Float05
             {
-                get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                get { return mFloat05; }
+                set { mFloat05 = value; OnElementChanged(); }
             }
             [ElementPriority(13)]
-            public byte[] ByteArray03
+            public float Float06
             {
-                get { return mByteArray03; }
-                set { mByteArray03 = value; OnElementChanged(); }
+                get { return mFloat06; }
+                set { mFloat06 = value; OnElementChanged(); }
             }
             [ElementPriority(14)]
-            public byte[] ByteArray04
+            public float Float07
             {
-                get { return mByteArray04; }
-                set { mByteArray04 = value; OnElementChanged(); }
+                get { return mFloat07; }
+                set { mFloat07 = value; OnElementChanged(); }
             }
             [ElementPriority(15)]
+            public float Float08
+            {
+                get { return mFloat08; }
+                set { mFloat08 = value; OnElementChanged(); }
+            }
+            [ElementPriority(16)]
+            public float Float09
+            {
+                get { return mFloat09; }
+                set { mFloat09 = value; OnElementChanged(); }
+            }
+            [ElementPriority(17)]
+            public ulong Long01
+            {
+                get { return mLong01; }
+                set { mLong01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(18)]
             public byte Byte03
             {
                 get { return mByte03; }
                 set { mByte03 = value; OnElementChanged(); }
             }
-
             #endregion
 
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mUint01);
-                s.Read(out mDdsResource);
-                s.Read(out mInt01);
-                s.Read(out mInt02);
-                s.Read(out mFloat01);
-
+                s.Read(out  mDdsResource);
+                s.Read(out  mByte01);
+                s.Read(out  mFloat01);
+                s.Read(out  mByte02);
+                s.Read(out  mFloat02);
                 mFloatList01 = new FloatList(handler, stream);
-
                 mFloatList02 = new FloatList(handler, stream);
-
                 mFloatList03 = new FloatList(handler, stream);
-
-                mVector3List01 = new Vector3ListLE(handler, stream);
-
-                mVector3List02 = new Vector3List(handler, stream);
-
-                s.Read(out mByteArray02, 4);
-                s.Read(out mFloat02);
-                s.Read(out mByteArray03, 8);
-                s.Read(out mByteArray04, 8);
-                s.Read(out mByte03);
+                mColourList01 = new ColourList(handler, stream);
+                mFloatList04 = new FloatList(handler, stream);
+                s.Read(out  mFloat04);
+                s.Read(out  mFloat05);
+                s.Read(out  mFloat06);
+                s.Read(out  mFloat07);
+                s.Read(out  mFloat08, ByteOrder.LittleEndian); //LE
+                s.Read(out  mFloat09, ByteOrder.LittleEndian); //LE
+                s.Read(out  mLong01);
+                if (mSection.Version >= 2) s.Read(out  mByte03); //version 2+
             }
 
             public override void UnParse(Stream stream)
@@ -3940,25 +4369,23 @@ namespace s3piwrappers
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mUint01);
                 s.Write(mDdsResource);
-                s.Write(mInt01);
-                s.Write(mInt02);
+                s.Write(mByte01);
                 s.Write(mFloat01);
-
-                mFloatList01.UnParse(stream);
-
-                mFloatList02.UnParse(stream);
-
-                mFloatList03.UnParse(stream);
-
-                mVector3List01.UnParse(stream);
-
-                mVector3List02.UnParse(stream);
-
-                s.Write(mByteArray02);
+                s.Write(mByte02);
                 s.Write(mFloat02);
-                s.Write(mByteArray03);
-                s.Write(mByteArray04);
-                s.Write(mByte03);
+                mFloatList01.UnParse(stream);
+                mFloatList02.UnParse(stream);
+                mFloatList03.UnParse(stream);
+                mColourList01.UnParse(stream);
+                mFloatList04.UnParse(stream);
+                s.Write(mFloat04);
+                s.Write(mFloat05);
+                s.Write(mFloat06);
+                s.Write(mFloat07);
+                s.Write(mFloat08, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat09, ByteOrder.LittleEndian); //LE
+                s.Write(mLong01);
+                if (mSection.Version >= 2) s.Write(mByte03); //version 2+
             }
 
 
@@ -3970,18 +4397,20 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: SequenceEffect
-        public class SequenceEffect : AbstractEffect, IEquatable<SequenceEffect>
+        public class SequenceEffect : Effect, IEquatable<SequenceEffect>
         {
             public SequenceEffect(int apiVersion, EventHandler handler, SequenceEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
             public SequenceEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
                 mElements = new ElementList(handler);
             }
             public SequenceEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
+
+            #region Nested Type: ElementList
             public class ElementList : AResource.DependentList<SequenceElement>
             {
                 public ElementList(EventHandler handler) : base(handler) { }
@@ -4010,8 +4439,9 @@ namespace s3piwrappers
                     element.UnParse(s);
                 }
             }
+            #endregion
 
-            #region Nested Type: Sequence Element
+            #region Nested Type: SequenceElement
 
             public class SequenceElement : AHandlerElement, IEquatable<SequenceElement>
             {
@@ -4125,21 +4555,25 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: SoundEffect
-        public class SoundEffect : AbstractEffect, IEquatable<SoundEffect>
+        public class SoundEffect : Effect, IEquatable<SoundEffect>
         {
             public SoundEffect(int apiVersion, EventHandler handler, SoundEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
-            public SoundEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) : base(apiVersion, handler,section) { }
+            public SoundEffect(int apiVersion, EventHandler handler, AbstractEffectSection section) : base(apiVersion, handler, section) { }
             public SoundEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
+            #region Fields
             private UInt32 mUint01;
             private UInt64 mLong01;
             private float mFloat01 = 0.25f;
             private float mFloat02;
             private float mFloat03;
+            #endregion
+
+            #region Properties
             [ElementPriority(1)]
             public uint Uint01
             {
@@ -4170,6 +4604,7 @@ namespace s3piwrappers
                 get { return mFloat03; }
                 set { mFloat03 = value; OnElementChanged(); }
             }
+            #endregion
 
             protected override void Parse(Stream stream)
             {
@@ -4200,14 +4635,14 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: ShakeEffect
-        public class ShakeEffect : AbstractEffect, IEquatable<ShakeEffect>
+        public class ShakeEffect : Effect, IEquatable<ShakeEffect>
         {
             public ShakeEffect(int apiVersion, EventHandler handler, ShakeEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
             public ShakeEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
@@ -4215,6 +4650,7 @@ namespace s3piwrappers
             public ShakeEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
+            #region Fields
             private float mFloat01;
             private float mFloat02;
             private FloatList mFloatList01;
@@ -4222,6 +4658,9 @@ namespace s3piwrappers
             private float mFloat03;
             private byte mByte01;
             private float mFloat04;
+            #endregion
+
+            #region Properties
             [ElementPriority(1)]
             public float Float01
             {
@@ -4264,18 +4703,15 @@ namespace s3piwrappers
                 get { return mFloat04; }
                 set { mFloat04 = value; OnElementChanged(); }
             }
+            #endregion
 
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01);
                 s.Read(out mFloat02);
-
                 mFloatList01 = new FloatList(handler, stream);
-
                 mFloatList02 = new FloatList(handler, stream);
-
-
                 s.Read(out mFloat03);
                 s.Read(out mByte01);
                 s.Read(out mFloat04);
@@ -4286,12 +4722,8 @@ namespace s3piwrappers
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01);
                 s.Write(mFloat02);
-
                 mFloatList01.UnParse(stream);
-
                 mFloatList02.UnParse(stream);
-
-
                 s.Write(mFloat03);
                 s.Write(mByte01);
                 s.Write(mFloat04);
@@ -4306,23 +4738,26 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: Camera Effect
-        public class CameraEffect : AbstractEffect, IEquatable<CameraEffect>
+        public class CameraEffect : Effect, IEquatable<CameraEffect>
         {
             public CameraEffect(int apiVersion, EventHandler handler, CameraEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
             public CameraEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
                 mFloatList03 = new FloatList(handler);
                 mFloatList04 = new FloatList(handler);
-                mByteArray01 = new Byte[17];
+                mFloatList05 = new FloatList(handler);
+                mFloatList06 = new FloatList(handler);
+                mFloatList07 = new FloatList(handler);
             }
             public CameraEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
+            #region Fields
             private UInt32 mInt01;
             private UInt16 mShort01;
             private float mFloat01;
@@ -4330,69 +4765,12 @@ namespace s3piwrappers
             private FloatList mFloatList02;
             private FloatList mFloatList03;
             private FloatList mFloatList04;
-            private byte[] mByteArray01;
-            private UInt32 mInt02;
-            private byte mByte01;
-            [ElementPriority(1)]
-            public uint Int01
-            {
-                get { return mInt01; }
-                set { mInt01 = value; }
-            }
-            [ElementPriority(2)]
-            public ushort Short01
-            {
-                get { return mShort01; }
-                set { mShort01 = value; }
-            }
-            [ElementPriority(3)]
-            public float Float01
-            {
-                get { return mFloat01; }
-                set { mFloat01 = value; }
-            }
-            [ElementPriority(4)]
-            public FloatList FloatList01
-            {
-                get { return mFloatList01; }
-                set { mFloatList01 = value; OnElementChanged(); }
-            }
-            [ElementPriority(5)]
-            public FloatList FloatList02
-            {
-                get { return mFloatList02; }
-                set { mFloatList02 = value; }
-            }
-            [ElementPriority(6)]
-            public FloatList FloatList03
-            {
-                get { return mFloatList03; }
-                set { mFloatList03 = value; }
-            }
-            [ElementPriority(7)]
-            public FloatList FloatList04
-            {
-                get { return mFloatList04; }
-                set { mFloatList04 = value; }
-            }
-            [ElementPriority(8)]
-            public byte[] ByteArray01
-            {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; }
-            }
-            [ElementPriority(9)]
-            public uint Int02
-            {
-                get { return mInt02; }
-                set { mInt02 = value; }
-            }
-            [ElementPriority(10)]
-            public byte Byte01
-            {
-                get { return mByte01; }
-                set { mByte01 = value; }
-            }
+            private FloatList mFloatList05;
+            private FloatList mFloatList06;
+            private FloatList mFloatList07;
+            private UInt64 mLong01;
+            private UInt16 mShort02;
+            #endregion
 
             protected override void Parse(Stream stream)
             {
@@ -4400,18 +4778,15 @@ namespace s3piwrappers
                 s.Read(out mInt01);
                 s.Read(out mShort01);
                 s.Read(out mFloat01);
-
                 mFloatList01 = new FloatList(handler, stream);
-
                 mFloatList02 = new FloatList(handler, stream);
-
                 mFloatList03 = new FloatList(handler, stream);
-
                 mFloatList04 = new FloatList(handler, stream);
-
-                s.Read(out mByteArray01, 17);
-                s.Read(out mInt02);
-                s.Read(out mByte01);
+                mFloatList05 = new FloatList(handler, stream);
+                mFloatList06 = new FloatList(handler, stream);
+                mFloatList07 = new FloatList(handler, stream);
+                s.Read(out mLong01);
+                s.Read(out mShort02);
             }
 
             public override void UnParse(Stream stream)
@@ -4420,18 +4795,15 @@ namespace s3piwrappers
                 s.Write(mInt01);
                 s.Write(mShort01);
                 s.Write(mFloat01);
-
                 mFloatList01.UnParse(stream);
-
                 mFloatList02.UnParse(stream);
-
                 mFloatList03.UnParse(stream);
-
                 mFloatList04.UnParse(stream);
-
-                s.Write(mByteArray01);
-                s.Write(mInt02);
-                s.Write(mByte01);
+                mFloatList05.UnParse(stream);
+                mFloatList06.UnParse(stream);
+                mFloatList07.UnParse(stream);
+                s.Write(mLong01);
+                s.Write(mShort02);
             }
 
             public bool Equals(CameraEffect other)
@@ -4442,7 +4814,7 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: ModelEffect
-        public class ModelEffect : AbstractEffect, IEquatable<ModelEffect>
+        public class ModelEffect : Effect, IEquatable<ModelEffect>
         {
             public ModelEffect(int apiVersion, EventHandler handler, ModelEffect basis)
                 : base(apiVersion, handler, basis)
@@ -4451,102 +4823,264 @@ namespace s3piwrappers
             public ModelEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
                 : base(apiVersion, handler, section)
             {
-                mByteArray01 = new byte[12];
-                mByteArray02 = new byte[4];
-                mByteArray03 = new byte[8];
+                mItems = new ItemList(handler);
             }
             public ModelEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
-
-            private byte[] mByteArray01;
-            private float mFloat01;
-            private float mFloat02;
-            private float mFloat03;
-            private float mFloat04;
-            private float mFloat05;
-            private byte[] mByteArray02;
-            private byte[] mByteArray03;
-            private byte mByte01;
-            [ElementPriority(1)]
-            public byte[] ByteArray01
+            #region Nested Type: ItemList
+            public class ItemList : DependentList<Item>
             {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; OnElementChanged(); }
+                public ItemList(EventHandler handler)
+                    : base(handler)
+                {
+                }
+
+                public ItemList(EventHandler handler, Stream s)
+                    : base(handler, s)
+                {
+                }
+                protected override uint ReadCount(Stream s)
+                {
+                    return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+                }
+                protected override void WriteCount(Stream s, uint count)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((uint)Count);
+                }
+                public override void Add()
+                {
+                    base.Add(new object[] { });
+                }
+
+                protected override Item CreateElement(Stream s)
+                {
+                    return new Item(0, handler, s);
+                }
+
+                protected override void WriteElement(Stream s, Item element)
+                {
+                    element.UnParse(s);
+                }
+            }
+            #endregion
+
+            #region Nested Type: Item
+            public class Item : AHandlerElement, IEquatable<Item>
+            {
+                public Item(int APIversion, EventHandler handler)
+                    : base(APIversion, handler)
+                {
+                }
+                public Item(int APIversion, EventHandler handler, Stream s)
+                    : base(APIversion, handler)
+                {
+                    Parse(s);
+                }
+
+                #region Fields
+                private float mFloat01; //LE
+                private float mFloat02; //LE
+                private FloatList mFloatList01;
+                private UInt32 mInt01;
+                private UInt32 mInt02;
+                private Byte mByte01;
+                private Byte mByte02;
+                #endregion
+
+                #region Properties
+                [ElementPriority(1)]
+                public float Float01
+                {
+                    get { return mFloat01; }
+                    set { mFloat01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(2)]
+                public float Float02
+                {
+                    get { return mFloat02; }
+                    set { mFloat02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(3)]
+                public FloatList FloatList01
+                {
+                    get { return mFloatList01; }
+                    set { mFloatList01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(4)]
+                public uint Int01
+                {
+                    get { return mInt01; }
+                    set { mInt01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(5)]
+                public uint Int02
+                {
+                    get { return mInt02; }
+                    set { mInt02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(6)]
+                public byte Byte01
+                {
+                    get { return mByte01; }
+                    set { mByte01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(7)]
+                public byte Byte02
+                {
+                    get { return mByte02; }
+                    set { mByte02 = value; OnElementChanged(); }
+                }
+                #endregion
+
+                private void Parse(Stream stream)
+                {
+                    var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Read(out mFloat01, ByteOrder.LittleEndian);
+                    s.Read(out mFloat02, ByteOrder.LittleEndian);
+                    mFloatList01 = new FloatList(handler, stream);
+                    s.Read(out mInt01);
+                    s.Read(out mInt02);
+                    s.Read(out mByte01);
+                    s.Read(out mByte02);
+
+                }
+                public void UnParse(Stream stream)
+                {
+                    var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Write(mFloat01, ByteOrder.LittleEndian);
+                    s.Write(mFloat02, ByteOrder.LittleEndian);
+                    mFloatList01.UnParse(stream);
+                    s.Write(mInt01);
+                    s.Write(mInt02);
+                    s.Write(mByte01);
+                    s.Write(mByte02);
+                }
+
+                public bool Equals(Item other)
+                {
+                    return base.Equals(other);
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override List<string> ContentFields
+                {
+                    get { return GetContentFields(requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+            }
+            #endregion
+
+            #region Fields
+            private UInt32 mInt01;
+            private UInt64 mLong01;
+            private UInt32 mInt02;
+            private float mFloat01; //LE
+            private float mFloat02; //LE
+            private float mFloat03; //LE
+            private float mFloat04;
+            private ItemList mItems;
+            private UInt64 mLong02;
+            private byte mByte01;
+            #endregion
+
+            #region Properties
+            [ElementPriority(1)]
+            public uint Int01
+            {
+                get { return mInt01; }
+                set { mInt01 = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
+            public ulong Long01
+            {
+                get { return mLong01; }
+                set { mLong01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public uint Int02
+            {
+                get { return mInt02; }
+                set { mInt02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(4)]
             public float Float01
             {
                 get { return mFloat01; }
                 set { mFloat01 = value; OnElementChanged(); }
             }
-            [ElementPriority(3)]
+            [ElementPriority(5)]
             public float Float02
             {
                 get { return mFloat02; }
                 set { mFloat02 = value; OnElementChanged(); }
             }
-            [ElementPriority(4)]
+            [ElementPriority(6)]
             public float Float03
             {
                 get { return mFloat03; }
                 set { mFloat03 = value; OnElementChanged(); }
             }
-            [ElementPriority(5)]
+            [ElementPriority(7)]
             public float Float04
             {
                 get { return mFloat04; }
                 set { mFloat04 = value; OnElementChanged(); }
             }
-            [ElementPriority(6)]
-            public float Float05
-            {
-                get { return mFloat05; }
-                set { mFloat05 = value; OnElementChanged(); }
-            }
-            [ElementPriority(7)]
-            public byte[] ByteArray02
-            {
-                get { return mByteArray02; }
-                set { mByteArray02 = value; OnElementChanged(); }
-            }
             [ElementPriority(8)]
-            public byte[] ByteArray03
+            public ItemList Items
             {
-                get { return mByteArray03; }
-                set { mByteArray03 = value; OnElementChanged(); }
+                get { return mItems; }
+                set { mItems = value; OnElementChanged(); }
             }
             [ElementPriority(9)]
+            public ulong Long02
+            {
+                get { return mLong02; }
+                set { mLong02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
             public byte Byte01
             {
                 get { return mByte01; }
                 set { mByte01 = value; OnElementChanged(); }
             }
+            #endregion
 
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mByteArray01, 12);
-                s.Read(out mFloat01);
-                s.Read(out mFloat02, ByteOrder.LittleEndian);
-                s.Read(out mFloat03, ByteOrder.LittleEndian);
-                s.Read(out mFloat04, ByteOrder.LittleEndian);
-                s.Read(out mFloat05);
-                s.Read(out mByteArray02, 4);
-                s.Read(out mByteArray03, 8);
+                s.Read(out mInt01);
+                s.Read(out mLong01);
+                s.Read(out mInt02);
+                s.Read(out mFloat01, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat04);
+                mItems = new ItemList(handler, stream);
+                s.Read(out mLong02);
                 s.Read(out mByte01);
             }
 
             public override void UnParse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mByteArray01);
-                s.Write(mFloat01);
-                s.Write(mFloat02, ByteOrder.LittleEndian);
-                s.Write(mFloat03, ByteOrder.LittleEndian);
-                s.Write(mFloat04, ByteOrder.LittleEndian);
-                s.Write(mFloat05);
-                s.Write(mByteArray02);
-                s.Write(mByteArray03);
+                s.Write(mInt01);
+                s.Write(mLong01);
+                s.Write(mInt02);
+                s.Write(mFloat01, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat02, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat03, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat04);
+                mItems.UnParse(stream);
+                s.Write(mLong02);
                 s.Write(mByte01);
             }
 
@@ -4559,29 +5093,348 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: ScreenEffect
-        public class ScreenEffect : AbstractEffect, IEquatable<ScreenEffect>
+        public class ScreenEffect : Effect, IEquatable<ScreenEffect>
         {
+            #region Nested Type: ByteValue
+            public class ByteValue : AHandlerElement, IEquatable<ByteValue>
+            {
+                public ByteValue(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+                public ByteValue(int apiVersion, EventHandler handler, ByteValue basis) : this(apiVersion, handler, basis.mData) { }
+                public ByteValue(int apiVersion, EventHandler handler, Byte r)
+                    : base(apiVersion, handler)
+                {
+                    mData = r;
+                }
+                public ByteValue(int apiVersion, EventHandler handler, Stream s)
+                    : base(apiVersion, handler)
+                {
+                    Parse(s);
+                }
+
+                private void Parse(Stream s)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Read(out mData);
+                }
+                public void UnParse(Stream s)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write(mData);
+
+                }
+                private Byte mData;
+                [ElementPriority(1)]
+                public Byte Data
+                {
+                    get { return mData; }
+                    set { mData = value; OnElementChanged(); }
+                }
+
+                public bool Equals(ByteValue other)
+                {
+                    return mData == other.mData;
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    return new ByteValue(base.requestedApiVersion, handler, this);
+                }
+
+                public override System.Collections.Generic.List<string> ContentFields
+                {
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+            }
+            #endregion
+
+            #region Nested Type: ByteList
+            public class ByteList : AResource.DependentList<ByteValue>
+            {
+                public ByteList(EventHandler handler) : base(handler) { }
+                public ByteList(EventHandler handler, Stream s) : base(handler, s) { }
+
+                protected override uint ReadCount(Stream s)
+                {
+                    return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadByte();
+                }
+
+                protected override void WriteCount(Stream s, uint count)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((Byte)count);
+                }
+
+                public override void Add()
+                {
+                    base.Add(new object[] { });
+                }
+
+                protected override ByteValue CreateElement(Stream s)
+                {
+                    return new ByteValue(0, handler, s);
+                }
+
+                protected override void WriteElement(Stream s, ByteValue element)
+                {
+                    element.UnParse(s);
+                }
+            }
+            #endregion
+
+            #region Nested Type: UInt32Value
+            public class UInt32Value : AHandlerElement, IEquatable<UInt32Value>
+            {
+                public UInt32Value(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+                public UInt32Value(int apiVersion, EventHandler handler, UInt32Value basis) : this(apiVersion, handler, basis.mData) { }
+                public UInt32Value(int apiVersion, EventHandler handler, UInt32 r)
+                    : base(apiVersion, handler)
+                {
+                    mData = r;
+                }
+                public UInt32Value(int apiVersion, EventHandler handler, Stream s)
+                    : base(apiVersion, handler)
+                {
+                    Parse(s);
+                }
+
+                private void Parse(Stream s)
+                {
+                    new BinaryStreamWrapper(s).Read(out mData, ByteOrder.BigEndian);
+                }
+                public void UnParse(Stream s)
+                {
+                    new BinaryStreamWrapper(s).Write(mData, ByteOrder.BigEndian);
+
+                }
+                private UInt32 mData;
+                [ElementPriority(1)]
+                public UInt32 Data
+                {
+                    get { return mData; }
+                    set { mData = value; OnElementChanged(); }
+                }
+
+                public bool Equals(UInt32Value other)
+                {
+                    return mData == other.mData;
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    return new UInt32Value(base.requestedApiVersion, handler, this);
+                }
+
+                public override System.Collections.Generic.List<string> ContentFields
+                {
+                    get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+            }
+            #endregion
+
+            #region Nested Type: UInt32List
+            public class UInt32List : AResource.DependentList<UInt32Value>
+            {
+                public UInt32List(EventHandler handler) : base(handler) { }
+                public UInt32List(EventHandler handler, Stream s) : base(handler, s) { }
+
+                protected override uint ReadCount(Stream s)
+                {
+                    return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+                }
+
+                protected override void WriteCount(Stream s, uint count)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
+                }
+
+                public override void Add()
+                {
+                    base.Add(new object[] { });
+                }
+
+                protected override UInt32Value CreateElement(Stream s)
+                {
+                    return new UInt32Value(0, handler, s);
+                }
+
+                protected override void WriteElement(Stream s, UInt32Value element)
+                {
+                    element.UnParse(s);
+                }
+            }
+            #endregion
+
+            #region Nested Type: ItemList
+            public class ItemList : DependentList<Item>
+            {
+                public ItemList(EventHandler handler)
+                    : base(handler)
+                {
+                }
+
+                public ItemList(EventHandler handler, Stream s)
+                    : base(handler, s)
+                {
+                }
+                protected override uint ReadCount(Stream s)
+                {
+                    return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+                }
+                protected override void WriteCount(Stream s, uint count)
+                {
+                    new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((uint)Count);
+                }
+                public override void Add()
+                {
+                    base.Add(new object[] { });
+                }
+
+                protected override Item CreateElement(Stream s)
+                {
+                    return new Item(0, handler, s);
+                }
+
+                protected override void WriteElement(Stream s, Item element)
+                {
+                    element.UnParse(s);
+                }
+            }
+            #endregion
+
+            #region Nested Type: Item
+            public class Item : AHandlerElement, IEquatable<Item>
+            {
+                public Item(int APIversion, EventHandler handler)
+                    : base(APIversion, handler)
+                {
+                    mByteList01 = new ByteList(handler);
+                }
+                public Item(int APIversion, EventHandler handler, Stream s)
+                    : base(APIversion, handler)
+                {
+                    Parse(s);
+                }
+
+                #region Fields
+                private Byte mByte01;
+                private Byte mByte02;
+                private UInt64 mLong01;
+                private ByteList mByteList01;
+                #endregion
+
+                #region Properties
+                [ElementPriority(1)]
+                public byte Byte01
+                {
+                    get { return mByte01; }
+                    set { mByte01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(2)]
+                public byte Byte02
+                {
+                    get { return mByte02; }
+                    set { mByte02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(3)]
+                public ulong Long01
+                {
+                    get { return mLong01; }
+                    set { mLong01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(4)]
+                public ByteList ByteList01
+                {
+                    get { return mByteList01; }
+                    set { mByteList01 = value; OnElementChanged(); }
+                }
+                #endregion
+
+                private void Parse(Stream stream)
+                {
+                    var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Read(out mByte01);
+                    s.Read(out mByte02);
+                    s.Read(out mLong01);
+                    mByteList01 = new ByteList(handler, stream);
+                }
+                public void UnParse(Stream stream)
+                {
+                    var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                    s.Write(mByte01);
+                    s.Write(mByte02);
+                    s.Write(mLong01);
+                    mByteList01.UnParse(stream);
+                }
+
+                public override AHandlerElement Clone(EventHandler handler)
+                {
+                    throw new NotImplementedException();
+                }
+
+                public override List<string> ContentFields
+                {
+                    get { return GetContentFields(requestedApiVersion, GetType()); }
+                }
+
+                public override int RecommendedApiVersion
+                {
+                    get { return kRecommendedAPIVersion; }
+                }
+
+                public bool Equals(Item other)
+                {
+                    return base.Equals(other);
+                }
+            }
+            #endregion
+
             public ScreenEffect(int apiVersion, EventHandler handler, ScreenEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
             public ScreenEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
-                mVector3List01 = new Vector3ListLE(handler);
-                mVector3List02 = new Vector3List(handler);
+                mColourList01 = new ColourList(handler);
+                mFloatList01 = new FloatList(handler);
+                mFloatList02 = new FloatList(handler);
+                mItems = new ItemList(handler);
+                mVector2List01 = new Vector2List(handler);
+                mIntList01 = new UInt32List(handler);
+                mVector3List01 = new Vector3LEList(handler);
+                mVector2List02 = new Vector2LEList(handler);
+                mIntList02 = new UInt32List(handler);
+
             }
             public ScreenEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
-
-            private byte mByte01;
+            #region Fields
+            private Byte mByte01;
             private UInt32 mInt01;
-            private Vector3ListLE mVector3List01;
-            private Vector3List mVector3List02;
-            private byte[] mByteArray01 = new byte[4];
-            private UInt64 mLong01 = 0xFFFFFFFFFFFFFFFFUL;
-            private byte[] mByteArray02 = new byte[21];
-            private byte[] mByteArray03 = new byte[3];
+            private ColourList mColourList01;
+            private FloatList mFloatList01;
+            private FloatList mFloatList02;
+            private float mFloat01;
+            private UInt32 mInt02;
+            private UInt32 mInt03;
+            private UInt32 mInt04;
+            private UInt64 mLong01;
+            private ItemList mItems;
+            private Vector2List mVector2List01;
+            private UInt32List mIntList01;
+            private Vector3LEList mVector3List01;
+            private Vector2LEList mVector2List02;
+            private UInt32List mIntList02;
+            #endregion
+
+            #region Properties
             [ElementPriority(1)]
             public byte Byte01
             {
@@ -4595,58 +5448,110 @@ namespace s3piwrappers
                 set { mInt01 = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public Vector3ListLE Vector3List01
+            public ColourList ColourList01
             {
-                get { return mVector3List01; }
-                set { mVector3List01 = value; OnElementChanged(); }
+                get { return mColourList01; }
+                set { mColourList01 = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public Vector3List Vector3List02
+            public FloatList FloatList01
             {
-                get { return mVector3List02; }
-                set { mVector3List02 = value; OnElementChanged(); }
+                get { return mFloatList01; }
+                set { mFloatList01 = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public byte[] ByteArray01
+            public FloatList FloatList02
             {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; OnElementChanged(); }
+                get { return mFloatList01; }
+                set { mFloatList01 = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
-            public UInt64 Long01
+            public float Float01
+            {
+                get { return mFloat01; }
+                set { mFloat01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(7)]
+            public uint Int02
+            {
+                get { return mInt02; }
+                set { mInt02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(8)]
+            public uint Int03
+            {
+                get { return mInt03; }
+                set { mInt03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public uint Int04
+            {
+                get { return mInt04; }
+                set { mInt04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public ulong Long01
             {
                 get { return mLong01; }
                 set { mLong01 = value; OnElementChanged(); }
             }
-            [ElementPriority(7)]
-            public byte[] ByteArray02
+            [ElementPriority(11)]
+            public ItemList Items
             {
-                get { return mByteArray02; }
-                set { mByteArray02 = value; OnElementChanged(); }
+                get { return mItems; }
+                set { mItems = value; OnElementChanged(); }
             }
-            [ElementPriority(8)]
-            public byte[] ByteArray03
+            [ElementPriority(12)]
+            public Vector2List Vector2List01
             {
-                get { return mByteArray03; }
-                set { mByteArray03 = value; OnElementChanged(); }
+                get { return mVector2List01; }
+                set { mVector2List01 = value; OnElementChanged(); }
             }
+            [ElementPriority(13)]
+            public UInt32List IntList01
+            {
+                get { return mIntList01; }
+                set { mIntList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(14)]
+            public Vector3LEList Vector3List01
+            {
+                get { return mVector3List01; }
+                set { mVector3List01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(15)]
+            public Vector2LEList Vector2List02
+            {
+                get { return mVector2List02; }
+                set { mVector2List02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(16)]
+            public UInt32List IntList02
+            {
+                get { return mIntList02; }
+                set { mIntList02 = value; OnElementChanged(); }
+            }
+            #endregion
 
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                int count;
                 s.Read(out mByte01);
                 s.Read(out mInt01);
-
-                mVector3List01 = new Vector3ListLE(handler, stream);
-
-                mVector3List02 = new Vector3List(handler, stream);
-
-                count = Byte01 == 0 ? 4 : 12;
-                s.Read(out mByteArray01, count);
+                mColourList01 = new ColourList(handler, stream);
+                mFloatList01 = new FloatList(handler, stream);
+                mFloatList02 = new FloatList(handler, stream);
+                s.Read(out mFloat01);
+                s.Read(out mInt02);
+                s.Read(out mInt03);
+                s.Read(out mInt04);
                 s.Read(out mLong01);
-                s.Read(out mByteArray02, 21);
-                s.Read(out mByteArray03, 3);
+                mItems = new ItemList(handler, stream);
+                mVector2List01 = new Vector2List(handler, stream);
+                mIntList01 = new UInt32List(handler, stream);
+                mVector3List01 = new Vector3LEList(handler, stream);
+                mVector2List02 = new Vector2LEList(handler, stream);
+                mIntList02 = new UInt32List(handler, stream);
             }
 
             public override void UnParse(Stream stream)
@@ -4654,15 +5559,20 @@ namespace s3piwrappers
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mByte01);
                 s.Write(mInt01);
-
-                mVector3List01.UnParse(stream);
-
-                mVector3List02.UnParse(stream);
-
-                s.Write(mByteArray01);
+                mColourList01.UnParse(stream);
+                mFloatList01.UnParse(stream);
+                mFloatList02.UnParse(stream);
+                s.Write(mFloat01);
+                s.Write(mInt02);
+                s.Write(mInt03);
+                s.Write(mInt04);
                 s.Write(mLong01);
-                s.Write(mByteArray02);
-                s.Write(mByteArray03);
+                mItems.UnParse(stream);
+                mVector2List01.UnParse(stream);
+                mIntList01.UnParse(stream);
+                mVector3List01.UnParse(stream);
+                mVector2List02.UnParse(stream);
+                mIntList02.UnParse(stream);
             }
 
             public bool Equals(ScreenEffect other)
@@ -4673,51 +5583,65 @@ namespace s3piwrappers
         #endregion
 
         #region Nested Type: Distribute Effect
-        public class DistributeEffect : AbstractEffect, IEquatable<DistributeEffect>
+        public class DistributeEffect : Effect, IEquatable<DistributeEffect>
         {
             public DistributeEffect(int apiVersion, EventHandler handler, DistributeEffect basis)
                 : base(apiVersion, handler, basis)
             {
             }
             public DistributeEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
-                : base(apiVersion, handler,section)
+                : base(apiVersion, handler, section)
             {
-                mByteArray01 = new byte[5];
-                mByteArray02 = new byte[2];
-                mByteArray03 = new byte[84];
-                mByteArray04 = new byte[24];
-                mByteArray05 = new byte[8];
-                mByteArray06 = new byte[14];
-                mByteArray07 = new byte[8];
-                mByteArray08 = new byte[5];
+                mTransform=new Transform(0,handler);
+                mFloatList01 = new FloatList(handler);
+                mFloatList02 = new FloatList(handler);
+                mFloatList03 = new FloatList(handler);
+                mFloatList04 = new FloatList(handler);
+                mColourList01 = new ColourList(handler);
+                mFloatList05 = new FloatList(handler);
+                mItemBList01 = new ItemBList(handler);
+                mResource = new Resource(0,handler);
             }
             public DistributeEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
 
-            private UInt32 mInt01;
-            private UInt32 mInt02;
-            private String mString01;
-            private byte[] mByteArray01;
+            #region Fields
+            private uint mInt01;
+            private uint mInt02;
+            private string mString01;
+            private uint mInt03;
+            private byte mByte01;
             private float mFloat01;
-            private byte[] mByteArray02;
-            private float mFloat02;
-            private float mFloat03;
-            private float mFloat04;
-            private float mFloat05;
-            private float mFloat06;
-            private float mFloat07;
-            private float mFloat08;
-            private float mFloat09;
-            private float mFloat10;
-            private byte[] mByteArray03;
-            private byte[] mByteArray04;
-            private float mFloat11;
-            private float mFloat12;
-            private float mFloat13;
-            private byte[] mByteArray05;
-            private byte[] mByteArray06;
-            private byte[] mByteArray07;
-            private byte[] mByteArray08;
+            private Transform mTransform;
+            private FloatList mFloatList01;
+            private uint mInt04;
+            private FloatList mFloatList02;
+            private FloatList mFloatList03;
+            private FloatList mFloatList04;
+            private uint mInt05;
+            private uint mInt06;
+            private uint mInt07;
+            private uint mInt08;
+            private uint mInt09;
+            private uint mInt10;
+            private ColourList mColourList01;
+            private float mFloat02; //LE
+            private float mFloat03; //LE
+            private float mFloat04; //LE
+            private FloatList mFloatList05;
+            private uint mInt11;
+            private ItemBList mItemBList01;
+            private ulong mLong01;
+            private ulong mLong02;
+            private ulong mLong03;
+            private float mFloat05; //LE
+            private float mFloat06; //LE
+            private Resource mResource;
+            private byte mByte02;
+            private uint mInt12;
+            #endregion
+
+            #region Properties
             [ElementPriority(1)]
             public uint Int01
             {
@@ -4737,159 +5661,223 @@ namespace s3piwrappers
                 set { mString01 = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public byte[] ByteArray01
+            public uint Int03
             {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; OnElementChanged(); }
+                get { return mInt03; }
+                set { mInt03 = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
+            public byte Byte01
+            {
+                get { return mByte01; }
+                set { mByte01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
             public float Float01
             {
                 get { return mFloat01; }
                 set { mFloat01 = value; OnElementChanged(); }
             }
-            [ElementPriority(6)]
-            public byte[] ByteArray02
-            {
-                get { return mByteArray02; }
-                set { mByteArray02 = value; OnElementChanged(); }
-            }
             [ElementPriority(7)]
+            public Transform Transform
+            {
+                get { return mTransform; }
+                set { mTransform = value; OnElementChanged(); }
+            }
+            [ElementPriority(8)]
+            public FloatList FloatList01
+            {
+                get { return mFloatList01; }
+                set { mFloatList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public uint Int04
+            {
+                get { return mInt04; }
+                set { mInt04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public FloatList FloatList02
+            {
+                get { return mFloatList02; }
+                set { mFloatList02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(11)]
+            public FloatList FloatList03
+            {
+                get { return mFloatList03; }
+                set { mFloatList03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(12)]
+            public FloatList FloatList04
+            {
+                get { return mFloatList04; }
+                set { mFloatList04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(13)]
+            public uint Int05
+            {
+                get { return mInt05; }
+                set { mInt05 = value; OnElementChanged(); }
+            }
+            [ElementPriority(14)]
+            public uint Int06
+            {
+                get { return mInt06; }
+                set { mInt06 = value; OnElementChanged(); }
+            }
+            [ElementPriority(15)]
+            public uint Int07
+            {
+                get { return mInt07; }
+                set { mInt07 = value; OnElementChanged(); }
+            }
+            [ElementPriority(16)]
+            public uint Int08
+            {
+                get { return mInt08; }
+                set { mInt08 = value; OnElementChanged(); }
+            }
+            [ElementPriority(17)]
+            public uint Int09
+            {
+                get { return mInt09; }
+                set { mInt09 = value; OnElementChanged(); }
+            }
+            [ElementPriority(18)]
+            public uint Int10
+            {
+                get { return mInt10; }
+                set { mInt10 = value; OnElementChanged(); }
+            }
+            [ElementPriority(19)]
+            public ColourList ColourList01
+            {
+                get { return mColourList01; }
+                set { mColourList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(20)]
             public float Float02
             {
                 get { return mFloat02; }
                 set { mFloat02 = value; OnElementChanged(); }
             }
-            [ElementPriority(8)]
+            [ElementPriority(21)]
             public float Float03
             {
                 get { return mFloat03; }
                 set { mFloat03 = value; OnElementChanged(); }
             }
-            [ElementPriority(9)]
+            [ElementPriority(22)]
             public float Float04
             {
                 get { return mFloat04; }
                 set { mFloat04 = value; OnElementChanged(); }
             }
-            [ElementPriority(10)]
+            [ElementPriority(23)]
+            public FloatList FloatList05
+            {
+                get { return mFloatList05; }
+                set { mFloatList05 = value; OnElementChanged(); }
+            }
+            [ElementPriority(24)]
+            public uint Int11
+            {
+                get { return mInt11; }
+                set { mInt11 = value; OnElementChanged(); }
+            }
+            [ElementPriority(25)]
+            public ItemBList ItemBList01
+            {
+                get { return mItemBList01; }
+                set { mItemBList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(26)]
+            public ulong Long01
+            {
+                get { return mLong01; }
+                set { mLong01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(27)]
+            public ulong Long02
+            {
+                get { return mLong02; }
+                set { mLong02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(28)]
+            public ulong Long03
+            {
+                get { return mLong03; }
+                set { mLong03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(29)]
             public float Float05
             {
                 get { return mFloat05; }
                 set { mFloat05 = value; OnElementChanged(); }
             }
-            [ElementPriority(11)]
+            [ElementPriority(30)]
             public float Float06
             {
                 get { return mFloat06; }
                 set { mFloat06 = value; OnElementChanged(); }
             }
-            [ElementPriority(12)]
-            public float Float07
+            [ElementPriority(31)]
+            public Resource ResourceKey
             {
-                get { return mFloat07; }
-                set { mFloat07 = value; OnElementChanged(); }
+                get { return mResource; }
+                set { mResource = value; OnElementChanged(); }
             }
-            [ElementPriority(13)]
-            public float Float08
+            [ElementPriority(32)]
+            public byte Byte02
             {
-                get { return mFloat08; }
-                set { mFloat08 = value; OnElementChanged(); }
+                get { return mByte02; }
+                set { mByte02 = value; OnElementChanged(); }
             }
-            [ElementPriority(14)]
-            public float Float09
+            [ElementPriority(33)]
+            public uint Int12
             {
-                get { return mFloat09; }
-                set { mFloat09 = value; OnElementChanged(); }
+                get { return mInt12; }
+                set { mInt12 = value; OnElementChanged(); }
             }
-            [ElementPriority(15)]
-            public float Float10
-            {
-                get { return mFloat10; }
-                set { mFloat10 = value; OnElementChanged(); }
-            }
-            [ElementPriority(16)]
-            public float Float11
-            {
-                get { return mFloat11; }
-                set { mFloat11 = value; OnElementChanged(); }
-            }
-            [ElementPriority(17)]
-            public byte[] ByteArray03
-            {
-                get { return mByteArray03; }
-                set { mByteArray03 = value; OnElementChanged(); }
-            }
-            [ElementPriority(18)]
-            public byte[] ByteArray04
-            {
-                get { return mByteArray04; }
-                set { mByteArray04 = value; OnElementChanged(); }
-            }
-            [ElementPriority(19)]
-            public float Float12
-            {
-                get { return mFloat12; }
-                set { mFloat12 = value; OnElementChanged(); }
-            }
-            [ElementPriority(20)]
-            public float Float13
-            {
-                get { return mFloat13; }
-                set { mFloat13 = value; OnElementChanged(); }
-            }
-            [ElementPriority(21)]
-            public byte[] ByteArray05
-            {
-                get { return mByteArray05; }
-                set { mByteArray05 = value; OnElementChanged(); }
-            }
-            [ElementPriority(22)]
-            public byte[] ByteArray06
-            {
-                get { return mByteArray06; }
-                set { mByteArray06 = value; OnElementChanged(); }
-            }
-            [ElementPriority(23)]
-            public byte[] ByteArray07
-            {
-                get { return mByteArray07; }
-                set { mByteArray07 = value; OnElementChanged(); }
-            }
-            [ElementPriority(24)]
-            public byte[] ByteArray08
-            {
-                get { return mByteArray08; }
-                set { mByteArray08 = value; OnElementChanged(); }
-            }
+            #endregion
 
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mInt01);
                 s.Read(out mInt02);
-                s.Read(out mString01, StringType.ZeroDelimited);
-                s.Read(out mByteArray01, 5);
+                s.Read(out  mString01,StringType.ZeroDelimited);
+                s.Read(out mInt03);
+                s.Read(out  mByte01);
                 s.Read(out mFloat01);
-                s.Read(out mByteArray02, 2);
-                s.Read(out mFloat02);
-                s.Read(out mFloat03, ByteOrder.LittleEndian);
-                s.Read(out mFloat04, ByteOrder.LittleEndian);
-                s.Read(out mFloat05, ByteOrder.LittleEndian);
-                s.Read(out mFloat06, ByteOrder.LittleEndian);
-                s.Read(out mFloat07, ByteOrder.LittleEndian);
-                s.Read(out mFloat08, ByteOrder.LittleEndian);
-                s.Read(out mFloat09, ByteOrder.LittleEndian);
-                s.Read(out mFloat10, ByteOrder.LittleEndian);
-                s.Read(out mFloat11, ByteOrder.LittleEndian);
-                s.Read(out mByteArray03, 84);
-                s.Read(out mByteArray04, 24);
-                s.Read(out mFloat12, ByteOrder.LittleEndian);
-                s.Read(out mFloat13, ByteOrder.LittleEndian);
-                s.Read(out mByteArray05, 8);
-                s.Read(out mByteArray06, 14);
-                s.Read(out mByteArray07, 8);
-                s.Read(out mByteArray08, 5);
+                mTransform = new Transform(0, handler, stream);
+                mFloatList01 = new FloatList(handler, stream);
+                s.Read(out mInt04);
+                mFloatList02 = new FloatList(handler, stream);
+                mFloatList03 = new FloatList(handler, stream);
+                mFloatList04 = new FloatList(handler, stream);
+                s.Read(out mInt05);
+                s.Read(out mInt06);
+                s.Read(out mInt07);
+                s.Read(out mInt08);
+                s.Read(out mInt09);
+                s.Read(out mInt10);
+                mColourList01 = new ColourList(handler, stream);
+                s.Read(out  mFloat02, ByteOrder.LittleEndian); //LE
+                s.Read(out  mFloat03, ByteOrder.LittleEndian); //LE
+                s.Read(out  mFloat04, ByteOrder.LittleEndian); //LE
+                mFloatList05 = new FloatList(handler, stream);
+                s.Read(out mInt11);
+                mItemBList01 = new ItemBList(handler, stream);
+                s.Read(out  mLong01);
+                s.Read(out  mLong02);
+                s.Read(out  mLong03);
+                s.Read(out  mFloat05, ByteOrder.LittleEndian); //LE
+                s.Read(out  mFloat06, ByteOrder.LittleEndian); //LE
+                mResource = new Resource(0, handler, stream);
+                s.Read(out  mByte02);
+                s.Read(out mInt12);
             }
 
             public override void UnParse(Stream stream)
@@ -4898,27 +5886,36 @@ namespace s3piwrappers
                 s.Write(mInt01);
                 s.Write(mInt02);
                 s.Write(mString01, StringType.ZeroDelimited);
-                s.Write(mByteArray01);
+                s.Write(mInt03);
+                s.Write(mByte01);
                 s.Write(mFloat01);
-                s.Write(mByteArray02);
-                s.Write(mFloat02);
-                s.Write(mFloat03, ByteOrder.LittleEndian);
-                s.Write(mFloat04, ByteOrder.LittleEndian);
-                s.Write(mFloat05, ByteOrder.LittleEndian);
-                s.Write(mFloat06, ByteOrder.LittleEndian);
-                s.Write(mFloat07, ByteOrder.LittleEndian);
-                s.Write(mFloat08, ByteOrder.LittleEndian);
-                s.Write(mFloat09, ByteOrder.LittleEndian);
-                s.Write(mFloat10, ByteOrder.LittleEndian);
-                s.Write(mFloat11, ByteOrder.LittleEndian);
-                s.Write(mByteArray03);
-                s.Write(mByteArray04);
-                s.Write(mFloat12, ByteOrder.LittleEndian);
-                s.Write(mFloat13, ByteOrder.LittleEndian);
-                s.Write(mByteArray05);
-                s.Write(mByteArray06);
-                s.Write(mByteArray07);
-                s.Write(mByteArray08);
+                mTransform.UnParse(stream);
+                mFloatList01.UnParse(stream);
+                s.Write(mInt04);
+                mFloatList02.UnParse(stream);
+                mFloatList03.UnParse(stream);
+                mFloatList04.UnParse(stream);
+                s.Write(mInt05);
+                s.Write(mInt06);
+                s.Write(mInt07);
+                s.Write(mInt08);
+                s.Write(mInt09);
+                s.Write(mInt10);
+                mColourList01.UnParse(stream);
+                s.Write(mFloat02, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat03, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat04, ByteOrder.LittleEndian); //LE
+                mFloatList05.UnParse(stream);
+                s.Write(mInt11);
+                mItemBList01.UnParse(stream);
+                s.Write(mLong01);
+                s.Write(mLong02);
+                s.Write(mLong03);
+                s.Write(mFloat05, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat06, ByteOrder.LittleEndian); //LE
+                mResource.UnParse(stream);
+                s.Write(mByte02);
+                s.Write(mInt12);
             }
 
             public bool Equals(DistributeEffect other)
@@ -4966,8 +5963,7 @@ namespace s3piwrappers
                 public PropertyList(EventHandler handler, Stream s) : base(handler, s) { }
                 protected override uint ReadCount(Stream s)
                 {
-                    uint count = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
-                    return count;
+                    return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
                 }
                 protected override void WriteCount(Stream s, uint count)
                 {
@@ -4975,7 +5971,7 @@ namespace s3piwrappers
                 }
                 public override void Add()
                 {
-                    base.Add(new object[0] { });
+                    throw new NotSupportedException();
                 }
 
                 protected override Material.Property CreateElement(System.IO.Stream stream)
@@ -5072,7 +6068,6 @@ namespace s3piwrappers
                 protected abstract void Parse(Stream s);
                 public abstract void UnParse(Stream s);
 
-            #endregion
 
                 public override string ToString()
                 {
@@ -5104,6 +6099,7 @@ namespace s3piwrappers
                     return mKey.CompareTo(other.mKey);
                 }
             }
+            #endregion
             [ConstructorParameters(new object[] { ValueType.Float, PropertyKey.AdditiveValue })]
             public class FloatProperty : Property
             {
@@ -5300,112 +6296,6 @@ namespace s3piwrappers
         #region Nested Type: Compilation
         public class Compilation : AHandlerElement, IEquatable<Compilation>
         {
-            public Compilation(int apiVersion, EventHandler handler, Compilation basis)
-                : base(apiVersion, handler)
-            {
-                MemoryStream ms = new MemoryStream();
-                basis.UnParse(ms);
-                ms.Position = 0L;
-                Parse(ms);
-            }
-            public Compilation(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
-            {
-                mFloatList01 = new FloatList(handler);
-                mItems = new IndexList(handler);
-                mByteArray01 = new byte[8];
-                mByteArray02 = new byte[5];
-                mByteArray03 = new byte[16];
-            }
-            public Compilation(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
-            private UInt32 mUint01;
-            private byte[] mByteArray01;
-            private float mFloat01;
-            private float mFloat02;
-            private byte[] mByteArray02;
-            private FloatList mFloatList01;
-            private byte[] mByteArray03;
-            private IndexList mItems;
-
-            [ElementPriority(0)]
-            public virtual BinaryReader Data
-            {
-                get
-                {
-                    MemoryStream s = new MemoryStream();
-                    UnParse(s);
-                    s.Position = 0L;
-                    return new BinaryReader(s);
-                }
-                set
-                {
-                    if (value.BaseStream.CanSeek)
-                    {
-                        value.BaseStream.Position = 0L;
-                        this.Parse(value.BaseStream);
-                    }
-                    else
-                    {
-                        MemoryStream s = new MemoryStream();
-                        byte[] buffer = new byte[0x100000];
-                        for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
-                        {
-                            s.Write(buffer, 0, i);
-                        }
-                        this.Parse(s);
-                    }
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(1)]
-            public uint Uint01
-            {
-                get { return mUint01; }
-                set { mUint01 = value; OnElementChanged(); }
-            }
-            [ElementPriority(2)]
-            public byte[] ByteArray01
-            {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; OnElementChanged(); }
-            }
-            [ElementPriority(3)]
-            public float Float01
-            {
-                get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
-            }
-            [ElementPriority(4)]
-            public float Float02
-            {
-                get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
-            }
-            [ElementPriority(5)]
-            public byte[] ByteArray02
-            {
-                get { return mByteArray02; }
-                set { mByteArray02 = value; OnElementChanged(); }
-            }
-            [ElementPriority(6)]
-            public FloatList FloatList01
-            {
-                get { return mFloatList01; }
-                set { mFloatList01 = value; OnElementChanged(); }
-            }
-            [ElementPriority(7)]
-            public byte[] ByteArray03
-            {
-                get { return mByteArray03; }
-                set { mByteArray03 = value; OnElementChanged(); }
-            }
-            [ElementPriority(8)]
-            public IndexList Items
-            {
-                get { return mItems; }
-                set { mItems = value; OnElementChanged(); }
-            }
 
             #region Nested Type: Index
             public class Index : AHandlerElement, IEquatable<Index>
@@ -5421,249 +6311,234 @@ namespace s3piwrappers
                 public Index(int apiVersion, EventHandler handler)
                     : base(apiVersion, handler)
                 {
-                    mXAxis = new Vector3(0, handler);
-                    mYAxis = new Vector3(0, handler);
-                    mZAxis = new Vector3(0, handler);
-                    mOffset = new Vector3(0, handler);
+                    mOrientation = new Matrix3x3LE(0, handler);
+                    mPosition = new Vector3LE(0, handler);
                     mVector3List01 = new Vector3List(handler);
-                    mByteArray01 = new byte[12];
                 }
                 public Index(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
-                #region Fields
 
-                private byte mByte01;
-                private UInt32 mUint01;
-                private UInt16 mUshort01;
+                #region Fields
+                private byte mBlockType;
+                private uint mInt01;
+                private ushort mShort01;
                 private float mFloat01;
-                private Vector3 mXAxis, mYAxis, mZAxis, mOffset;
+                private Matrix3x3LE mOrientation;
+                private Vector3LE mPosition;
+                private byte mByte01;
                 private byte mByte02;
-                private byte mByte03;
                 private Vector3List mVector3List01;
-                private float mFloat14 = 1f;
-                private float mFloat15 = 1f;
-                private float mFloat16 = 1f;
-                private float mFloat17 = 1f;
-                private float mFloat18 = 1f;
-                private float mFloat19 = 1f;
-                private byte[] mByteArray01;
-                private float mFloat20 = 1f;
-                private UInt32 mUint02;
-                private byte mByte04;
-                private byte mByte05;
+                private float mFloat02 = 1f;
+                private float mFloat03 = 1f;
+                private float mFloat04 = 1f;
+                private float mFloat05 = 1f;
+                private float mFloat06 = 1f;
+                private float mFloat07 = 1f;
+                private float mFloat08;
+                private float mFloat09;
+                private ushort mShort02;
+                private ushort mShort03;
+                private float mFloat10;
+                private uint mBlockIndex;
+                private byte mByte03; //version 2+
+                private byte mByte04; //version 2+
 
                 #endregion
 
-
-
                 #region Properties
                 [ElementPriority(1)]
-                public byte BlockTypeId
+                public byte BlockType
                 {
-                    get { return mByte01; }
-                    set { mByte01 = value; OnElementChanged(); }
+                    get { return mBlockType; }
+                    set { mBlockType = value; OnElementChanged(); }
                 }
                 [ElementPriority(2)]
-                public uint Uint01
+                public uint Int01
                 {
-                    get { return mUint01; }
-                    set { mUint01 = value; OnElementChanged(); }
+                    get { return mInt01; }
+                    set { mInt01 = value; OnElementChanged(); }
+                }
+                [ElementPriority(2)]
+                public ushort Short01
+                {
+                    get { return mShort01; }
+                    set { mShort01 = value; OnElementChanged(); }
                 }
                 [ElementPriority(3)]
-                public ushort Ushort01
-                {
-                    get { return mUshort01; }
-                    set { mUshort01 = value; OnElementChanged(); }
-                }
-                [ElementPriority(4)]
                 public float Float01
                 {
                     get { return mFloat01; }
                     set { mFloat01 = value; OnElementChanged(); }
                 }
-                [ElementPriority(5)]
-                public Vector3 X_Axis
+                [ElementPriority(4)]
+                public Matrix3x3LE Orientation
                 {
-                    get { return mXAxis; }
-                    set { mXAxis = value; OnElementChanged(); }
+                    get { return mOrientation; }
+                    set { mOrientation = value; OnElementChanged(); }
+                }
+                [ElementPriority(5)]
+                public Vector3LE Position
+                {
+                    get { return mPosition; }
+                    set { mPosition = value; OnElementChanged(); }
                 }
                 [ElementPriority(6)]
-                public Vector3 Y_Axis
+                public byte Byte01
                 {
-                    get { return mYAxis; }
-                    set { mYAxis = value; OnElementChanged(); }
+                    get { return mByte01; }
+                    set { mByte01 = value; OnElementChanged(); }
                 }
                 [ElementPriority(7)]
-                public Vector3 Z_Axis
-                {
-                    get { return mZAxis; }
-                    set { mZAxis = value; OnElementChanged(); }
-                }
-                [ElementPriority(8)]
-                public Vector3 Offset
-                {
-                    get { return mOffset; }
-                    set { mOffset = value; OnElementChanged(); }
-                }
-                [ElementPriority(9)]
                 public byte Byte02
                 {
                     get { return mByte02; }
                     set { mByte02 = value; OnElementChanged(); }
                 }
-                [ElementPriority(10)]
-                public byte Byte03
-                {
-                    get { return mByte03; }
-                    set { mByte03 = value; OnElementChanged(); }
-                }
-                [ElementPriority(11)]
+                [ElementPriority(8)]
                 public Vector3List Vector3List01
                 {
                     get { return mVector3List01; }
                     set { mVector3List01 = value; OnElementChanged(); }
                 }
-                [ElementPriority(12)]
-                public float Float14
+                [ElementPriority(9)]
+                public float Float02
                 {
-                    get { return mFloat14; }
-                    set { mFloat14 = value; OnElementChanged(); }
+                    get { return mFloat02; }
+                    set { mFloat02 = value; OnElementChanged(); }
+                }
+                [ElementPriority(10)]
+                public float Float03
+                {
+                    get { return mFloat03; }
+                    set { mFloat03 = value; OnElementChanged(); }
+                }
+                [ElementPriority(11)]
+                public float Float04
+                {
+                    get { return mFloat04; }
+                    set { mFloat04 = value; OnElementChanged(); }
+                }
+                [ElementPriority(12)]
+                public float Float05
+                {
+                    get { return mFloat05; }
+                    set { mFloat05 = value; OnElementChanged(); }
                 }
                 [ElementPriority(13)]
-                public float Float15
+                public float Float06
                 {
-                    get { return mFloat15; }
-                    set { mFloat15 = value; OnElementChanged(); }
+                    get { return mFloat06; }
+                    set { mFloat06 = value; OnElementChanged(); }
                 }
                 [ElementPriority(14)]
-                public float Float16
+                public float Float07
                 {
-                    get { return mFloat16; }
-                    set { mFloat16 = value; OnElementChanged(); }
+                    get { return mFloat07; }
+                    set { mFloat07 = value; OnElementChanged(); }
                 }
                 [ElementPriority(15)]
-                public float Float17
+                public float Float08
                 {
-                    get { return mFloat17; }
-                    set { mFloat17 = value; OnElementChanged(); }
+                    get { return mFloat08; }
+                    set { mFloat08 = value; OnElementChanged(); }
                 }
                 [ElementPriority(16)]
-                public float Float18
+                public float Float09
                 {
-                    get { return mFloat18; }
-                    set { mFloat18 = value; OnElementChanged(); }
+                    get { return mFloat09; }
+                    set { mFloat09 = value; OnElementChanged(); }
                 }
                 [ElementPriority(17)]
-                public float Float19
+                public ushort Short02
                 {
-                    get { return mFloat19; }
-                    set { mFloat19 = value; OnElementChanged(); }
+                    get { return mShort02; }
+                    set { mShort02 = value; OnElementChanged(); }
                 }
                 [ElementPriority(18)]
-                public byte[] ByteArray01
+                public ushort Short03
                 {
-                    get { return mByteArray01; }
-                    set { mByteArray01 = value; OnElementChanged(); }
+                    get { return mShort03; }
+                    set { mShort03 = value; OnElementChanged(); }
                 }
                 [ElementPriority(19)]
-                public float Float20
+                public float Float10
                 {
-                    get { return mFloat20; }
-                    set { mFloat20 = value; OnElementChanged(); }
+                    get { return mFloat10; }
+                    set { mFloat10 = value; OnElementChanged(); }
                 }
                 [ElementPriority(20)]
                 public uint BlockIndex
                 {
-                    get { return mUint02; }
-                    set { mUint02 = value; OnElementChanged(); }
+                    get { return mBlockIndex; }
+                    set { mBlockIndex = value; OnElementChanged(); }
                 }
                 [ElementPriority(21)]
+                public byte Byte03
+                {
+                    get { return mByte03; }
+                    set { mByte03 = value; OnElementChanged(); }
+                }
+                [ElementPriority(22)]
                 public byte Byte04
                 {
                     get { return mByte04; }
                     set { mByte04 = value; OnElementChanged(); }
                 }
-                [ElementPriority(22)]
-                public byte Byte05
-                {
-                    get { return mByte05; }
-                    set { mByte05 = value; OnElementChanged(); }
-                }
-
                 #endregion
 
                 protected void Parse(Stream stream)
                 {
                     BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Read(out mByte01);
-                    s.Read(out mUint01);
-                    s.Read(out mUshort01);
+                    s.Read(out mBlockType);
+                    s.Read(out mInt01);
+                    s.Read(out mShort01);
                     s.Read(out mFloat01);
-                    float x, y, z;
-                    s.Read(out x, ByteOrder.LittleEndian);
-                    s.Read(out y, ByteOrder.LittleEndian);
-                    s.Read(out z, ByteOrder.LittleEndian);
-                    mXAxis = new Vector3(0, handler, x, y, z);
-                    s.Read(out x, ByteOrder.LittleEndian);
-                    s.Read(out y, ByteOrder.LittleEndian);
-                    s.Read(out z, ByteOrder.LittleEndian);
-                    mYAxis = new Vector3(0, handler, x, y, z);
-                    s.Read(out x, ByteOrder.LittleEndian);
-                    s.Read(out y, ByteOrder.LittleEndian);
-                    s.Read(out z, ByteOrder.LittleEndian);
-                    mZAxis = new Vector3(0, handler, x, y, z);
-                    s.Read(out x, ByteOrder.LittleEndian);
-                    s.Read(out y, ByteOrder.LittleEndian);
-                    s.Read(out z, ByteOrder.LittleEndian);
-                    mOffset = new Vector3(0, handler, x, y, z);
+                    mOrientation = new Matrix3x3LE(0, handler, stream);
+                    mPosition = new Vector3LE(0, handler, stream);
+                    s.Read(out mByte01);
                     s.Read(out mByte02);
-                    s.Read(out mByte03);
-                    mVector3List01 = new Vector3List(this.handler, stream);
-                    s.Read(out mFloat14);
-                    s.Read(out mFloat15);
-                    s.Read(out mFloat16);
-                    s.Read(out mFloat17);
-                    s.Read(out mFloat18);
-                    s.Read(out mFloat19);
-                    s.Read(out mByteArray01, 12);
-                    s.Read(out mFloat20);
-                    s.Read(out mUint02);
-                    s.Read(out mByte04);
-                    s.Read(out mByte05);
+                    mVector3List01 = new Vector3List(handler, stream);
+                    s.Read(out mFloat02); //1.0
+                    s.Read(out mFloat03); //1.0
+                    s.Read(out mFloat04); //1.0
+                    s.Read(out mFloat05); //1.0
+                    s.Read(out mFloat06); //1.0
+                    s.Read(out mFloat07); //1.0
+                    s.Read(out mFloat08);
+                    s.Read(out mFloat09);
+                    s.Read(out mShort02);
+                    s.Read(out mShort03);
+                    s.Read(out mFloat10);
+                    s.Read(out mBlockIndex);
+                    s.Read(out mByte03); //version 2+
+                    s.Read(out mByte04); //version 2+
                 }
 
                 public void UnParse(Stream stream)
                 {
                     BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                    s.Write(mByte01);
-                    s.Write(mUint01);
-                    s.Write(mUshort01);
+                    s.Write(mBlockType);
+                    s.Write(mInt01);
+                    s.Write(mShort01);
                     s.Write(mFloat01);
-                    s.Write(mXAxis.X, ByteOrder.LittleEndian);
-                    s.Write(mXAxis.Y, ByteOrder.LittleEndian);
-                    s.Write(mXAxis.Z, ByteOrder.LittleEndian);
-                    s.Write(mYAxis.X, ByteOrder.LittleEndian);
-                    s.Write(mYAxis.Y, ByteOrder.LittleEndian);
-                    s.Write(mYAxis.Z, ByteOrder.LittleEndian);
-                    s.Write(mZAxis.X, ByteOrder.LittleEndian);
-                    s.Write(mZAxis.Y, ByteOrder.LittleEndian);
-                    s.Write(mZAxis.Z, ByteOrder.LittleEndian);
-                    s.Write(mOffset.X, ByteOrder.LittleEndian);
-                    s.Write(mOffset.Y, ByteOrder.LittleEndian);
-                    s.Write(mOffset.Z, ByteOrder.LittleEndian);
+                    mOrientation.UnParse(stream);
+                    mPosition.UnParse(stream);
+                    s.Write(mByte01);
                     s.Write(mByte02);
-                    s.Write(mByte03);
                     mVector3List01.UnParse(stream);
-                    s.Write(mFloat14);
-                    s.Write(mFloat15);
-                    s.Write(mFloat16);
-                    s.Write(mFloat17);
-                    s.Write(mFloat18);
-                    s.Write(mFloat19);
-                    s.Write(mByteArray01);
-                    s.Write(mFloat20);
-                    s.Write(mUint02);
-                    s.Write(mByte04);
-                    s.Write(mByte05);
+                    s.Write(mFloat02); //1.0
+                    s.Write(mFloat03); //1.0
+                    s.Write(mFloat04); //1.0
+                    s.Write(mFloat05); //1.0
+                    s.Write(mFloat06); //1.0
+                    s.Write(mFloat07); //1.0
+                    s.Write(mFloat08);
+                    s.Write(mFloat09);
+                    s.Write(mShort02);
+                    s.Write(mShort03);
+                    s.Write(mFloat10);
+                    s.Write(mBlockIndex);
+                    s.Write(mByte03); //version 2+
+                    s.Write(mByte04); //version 2+
                 }
 
 
@@ -5689,6 +6564,7 @@ namespace s3piwrappers
             }
             #endregion
 
+            #region Nested Type: IndexList
             public class IndexList : AResource.DependentList<Index>
             {
                 public IndexList(EventHandler handler) : base(handler) { }
@@ -5720,6 +6596,152 @@ namespace s3piwrappers
                     element.UnParse(s);
                 }
             }
+            #endregion
+
+            public Compilation(int apiVersion, EventHandler handler, Compilation basis)
+                : base(apiVersion, handler)
+            {
+                MemoryStream ms = new MemoryStream();
+                basis.UnParse(ms);
+                ms.Position = 0L;
+                Parse(ms);
+            }
+            public Compilation(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+                mFloatList01 = new FloatList(handler);
+                mItems = new IndexList(handler);
+            }
+            public Compilation(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+
+            #region Fields
+            private UInt32 mInt01;
+            private UInt32 mInt02;
+            private UInt32 mInt03;
+            private float mFloat01;
+            private float mFloat02;
+            private UInt32 mInt04;
+            private byte mByte01;
+            private FloatList mFloatList01;
+            private float mFloat03;
+            private float mFloat04;
+            private float mFloat05;
+            private UInt32 mInt05;
+            private IndexList mItems;
+            #endregion
+
+            #region Properties
+            [ElementPriority(1)]
+            public uint Int01
+            {
+                get { return mInt01; }
+                set { mInt01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public uint Int02
+            {
+                get { return mInt02; }
+                set { mInt02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public uint Int03
+            {
+                get { return mInt03; }
+                set { mInt03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(4)]
+            public float Float01
+            {
+                get { return mFloat01; }
+                set { mFloat01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(5)]
+            public float Float02
+            {
+                get { return mFloat02; }
+                set { mFloat02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
+            public uint Int04
+            {
+                get { return mInt04; }
+                set { mInt04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(7)]
+            public byte Byte01
+            {
+                get { return mByte01; }
+                set { mByte01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(8)]
+            public FloatList FloatList01
+            {
+                get { return mFloatList01; }
+                set { mFloatList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public float Float03
+            {
+                get { return mFloat03; }
+                set { mFloat03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public float Float04
+            {
+                get { return mFloat04; }
+                set { mFloat04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(11)]
+            public float Float05
+            {
+                get { return mFloat05; }
+                set { mFloat05 = value; OnElementChanged(); }
+            }
+            [ElementPriority(12)]
+            public uint Int05
+            {
+                get { return mInt05; }
+                set { mInt05 = value; OnElementChanged(); }
+            }
+            [ElementPriority(13)]
+            public IndexList Items
+            {
+                get { return mItems; }
+                set { mItems = value; OnElementChanged(); }
+            }
+
+            [ElementPriority(0)]
+            public virtual BinaryReader Data
+            {
+                get
+                {
+                    MemoryStream s = new MemoryStream();
+                    UnParse(s);
+                    s.Position = 0L;
+                    return new BinaryReader(s);
+                }
+                set
+                {
+                    if (value.BaseStream.CanSeek)
+                    {
+                        value.BaseStream.Position = 0L;
+                        this.Parse(value.BaseStream);
+                    }
+                    else
+                    {
+                        MemoryStream s = new MemoryStream();
+                        byte[] buffer = new byte[0x100000];
+                        for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
+                        {
+                            s.Write(buffer, 0, i);
+                        }
+                        this.Parse(s);
+                    }
+                    OnElementChanged();
+                }
+            }
+            #endregion
+
 
             public override AHandlerElement Clone(EventHandler handler)
             {
@@ -5743,27 +6765,36 @@ namespace s3piwrappers
             private void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mUint01);
-                s.Read(out mByteArray01, 8);
-                s.Read(out mFloat01);
-                s.Read(out mFloat02);
-                s.Read(out mByteArray02, 5);
+                s.Read(out mInt01);
+                s.Read(out mInt02);
+                s.Read(out mInt03);
+                s.Read(out  mFloat01);
+                s.Read(out  mFloat02);
+                s.Read(out mInt04);
+                s.Read(out mByte01);
                 mFloatList01 = new FloatList(handler, stream);
-                s.Read(out mByteArray03, 16);
+                s.Read(out  mFloat03);
+                s.Read(out  mFloat04);
+                s.Read(out  mFloat05);
+                s.Read(out mInt05);
                 mItems = new IndexList(handler, stream);
             }
             public void UnParse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mUint01);
-                s.Write(mByteArray01);
+                s.Write(mInt01);
+                s.Write(mInt02);
+                s.Write(mInt03);
                 s.Write(mFloat01);
                 s.Write(mFloat02);
-                s.Write(mByteArray02);
+                s.Write(mInt04);
+                s.Write(mByte01);
                 mFloatList01.UnParse(stream);
-                s.Write(mByteArray03);
+                s.Write(mFloat03);
+                s.Write(mFloat04);
+                s.Write(mFloat05);
+                s.Write(mInt05);
                 mItems.UnParse(stream);
-
             }
         }
         #endregion
@@ -5977,53 +7008,53 @@ namespace s3piwrappers
             set { mEffects = value; OnResourceChanged(this, new EventArgs()); }
         }
 
-        [ElementPriority(6)]
+        [ElementPriority(3)]
         public byte[] ByteArray01
         {
             get { return mByteArray01; }
             set { mByteArray01 = value; OnResourceChanged(this, new EventArgs()); }
         }
 
-        [ElementPriority(7)]
+        [ElementPriority(4)]
         public uint Uint01
         {
             get { return mUint01; }
             set { mUint01 = value; OnResourceChanged(this, new EventArgs()); }
         }
 
-        [ElementPriority(8)]
+        [ElementPriority(5)]
         public ushort Short01
         {
             get { return mShort01; }
             set { mShort01 = value; OnResourceChanged(this, new EventArgs()); }
         }
-        [ElementPriority(3)]
+        [ElementPriority(6)]
         public MaterialList Materials
         {
             get { return mMaterials; }
             set { mMaterials = value; OnResourceChanged(this, new EventArgs()); }
         }
 
-        [ElementPriority(9)]
+        [ElementPriority(7)]
         public byte[] ByteArray02
         {
             get { return mByteArray02; }
             set { mByteArray02 = value; OnResourceChanged(this, new EventArgs()); }
         }
 
-        [ElementPriority(10)]
-        public byte[] ByteArray03
-        {
-            get { return mByteArray03; }
-            set { mByteArray03 = value; ; OnResourceChanged(this, new EventArgs()); }
-        }
-        [ElementPriority(4)]
+        [ElementPriority(8)]
         public CompilationList Compilations
         {
             get { return mCompilations; }
             set { mCompilations = value; OnResourceChanged(this, new EventArgs()); }
         }
-        [ElementPriority(5)]
+        [ElementPriority(9)]
+        public byte[] ByteArray03
+        {
+            get { return mByteArray03; }
+            set { mByteArray03 = value; ; OnResourceChanged(this, new EventArgs()); }
+        }
+        [ElementPriority(10)]
         public EffectHandleList Handles
         {
             get { return mHandles; }
