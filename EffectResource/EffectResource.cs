@@ -150,7 +150,7 @@ namespace s3piwrappers.Effects
             }
             protected virtual void Parse(Stream stream)
             {
-                mX = new Vector3LE(0,handler, stream);
+                mX = new Vector3LE(0, handler, stream);
                 mY = new Vector3LE(0, handler, stream);
                 mZ = new Vector3LE(0, handler, stream);
             }
@@ -369,7 +369,7 @@ namespace s3piwrappers.Effects
             }
         }
         #endregion
-        
+
         #region Nested Type: Vector2LE
         public class Vector2LE : AHandlerElement, IEquatable<Vector2LE>
         {
@@ -4772,6 +4772,81 @@ namespace s3piwrappers.Effects
             private UInt16 mShort02;
             #endregion
 
+            #region Properties
+            [ElementPriority(1)]
+            public uint Int01
+            {
+                get { return mInt01; }
+                set { mInt01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public ushort Short02
+            {
+                get { return mShort01; }
+                set { mShort01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public float Float01
+            {
+                get { return mFloat01; }
+                set { mFloat01 = value; OnElementChanged(); }
+            }
+
+            public FloatList FloatList01
+            {
+                get { return mFloatList01; }
+                set { mFloatList01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(4)]
+            public FloatList FloatList02
+            {
+                get { return mFloatList02; }
+                set { mFloatList02 = value; OnElementChanged(); }
+            }
+            [ElementPriority(5)]
+            public FloatList FloatList03
+            {
+                get { return mFloatList03; }
+                set { mFloatList03 = value; OnElementChanged(); }
+            }
+            [ElementPriority(6)]
+            public FloatList FloatList04
+            {
+                get { return mFloatList04; }
+                set { mFloatList04 = value; OnElementChanged(); }
+            }
+            [ElementPriority(7)]
+            public FloatList FloatList05
+            {
+                get { return mFloatList05; }
+                set { mFloatList05 = value; OnElementChanged(); }
+            }
+            [ElementPriority(8)]
+            public FloatList FloatList06
+            {
+                get { return mFloatList06; }
+                set { mFloatList06 = value; OnElementChanged(); }
+            }
+            [ElementPriority(9)]
+            public FloatList FloatList07
+            {
+                get { return mFloatList07; }
+                set { mFloatList07 = value; OnElementChanged(); }
+            }
+            [ElementPriority(10)]
+            public ulong Long01
+            {
+                get { return mLong01; }
+                set { mLong01 = value; OnElementChanged(); }
+            }
+            [ElementPriority(11)]
+            public ushort Short02
+            {
+                get { return mShort02; }
+                set { mShort02 = value; OnElementChanged(); }
+            }
+            #endregion
+
             protected override void Parse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -5592,7 +5667,7 @@ namespace s3piwrappers.Effects
             public DistributeEffect(int apiVersion, EventHandler handler, AbstractEffectSection section)
                 : base(apiVersion, handler, section)
             {
-                mTransform=new Transform(0,handler);
+                mTransform = new Transform(0, handler);
                 mFloatList01 = new FloatList(handler);
                 mFloatList02 = new FloatList(handler);
                 mFloatList03 = new FloatList(handler);
@@ -5600,7 +5675,7 @@ namespace s3piwrappers.Effects
                 mColourList01 = new ColourList(handler);
                 mFloatList05 = new FloatList(handler);
                 mItemBList01 = new ItemBList(handler);
-                mResource = new Resource(0,handler);
+                mResource = new Resource(0, handler);
             }
             public DistributeEffect(int apiVersion, EventHandler handler, Stream s, AbstractEffectSection section) : base(apiVersion, handler, s, section) { }
 
@@ -5847,7 +5922,7 @@ namespace s3piwrappers.Effects
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mInt01);
                 s.Read(out mInt02);
-                s.Read(out  mString01,StringType.ZeroDelimited);
+                s.Read(out  mString01, StringType.ZeroDelimited);
                 s.Read(out mInt03);
                 s.Read(out  mByte01);
                 s.Read(out mFloat01);
