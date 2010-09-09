@@ -4780,7 +4780,7 @@ namespace s3piwrappers.Effects
                 set { mInt01 = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public ushort Short02
+            public ushort Short01
             {
                 get { return mShort01; }
                 set { mShort01 = value; OnElementChanged(); }
