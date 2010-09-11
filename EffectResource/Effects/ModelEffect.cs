@@ -20,15 +20,11 @@ namespace s3piwrappers.Effects
         public ModelEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
         
         #region Nested Type: Item
-        public class Item : ExportableDataElement, IEquatable<Item>
+        public class Item : DataElement, IEquatable<Item>
         {
             public Item(int apiVersion, EventHandler handler, Item basis)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler,basis)
             {
-                MemoryStream ms = new MemoryStream();
-                basis.UnParse(ms);
-                ms.Position = 0L;
-                Parse(ms);
             }
             public Item(int APIversion, EventHandler handler)
                 : base(APIversion, handler)

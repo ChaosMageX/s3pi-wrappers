@@ -9,7 +9,7 @@ namespace s3piwrappers.Effects
     public class DistributeEffect : Effect, IEquatable<DistributeEffect>
     {
         #region Nested Type: TransformElement
-        public class TransformElement : ExportableDataElement, IEquatable<TransformElement>
+        public class TransformElement : DataElement, IEquatable<TransformElement>
         {
 
             public TransformElement(int apiVersion, EventHandler handler, TransformElement basis)

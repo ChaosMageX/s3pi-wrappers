@@ -18,7 +18,7 @@ namespace s3piwrappers.Effects
         
         
         #region Nested Type: Item
-        public class Item : ExportableDataElement, IEquatable<Item>
+        public class Item : DataElement, IEquatable<Item>
         {
 
             public Item(int APIversion, EventHandler handler, Item basis)

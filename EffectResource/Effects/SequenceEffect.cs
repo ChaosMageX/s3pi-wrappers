@@ -15,44 +15,14 @@ namespace s3piwrappers.Effects
         public SequenceEffect(int apiVersion, EventHandler handler, Section section)
             : base(apiVersion, handler, section)
         {
-            mElements = new ElementList(handler);
+            mElements = new DataList<Element>(handler);
         }
         public SequenceEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
 
-        #region Nested Type: ElementList
-        public class ElementList : AResource.DependentList<Element>
-        {
-            public ElementList(EventHandler handler) : base(handler) { }
-            public ElementList(EventHandler handler, Stream s) : base(handler, s) { }
-
-            protected override uint ReadCount(Stream s)
-            {
-                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
-            }
-            protected override void WriteCount(Stream s, uint count)
-            {
-                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
-            }
-            public override void Add()
-            {
-                base.Add(new object[0] { });
-            }
-
-            protected override Element CreateElement(Stream s)
-            {
-                return new Element(0, elementHandler, s);
-            }
-
-            protected override void WriteElement(Stream s, Element element)
-            {
-                element.UnParse(s);
-            }
-        }
-        #endregion
 
         #region Nested Type: Element
 
-        public class Element : ExportableDataElement, IEquatable<Element>
+        public class Element : DataElement, IEquatable<Element>
         {
             public Element(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
             public Element(int apiVersion, EventHandler handler, Element basis)
@@ -112,14 +82,14 @@ namespace s3piwrappers.Effects
 
         #region Fields
 
-        private ElementList mElements;
+        private DataList<Element> mElements;
         private UInt32 mInt01;
 
         #endregion
 
         #region Properties
         [ElementPriority(1)]
-        public ElementList Elements
+        public DataList<Element> Elements
         {
             get { return mElements; }
             set { mElements = value; OnElementChanged(); }
@@ -136,7 +106,7 @@ namespace s3piwrappers.Effects
         protected override void Parse(Stream stream)
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            mElements = new ElementList(handler, stream);
+            mElements = new DataList<Element>(handler, stream);
             s.Read(out mInt01);
         }
 

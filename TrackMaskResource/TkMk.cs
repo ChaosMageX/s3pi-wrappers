@@ -97,7 +97,15 @@ namespace s3piwrappers
             : base(APIversion, handler, s)
         {
         }
+
         [ElementPriority(2)]
+        public byte[] Unused
+        {
+            get { return mUnused; }
+            set { mUnused = value; OnRCOLChanged(this,new EventArgs()); }
+        }
+
+        [ElementPriority(3)]
         public TrackMaskList TrackMasks
         {
             get { return mTrackMasks; }
@@ -128,6 +136,7 @@ namespace s3piwrappers
         }
 
         private UInt32 mVersion;
+        private byte[] mUnused;
         private TrackMaskList mTrackMasks;
         public string Value
         {
@@ -150,12 +159,7 @@ namespace s3piwrappers
             if (FOURCC(br.ReadUInt32()) != Tag)
                 throw new InvalidDataException("Invalid Tag, Expected \"TkMk\"");
             mVersion = br.ReadUInt32();
-            for (int i = 0; i < 12; i++)
-            {
-                var a = br.ReadUInt32();
-                if (a != 0)
-                    throw new InvalidDataException("Expected 0x00000000, but got 0x" + a.ToString("X8"));
-            }
+            mUnused = br.ReadBytes(48);
             mTrackMasks = new TrackMaskList(handler, s);
             if (s.Position != s.Length)
                 throw new InvalidDataException("Unexpected End of File");
