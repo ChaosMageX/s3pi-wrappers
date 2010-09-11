@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using s3pi.Interfaces;
 
-namespace s3piwrappers.Effects
+namespace s3piwrappers
 {
     public class EffectResourceHandler :AResourceHandler
     {

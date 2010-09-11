@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>s3piwrappers</RootNamespace>
     <AssemblyName>EffectResource</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -48,14 +48,53 @@
       <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SWB\ColourValue.cs" />
+    <Compile Include="SWB\ByteValue.cs" />
+    <Compile Include="SWB\Structures\Colour.cs" />
+    <Compile Include="SWB\Structures\Vector2.cs" />
+    <Compile Include="SWB\Structures\Vector3.cs" />
+    <Compile Include="SWB\DataElement.cs" />
+    <Compile Include="Effects\CameraEffect.cs" />
+    <Compile Include="Effects\DecalEffect.cs" />
+    <Compile Include="Effects\DefaultEffect.cs" />
+    <Compile Include="SWB\ExportableDataElement.cs" />
+    <Compile Include="SWB\DataList.cs" />
+    <Compile Include="Effects\DistributeEffect.cs" />
+    <Compile Include="Effects\Effect.cs" />
     <Compile Include="EffectResource.cs" />
     <Compile Include="EffectResourceHandler.cs" />
-    <Compile Include="IO\BinaryStreamWrapper.cs" />
+    <Compile Include="SWB\FloatValue.cs" />
+    <Compile Include="SWB\UInt32Value.cs" />
+    <Compile Include="SWB\IO\BinaryStreamWrapper.cs" />
+    <Compile Include="SWB\IO\ByteOrder.cs" />
+    <Compile Include="SWB\IO\DataType.cs" />
+    <Compile Include="SWB\IO\IntSize.cs" />
+    <Compile Include="SWB\IO\StringType.cs" />
+    <Compile Include="Effects\MetaparticleEffect.cs" />
+    <Compile Include="Effects\ModelEffect.cs" />
+    <Compile Include="Effects\ParticleEffect.cs" />
+    <Compile Include="SWB\Matrix3x3Value.cs" />
+    <Compile Include="Resources\Map.cs" />
+    <Compile Include="Resources\Material.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Effects\ScreenEffect.cs" />
+    <Compile Include="Effects\SequenceEffect.cs" />
+    <Compile Include="Effects\ShakeEffect.cs" />
+    <Compile Include="Effects\SoundEffect.cs" />
+    <Compile Include="SWB\Vector2Value.cs" />
+    <Compile Include="SWB\Vector2ValueLE.cs" />
+    <Compile Include="SWB\Vector3Value.cs" />
+    <Compile Include="SWB\Vector3ValueLE.cs" />
+    <Compile Include="Resources\Resource.cs" />
+    <Compile Include="SWB\Section.cs" />
+    <Compile Include="SWB\SectionData.cs" />
+    <Compile Include="SWB\SectionDataList.cs" />
+    <Compile Include="SWB\SectionList.cs" />
+    <Compile Include="SWB\ValueElement.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
