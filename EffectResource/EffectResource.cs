@@ -746,14 +746,14 @@ namespace s3piwrappers
             private UInt32 mInt01;
             private UInt32 mInt02;
             private UInt32 mInt03;
-            private float mFloat01;
-            private float mFloat02;
+            private float mFloat01; //LE
+            private float mFloat02; //LE
             private UInt32 mInt04;
             private byte mByte01;
             private DataList<FloatValue> mFloatList01;
-            private float mFloat03;
-            private float mFloat04;
-            private float mFloat05;
+            private float mFloat03; //LE
+            private float mFloat04; //LE
+            private float mFloat05; //LE
             private UInt32 mInt05;
             private SectionDataList<Index> mItems;
             #endregion
@@ -851,14 +851,14 @@ namespace s3piwrappers
                 s.Read(out mInt01);
                 s.Read(out mInt02);
                 s.Read(out mInt03);
-                s.Read(out mFloat01);
-                s.Read(out mFloat02);
+                s.Read(out mFloat01, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
                 s.Read(out mInt04);
                 s.Read(out mByte01);
                 mFloatList01 = new DataList<FloatValue>(handler, stream);
-                s.Read(out mFloat03);
-                s.Read(out mFloat04);
-                s.Read(out mFloat05);
+                s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat04, ByteOrder.LittleEndian); //LE
+                s.Read(out mFloat05, ByteOrder.LittleEndian); //LE
                 s.Read(out mInt05);
                 mItems = new SectionDataList<Index>(handler,mSection, stream);
             }
@@ -868,14 +868,14 @@ namespace s3piwrappers
                 s.Write(mInt01);
                 s.Write(mInt02);
                 s.Write(mInt03);
-                s.Write(mFloat01);
-                s.Write(mFloat02);
+                s.Write(mFloat01, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat02, ByteOrder.LittleEndian); //LE
                 s.Write(mInt04);
                 s.Write(mByte01);
                 mFloatList01.UnParse(stream);
-                s.Write(mFloat03);
-                s.Write(mFloat04);
-                s.Write(mFloat05);
+                s.Write(mFloat03, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat04, ByteOrder.LittleEndian); //LE
+                s.Write(mFloat05, ByteOrder.LittleEndian); //LE
                 s.Write(mInt05);
                 mItems.UnParse(stream);
             }
