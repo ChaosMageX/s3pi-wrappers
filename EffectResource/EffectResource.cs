@@ -678,6 +678,7 @@ namespace s3piwrappers
                     s.Read(out mFloat10);
                     s.Read(out mBlockIndex);
                     if (stream.Position == stream.Length) return; //importing older sections
+                    if (mSection.Version >= 2)
                     {
                         s.Read(out mByte03); //version 2+
                         s.Read(out mByte04); //version 2+
