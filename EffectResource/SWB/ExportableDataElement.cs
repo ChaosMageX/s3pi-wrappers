@@ -18,10 +18,6 @@ namespace s3piwrappers.SWB
         protected ExportableDataElement(int apiVersion, EventHandler handler, ExportableDataElement basis)
             : base(apiVersion, handler,basis)
         {
-            MemoryStream ms = new MemoryStream();
-            basis.UnParse(ms);
-            ms.Position = 0L;
-            Parse(ms);
         }
         protected abstract override void Parse(Stream s);
         public abstract override void UnParse(Stream s);

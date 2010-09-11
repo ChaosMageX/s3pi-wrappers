@@ -17,7 +17,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, section)
         {
             mParticleParameters = new ParticleParams(0, handler);
-            mResource = new Resource(0, handler);
+            mResource = new ResourceReference(0, handler);
             mItemAList01 = new DataList<ItemA>(handler);
             mItemBList01 = new DataList<ItemB>(handler);
             mItemDList01 = new DataList<ItemD>(handler);
@@ -58,7 +58,7 @@ namespace s3piwrappers.Effects
         private float mFloat08; //LE
         private float mFloat09; //LE
         private float mFloat10; //LE
-        private Resource mResource;
+        private ResourceReference mResource;
 
         private Byte mByte01;
         private Byte mByte02;
@@ -525,7 +525,7 @@ namespace s3piwrappers.Effects
         }
 
         [ElementPriority(20)]
-        public Resource ResourceKey
+        public ResourceReference ResourceKey
         {
             get { return mResource; }
             set { mResource = value; OnElementChanged(); }
@@ -688,7 +688,7 @@ namespace s3piwrappers.Effects
             s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
-            mResource = new Resource(0, handler, stream);
+            mResource = new ResourceReference(0, handler, stream);
 
             s.Read(out mByte01);
             s.Read(out mByte02);

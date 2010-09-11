@@ -96,7 +96,7 @@ namespace s3piwrappers.Effects
             mColourList01 = new DataList<ColourValue>(handler);
             mFloatList05 = new DataList<FloatValue>(handler);
             mItemBList01 = new DataList<ItemB>(handler);
-            mResource = new Resource(0, handler);
+            mResource = new ResourceReference(0, handler);
         }
         public DistributeEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
 
@@ -132,7 +132,7 @@ namespace s3piwrappers.Effects
         private ulong mLong03;
         private float mFloat05; //LE
         private float mFloat06; //LE
-        private Resource mResource;
+        private ResourceReference mResource;
         private byte mByte02;
         private uint mInt12;
         #endregion
@@ -319,7 +319,7 @@ namespace s3piwrappers.Effects
             set { mFloat06 = value; OnElementChanged(); }
         }
         [ElementPriority(31)]
-        public Resource ResourceKey
+        public ResourceReference ResourceKey
         {
             get { return mResource; }
             set { mResource = value; OnElementChanged(); }
@@ -371,7 +371,7 @@ namespace s3piwrappers.Effects
             s.Read(out mLong03);
             s.Read(out mFloat05, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat06, ByteOrder.LittleEndian); //LE
-            mResource = new Resource(0, handler, stream);
+            mResource = new ResourceReference(0, handler, stream);
             s.Read(out mByte02);
             s.Read(out mInt12);
         }

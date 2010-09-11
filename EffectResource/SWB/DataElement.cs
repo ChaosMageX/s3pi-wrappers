@@ -9,6 +9,10 @@ namespace s3piwrappers.SWB
     {
         protected DataElement(int APIversion, EventHandler handler, DataElement basis) : base(APIversion, handler)
         {
+            MemoryStream ms = new MemoryStream();
+            basis.UnParse(ms);
+            ms.Position = 0L;
+            Parse(ms);
         }
         protected DataElement(int apiVersion, EventHandler handler)
             : base(apiVersion, handler)

@@ -10,10 +10,10 @@ namespace s3piwrappers.Effects
     {
 
         #region Nested Type: Resource
-        public class Resource : DataElement
+        public class ResourceReference : DataElement
         {
-            public Resource(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public Resource(int apiVersion, EventHandler handler, Resource basis)
+            public ResourceReference(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public ResourceReference(int apiVersion, EventHandler handler, ResourceReference basis)
                 : base(apiVersion, handler)
             {
                 mInstanceId = basis.mInstanceId;
@@ -26,7 +26,7 @@ namespace s3piwrappers.Effects
                 mInt02 = basis.mInt02;
                 mLong01 = basis.mLong01;
             }
-            public Resource(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            public ResourceReference(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
             #region Fields
             private UInt64 mInstanceId;
@@ -128,20 +128,12 @@ namespace s3piwrappers.Effects
         public class ParticleParams : DataElement
         {
             public ParticleParams(int apiVersion, EventHandler handler, ParticleParams basis)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, basis)
             {
-                MemoryStream ms = new MemoryStream();
-                basis.UnParse(ms);
-                ms.Position = 0L;
-                Parse(ms);
             }
             public ParticleParams(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
-                mVector3_1 = new Vector3ValueLE(0, handler);
-                mVector3_2 = new Vector3ValueLE(0, handler);
-                mVector3_3 = new Vector3ValueLE(0, handler);
-                mVector3_4 = new Vector3ValueLE(0, handler);
             }
             public ParticleParams(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
@@ -157,15 +149,26 @@ namespace s3piwrappers.Effects
             private float mFloat06 = -1f;
             private float mFloat07 = -1f;
 
-            Vector3ValueLE mVector3_1;
-            Vector3ValueLE mVector3_2;
-
             private float mFloat08;
             private float mFloat09;
+            private float mFloat10;
 
-            Vector3ValueLE mVector3_3;
-            Vector3ValueLE mVector3_4;
-            private float mFloat10 = -1f;
+            private float mFloat11;
+            private float mFloat12;
+            private float mFloat13;
+
+            private float mFloat14;
+            private float mFloat15;
+
+            private float mFloat16;
+            private float mFloat17;
+            private float mFloat18;
+
+            private float mFloat19;
+            private float mFloat20;
+            private float mFloat21;
+
+            private float mFloat22 = -1f;
             #endregion
 
             #region Properties
@@ -212,47 +215,96 @@ namespace s3piwrappers.Effects
                 set { mFloat07 = value; OnElementChanged(); }
             }
             [ElementPriority(8)]
-            public Vector3ValueLE Vector3_01
-            {
-                get { return mVector3_1; }
-                set { mVector3_1 = value; OnElementChanged(); }
-            }
-            [ElementPriority(9)]
-            public Vector3ValueLE Vector3_02
-            {
-                get { return mVector3_2; }
-                set { mVector3_2 = value; OnElementChanged(); }
-            }
-            [ElementPriority(10)]
-            public float Float8
+            public float Float08
             {
                 get { return mFloat08; }
                 set { mFloat08 = value; OnElementChanged(); }
             }
-            [ElementPriority(11)]
-            public float Float9
+            [ElementPriority(9)]
+            public float Float09
             {
                 get { return mFloat09; }
                 set { mFloat09 = value; OnElementChanged(); }
             }
-            [ElementPriority(12)]
-            public Vector3ValueLE Vector3_03
-            {
-                get { return mVector3_3; }
-                set { mVector3_3 = value; OnElementChanged(); }
-            }
-            [ElementPriority(13)]
-            public Vector3ValueLE Vector3_04
-            {
-                get { return mVector3_4; }
-                set { mVector3_4 = value; OnElementChanged(); }
-            }
-            [ElementPriority(14)]
+            [ElementPriority(10)]
             public float Float10
             {
                 get { return mFloat10; }
                 set { mFloat10 = value; OnElementChanged(); }
             }
+            [ElementPriority(11)]
+            public float Float11
+            {
+                get { return mFloat11; }
+                set { mFloat11 = value; OnElementChanged(); }
+            }
+            [ElementPriority(12)]
+            public float Float12
+            {
+                get { return mFloat12; }
+                set { mFloat12 = value; OnElementChanged(); }
+            }
+            [ElementPriority(13)]
+            public float Float13
+            {
+                get { return mFloat13; }
+                set { mFloat13 = value; OnElementChanged(); }
+            }
+            [ElementPriority(14)]
+            public float Float14
+            {
+                get { return mFloat14; }
+                set { mFloat14 = value; OnElementChanged(); }
+            }
+            [ElementPriority(15)]
+            public float Float15
+            {
+                get { return mFloat15; }
+                set { mFloat15 = value; OnElementChanged(); }
+            }
+            [ElementPriority(16)]
+            public float Float16
+            {
+                get { return mFloat16; }
+                set { mFloat16 = value; OnElementChanged(); }
+            }
+            [ElementPriority(17)]
+            public float Float17
+            {
+                get { return mFloat17; }
+                set { mFloat17 = value; OnElementChanged(); }
+            }
+            [ElementPriority(18)]
+            public float Float18
+            {
+                get { return mFloat18; }
+                set { mFloat18 = value; OnElementChanged(); }
+            }
+            [ElementPriority(19)]
+            public float Float19
+            {
+                get { return mFloat19; }
+                set { mFloat19 = value; OnElementChanged(); }
+            }
+            [ElementPriority(20)]
+            public float Float20
+            {
+                get { return mFloat20; }
+                set { mFloat20 = value; OnElementChanged(); }
+            }
+            [ElementPriority(21)]
+            public float Float21
+            {
+                get { return mFloat21; }
+                set { mFloat21 = value; OnElementChanged(); }
+            }
+            [ElementPriority(22)]
+            public float Float22
+            {
+                get { return mFloat22; }
+                set { mFloat22 = value; OnElementChanged(); }
+            }
+
             #endregion
 
             protected override void Parse(Stream stream)
@@ -265,13 +317,21 @@ namespace s3piwrappers.Effects
                 s.Read(out mFloat05, ByteOrder.LittleEndian);
                 s.Read(out mFloat06, ByteOrder.LittleEndian);
                 s.Read(out mFloat07, ByteOrder.LittleEndian);
-                mVector3_1 = new Vector3ValueLE(0, handler, stream);
-                mVector3_2 = new Vector3ValueLE(0, handler, stream);
                 s.Read(out mFloat08, ByteOrder.LittleEndian);
                 s.Read(out mFloat09, ByteOrder.LittleEndian);
-                mVector3_3 = new Vector3ValueLE(0, handler, stream);
-                mVector3_4 = new Vector3ValueLE(0, handler, stream);
-                s.Read(out mFloat10);
+                s.Read(out mFloat10, ByteOrder.LittleEndian);
+                s.Read(out mFloat11, ByteOrder.LittleEndian);
+                s.Read(out mFloat12, ByteOrder.LittleEndian);
+                s.Read(out mFloat13, ByteOrder.LittleEndian);
+                s.Read(out mFloat14, ByteOrder.LittleEndian);
+                s.Read(out mFloat15, ByteOrder.LittleEndian);
+                s.Read(out mFloat16, ByteOrder.LittleEndian);
+                s.Read(out mFloat17, ByteOrder.LittleEndian);
+                s.Read(out mFloat18, ByteOrder.LittleEndian);
+                s.Read(out mFloat19, ByteOrder.LittleEndian);
+                s.Read(out mFloat20, ByteOrder.LittleEndian);
+                s.Read(out mFloat21, ByteOrder.LittleEndian);
+                s.Read(out mFloat22);
             }
 
             public override void UnParse(Stream stream)
@@ -284,13 +344,21 @@ namespace s3piwrappers.Effects
                 s.Write(mFloat05, ByteOrder.LittleEndian);
                 s.Write(mFloat06, ByteOrder.LittleEndian);
                 s.Write(mFloat07, ByteOrder.LittleEndian);
-                mVector3_1.UnParse(stream);
-                mVector3_2.UnParse(stream);
                 s.Write(mFloat08, ByteOrder.LittleEndian);
                 s.Write(mFloat09, ByteOrder.LittleEndian);
-                mVector3_3.UnParse(stream);
-                mVector3_4.UnParse(stream);
-                s.Write(mFloat10);
+                s.Write(mFloat10, ByteOrder.LittleEndian);
+                s.Write(mFloat11, ByteOrder.LittleEndian);
+                s.Write(mFloat12, ByteOrder.LittleEndian);
+                s.Write(mFloat13, ByteOrder.LittleEndian);
+                s.Write(mFloat14, ByteOrder.LittleEndian);
+                s.Write(mFloat15, ByteOrder.LittleEndian);
+                s.Write(mFloat16, ByteOrder.LittleEndian);
+                s.Write(mFloat17, ByteOrder.LittleEndian);
+                s.Write(mFloat18, ByteOrder.LittleEndian);
+                s.Write(mFloat19, ByteOrder.LittleEndian);
+                s.Write(mFloat20, ByteOrder.LittleEndian);
+                s.Write(mFloat21, ByteOrder.LittleEndian);
+                s.Write(mFloat22);
             }
         }
         #endregion
@@ -414,7 +482,7 @@ namespace s3piwrappers.Effects
         #region Nested Type: ItemB
         public class ItemB : DataElement, IEquatable<ItemB>
         {
-            private byte[] mByteArray01 = new byte[4];
+            private UInt32 mInt02;
             private float mFloat01;
             private float mFloat02;
             private float mFloat03;
@@ -470,10 +538,10 @@ namespace s3piwrappers.Effects
                 set { mFloat04 = value; OnElementChanged(); }
             }
             [ElementPriority(7)]
-            public byte[] ByteArray01
+            public UInt32 Int02
             {
-                get { return mByteArray01; }
-                set { mByteArray01 = value; OnElementChanged(); }
+                get { return mInt02; }
+                set { mInt02 = value; OnElementChanged(); }
             }
             [ElementPriority(8)]
             public String String01
@@ -503,7 +571,7 @@ namespace s3piwrappers.Effects
                 s.Read(out mFloat02);
                 s.Read(out mFloat03);
                 s.Read(out mFloat04);
-                s.Read(out mByteArray01, 4);
+                s.Read(out mInt02);
                 s.Read(out mString01, StringType.ZeroDelimited);
                 s.Read(out mString02, StringType.ZeroDelimited);
                 mVector3List01 = new DataList<Vector3ValueLE>(handler, stream);
@@ -518,7 +586,7 @@ namespace s3piwrappers.Effects
                 s.Write(mFloat02);
                 s.Write(mFloat03);
                 s.Write(mFloat04);
-                s.Write(mByteArray01);
+                s.Write(mInt02);
                 s.Write(mString01, StringType.ZeroDelimited);
                 s.Write(mString02, StringType.ZeroDelimited);
                 mVector3List01.UnParse(stream);

@@ -18,6 +18,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkinToneResource", "SkinToneResource\SkinToneResource.csproj", "{3302B05D-AFB4-49D1-804A-4B6AB4C92D1C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EC214B06-61C9-462B-87C7-990E0030EACF}"
+	ProjectSection(SolutionItems) = preProject
+		changelog.txt = changelog.txt
+		gpl-3.0.txt = gpl-3.0.txt
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigResource", "RigResource\RigResource.csproj", "{96239738-405A-437E-903A-C51B9521912D}"
 EndProject
