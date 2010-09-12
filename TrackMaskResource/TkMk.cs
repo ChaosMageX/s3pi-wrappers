@@ -171,7 +171,8 @@ namespace s3piwrappers
             var bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            bw.Write(new byte[48]);
+            if(mUnused==null)mUnused= new byte[48];
+            bw.Write(mUnused);
             if (mTrackMasks == null) mTrackMasks = new TrackMaskList(handler);
             mTrackMasks.UnParse(s);
             return s;
