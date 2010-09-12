@@ -13,7 +13,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public MetaparticleEffect(int apiVersion, EventHandler handler, Section section)
+        public MetaparticleEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mParticleParameters = new ParticleParams(0, handler);
@@ -37,7 +37,7 @@ namespace s3piwrappers.Effects
             mFloat10 = -10000.0f;
             mFloat11 = 10000.0f;
         }
-        public MetaparticleEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public MetaparticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
         #region Fields
         private UInt32 mInt01;

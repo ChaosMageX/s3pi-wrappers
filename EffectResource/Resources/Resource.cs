@@ -6,12 +6,12 @@ namespace s3piwrappers.Resources
 {
     public abstract class Resource : SectionData
     {
-        protected Resource(int apiVersion, EventHandler handler, Section section)
+        protected Resource(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
         }
 
-        protected Resource(int apiVersion, EventHandler handler, Section section, Stream s)
+        protected Resource(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s)
         {
         }

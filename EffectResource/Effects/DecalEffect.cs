@@ -12,7 +12,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public DecalEffect(int apiVersion, EventHandler handler, Section section)
+        public DecalEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mFloatList01 = new DataList<FloatValue>(handler);
@@ -21,7 +21,7 @@ namespace s3piwrappers.Effects
             mColourList01 = new DataList<ColourValue>(handler);
             mFloatList04 = new DataList<FloatValue>(handler);
         }
-        public DecalEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public DecalEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
 
         #region Fields

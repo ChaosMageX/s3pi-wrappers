@@ -34,7 +34,7 @@ namespace s3piwrappers.Resources
             ResourceKey = 0x06
         }
 
-        #region Nested Type: PropertyList
+        #region PropertyList
 
         public class PropertyList : AResource.DependentList<Property>
         {
@@ -88,7 +88,7 @@ namespace s3piwrappers.Resources
         }
         #endregion
 
-        #region Nested Type: Property
+        #region Property
 
         public abstract class Property : DataElement, IEquatable<Property>, IComparable<Property>
         {
@@ -226,13 +226,13 @@ namespace s3piwrappers.Resources
         private ShaderType mShader = ShaderType.FluidEffect;
         private PropertyList mProperties;
 
-        public Material(int apiVersion, EventHandler handler, Section section) : base(apiVersion, handler, section)
+        public Material(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section)
         {
             mProperties=new PropertyList(handler);
         }
 
 
-        public Material(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s)
+        public Material(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
         {
         }
 

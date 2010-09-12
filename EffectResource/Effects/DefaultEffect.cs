@@ -6,11 +6,11 @@ namespace s3piwrappers.Effects
 {
     public class DefaultEffect : Effect, IEquatable<DefaultEffect>
     {
-        public DefaultEffect(int apiVersion, EventHandler handler, Section section) : base(apiVersion, handler, section)
+        public DefaultEffect(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section)
         {
             throw new NotSupportedException();
         }
-        public DefaultEffect(int apiVersion, EventHandler handler, Section section, Stream s) 
+        public DefaultEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
             : base(apiVersion, handler, section,s)
         {
             throw new NotSupportedException();

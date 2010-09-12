@@ -6,13 +6,13 @@ namespace s3piwrappers.Resources
 {
     public class Map : Resource, IEquatable<Map>
     {
-        public Map(int apiVersion, EventHandler handler, Section section)
+        public Map(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             throw new NotSupportedException();
         }
 
-        public Map(int apiVersion, EventHandler handler, Section section, Stream s)
+        public Map(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s)
         {
             throw new NotSupportedException();

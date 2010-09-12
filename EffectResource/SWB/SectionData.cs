@@ -5,14 +5,14 @@ namespace s3piwrappers.SWB
 {
     public class SectionData : ExportableDataElement, IEquatable<SectionData>
     {
-        public SectionData(int apiVersion, EventHandler handler, Section section)
+        public SectionData(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler)
         {
             if(section == null)throw new ArgumentException("Argument cannot be null","section");
             mSection = section;
         }
 
-        public SectionData(int apiVersion, EventHandler handler, Section section, Stream s)
+        public SectionData(int apiVersion, EventHandler handler, ISection section, Stream s)
             : this(apiVersion, handler,section)
         {
             Parse(s);
@@ -27,7 +27,12 @@ namespace s3piwrappers.SWB
             ms.Position = 0L;
             Parse(ms);
         }
-        protected Section mSection;
+        protected ISection mSection;
+
+        public ISection Section
+        {
+            get { return mSection; }
+        }
 
         protected override void Parse(Stream s){}
         public override void UnParse(Stream s){}

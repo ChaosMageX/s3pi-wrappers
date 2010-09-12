@@ -5,7 +5,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers.SWB
 {
-    public abstract class Section : ExportableDataElement
+    public abstract class Section : ExportableDataElement, ISection
     {
         protected ushort mVersion;
         protected ushort mType;
@@ -53,6 +53,8 @@ namespace s3piwrappers.SWB
             get { return mItems; } 
             set { mItems = value;OnElementChanged(); }
         }
+
+        IEnumerable ISection.Items { get { return mItems; } }
     }
     public abstract class Section<T> : Section
         where T : SectionData, IEquatable<T>

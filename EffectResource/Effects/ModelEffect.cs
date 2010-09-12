@@ -12,14 +12,14 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public ModelEffect(int apiVersion, EventHandler handler, Section section)
+        public ModelEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mItems = new DataList<Item>(handler);
         }
-        public ModelEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public ModelEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
         
-        #region Nested Type: Item
+        #region Item
         public class Item : DataElement, IEquatable<Item>
         {
             public Item(int apiVersion, EventHandler handler, Item basis)

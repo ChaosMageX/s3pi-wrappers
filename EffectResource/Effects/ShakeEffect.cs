@@ -12,13 +12,13 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public ShakeEffect(int apiVersion, EventHandler handler, Section section)
+        public ShakeEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mFloatList01 = new DataList<FloatValue>(handler);
             mFloatList02 = new DataList<FloatValue>(handler);
         }
-        public ShakeEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public ShakeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
 
         #region Fields

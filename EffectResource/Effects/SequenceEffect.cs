@@ -12,15 +12,15 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public SequenceEffect(int apiVersion, EventHandler handler, Section section)
+        public SequenceEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mElements = new DataList<Element>(handler);
         }
-        public SequenceEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public SequenceEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
 
-        #region Nested Type: Element
+        #region Element
 
         public class Element : DataElement, IEquatable<Element>
         {

@@ -29,7 +29,10 @@ namespace s3piwrappers.SWB
         protected abstract override void Parse(Stream s);
         public abstract override void UnParse(Stream s);
 
-
+        public override string ToString()
+        {
+            return mData.ToString();
+        }
         public override AHandlerElement Clone(EventHandler handler)
         {
             return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this, mData });

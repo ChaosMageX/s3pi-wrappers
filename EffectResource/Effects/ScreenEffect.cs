@@ -6,18 +6,18 @@ using s3piwrappers.SWB.IO;
 
 namespace s3piwrappers.Effects
 {
-    #region Nested Type: ByteValue
+    #region ByteValue
 
     #endregion
 
-    #region Nested Type: UInt32Value
+    #region UInt32Value
 
     #endregion
     public class ScreenEffect : Effect, IEquatable<ScreenEffect>
     {
         
         
-        #region Nested Type: Item
+        #region Item
         public class Item : DataElement, IEquatable<Item>
         {
 
@@ -94,7 +94,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public ScreenEffect(int apiVersion, EventHandler handler, Section section)
+        public ScreenEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mColourList01 = new DataList<ColourValue>(handler);
@@ -108,7 +108,7 @@ namespace s3piwrappers.Effects
             mIntList02 = new DataList<UInt32Value>(handler);
 
         }
-        public ScreenEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public ScreenEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
         #region Fields
         private Byte mByte01;

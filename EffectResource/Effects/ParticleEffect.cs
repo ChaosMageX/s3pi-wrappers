@@ -13,7 +13,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public ParticleEffect(int apiVersion, EventHandler handler, Section section)
+        public ParticleEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mParticleParameters = new ParticleParams(0, handler);
@@ -35,7 +35,7 @@ namespace s3piwrappers.Effects
 
 
         }
-        public ParticleEffect(int apiVersion, EventHandler handler, Section section, Stream s)
+        public ParticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s) { }
 
         #region Fields

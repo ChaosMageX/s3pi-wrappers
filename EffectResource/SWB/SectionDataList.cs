@@ -8,18 +8,18 @@ namespace s3piwrappers.SWB
     public class SectionDataList<T> : DataList<SectionData>
         where T : SectionData, IEquatable<SectionData>
     {
-        public SectionDataList(EventHandler handler, Section section)
+        public SectionDataList(EventHandler handler, ISection section)
             : base(handler)
         {
             mSection = section;
         }
 
-        public SectionDataList(EventHandler handler, Section section, Stream s)
+        public SectionDataList(EventHandler handler, ISection section, Stream s)
             : this(handler, section)
         {
             Parse(s);
         }
-        protected Section mSection;
+        protected ISection mSection;
 
         protected override SectionData CreateElement(Stream s)
         {

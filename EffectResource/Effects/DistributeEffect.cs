@@ -8,7 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class DistributeEffect : Effect, IEquatable<DistributeEffect>
     {
-        #region Nested Type: TransformElement
+        #region TransformElement
         public class TransformElement : DataElement, IEquatable<TransformElement>
         {
 
@@ -85,7 +85,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public DistributeEffect(int apiVersion, EventHandler handler, Section section)
+        public DistributeEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mTransform = new TransformElement(0, handler);
@@ -98,7 +98,7 @@ namespace s3piwrappers.Effects
             mItemBList01 = new DataList<ItemB>(handler);
             mResource = new ResourceReference(0, handler);
         }
-        public DistributeEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public DistributeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
 
         #region Fields

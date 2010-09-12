@@ -12,7 +12,7 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public CameraEffect(int apiVersion, EventHandler handler, Section section)
+        public CameraEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mFloatList01 = new DataList<FloatValue>(handler);
@@ -23,7 +23,7 @@ namespace s3piwrappers.Effects
             mFloatList06 = new DataList<FloatValue>(handler);
             mFloatList07 = new DataList<FloatValue>(handler);
         }
-        public CameraEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public CameraEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
         #region Fields
         private UInt32 mInt01;

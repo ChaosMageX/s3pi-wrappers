@@ -9,7 +9,7 @@ namespace s3piwrappers.Effects
     public class Effect : SectionData, IEquatable<Effect>
     {
 
-        #region Nested Type: Resource
+        #region Resource
         public class ResourceReference : DataElement
         {
             public ResourceReference(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
@@ -124,7 +124,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ParticleParams
+        #region ParticleParams
         public class ParticleParams : DataElement
         {
             public ParticleParams(int apiVersion, EventHandler handler, ParticleParams basis)
@@ -363,7 +363,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemA
+        #region ItemA
         public class ItemA : DataElement, IEquatable<ItemA>
         {
             private float mFloat01;
@@ -479,7 +479,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemB
+        #region ItemB
         public class ItemB : DataElement, IEquatable<ItemB>
         {
             private UInt32 mInt02;
@@ -598,7 +598,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemC
+        #region ItemC
         public class ItemC : DataElement, IEquatable<ItemC>
         {
             public ItemC(int apiVersion, EventHandler handler, ItemC basis)
@@ -631,7 +631,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemD
+        #region ItemD
         public class ItemD : DataElement, IEquatable<ItemD>
         {
             public ItemD(int apiVersion, EventHandler handler, ItemD basis)
@@ -727,7 +727,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemE
+        #region ItemE
         public class ItemE : DataElement, IEquatable<ItemE>
         {
             public ItemE(int apiVersion, EventHandler handler, ItemE basis)
@@ -825,7 +825,7 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        #region Nested Type: ItemF
+        #region ItemF
         public class ItemF : DataElement
         {
             public ItemF(int apiVersion, EventHandler handler, ItemF basis)
@@ -937,12 +937,12 @@ namespace s3piwrappers.Effects
         }
         #endregion
 
-        public Effect(int apiVersion, EventHandler handler, Section section)
+        public Effect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
         }
 
-        public Effect(int apiVersion, EventHandler handler, Section section, Stream s)
+        public Effect(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s)
         {
         }

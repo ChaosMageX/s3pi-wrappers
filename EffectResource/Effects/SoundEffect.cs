@@ -12,8 +12,8 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public SoundEffect(int apiVersion, EventHandler handler, Section section) : base(apiVersion, handler, section) { }
-        public SoundEffect(int apiVersion, EventHandler handler, Section section, Stream s) : base(apiVersion, handler, section, s) { }
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section) { }
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
 
         #region Fields

@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="SWB\ColourValue.cs" />
     <Compile Include="SWB\ByteValue.cs" />
+    <Compile Include="SWB\ISection.cs" />
     <Compile Include="SWB\Structures\Colour.cs" />
     <Compile Include="SWB\Structures\Vector2.cs" />
     <Compile Include="SWB\Structures\Vector3.cs" />
@@ -93,6 +94,8 @@
     <Compile Include="SWB\SectionDataList.cs" />
     <Compile Include="SWB\SectionList.cs" />
     <Compile Include="SWB\ValueElement.cs" />
+    <Compile Include="VisualEffects\VisualEffect.cs" />
+    <Compile Include="VisualEffects\VisualEffectHandle.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
