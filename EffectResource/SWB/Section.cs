@@ -5,7 +5,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers.SWB
 {
-    public abstract class Section : ExportableDataElement, ISection
+    public abstract class Section : DataElement, ISection
     {
         protected ushort mVersion;
         protected ushort mType;

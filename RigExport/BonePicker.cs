@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using s3piwrappers;
 using System.IO;
 using s3pi.DemoPlugins;
+using System.Globalization;
+using System.Threading;
 
 namespace RigExport
 {
@@ -51,12 +53,11 @@ namespace RigExport
             get { return mResult; }
         }
 
-
         private void btnOk_Click(object sender, EventArgs e)
         {
             try
             {
-
+                Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
                 GrannyRigData grd = mRig.RigData as GrannyRigData;
                 
                 var result = saveFileDialog1.ShowDialog();
@@ -68,12 +69,13 @@ namespace RigExport
                         if (clbBones.GetItemChecked(i))
                         {
                             var bone = (GrannyRigData.Bone) clbBones.Items[i];
-                            sb.AppendFormat("\"{0}\" \"{1}\" {2,8:0.000000} {3,8:0.000000} {4,8:0.000000} {5}\r\n", bone.Name,
+                            sb.AppendFormat("\"{0}\" \"{1}\" {2} {3} {4} {5}\r\n", bone.Name,
                                             bone.ParentIndex == -1
                                                 ? "unparented"
                                                 : grd.Skeleton.Bones[bone.ParentIndex].Name,
-                                            bone.LocalTransform.Position.X,
-                                            bone.LocalTransform.Position.Y, bone.LocalTransform.Position.Z,
+                                            bone.LocalTransform.Position.X.ToString("0.00000",CultureInfo.InvariantCulture),
+                                            bone.LocalTransform.Position.Y.ToString("0.00000", CultureInfo.InvariantCulture),
+                                            bone.LocalTransform.Position.Z.ToString("0.00000", CultureInfo.InvariantCulture),
                                             ToEuler(bone.LocalTransform.Orientation));
                         }
                     }
@@ -134,7 +136,8 @@ namespace RigExport
                 y = Math.Asin(2 * poleTest);
                 z = Math.Atan2(2D * q.Y * q.W - 2 * q.X * q.Z, 1 - 2 * sqY - 2 * sqZ);
             }
-            return string.Format("{0,8:0.000000} {1,8:0.000000} {2,8:0.000000}", x, y, z);
+
+            return string.Format("{0} {1} {2}", x.ToString("0.00000", CultureInfo.InvariantCulture), y.ToString("0.00000", CultureInfo.InvariantCulture), z.ToString("0.00000", CultureInfo.InvariantCulture));
 
         }
     }

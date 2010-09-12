@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
+using System.Collections;
+using System.Text;
 
 namespace s3piwrappers.SWB
 {

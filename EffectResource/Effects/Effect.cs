@@ -959,41 +959,5 @@ namespace s3piwrappers.Effects
         {
             return base.Equals(other);
         }
-
-        public static Type GetEffectType(ushort id)
-        {
-            switch (id)
-            {
-                case 0x0001:
-                    return typeof(ParticleEffect);
-                case 0x0002:
-                    return typeof(MetaparticleEffect);
-                case 0x0003:
-                    return typeof(DecalEffect);
-                case 0x0004:
-                    return typeof(SequenceEffect);
-                case 0x0005:
-                    return typeof(SoundEffect);
-                case 0x0006:
-                    return typeof(ShakeEffect);
-                case 0x0007:
-                    return typeof(CameraEffect);
-                case 0x0008:
-                    return typeof(ModelEffect);
-                case 0x0009:
-                    return typeof(ScreenEffect);
-                case 0x000B:
-                    return typeof(DefaultEffect);
-                case 0x000C:
-                    return typeof(DefaultEffect);
-                case 0x000D:
-                    return typeof(DistributeEffect);
-                case 0x000E:
-                    return typeof(DefaultEffect);
-                default:
-                    throw new Exception("Invalid block type 0x" + id.ToString("X4"));
-            }
-        }
-
     }
 }

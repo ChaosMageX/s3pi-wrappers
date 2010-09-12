@@ -6,7 +6,6 @@ using s3piwrappers.Effects;
 using s3piwrappers.Resources;
 using s3piwrappers.SWB;
 using s3piwrappers.SWB.IO;
-using System.Collections;
 
 namespace s3piwrappers
 {
@@ -516,9 +515,9 @@ namespace s3piwrappers
 
         #region Fields
         private UInt16 mVersion = 0x00000002;
-        private EffectSectionList mEffects;
-        private ResourceSectionList mResources;
-        private VisualEffectSection mVisualEffects;
+        private EffectSectionList mEffectSections;
+        private ResourceSectionList mResourceSections;
+        private VisualEffectSection mVisualEffectSections;
         private byte[] mReserved;
         private VisualEffectHandleList mVisualEffectHandles;
         #endregion
@@ -531,22 +530,22 @@ namespace s3piwrappers
             set { mVersion = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(2)]
-        public EffectSectionList Effects
+        public EffectSectionList EffectSections
         {
-            get { return mEffects; }
-            set { mEffects = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mEffectSections; }
+            set { mEffectSections = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
-        public ResourceSectionList Resources
+        public ResourceSectionList ResourceSections
         {
-            get { return mResources; }
-            set { mResources = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mResourceSections; }
+            set { mResourceSections = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
-        public VisualEffectSection VisualEffects
+        public VisualEffectSection VisualEffectSections
         {
-            get { return mVisualEffects; }
-            set { mVisualEffects = value; OnResourceChanged(this, new EventArgs()); }
+            get { return mVisualEffectSections; }
+            set { mVisualEffectSections = value; OnResourceChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
         public byte[] Reserved
@@ -580,9 +579,9 @@ namespace s3piwrappers
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mVersion = s.ReadUInt16();
-            mEffects = new EffectSectionList(this.OnResourceChanged, stream);
-            mResources = new ResourceSectionList(this.OnResourceChanged, stream);
-            mVisualEffects = new VisualEffectSection(0, this.OnResourceChanged, s.ReadUInt16(), stream);
+            mEffectSections = new EffectSectionList(this.OnResourceChanged, stream);
+            mResourceSections = new ResourceSectionList(this.OnResourceChanged, stream);
+            mVisualEffectSections = new VisualEffectSection(0, this.OnResourceChanged, s.ReadUInt16(), stream);
             mReserved = s.ReadBytes(4);
             mVisualEffectHandles = new VisualEffectHandleList(this.OnResourceChanged, stream);
         }
@@ -592,13 +591,13 @@ namespace s3piwrappers
             MemoryStream stream = new MemoryStream();
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mVersion);
-            if (mEffects == null) mEffects = new EffectSectionList(this.OnResourceChanged);
-            mEffects.UnParse(stream);
-            if (this.mResources == null) this.mResources = new ResourceSectionList(this.OnResourceChanged);
-            mResources.UnParse(stream);
-            if (mVisualEffects == null) mVisualEffects = new VisualEffectSection(0, this.OnResourceChanged, 2);
-            s.Write(mVisualEffects.Version);
-            mVisualEffects.UnParse(stream);
+            if (mEffectSections == null) mEffectSections = new EffectSectionList(this.OnResourceChanged);
+            mEffectSections.UnParse(stream);
+            if (this.mResourceSections == null) this.mResourceSections = new ResourceSectionList(this.OnResourceChanged);
+            mResourceSections.UnParse(stream);
+            if (mVisualEffectSections == null) mVisualEffectSections = new VisualEffectSection(0, this.OnResourceChanged, 2);
+            s.Write(mVisualEffectSections.Version);
+            mVisualEffectSections.UnParse(stream);
             if (mReserved == null) mReserved = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
             s.Write(mReserved);
             if (mVisualEffectHandles == null) mVisualEffectHandles = new VisualEffectHandleList(this.OnResourceChanged);
