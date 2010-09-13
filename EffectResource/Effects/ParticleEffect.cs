@@ -751,9 +751,9 @@ namespace s3piwrappers.Effects
             s.Read(out mFloat44);
 
             mItemDList01 = new DataList<ItemD>(handler, stream);
-            if (stream.Position == stream.Length) return; //can happen if importing lower version to higher version
+            
             //Version 2+
-            if (mSection.Version >= 0x0002)
+            if (mSection.Version >= 0x0002 && stream.Position < stream.Length)
             {
                 s.Read(out mFloat45, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat46, ByteOrder.LittleEndian); //LE
@@ -762,10 +762,10 @@ namespace s3piwrappers.Effects
             }
 
             //Version 3+
-            if (mSection.Version >= 0x0003) s.Read(out mByte14);
+            if (mSection.Version >= 0x0003 && stream.Position < stream.Length) s.Read(out mByte14);
 
             //Version 4+
-            if (mSection.Version >= 0x0004) s.Read(out mFloat48);
+            if (mSection.Version >= 0x0004 && stream.Position < stream.Length) s.Read(out mFloat48);
 
         }
         public override void UnParse(Stream stream)

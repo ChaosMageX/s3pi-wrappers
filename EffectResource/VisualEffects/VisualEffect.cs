@@ -8,7 +8,6 @@ namespace s3piwrappers
 {
     public class VisualEffect : SectionData, IEquatable<VisualEffect>
     {
-
         #region Index
         public class Index : SectionData, IEquatable<Index>
         {
@@ -225,8 +224,7 @@ namespace s3piwrappers
                 s.Read(out mShort03);
                 s.Read(out mFloat10);
                 s.Read(out mBlockIndex);
-                if (stream.Position == stream.Length) return; //importing older sections
-                if (mSection.Version >= 2)
+                if (mSection.Version >= 2 && stream.Position < stream.Length)
                 {
                     s.Read(out mByte03); //version 2+
                     s.Read(out mByte04); //version 2+
@@ -272,8 +270,6 @@ namespace s3piwrappers
         }
         #endregion
 
-
-
         public VisualEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
@@ -290,6 +286,7 @@ namespace s3piwrappers
             : base(apiVersion, handler, basis)
         {
         }
+
         #region Fields
         private UInt32 mInt01;
         private UInt32 mInt02;

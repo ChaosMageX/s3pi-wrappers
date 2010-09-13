@@ -77,7 +77,6 @@ namespace s3piwrappers.Effects
             s.Write(mFloat03);
         }
 
-
         public bool Equals(SoundEffect other)
         {
             return base.Equals(other);

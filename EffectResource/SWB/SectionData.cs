@@ -19,9 +19,8 @@ namespace s3piwrappers.SWB
         }
 
         public SectionData(int apiVersion, EventHandler handler, SectionData basis)
-            : base(apiVersion, handler)
+            : this(apiVersion, handler,basis.mSection)
         {
-            mSection = basis.mSection;
             MemoryStream ms = new MemoryStream();
             basis.UnParse(ms);
             ms.Position = 0L;

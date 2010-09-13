@@ -6,16 +6,8 @@ using s3piwrappers.SWB.IO;
 
 namespace s3piwrappers.Effects
 {
-    #region ByteValue
-
-    #endregion
-
-    #region UInt32Value
-
-    #endregion
     public class ScreenEffect : Effect, IEquatable<ScreenEffect>
-    {
-        
+    {       
         
         #region Item
         public class Item : DataElement, IEquatable<Item>

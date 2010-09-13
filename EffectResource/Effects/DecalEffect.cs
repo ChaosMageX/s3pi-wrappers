@@ -186,8 +186,7 @@ namespace s3piwrappers.Effects
             s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
             s.Read(out mLong01);
-            if (stream.Position == stream.Length) return; //can happen if importing lower version to higher version
-            if (mSection.Version >= 2) s.Read(out mByte03); //version 2+
+            if (mSection.Version >= 2 && stream.Position < stream.Length) s.Read(out mByte03); //version 2+
         }
 
         public override void UnParse(Stream stream)
