@@ -732,12 +732,12 @@ namespace s3piwrappers
             }
             mUnknown01 = br.ReadUInt32();
             int grannySize = br.ReadInt32();
-            long grannyOffset = br.ReadUInt32() + s.Position - 4;
-            long ikChainsOffset = br.ReadUInt32() + s.Position - 4;
-            long ikTargetsOffset = br.ReadUInt32() + s.Position - 4;
-            long infoNodesOffset = br.ReadUInt32() + s.Position - 4;
-            long compressNodesOffset = br.ReadUInt32() + s.Position - 4;
-            long fullBoneListOffset = br.ReadUInt32() + s.Position - 4;
+            long grannyOffset = s.Position + br.ReadUInt32();
+            long ikChainsOffset = s.Position + br.ReadUInt32();
+            long ikTargetsOffset = s.Position + br.ReadUInt32();
+            long infoNodesOffset = s.Position + br.ReadUInt32();
+            long compressNodesOffset = s.Position + br.ReadUInt32();
+            long fullBoneListOffset = s.Position + br.ReadUInt32();
             mUnknown02 = br.ReadBytes(16);
             if (checking && s.Position != grannyOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", grannyOffset, s.Position));
@@ -745,7 +745,10 @@ namespace s3piwrappers
             byte[] buffer = br.ReadBytes(grannySize);
             mRigData = CreateRigData(0, OnResourceChanged, new MemoryStream(buffer));
 
-            s.Seek(4 - (s.Position % 4), SeekOrigin.Current); //correct pos
+            while ((s.Position % 4) != 0)
+                if (br.ReadByte() != 0x00 && checking)
+                    throw new InvalidDataException("Expected padding char 0x00");
+
             if (checking && s.Position != ikChainsOffset)
                 throw new InvalidDataException(String.Format("Bad offset, expected {0} but got {1}", ikChainsOffset, s.Position));
             mIkChains = new IkChainList(this.OnResourceChanged, s);
@@ -799,7 +802,7 @@ namespace s3piwrappers
             gr2.Read(buffer, 0, buffer.Length);
             gr2.Close();
             bw.Write(buffer.Length);
-
+            if((s.Position %4)!=0)bw.Write(new byte[4-(s.Position%4)]);
 
             long offsetPosition = s.Position;
             s.Seek(24, SeekOrigin.Current);
@@ -809,7 +812,9 @@ namespace s3piwrappers
 
             bw.Write(buffer);
 
-            bw.Write(new byte[4 - (s.Position % 4)]);
+            //00 padding to next DWORD
+            while ((s.Position % 4) != 0) 
+                bw.Write((byte) 0x00);
 
 
             ikChainsOffset = s.Position;
