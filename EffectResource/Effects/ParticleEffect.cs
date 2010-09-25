@@ -3,6 +3,7 @@ using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.SWB;
 using s3piwrappers.SWB.IO;
+using System.Collections.Generic;
 
 namespace s3piwrappers.Effects
 {
@@ -867,7 +868,22 @@ namespace s3piwrappers.Effects
             if (mSection.Version >= 0x0004) s.Write(mFloat48);
 
         }
-
+        public override List<string> ContentFields
+        {
+            get
+            {
+                var fields = base.ContentFields;
+                if (mSection.Version < 4) fields.Remove("Float48");
+                if (mSection.Version < 3) fields.Remove("Byte14");
+                if (mSection.Version < 2)
+                {
+                    fields.Remove("Float45");
+                    fields.Remove("Float46");
+                    fields.Remove("Float47");
+                }
+                return fields;
+            }
+        }
         public bool Equals(ParticleEffect other)
         {
             return base.Equals(other);

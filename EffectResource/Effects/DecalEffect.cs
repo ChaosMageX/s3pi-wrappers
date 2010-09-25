@@ -213,7 +213,15 @@ namespace s3piwrappers.Effects
             if (mSection.Version >= 2) s.Write(mByte03); //version 2+
         }
 
-
+        public override System.Collections.Generic.List<string> ContentFields
+        {
+            get
+            {
+                var fields = base.ContentFields;
+                if (mSection.Version < 2) fields.Remove("Byte03");
+                return fields;
+            }
+        }
         public bool Equals(DecalEffect other)
         {
             return base.Equals(other);

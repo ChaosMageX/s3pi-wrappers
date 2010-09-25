@@ -261,7 +261,19 @@ namespace s3piwrappers
                     s.Write(mByte04); //version 2+
                 }
             }
-
+            public override System.Collections.Generic.List<string> ContentFields
+            {
+                get 
+                { 
+                    var fields = base.ContentFields;
+                    if(mSection.Version <2)
+                    {
+                        fields.Remove("Byte03");
+                        fields.Remove("Byte04");
+                    }
+                    return fields;
+                }
+            }
 
             public bool Equals(Index other)
             {
