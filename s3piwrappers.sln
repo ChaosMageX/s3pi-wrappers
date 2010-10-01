@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigExport", "RigExport\RigE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrackMaskResource", "TrackMaskResource\TrackMaskResource.csproj", "{B075928C-0D4F-4E83-81CD-1972F726B1E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimatedTextureResource", "AnimatedTextureResource\AnimatedTextureResource.csproj", "{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -150,6 +152,16 @@ Global
 		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B075928C-0D4F-4E83-81CD-1972F726B1E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AC7A70ED-1A0B-4863-9C40-8342C5FE5C97}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
