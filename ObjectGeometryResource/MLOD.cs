@@ -512,6 +512,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Material01 Index: 0x{0:X8}\n", mMATDIndex01);
                     sb.AppendFormat("VRTF: 0x{0:X8}\n", mVRTFIndex);
                     sb.AppendFormat("VBUF: 0x{0:X8}\n", mVBUFIndex);
+                    sb.AppendFormat("VBUF Type: 0x{0:X8}\n", mVBUFType);
                     sb.AppendFormat("VBUF Offset: 0x{0:X16}\n", mVBUFOffset);
                     sb.AppendFormat("IBUF Offset: 0x{0:X16}\n", mIBUFOffset);
                     sb.AppendFormat("Vertex Count: {0}\n", mVBUFCount);
@@ -535,12 +536,15 @@ namespace s3piwrappers
                         {
                             sb.AppendFormat("=Geometry State[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
                         }
+                    } 
+                    if (mOwner.Version >= 0x00000202)
+                    {
+                        sb.AppendFormat("Unknown01: {0,8:0.00000}\n", mUnknown01);
+                        sb.AppendFormat("Unknown02: {0,8:0.00000}\n", mUnknown02);
+                        sb.AppendFormat("Unknown03: {0,8:0.00000}\n", mUnknown03);
+                        sb.AppendFormat("Unknown04: {0,8:0.00000}\n", mUnknown04);
+                        sb.AppendFormat("Unknown05: {0,8:0.00000}\n", mUnknown05);
                     }
-                    sb.AppendFormat("Unknown01: {0,8:0.00000}\n", mUnknown01);
-                    sb.AppendFormat("Unknown02: {0,8:0.00000}\n", mUnknown02);
-                    sb.AppendFormat("Unknown03: {0,8:0.00000}\n", mUnknown03);
-                    sb.AppendFormat("Unknown04: {0,8:0.00000}\n", mUnknown04);
-                    sb.AppendFormat("Unknown05: {0,8:0.00000}\n", mUnknown05);
                     return sb.ToString();
                 }
             }
