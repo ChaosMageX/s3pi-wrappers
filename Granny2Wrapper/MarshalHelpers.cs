@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Runtime.InteropServices;
-using System.Collections;
 
-namespace s3piwrappers
+namespace s3piwrappers.Granny2
 {
-    public static class MarshalHelpers
+    internal static class MarshalHelpers
     {
         public static T S<T>(this IntPtr ptr)
         {

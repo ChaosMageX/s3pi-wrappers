@@ -642,8 +642,8 @@ namespace s3piwrappers
             if (Index == -1) return "NULL";
             if (!hasGranny2Dll) return "0x" + Index.ToString("X8");
             GrannyRigData grd = mRigData as GrannyRigData;
-            if (Index >= grd.Skeleton.Bones.Count) return "INVALID";
-            return grd.Skeleton.Bones[Index].Name;
+            if (Index >= grd.FileInfo.Skeleton.Bones.Count) return "INVALID";
+            return grd.FileInfo.Skeleton.Bones[Index].Name;
         }
 
 

@@ -3,9 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace s3piwrappers.Granny2
 {
-    public static class Constants
+    internal static class Constants
     {
-
         static Constants()
         {
             IntPtr hwnd = LoadLibrary("granny2.dll");

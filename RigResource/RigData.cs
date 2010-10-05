@@ -14,14 +14,6 @@ namespace s3piwrappers
             : base(APIversion, handler)
         {
         }
-        public RigData(int APIversion, EventHandler handler, RigData basis)
-            : this(APIversion, handler)
-        {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
-        }
-
         public RigData(int APIversion, EventHandler handler, Stream s)
             : this(APIversion, handler)
         {

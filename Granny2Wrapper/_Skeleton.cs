@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace s3piwrappers.Granny2
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Skeleton
+    internal struct _Skeleton
     {
         public String Name;
         public Int32 BoneCount;

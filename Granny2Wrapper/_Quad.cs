@@ -3,8 +3,9 @@
 namespace s3piwrappers.Granny2
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triple
+    internal struct _Quad
     {
-        public float X, Y, Z;
+        public float X, Y, Z, W;
     }
+
 }

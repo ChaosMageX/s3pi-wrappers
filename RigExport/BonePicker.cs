@@ -11,6 +11,7 @@ using System.IO;
 using s3pi.DemoPlugins;
 using System.Globalization;
 using System.Threading;
+using s3piwrappers.Granny2;
 
 namespace RigExport
 {
@@ -40,7 +41,7 @@ namespace RigExport
                 Close();
                 return;
             }
-            var bones = grd.Skeleton.Bones;
+            var bones = grd.FileInfo.Skeleton.Bones;
             for (int i = 0; i < bones.Count; i++)
             {
                 clbBones.Items.Add(bones[i]);
@@ -68,11 +69,11 @@ namespace RigExport
                     {
                         if (clbBones.GetItemChecked(i))
                         {
-                            var bone = (GrannyRigData.Bone) clbBones.Items[i];
+                            var bone = (Bone) clbBones.Items[i];
                             sb.AppendFormat("\"{0}\" \"{1}\" {2} {3} {4} {5}\r\n", bone.Name,
                                             bone.ParentIndex == -1
                                                 ? "unparented"
-                                                : grd.Skeleton.Bones[bone.ParentIndex].Name,
+                                                : grd.FileInfo.Skeleton.Bones[bone.ParentIndex].Name,
                                             bone.LocalTransform.Position.X.ToString("0.00000",CultureInfo.InvariantCulture),
                                             bone.LocalTransform.Position.Y.ToString("0.00000", CultureInfo.InvariantCulture),
                                             bone.LocalTransform.Position.Z.ToString("0.00000", CultureInfo.InvariantCulture),
@@ -108,7 +109,7 @@ namespace RigExport
                 clbBones.SetItemChecked(i, false);
             }
         }
-        public static string ToEuler(GrannyRigData.Quad q)
+        public static string ToEuler(Quad q)
         {
             double sqX, sqY, sqZ, sqW;
             double x, y, z;

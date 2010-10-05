@@ -45,22 +45,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>bin\x64\Release\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>..\bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>..\bin\Release\</OutputPath>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="s3pi.Interfaces">
       <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
@@ -78,31 +62,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Granny2\Matrix4x4.cs" />
-    <Compile Include="Granny2\Quad.cs" />
-    <Compile Include="Granny2\Transform.cs" />
-    <Compile Include="Granny2\Triple.cs" />
-    <Compile Include="Granny2\Constants.cs" />
-    <Compile Include="Granny2\DataTreeWriter.cs" />
-    <Compile Include="Granny2\FileBuilder.cs" />
-    <Compile Include="Granny2\IO.cs" />
-    <Compile Include="Granny2\GrannyFileInfo.cs" />
-    <Compile Include="Granny2\Logging.cs" />
-    <Compile Include="Granny2\Variant.cs" />
-    <Compile Include="RigData.cs" />
-    <Compile Include="MarshalHelpers.cs" />
-    <Compile Include="Granny2\ArtToolInfo.cs" />
-    <Compile Include="Granny2\Model.cs" />
-    <Compile Include="Granny2\Bone.cs" />
-    <Compile Include="Granny2\Skeleton.cs" />
     <Compile Include="GrannyRigData.cs" />
+    <Compile Include="RigData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawRigData.cs" />
     <Compile Include="RigResource.cs" />
     <Compile Include="RigResourceHandler.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="granny2.dll" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -120,6 +85,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Granny2Wrapper\Granny2Wrapper.csproj">
+      <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
+      <Name>Granny2Wrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,12 +1,10 @@
 ﻿using System.Runtime.InteropServices;
-using System;
 
 namespace s3piwrappers.Granny2
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quad
+    internal struct _Matrix4x4
     {
-        public float X, Y, Z, W;
+        public _Quad m0, m1, m2, m3;
     }
-
 }

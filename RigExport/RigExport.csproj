@@ -94,6 +94,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Granny2Wrapper\Granny2Wrapper.csproj">
+      <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
+      <Name>Granny2Wrapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RigResource\RigResource.csproj">
       <Project>{96239738-405A-437E-903A-C51B9521912D}</Project>
       <Name>RigResource</Name>

@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 namespace s3piwrappers.Granny2
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct Model
+    internal struct _Model
     {
         public String Name;
         public IntPtr Skeleton;
-        public Transform InitialPlacement;
+        public _Transform InitialPlacement;
         public Int32 MeshBindingCount;
         public IntPtr MeshBindings;
 
