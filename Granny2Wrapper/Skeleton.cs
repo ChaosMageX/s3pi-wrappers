@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using s3pi.Interfaces;
 using System.Text;
+using System.Linq;
 
 namespace s3piwrappers.Granny2
 {
@@ -21,7 +22,7 @@ namespace s3piwrappers.Granny2
             : base(APIversion, handler)
         {
             mName = name;
-            mBones = new GrannyElementList<Bone>(handler, bones);
+            mBones = new GrannyElementList<Bone>(handler, bones.Select(x=>new Bone(0,handler,x)).ToList());
         }
 
         internal Skeleton(int APIversion, EventHandler handler, _Skeleton s) : base(APIversion, handler) { FromStruct(s); }

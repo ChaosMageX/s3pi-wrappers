@@ -14,6 +14,8 @@ namespace s3piwrappers.Granny2
         public Bone(int APIversion, EventHandler handler)
             : base(APIversion, handler)
         {
+            mName = "<New Bone>";
+            mParentIndex = -1;
             mLocalTransform = new Transform(0, handler);
             mInverseWorld4x4 = new Matrix4x4(0, handler);
         }

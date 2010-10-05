@@ -12,6 +12,7 @@ namespace s3piwrappers.Granny2
         public Model(int APIversion, EventHandler handler) : base(APIversion, handler)
         {
             mInitialPlacement = new Transform(0,handler);
+            mInitialPlacement.Flags = (TransformFlags) 0;
         }
         public Model(int APIversion, EventHandler handler, string name, Transform initialPlacement) : base(APIversion, handler)
         {
