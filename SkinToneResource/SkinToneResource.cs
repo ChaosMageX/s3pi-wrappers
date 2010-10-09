@@ -162,7 +162,7 @@ namespace s3piwrappers
                     return str.Trim();
                 }
             }
- 
+
 
             [ElementPriority(1)]
             public AgeGenderFlags AgeGenderFlags
@@ -221,7 +221,8 @@ namespace s3piwrappers
 
             #region AHandlerElement
 
-            public TextureKey(int APIversion, EventHandler handler,SkinToneResource owner) : base(APIversion, handler)
+            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner)
+                : base(APIversion, handler)
             {
                 mOwner = owner;
             }
@@ -233,7 +234,7 @@ namespace s3piwrappers
                 ms.Position = 0L;
                 Parse(ms);
             }
-            public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner) : this(APIversion, handler,owner) { Parse(s); }
+            public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner) : this(APIversion, handler, owner) { Parse(s); }
 
             public override AHandlerElement Clone(EventHandler handler)
             {
@@ -312,22 +313,24 @@ namespace s3piwrappers
         public class TextureKeyList : DependentList<TextureKey>
         {
             private SkinToneResource mOwner;
-            public TextureKeyList(EventHandler handler,SkinToneResource owner) : base(handler)
+            public TextureKeyList(EventHandler handler, SkinToneResource owner)
+                : base(handler)
             {
                 mOwner = owner;
             }
-            public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner) : this(handler,owner)
+            public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner)
+                : this(handler, owner)
             {
                 Parse(s);
             }
             public override void Add()
             {
-                this.Add(new TextureKey(0, null,mOwner));
+                this.Add(new TextureKey(0, null, mOwner));
             }
 
             protected override TextureKey CreateElement(Stream s)
             {
-                TextureKey obj = new TextureKey(0, null,mOwner);
+                TextureKey obj = new TextureKey(0, null, mOwner);
                 obj.Parse(s);
                 return obj;
             }
@@ -400,15 +403,34 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                sb.AppendFormat("\nShaderKeys:\n");
-                for (int i = 0; i < mShaderKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
-                sb.AppendFormat("SkinRampIndex1:{0}\n", mReferences[(int)mSkinRampIndex1]);
-                sb.AppendFormat("SkinRampIndex2:{0}\n", mReferences[(int)mSkinRampIndex2]);
-                sb.AppendFormat("\nTextureKeys:\n");
-                for (int i = 0; i < mTextureKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mTextureKeyList[i].Value);
+                if (mShaderKeyList.Count > 0)
+                {
+                    sb.AppendFormat("\nShaderKeys:\n");
+                    for (int i = 0; i < mShaderKeyList.Count; i++)
+                    {
+                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                    }
+                }
+                sb.AppendFormat("SkinRampIndex1: 0X{0:x8}\n", mSkinRampIndex1);
+                sb.AppendFormat("SkinRampIndex2: 0X{0:x8}\n", mSkinRampIndex2);
+
+                if (mTextureKeyList.Count > 0)
+                {
+                    sb.AppendFormat("TextureKeys:\n");
+                    for (int i = 0; i < mTextureKeyList.Count; i++)
+                    {
+                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mTextureKeyList[i].Value);
+                    }
+                }
                 sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
-                sb.AppendFormat("\nReferences[{0}]:\n",mReferences.Count);
-                for (int i = 0; i < mReferences.Count;i++ ) sb.AppendFormat("[0x{0:X8}]{1}\n",i,mReferences[i].Value);
+                if (mReferences.Count > 0)
+                {
+                    sb.AppendFormat("References[{0}]:\n", mReferences.Count);
+                    for (int i = 0; i < mReferences.Count; i++)
+                    {
+                        sb.AppendFormat("[0x{0:X8}]{1}\n", i, mReferences[i].Value);
+                    }
+                }
                 return sb.ToString();
             }
         }
@@ -435,7 +457,7 @@ namespace s3piwrappers
             mShaderKeyList = new ShaderKeyList(this.OnResourceChanged, s);
             mSkinRampIndex1 = br.ReadUInt32();
             mSkinRampIndex2 = br.ReadUInt32();
-            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s,this);
+            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s, this);
             mIsDominant = br.ReadByte();
             mReferences = new TGIBlockList(this.OnResourceChanged, s, tgioffset, tgisize);
         }
@@ -451,7 +473,7 @@ namespace s3piwrappers
             mShaderKeyList.UnParse(s);
             bw.Write(mSkinRampIndex1);
             bw.Write(mSkinRampIndex2);
-            if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged,this);
+            if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged, this);
             mTextureKeyList.UnParse(s);
             bw.Write(mIsDominant);
             if (mReferences == null) mReferences = new TGIBlockList(OnResourceChanged, false);

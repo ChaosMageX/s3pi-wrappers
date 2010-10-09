@@ -1,6 +1,7 @@
 ﻿using System;
 using s3pi.Interfaces;
 using System.Text;
+using System.Reflection;
 
 namespace s3piwrappers.Granny2
 {
@@ -18,7 +19,10 @@ namespace s3piwrappers.Granny2
 
         public ArtToolInfo(int APIversion, EventHandler handler) : base(APIversion, handler)
         {
-            mFromArtToolName = "s3pe";
+            var a = Assembly.GetEntryAssembly().GetName();
+            mFromArtToolName = a.Name;
+            mArtToolMajorRevision = a.Version.MajorRevision;
+            mArtToolMinorRevision = a.Version.MinorRevision;
             mUnitsPerMeter = 1f;
             mArtToolMajorRevision = RecommendedApiVersion;
             mOrigin = new Triple(0, handler);

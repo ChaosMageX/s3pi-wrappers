@@ -31,7 +31,7 @@ namespace RigExport
             s.Read(mResult, 0, mResult.Length);
             s.Position = 0L;
             mRig = new RigResource(0, s);
-            GrannyRigData grd = mRig.RigData as GrannyRigData;
+            WrappedGrannyData grd = mRig.Rig.GrannyData as WrappedGrannyData;
             
             if (grd == null)
             {
@@ -59,7 +59,7 @@ namespace RigExport
             try
             {
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                GrannyRigData grd = mRig.RigData as GrannyRigData;
+                WrappedGrannyData grd = mRig.Rig.GrannyData as WrappedGrannyData;
                 
                 var result = saveFileDialog1.ShowDialog();
                 if (result == DialogResult.OK)

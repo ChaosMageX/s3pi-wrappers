@@ -101,14 +101,15 @@ namespace s3piwrappers
                 set { mHaloBlur = value; OnElementChanged(); }
             }
 
-            
-            
+
+
 
             #endregion
 
             #region AHandlerElement
             public ShaderKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
-            public ShaderKey(int APIversion, EventHandler handler,ShaderKey basis) : base(APIversion, handler)
+            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis)
+                : base(APIversion, handler)
             {
                 MemoryStream ms = new MemoryStream();
                 basis.UnParse(ms);
@@ -196,7 +197,7 @@ namespace s3piwrappers
             }
         }
         #endregion
-        
+
         #region Fields
         private UInt32 mVersion;
         private ShaderKeyList mShaderKeyList;
@@ -211,8 +212,14 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                sb.AppendFormat("\nShaderKeys:\n");
-                for (int i = 0; i < mShaderKeyList.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                if (mShaderKeyList.Count > 0)
+                {
+                    sb.AppendFormat("\nShaderKeys:\n");
+                    for (int i = 0; i < mShaderKeyList.Count; i++)
+                    {
+                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                    }
+                }
                 sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
                 return sb.ToString();
             }
@@ -241,7 +248,7 @@ namespace s3piwrappers
         public HairToneResource(int apiVersion, Stream s)
             : base(apiVersion, s)
         {
-	    if (base.stream == null)
+            if (base.stream == null)
             {
                 base.stream = this.UnParse();
                 this.OnResourceChanged(this, new EventArgs());
@@ -261,7 +268,7 @@ namespace s3piwrappers
             Stream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(mVersion);
-            if(mShaderKeyList == null)mShaderKeyList = new ShaderKeyList(OnResourceChanged);
+            if (mShaderKeyList == null) mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
             bw.Write(mIsDominant);
             return s;

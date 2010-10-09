@@ -62,12 +62,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrannyRigData.cs" />
-    <Compile Include="RigData.cs" />
+    <Compile Include="BodyRig.cs" />
+    <Compile Include="WrappedGrannyData.cs" />
+    <Compile Include="ObjectRig.cs" />
+    <Compile Include="AbstractRig.cs" />
+    <Compile Include="GrannyData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RawRigData.cs" />
+    <Compile Include="RawGrannyData.cs" />
     <Compile Include="RigResource.cs" />
     <Compile Include="RigResourceHandler.cs" />
+    <Compile Include="RigType.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -1,3 +1,21 @@
+2010-10-09:
+SkinToneResource:
+	*Fixed error in Value string
+RigResource:
+	*Refactoring
+2010-10-05:
+RigResource:
+	*Added default values
+2010-09-30:
+New Wrappers:
+	*AnimatedTextureResource
+ObjectGeometryResource:
+	*Filtered some version dependent content fields
+	*Added "VbufType" to "Value" string	
+EffectResource:
+	*Filtered some version dependent content fields
+RigResource:
+	*Fixed issue with writing body rigs
 2010-09-11:
 EffectResource:
 	*Rewrote to handle file sections
