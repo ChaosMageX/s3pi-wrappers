@@ -5,16 +5,30 @@ using s3pi.Settings;
 
 namespace s3piwrappers
 {
-    public abstract class RigData : AHandlerElement
+    public abstract class GrannyData : AHandlerElement
     {
+        internal static GrannyData CreateInstance(int apiVersion, EventHandler handler, Stream s)
+        {
+            return hasGranny2Dll ? (GrannyData)new WrappedGrannyData(apiVersion, handler, s) : (GrannyData)new RawGrannyData(apiVersion, handler, s);
+        }
+        internal static GrannyData CreateInstance(int apiVersion, EventHandler handler)
+        {
+            return hasGranny2Dll ? (GrannyData)new WrappedGrannyData(apiVersion, handler) : (GrannyData)new RawGrannyData(apiVersion, handler);
+        }
+        static GrannyData()
+        {
+            string dir = Path.GetDirectoryName(typeof(RigResource).Assembly.Location);
+            hasGranny2Dll = File.Exists(Path.Combine(dir, "granny2.dll"));
+        }
+        private static bool hasGranny2Dll = false;
         protected const int kRecommendedApiVersion = 1;
         private static bool checking = Settings.Checking;
 
-        public RigData(int APIversion, EventHandler handler)
+        public GrannyData(int APIversion, EventHandler handler)
             : base(APIversion, handler)
         {
         }
-        public RigData(int APIversion, EventHandler handler, Stream s)
+        public GrannyData(int APIversion, EventHandler handler, Stream s)
             : this(APIversion, handler)
         {
             Parse(s);

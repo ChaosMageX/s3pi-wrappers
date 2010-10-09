@@ -4,14 +4,14 @@ using s3pi.Interfaces;
 using System.Collections.Generic;
 namespace s3piwrappers
 {
-    public class RawRigData : RigData
+    public class RawGrannyData : GrannyData
     {
         private byte[] mData;
 
-        public RawRigData(int APIversion, EventHandler handler) : base(APIversion, handler) { }
-        public RawRigData(int APIversion, EventHandler handler, RawRigData basis) : this(APIversion, handler, basis.mData) { }
-        public RawRigData(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
-        public RawRigData(int APIversion, EventHandler handler, byte[] data) : base(APIversion, handler) { mData = data; }
+        public RawGrannyData(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+        public RawGrannyData(int APIversion, EventHandler handler, RawGrannyData basis) : this(APIversion, handler, basis.mData) { }
+        public RawGrannyData(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
+        public RawGrannyData(int APIversion, EventHandler handler, byte[] data) : base(APIversion, handler) { mData = data; }
 
         protected override void Parse(Stream s)
         {
@@ -28,7 +28,7 @@ namespace s3piwrappers
 
         public override AHandlerElement Clone(EventHandler handler)
         {
-            return new RawRigData(0, handler, this);
+            return new RawGrannyData(0, handler, this);
         }
 
         public override List<string> ContentFields

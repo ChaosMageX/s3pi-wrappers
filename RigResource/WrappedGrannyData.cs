@@ -7,19 +7,19 @@ using s3piwrappers.Granny2;
 
 namespace s3piwrappers
 {
-    public class GrannyRigData : RigData
+    public class WrappedGrannyData : GrannyData
     {
-        public GrannyRigData(int APIversion, EventHandler handler) 
+        public WrappedGrannyData(int APIversion, EventHandler handler) 
             : base(APIversion, handler)
         {
             mGrannyFileInfo = new GrannyFileInfo(0,handler);
         }
-        public GrannyRigData(int APIversion, EventHandler handler, GrannyRigData basis) : this(APIversion, handler,basis.mGrannyFileInfo) { }
-        public GrannyRigData(int APIversion, EventHandler handler, GrannyFileInfo grannyFileInfo) : base(APIversion, handler)
+        public WrappedGrannyData(int APIversion, EventHandler handler, WrappedGrannyData basis) : this(APIversion, handler,basis.mGrannyFileInfo) { }
+        public WrappedGrannyData(int APIversion, EventHandler handler, GrannyFileInfo grannyFileInfo) : base(APIversion, handler)
         {
             mGrannyFileInfo = new GrannyFileInfo(0, handler, grannyFileInfo);
         }
-        public GrannyRigData(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
+        public WrappedGrannyData(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
 
         private GrannyFileInfo mGrannyFileInfo;
 
