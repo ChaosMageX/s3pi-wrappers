@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}</ProjectGuid>
+    <ProjectGuid>{7F22563C-FBE0-496C-8DEF-E3812491935B}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RigExport</RootNamespace>
-    <AssemblyName>RigExport</AssemblyName>
+    <RootNamespace>s3piwrappers.BoneTool</RootNamespace>
+    <AssemblyName>BoneTool</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,49 +27,78 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
+    <OutputPath>..\..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="s3pi.CustomForms">
-      <HintPath>..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
+      <HintPath>..\..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.DemoPlugins">
-      <HintPath>..\lib\s3pi_current\s3pi.DemoPlugins.dll</HintPath>
+      <HintPath>..\..\lib\s3pi_current\s3pi.DemoPlugins.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.Interfaces">
-      <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
+      <HintPath>..\..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Custom">
-      <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
+    <Reference Include="System.Custom, Version=1008.30.15.26578, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BonePicker.cs">
+    <Compile Include="BoneActionEventArgs.cs" />
+    <Compile Include="BoneActionEventHandler.cs" />
+    <Compile Include="BoneManager.cs" />
+    <Compile Include="BoneOps\BoneOp.cs" />
+    <Compile Include="BoneOps\AddBoneOp.cs" />
+    <Compile Include="BoneOps\CloneBoneOp.cs" />
+    <Compile Include="BoneOps\CopyBoneOp.cs" />
+    <Compile Include="BoneOps\CopyHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\CutBoneOp.cs" />
+    <Compile Include="BoneOps\DeleteBoneOp.cs" />
+    <Compile Include="BoneOps\DeleteHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\PasteBoneOp.cs" />
+    <Compile Include="BoneOps\PrefixNameBoneOp.cs" />
+    <Compile Include="BoneOps\RenameNameBoneOp.cs" />
+    <Compile Include="BoneOps\ReplaceNameInHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\SuffixHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\UnParentBoneOp.cs" />
+    <Compile Include="BoneTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FindAndReplaceDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="BonePicker.Designer.cs">
-      <DependentUpon>BonePicker.cs</DependentUpon>
+    <Compile Include="InputStringDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BoneOps\IPasteBoneOp.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="BonePicker.resx">
-      <DependentUpon>BonePicker.cs</DependentUpon>
+    <EmbeddedResource Include="FindAndReplaceDialog.resx">
+      <DependentUpon>FindAndReplaceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InputStringDialog.resx">
+      <DependentUpon>InputStringDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -79,10 +108,11 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
-    <Content Include="Helpers\RigExport.helper">
+    <None Include="Helpers\BoneTool.helper">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -94,11 +124,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Granny2Wrapper\Granny2Wrapper.csproj">
+    <ProjectReference Include="..\..\Granny2Wrapper\Granny2Wrapper.csproj">
       <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
       <Name>Granny2Wrapper</Name>
     </ProjectReference>
-    <ProjectReference Include="..\RigResource\RigResource.csproj">
+    <ProjectReference Include="..\..\RigResource\RigResource.csproj">
       <Project>{96239738-405A-437E-903A-C51B9521912D}</Project>
       <Name>RigResource</Name>
     </ProjectReference>

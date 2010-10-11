@@ -65,7 +65,7 @@ namespace s3piwrappers.Granny2
         }
         public bool Equals(Model other)
         {
-            return mName.Equals(other.mName);
+            return base.Equals(other);
         }
     }
 }

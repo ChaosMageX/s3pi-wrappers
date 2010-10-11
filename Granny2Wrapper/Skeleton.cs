@@ -96,7 +96,7 @@ namespace s3piwrappers.Granny2
 
         public bool Equals(Skeleton other)
         {
-            return mName.Equals(other.mName);
+            return base.Equals(other);
         }
     }
 }

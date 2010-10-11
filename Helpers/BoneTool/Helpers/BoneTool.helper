@@ -1,0 +1,5 @@
+﻿ResourceType: 0x8EAF13DE
+Label: Bone Tool
+Command: BoneTool.exe
+Arguments: "{}"
+Desc: Edits bone hierarchy
