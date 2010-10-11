@@ -16,6 +16,7 @@ namespace s3piwrappers.BoneTool
         public GrannyBoneControl()
         {
             InitializeComponent();
+            Enabled = false;
             tbName.TextChanged += new EventHandler(tbName_TextChanged);
             tcLocalTransform.Changed += new EventHandler(tcLocalTransform_Changed);
         }
@@ -31,6 +32,7 @@ namespace s3piwrappers.BoneTool
         }
         private void UpdateView()
         {
+            Enabled = true;
             tbName.Text = mValue.Name;
             tcLocalTransform.Value = mValue.LocalTransform;
 
