@@ -48,8 +48,7 @@ namespace s3piwrappers.BoneTool
             this.tbFind.Name = "tbFind";
             this.tbFind.Size = new System.Drawing.Size(214, 20);
             this.tbFind.TabIndex = 0;
-            this.tbFind.Validating += new System.ComponentModel.CancelEventHandler(this.tbFind_Validating);
-            this.tbFind.Validated += new System.EventHandler(this.tbFind_Validated);
+            this.tbFind.TextChanged += new System.EventHandler(this.tbFind_TextChanged);
             // 
             // tbReplace
             // 
@@ -57,7 +56,7 @@ namespace s3piwrappers.BoneTool
             this.tbReplace.Name = "tbReplace";
             this.tbReplace.Size = new System.Drawing.Size(214, 20);
             this.tbReplace.TabIndex = 1;
-            this.tbReplace.Validated += new System.EventHandler(this.tbReplace_Validated);
+            this.tbReplace.TextChanged += new System.EventHandler(this.tbReplace_TextChanged);
             // 
             // lbFind
             // 
@@ -86,7 +85,6 @@ namespace s3piwrappers.BoneTool
             this.btnOk.TabIndex = 4;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
-            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
@@ -97,10 +95,11 @@ namespace s3piwrappers.BoneTool
             this.btnCancel.TabIndex = 5;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // FindAndReplaceDialog
             // 
+            this.AcceptButton = this.btnOk;
+            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(299, 100);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
@@ -109,48 +108,20 @@ namespace s3piwrappers.BoneTool
             this.Controls.Add(this.tbReplace);
             this.Controls.Add(this.tbFind);
             this.Name = "FindAndReplaceDialog";
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FindAndReplaceDialog_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        private void btnOk_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-        private void btnCancel_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-        private void tbFind_Validating(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(tbFind.Text))
-            {
-                e.Cancel = true;
-                MessageBox.Show(this, "Find: cannot be blank.", "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Exclamation);
-                
-            }
-        }
-        private void tbFind_Validated(object sender, System.EventArgs e)
+        private void tbFind_TextChanged(object sender, System.EventArgs e)
         {
             mFindString = tbFind.Text;
         }
 
-        private void tbReplace_Validated(object sender, System.EventArgs e)
+        private void tbReplace_TextChanged(object sender, System.EventArgs e)
         {
             mReplaceString = tbReplace.Text;
-        }
 
-        private void FindAndReplaceDialog_KeyDown(object sender, KeyEventArgs e)
-        {
-
-            if (e.KeyCode == Keys.Enter)
-            {
-                btnOk_Click(sender, e);
-                e.Handled = true;
-            }
         }
     }
 }

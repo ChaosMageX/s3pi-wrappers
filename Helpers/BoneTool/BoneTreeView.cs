@@ -99,6 +99,7 @@ namespace s3piwrappers.BoneTool
         public void BuildTree()
         {
             Nodes.Clear();
+            mBoneMap.Clear();
             var nodes = Bones.Select(x => CreateNode(x)).ToArray();
             for (int i = 0; i < Bones.Count; i++)
             {

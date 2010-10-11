@@ -8,7 +8,7 @@ namespace s3piwrappers.BoneTool.BoneOps
 
         public override string Name
         {
-            get { return "Add"; }
+            get { return "Add..."; }
         }
 
         public override void Execute(Bone bone)

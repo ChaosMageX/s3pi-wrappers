@@ -41,8 +41,7 @@ namespace s3piwrappers.BoneTool
             this.tbInput.Name = "tbInput";
             this.tbInput.Size = new System.Drawing.Size(275, 20);
             this.tbInput.TabIndex = 0;
-            this.tbInput.Validating += new System.ComponentModel.CancelEventHandler(this.tbInput_Validating);
-            this.tbInput.Validated += new System.EventHandler(this.tbInput_Validated);
+            this.tbInput.TextChanged += new System.EventHandler(this.tbInput_TextChanged);
             // 
             // btnOk
             // 
@@ -53,7 +52,6 @@ namespace s3piwrappers.BoneTool
             this.btnOk.TabIndex = 4;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
-            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
@@ -64,56 +62,25 @@ namespace s3piwrappers.BoneTool
             this.btnCancel.TabIndex = 5;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // InputStringDialog
             // 
+            this.AcceptButton = this.btnOk;
+            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(299, 72);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.tbInput);
             this.Name = "InputStringDialog";
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InputStringDialog_KeyDown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        private void btnOk_Click(object sender, System.EventArgs e)
-        {
-            if (string.IsNullOrEmpty(tbInput.Text))
-            {
-                MessageBox.Show(this, "Field cannot be blank", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            Close();
-        }
-        
-        private void tbInput_Validated(object sender, System.EventArgs e)
+        private void tbInput_TextChanged(object sender, System.EventArgs e)
         {
             mInputString = tbInput.Text;
         }
-        private void tbInput_Validating(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(tbInput.Text))
-            {
-                e.Cancel = true;
-                MessageBox.Show(this, "Field cannot be blank", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
-        }
 
-        private void btnCancel_Click(object sender, System.EventArgs e)
-        {
-            Close();
-        }
-
-        private void InputStringDialog_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.KeyCode == Keys.Enter)
-            {
-                btnOk_Click(sender, e);
-                e.Handled = true;
-            }
-        }
     }
 }
