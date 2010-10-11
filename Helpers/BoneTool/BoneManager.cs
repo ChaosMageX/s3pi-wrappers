@@ -14,7 +14,7 @@ namespace s3piwrappers.BoneTool
         public IList<Bone> Bones
         {
             get { return mBones; }
-            set { mBones = value; }
+            set { mBones = value;OnBoneSourceChanged(this,new EventArgs()); }
         }
         public Bone GetParent(Bone b)
         {
@@ -120,6 +120,12 @@ namespace s3piwrappers.BoneTool
             if (BoneAdded != null)
                 BoneAdded(sender, e);
         }
+        private void OnBoneSourceChanged(object sender, EventArgs e)
+        {
+            if (BoneSourceChanged != null)
+                BoneSourceChanged(sender, e);
+        }
+        public event EventHandler BoneSourceChanged;
         public event BoneActionEventHandler BoneNameChanged;
         public event BoneActionEventHandler BoneParentChanged;
         public event BoneActionEventHandler BoneRemoved;

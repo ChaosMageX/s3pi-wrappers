@@ -12,14 +12,9 @@ namespace s3piwrappers.BoneTool
         private Dictionary<Bone, TreeNode> mBoneMap;
         public BoneTreeView()
         {
-            mBoneManager = new BoneManager();
             mBoneMap = new Dictionary<Bone, TreeNode>();
             ContextMenu = new ContextMenu();
             ContextMenu.Popup += new EventHandler(ContextMenu_Popup);
-            mBoneManager.BoneAdded += new BoneActionEventHandler(mBoneManager_BoneAdded);
-            mBoneManager.BoneRemoved += new BoneActionEventHandler(mBoneManager_BoneRemoved);
-            mBoneManager.BoneNameChanged += new BoneActionEventHandler(mBoneManager_BoneNameChanged);
-            mBoneManager.BoneParentChanged += new BoneActionEventHandler(mBoneManager_BoneParentChanged);
         }
 
         private void RemoveNode(TreeNode node)
@@ -41,7 +36,7 @@ namespace s3piwrappers.BoneTool
         }
         private void mBoneManager_BoneParentChanged(BoneManager sender, BoneActionEventArgs e)
         {
-            var parent = mBoneManager.GetParent(e.Bone);
+            var parent = BoneManager.GetParent(e.Bone);
             var parentNode = parent == null ? null : mBoneMap[parent];
             var childNode = mBoneMap[e.Bone];
             RemoveNode(childNode);
@@ -64,7 +59,7 @@ namespace s3piwrappers.BoneTool
         {
             var node = CreateNode(e.Bone);
             mBoneMap[e.Bone] = node;
-            var parent = mBoneManager.GetParent(e.Bone);
+            var parent = BoneManager.GetParent(e.Bone);
             var parentNode = parent == null ? null : mBoneMap[parent];
             AddNode(node,parentNode);
         }
@@ -73,7 +68,7 @@ namespace s3piwrappers.BoneTool
             var m = (ContextMenu)sender;
             m.MenuItems.Clear();
             Bone b = SelectedNode == null ? null : SelectedNode.Tag as Bone;
-            foreach (var op in BoneOp.GetOps(mBoneManager, b))
+            foreach (var op in BoneOp.GetOps(BoneManager, b))
             {
                 m.MenuItems.Add(op.Name, op.OnExecute);
             }
@@ -82,9 +77,32 @@ namespace s3piwrappers.BoneTool
         }
         public IList<Bone> Bones
         {
-            get { return mBoneManager.Bones; }
-            set { mBoneManager.Bones = value; if(value!=null)BuildTree(); }
+            get { return BoneManager.Bones; }
         }
+
+        public BoneManager BoneManager
+        {
+            get { return mBoneManager; }
+            set
+            {
+                mBoneManager = value;
+                if (mBoneManager != null)
+                {
+                    BoneManager.BoneAdded += new BoneActionEventHandler(mBoneManager_BoneAdded);
+                    BoneManager.BoneRemoved += new BoneActionEventHandler(mBoneManager_BoneRemoved);
+                    BoneManager.BoneNameChanged += new BoneActionEventHandler(mBoneManager_BoneNameChanged);
+                    BoneManager.BoneParentChanged += new BoneActionEventHandler(mBoneManager_BoneParentChanged);
+                    BoneManager.BoneSourceChanged += new EventHandler(BoneManager_BoneSourceChanged);
+                    BuildTree();
+                }
+            }
+        }
+
+        void BoneManager_BoneSourceChanged(object sender, EventArgs e)
+        {
+            BuildTree();
+        }
+
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
@@ -100,6 +118,7 @@ namespace s3piwrappers.BoneTool
         {
             Nodes.Clear();
             mBoneMap.Clear();
+            if (mBoneManager.Bones == null) return;
             var nodes = Bones.Select(x => CreateNode(x)).ToArray();
             for (int i = 0; i < Bones.Count; i++)
             {

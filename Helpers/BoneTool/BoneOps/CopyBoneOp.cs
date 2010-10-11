@@ -11,15 +11,16 @@ namespace s3piwrappers.BoneTool.BoneOps
             get { return "Copy"; }
         }
 
+        private Bone mCopy;
         public override void Execute(Bone bone)
         {
             sCurrentPasteOp = this;
-            sTarget = bone;
+            mCopy = bone;
         }
 
         public void Paste(Bone bone)
         {
-            var newBone = new Bone(0, null, sTarget);
+            var newBone = new Bone(0, null, mCopy);
             BoneManager.AddBone(newBone,bone);
         }
     }

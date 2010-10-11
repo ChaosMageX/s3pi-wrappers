@@ -2,6 +2,8 @@
 using System.Windows.Forms;
 using s3pi.DemoPlugins;
 using System.IO;
+using s3piwrappers.BoneTool.Geometry;
+using s3piwrappers.Granny2;
 
 namespace s3piwrappers.BoneTool
 {
@@ -14,7 +16,6 @@ namespace s3piwrappers.BoneTool
 
         private byte[] mResult;
         private RigResource mRig;
-        private const string kFormName= "Bone Tool(#)";
         public MainForm(Stream s)
         {
             InitializeComponent();
@@ -25,9 +26,10 @@ namespace s3piwrappers.BoneTool
             {
                 throw new Exception("Could not read Granny2 data.  Ensure that the correct granny2.dll is installed.");
             }
-            boneTreeView.Bones = grd.FileInfo.Skeleton.Bones;
-            Text = kFormName.Replace("#", grd.FileInfo.Skeleton.Name);
+            grannySkeletonControl1.Value = grd.FileInfo.Skeleton;
+
         }
+
         private void btnCommit_Click(object sender, System.EventArgs e)
         {
             mResult = mRig.AsBytes;

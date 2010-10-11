@@ -7,11 +7,11 @@ namespace s3piwrappers.BoneTool.BoneOps
     {
         public override string Name
         {
-            get { return "Paste"; }
+            get { return string.Format("Paste({0})",((BoneOp)sCurrentPasteOp).Name); }
         }
         public override bool CanExecute()
         {
-            return sTarget != null;
+            return sCurrentPasteOp != null;
         }
         public override void Execute(Bone bone)
         {

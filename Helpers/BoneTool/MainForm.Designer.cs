@@ -28,27 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.boneTreeView = new s3piwrappers.BoneTool.BoneTreeView();
             this.btnCommit = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.grannySkeletonControl1 = new s3piwrappers.BoneTool.GrannySkeletonControl();
             this.SuspendLayout();
-            // 
-            // boneTreeView
-            // 
-            this.boneTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.boneTreeView.Bones = null;
-            this.boneTreeView.Location = new System.Drawing.Point(1, 3);
-            this.boneTreeView.Name = "boneTreeView";
-            this.boneTreeView.Size = new System.Drawing.Size(263, 435);
-            this.boneTreeView.TabIndex = 0;
             // 
             // btnCommit
             // 
-            this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnCommit.Location = new System.Drawing.Point(189, 444);
+            this.btnCommit.Location = new System.Drawing.Point(588, 406);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
             this.btnCommit.TabIndex = 1;
@@ -58,9 +46,8 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(108, 444);
+            this.btnCancel.Location = new System.Drawing.Point(507, 406);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
@@ -68,15 +55,24 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // grannySkeletonControl1
+            // 
+            this.grannySkeletonControl1.Location = new System.Drawing.Point(6, 12);
+            this.grannySkeletonControl1.Name = "grannySkeletonControl1";
+            this.grannySkeletonControl1.Size = new System.Drawing.Size(648, 378);
+            this.grannySkeletonControl1.TabIndex = 3;
+            this.grannySkeletonControl1.Value = null;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(267, 472);
+            this.ClientSize = new System.Drawing.Size(667, 442);
+            this.Controls.Add(this.grannySkeletonControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
-            this.Controls.Add(this.boneTreeView);
-            this.MinimumSize = new System.Drawing.Size(180, 200);
+            this.MaximumSize = new System.Drawing.Size(675, 470);
+            this.MinimumSize = new System.Drawing.Size(675, 470);
             this.Name = "MainForm";
             this.Text = "Bone Tool";
             this.ResumeLayout(false);
@@ -85,9 +81,9 @@
 
         #endregion
 
-        private BoneTreeView boneTreeView;
         private System.Windows.Forms.Button btnCommit;
         private System.Windows.Forms.Button btnCancel;
+        private GrannySkeletonControl grannySkeletonControl1;
 
     }
 }

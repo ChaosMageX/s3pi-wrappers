@@ -1,5 +1,4 @@
 ﻿using s3piwrappers.Granny2;
-
 namespace s3piwrappers.BoneTool
 {
     internal class BoneActionEventArgs

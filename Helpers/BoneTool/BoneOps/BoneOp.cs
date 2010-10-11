@@ -10,8 +10,7 @@ namespace s3piwrappers.BoneTool
     {
         private static IEnumerable<Type> sBoneOps;
         protected static IPasteBoneOp sCurrentPasteOp;
-        protected static Bone sTarget;
-        private Bone mSrc;
+        private Bone mTargetBone;
         private BoneManager mBoneManager;
         static BoneOp()
         {
@@ -28,7 +27,7 @@ namespace s3piwrappers.BoneTool
             {
                 var op = (BoneOp)Activator.CreateInstance(t);
                 op.mBoneManager = manager;
-                op.mSrc = bone;
+                op.mTargetBone = bone;
                 if (op.CanExecute())
                     ops.Add(op);
             }
@@ -46,7 +45,7 @@ namespace s3piwrappers.BoneTool
         
         public virtual bool CanExecute()
         {
-            return mSrc != null;
+            return mTargetBone != null;
         }
 
         public abstract void Execute(Bone bone);
@@ -57,7 +56,7 @@ namespace s3piwrappers.BoneTool
         }
         public void OnExecute(object sender, EventArgs e)
         {
-            Execute(mSrc);
+            Execute(mTargetBone);
         }
     }
 }

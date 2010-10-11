@@ -11,16 +11,37 @@ namespace s3piwrappers.BoneTool.BoneOps
             get { return "Cut"; }
         }
 
+        private BoneHierarchy mCopy;
         public override void Execute(Bone bone)
         {
             sCurrentPasteOp = this;
-            sTarget = bone;
+            mCopy = CopyHierarchy(bone);
+            BoneManager.DeleteBone(bone,true);
+
+
+        }
+        private BoneHierarchy CopyHierarchy(Bone b)
+        {
+            var h = new BoneHierarchy(b);
+            foreach (var child in BoneManager.GetChildren(b))
+            {
+                h.Children.Add(CopyHierarchy(child));
+            }
+            return h;
         }
 
         public void Paste(Bone bone)
         {
-            BoneManager.SetParent(sTarget, bone);
-            sTarget = null;
+            sCurrentPasteOp = null;
+            AddHierarchy(mCopy,bone);
+        }
+        private void AddHierarchy(BoneHierarchy h, Bone parent)
+        {
+            BoneManager.AddBone(h.Bone, parent);
+            foreach (var child in h.Children)
+            {
+                AddHierarchy(child, h.Bone);
+            }
         }
     }
 }
