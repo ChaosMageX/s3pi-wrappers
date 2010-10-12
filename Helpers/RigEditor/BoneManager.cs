@@ -2,19 +2,17 @@
 using System.Collections.Generic;
 using s3piwrappers.Granny2;
 
-namespace s3piwrappers.BoneTool
+namespace s3piwrappers.RigEditor
 {
     internal class BoneManager
     {
         private IList<Bone> mBones;
-        public BoneManager()
-        {
-        }
+        public BoneManager(){}
 
         public IList<Bone> Bones
         {
             get { return mBones; }
-            set { mBones = value;OnBoneSourceChanged(this,new EventArgs()); }
+            set { mBones = value; OnBoneSourceChanged(this, new EventArgs()); }
         }
         public Bone GetParent(Bone b)
         {
@@ -29,18 +27,18 @@ namespace s3piwrappers.BoneTool
                 if (mBones[i].ParentIndex == ix) yield return mBones[i];
             }
         }
-        public void AddBone(Bone child,Bone parent)
+        public void AddBone(Bone child, Bone parent)
         {
             Bones.Add(child);
             OnBoneAdded(this, new BoneActionEventArgs(child));
-            SetParent(child,parent);
+            SetParent(child, parent);
         }
         public void DeleteBone(Bone b, bool recursive)
         {
             if (b != null && mBones.Contains(b))
             {
                 var deletedIndex = mBones.IndexOf(b);
-                var parent = mBones[b.ParentIndex];
+                var parent = b.ParentIndex > -1 ? mBones[b.ParentIndex] : null;
 
                 mBones.Remove(b);
                 OnBoneRemoved(this, new BoneActionEventArgs(b));
@@ -50,7 +48,7 @@ namespace s3piwrappers.BoneTool
                     if (mBones[i].ParentIndex > deletedIndex)
                     {
                         mBones[i].ParentIndex--;
-                    } 
+                    }
                     else if (mBones[i].ParentIndex == deletedIndex)
                     {
                         if (recursive)
@@ -63,7 +61,7 @@ namespace s3piwrappers.BoneTool
                         }
                     }
                 }
-                foreach(var item in trash)DeleteBone(item,recursive);
+                foreach (var item in trash) DeleteBone(item, recursive);
             }
         }
         public IEnumerable<Bone> GetDescendants(Bone b)
@@ -88,7 +86,7 @@ namespace s3piwrappers.BoneTool
         {
             if (child.ParentIndex != mBones.IndexOf(parent))
             {
-                child.ParentIndex = parent == null?-1:mBones.IndexOf(parent);
+                child.ParentIndex = parent == null ? -1 : mBones.IndexOf(parent);
                 OnBoneParentChanged(this, new BoneActionEventArgs(child));
             }
         }
@@ -97,13 +95,12 @@ namespace s3piwrappers.BoneTool
             if (b.Name != name)
             {
                 b.Name = name;
-                OnBoneNameChanged(this, new BoneActionEventArgs(b));
+                OnBoneUpdated(this, new BoneActionEventArgs(b));
             }
         }
-        private void OnBoneNameChanged(BoneManager sender, BoneActionEventArgs e)
+        public void UpdateBone(Bone b)
         {
-            if (BoneNameChanged != null)
-                BoneNameChanged(sender, e);
+            OnBoneUpdated(this,new BoneActionEventArgs(b));
         }
         private void OnBoneParentChanged(BoneManager sender, BoneActionEventArgs e)
         {
@@ -120,15 +117,20 @@ namespace s3piwrappers.BoneTool
             if (BoneAdded != null)
                 BoneAdded(sender, e);
         }
+        private void OnBoneUpdated(BoneManager sender, BoneActionEventArgs e)
+        {
+            if (BoneUpdated != null)
+                BoneUpdated(sender, e);
+        }
         private void OnBoneSourceChanged(object sender, EventArgs e)
         {
             if (BoneSourceChanged != null)
                 BoneSourceChanged(sender, e);
         }
         public event EventHandler BoneSourceChanged;
-        public event BoneActionEventHandler BoneNameChanged;
         public event BoneActionEventHandler BoneParentChanged;
         public event BoneActionEventHandler BoneRemoved;
         public event BoneActionEventHandler BoneAdded;
+        public event BoneActionEventHandler BoneUpdated;
     }
 }
