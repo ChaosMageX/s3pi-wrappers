@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{7F22563C-FBE0-496C-8DEF-E3812491935B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>s3piwrappers.RigEditor</RootNamespace>
+    <AssemblyName>RigEditor</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="s3pi.CustomForms">
+      <HintPath>..\..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.DemoPlugins">
+      <HintPath>..\..\lib\s3pi_current\s3pi.DemoPlugins.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="s3pi.Interfaces">
+      <HintPath>..\..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Custom, Version=1008.30.15.26578, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BoneOps\BoneHierarchy.cs" />
+    <Compile Include="Common\IntBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GrannyArtToolInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannyArtToolInfoControl.Designer.cs">
+      <DependentUpon>GrannyArtToolInfoControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GrannyFileInfoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannyFileInfoControl.Designer.cs">
+      <DependentUpon>GrannyFileInfoControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GrannyModelControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannyModelControl.Designer.cs">
+      <DependentUpon>GrannyModelControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\ValueControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\AngleBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Geometry\AngleAxisControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\AngleAxisControl.Designer.cs">
+      <DependentUpon>AngleAxisControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BoneActionEventArgs.cs" />
+    <Compile Include="BoneActionEventHandler.cs" />
+    <Compile Include="GrannyBoneControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannyBoneControl.Designer.cs">
+      <DependentUpon>GrannyBoneControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BoneManager.cs" />
+    <Compile Include="BoneOps\BoneOp.cs" />
+    <Compile Include="BoneOps\AddBoneOp.cs" />
+    <Compile Include="BoneOps\CloneBoneOp.cs" />
+    <Compile Include="BoneOps\CopyBoneOp.cs" />
+    <Compile Include="BoneOps\CopyHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\CutBoneOp.cs" />
+    <Compile Include="BoneOps\DeleteBoneOp.cs" />
+    <Compile Include="BoneOps\DeleteHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\PasteBoneOp.cs" />
+    <Compile Include="BoneOps\PrefixNameBoneOp.cs" />
+    <Compile Include="BoneOps\RenameNameBoneOp.cs" />
+    <Compile Include="BoneOps\ReplaceNameInHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\SuffixHierarchyBoneOp.cs" />
+    <Compile Include="BoneOps\UnParentBoneOp.cs" />
+    <Compile Include="BoneTreeView.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Common\DoubleBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Geometry\EulerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\EulerControl.Designer.cs">
+      <DependentUpon>EulerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\FindAndReplaceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\FormattedTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Geometry\AngleAxis.cs" />
+    <Compile Include="Geometry\EulerAngle.cs" />
+    <Compile Include="Geometry\Matrix.cs" />
+    <Compile Include="Geometry\MatrixControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\MatrixControl.Designer.cs">
+      <DependentUpon>MatrixControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Geometry\Quaternion.cs" />
+    <Compile Include="Geometry\RotationControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\RotationControl.Designer.cs">
+      <DependentUpon>RotationControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Geometry\QuaternionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\QuaternionControl.Designer.cs">
+      <DependentUpon>QuaternionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Geometry\Vector3.cs" />
+    <Compile Include="Geometry\Vector3Control.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Geometry\Vector3Control.Designer.cs">
+      <DependentUpon>Vector3Control.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Common\InputStringDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BoneOps\IPasteBoneOp.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="GrannySkeletonControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannySkeletonControl.Designer.cs">
+      <DependentUpon>GrannySkeletonControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GrannyTransformControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GrannyTransformControl.Designer.cs">
+      <DependentUpon>GrannyTransformControl.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Geometry\AngleAxisControl.resx">
+      <DependentUpon>AngleAxisControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrannyArtToolInfoControl.resx">
+      <DependentUpon>GrannyArtToolInfoControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrannyBoneControl.resx">
+      <DependentUpon>GrannyBoneControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Geometry\EulerControl.resx">
+      <DependentUpon>EulerControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\FindAndReplaceDialog.resx">
+      <DependentUpon>FindAndReplaceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Geometry\MatrixControl.resx">
+      <DependentUpon>MatrixControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Geometry\RotationControl.resx">
+      <DependentUpon>RotationControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Geometry\QuaternionControl.resx">
+      <DependentUpon>QuaternionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Geometry\Vector3Control.resx">
+      <DependentUpon>Vector3Control.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrannyFileInfoControl.resx">
+      <DependentUpon>GrannyFileInfoControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrannyModelControl.resx">
+      <DependentUpon>GrannyModelControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Common\InputStringDialog.resx">
+      <DependentUpon>InputStringDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="GrannySkeletonControl.resx">
+      <DependentUpon>GrannySkeletonControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GrannyTransformControl.resx">
+      <DependentUpon>GrannyTransformControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Helpers\RigEditor.helper">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Granny2Wrapper\Granny2Wrapper.csproj">
+      <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
+      <Name>Granny2Wrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\RigResource\RigResource.csproj">
+      <Project>{96239738-405A-437E-903A-C51B9521912D}</Project>
+      <Name>RigResource</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
