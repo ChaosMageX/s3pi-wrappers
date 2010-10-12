@@ -35,6 +35,7 @@
             // 
             // btnCommit
             // 
+            this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnCommit.Location = new System.Drawing.Point(587, 463);
             this.btnCommit.Name = "btnCommit";
@@ -46,6 +47,7 @@
             // 
             // btnCancel
             // 
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(506, 463);
             this.btnCancel.Name = "btnCancel";
@@ -57,6 +59,9 @@
             // 
             // grannyFileInfoControl1
             // 
+            this.grannyFileInfoControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.grannyFileInfoControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grannyFileInfoControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyFileInfoControl1.Name = "grannyFileInfoControl1";
@@ -72,8 +77,9 @@
             this.Controls.Add(this.grannyFileInfoControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
+            this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(680, 530);
-            this.MinimumSize = new System.Drawing.Size(680, 525);
+            this.MinimumSize = new System.Drawing.Size(680, 530);
             this.Name = "MainForm";
             this.Text = "Rig Editor";
             this.ResumeLayout(false);

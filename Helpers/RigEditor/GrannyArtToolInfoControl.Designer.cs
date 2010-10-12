@@ -52,7 +52,7 @@ namespace s3piwrappers.RigEditor
             // lbFromArtToolName
             // 
             this.lbFromArtToolName.AutoSize = true;
-            this.lbFromArtToolName.Location = new System.Drawing.Point(8, 8);
+            this.lbFromArtToolName.Location = new System.Drawing.Point(6, 6);
             this.lbFromArtToolName.Name = "lbFromArtToolName";
             this.lbFromArtToolName.Size = new System.Drawing.Size(98, 13);
             this.lbFromArtToolName.TabIndex = 0;
@@ -69,7 +69,7 @@ namespace s3piwrappers.RigEditor
             // lbFromArtToolMajorRevision
             // 
             this.lbFromArtToolMajorRevision.AutoSize = true;
-            this.lbFromArtToolMajorRevision.Location = new System.Drawing.Point(8, 30);
+            this.lbFromArtToolMajorRevision.Location = new System.Drawing.Point(6, 30);
             this.lbFromArtToolMajorRevision.Name = "lbFromArtToolMajorRevision";
             this.lbFromArtToolMajorRevision.Size = new System.Drawing.Size(117, 13);
             this.lbFromArtToolMajorRevision.TabIndex = 2;
@@ -104,7 +104,7 @@ namespace s3piwrappers.RigEditor
             // lbFromArtToolMinorRevision
             // 
             this.lbFromArtToolMinorRevision.AutoSize = true;
-            this.lbFromArtToolMinorRevision.Location = new System.Drawing.Point(8, 53);
+            this.lbFromArtToolMinorRevision.Location = new System.Drawing.Point(6, 53);
             this.lbFromArtToolMinorRevision.Name = "lbFromArtToolMinorRevision";
             this.lbFromArtToolMinorRevision.Size = new System.Drawing.Size(117, 13);
             this.lbFromArtToolMinorRevision.TabIndex = 4;
@@ -113,7 +113,7 @@ namespace s3piwrappers.RigEditor
             // lbUnitsPerMeter
             // 
             this.lbUnitsPerMeter.AutoSize = true;
-            this.lbUnitsPerMeter.Location = new System.Drawing.Point(8, 76);
+            this.lbUnitsPerMeter.Location = new System.Drawing.Point(6, 76);
             this.lbUnitsPerMeter.Name = "lbUnitsPerMeter";
             this.lbUnitsPerMeter.Size = new System.Drawing.Size(83, 13);
             this.lbUnitsPerMeter.TabIndex = 6;
@@ -135,7 +135,7 @@ namespace s3piwrappers.RigEditor
             // lbOrigin
             // 
             this.lbOrigin.AutoSize = true;
-            this.lbOrigin.Location = new System.Drawing.Point(8, 99);
+            this.lbOrigin.Location = new System.Drawing.Point(6, 99);
             this.lbOrigin.Name = "lbOrigin";
             this.lbOrigin.Size = new System.Drawing.Size(37, 13);
             this.lbOrigin.TabIndex = 8;
@@ -158,7 +158,7 @@ namespace s3piwrappers.RigEditor
             // lbRightVector
             // 
             this.lbRightVector.AutoSize = true;
-            this.lbRightVector.Location = new System.Drawing.Point(8, 138);
+            this.lbRightVector.Location = new System.Drawing.Point(6, 138);
             this.lbRightVector.Name = "lbRightVector";
             this.lbRightVector.Size = new System.Drawing.Size(69, 13);
             this.lbRightVector.TabIndex = 10;
@@ -174,7 +174,7 @@ namespace s3piwrappers.RigEditor
             // lbUpVector
             // 
             this.lbUpVector.AutoSize = true;
-            this.lbUpVector.Location = new System.Drawing.Point(8, 177);
+            this.lbUpVector.Location = new System.Drawing.Point(6, 177);
             this.lbUpVector.Name = "lbUpVector";
             this.lbUpVector.Size = new System.Drawing.Size(58, 13);
             this.lbUpVector.TabIndex = 12;
@@ -190,7 +190,7 @@ namespace s3piwrappers.RigEditor
             // lbBackVector
             // 
             this.lbBackVector.AutoSize = true;
-            this.lbBackVector.Location = new System.Drawing.Point(8, 216);
+            this.lbBackVector.Location = new System.Drawing.Point(6, 216);
             this.lbBackVector.Name = "lbBackVector";
             this.lbBackVector.Size = new System.Drawing.Size(69, 13);
             this.lbBackVector.TabIndex = 14;

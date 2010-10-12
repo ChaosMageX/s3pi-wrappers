@@ -66,6 +66,9 @@
             // 
             // boneTreeView
             // 
+            this.boneTreeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.boneTreeView.BoneManager = null;
             this.boneTreeView.HideSelection = false;
             this.boneTreeView.Location = new System.Drawing.Point(6, 18);
@@ -77,6 +80,7 @@
             // 
             // grannyBoneControl
             // 
+            this.grannyBoneControl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.grannyBoneControl.Enabled = false;
             this.grannyBoneControl.Location = new System.Drawing.Point(194, 19);
             this.grannyBoneControl.Name = "grannyBoneControl";

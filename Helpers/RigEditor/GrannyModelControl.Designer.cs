@@ -54,7 +54,7 @@
             // 
             this.tcInitialPlacement.Location = new System.Drawing.Point(0, 30);
             this.tcInitialPlacement.Name = "tcInitialPlacement";
-            this.tcInitialPlacement.Size = new System.Drawing.Size(448, 268);
+            this.tcInitialPlacement.Size = new System.Drawing.Size(448, 277);
             this.tcInitialPlacement.TabIndex = 2;
             this.tcInitialPlacement.Title = "Initial Placement:";
             this.tcInitialPlacement.Value = null;
@@ -67,7 +67,7 @@
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
             this.Name = "GrannyModelControl";
-            this.Size = new System.Drawing.Size(449, 300);
+            this.Size = new System.Drawing.Size(449, 306);
             this.ResumeLayout(false);
             this.PerformLayout();
 

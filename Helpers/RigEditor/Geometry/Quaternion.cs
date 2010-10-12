@@ -4,7 +4,7 @@ namespace s3piwrappers.RigEditor.Geometry
 {
     public struct Quaternion
     {
-        public static Quaternion Identity = new Quaternion(0f, 0f, 0f, 1f);
+        public static Quaternion Identity = new Quaternion(0d, 0d, 0d, 1d);
         public double X, Y, Z, W;
         public Quaternion(Quaternion q):this(q.X,q.Y,q.Z,q.W){}
         public Quaternion(double x, double y, double z, double w)
@@ -16,19 +16,17 @@ namespace s3piwrappers.RigEditor.Geometry
         }
         public Quaternion(EulerAngle e)
         {
-            double y = e.Yaw * 0.5f;
-            double siny = Math.Sin(y);
-            double cosy = Math.Cos(y);
-            double p = e.Pitch * 0.5f;
-            double sinp = Math.Sin(p);
-            double cosp = Math.Cos(p);
-            double r = e.Roll * 0.5f;
-            double sinr = Math.Sin(r);
-            double cosr = Math.Cos(r);
-            X = ((cosy * sinp) * cosr) + ((siny * cosp) * sinr);
-            Y = ((siny * cosp) * cosr) - ((cosy * sinp) * sinr);
-            Z = ((cosy * cosp) * sinr) - ((siny * sinp) * cosr);
-            W = ((cosy * cosp) * cosr) + ((siny * sinp) * sinr);
+            double c1 = Math.Cos(e.Yaw * 0.5d);
+            double c2 = Math.Cos(e.Pitch * 0.5d);
+            double c3 = Math.Cos(e.Roll * 0.5d);
+            
+            double s1 = Math.Sin(e.Yaw * 0.5d);
+            double s2 = Math.Sin(e.Pitch * 0.5d);
+            double s3 = Math.Sin(e.Roll * 0.5d);
+            W = c1 * c2 * c3 - s1 * s2 * s3;
+            X = s1 * s2 * c3 + c1 * c2 * s3;
+            Y = s1 * c2 * c3 + c1 * s2 * s3;
+            Z = c1 * s2 * c3 - s1 * c2 * s3;
 
         }
         public Quaternion(AngleAxis angleAxis)
@@ -49,10 +47,13 @@ namespace s3piwrappers.RigEditor.Geometry
         {
             
             double magnitude = Magnitude();
-            X /= magnitude;
-            Y /= magnitude;
-            Z /= magnitude;
-            W /= magnitude;
+            if (magnitude != 0)
+            {
+                X /= magnitude;
+                Y /= magnitude;
+                Z /= magnitude;
+                W /= magnitude;
+            }
         }
     }
 }

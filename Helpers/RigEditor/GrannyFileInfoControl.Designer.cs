@@ -55,12 +55,15 @@
             // 
             this.grannyModelControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyModelControl1.Name = "grannyModelControl1";
-            this.grannyModelControl1.Size = new System.Drawing.Size(451, 300);
+            this.grannyModelControl1.Size = new System.Drawing.Size(451, 307);
             this.grannyModelControl1.TabIndex = 0;
             this.grannyModelControl1.Value = null;
             // 
             // tabControl1
             // 
+            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tpSkeleton);
             this.tabControl1.Controls.Add(this.tpModel);
             this.tabControl1.Controls.Add(this.tpArtToolInfo);
@@ -82,9 +85,12 @@
             // 
             // grannySkeletonControl1
             // 
+            this.grannySkeletonControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.grannySkeletonControl1.Location = new System.Drawing.Point(0, 0);
             this.grannySkeletonControl1.Name = "grannySkeletonControl1";
-            this.grannySkeletonControl1.Size = new System.Drawing.Size(657, 401);
+            this.grannySkeletonControl1.Size = new System.Drawing.Size(657, 404);
             this.grannySkeletonControl1.TabIndex = 0;
             this.grannySkeletonControl1.Value = null;
             // 
@@ -121,6 +127,8 @@
             // 
             // tbFromFileName
             // 
+            this.tbFromFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tbFromFileName.Location = new System.Drawing.Point(85, 3);
             this.tbFromFileName.Name = "tbFromFileName";
             this.tbFromFileName.Size = new System.Drawing.Size(570, 20);
