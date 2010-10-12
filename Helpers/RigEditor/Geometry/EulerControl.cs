@@ -32,18 +32,20 @@ namespace s3piwrappers.RigEditor.Geometry
         private void dbYaw_Validated(object sender, EventArgs e)
         {
             mValue.Yaw = dbYaw.Value;
-            OnChanged(this, new EventArgs());
         }
 
         private void dbPitch_Validated(object sender, EventArgs e)
         {
             mValue.Pitch = dbPitch.Value;
-            OnChanged(this, new EventArgs());
         }
 
         private void dbRoll_Validated(object sender, EventArgs e)
         {
             mValue.Roll = dbRoll.Value;
+        }
+        protected override void OnValidated(EventArgs e)
+        {
+            base.OnValidated(e);
             OnChanged(this, new EventArgs());
         }
     }

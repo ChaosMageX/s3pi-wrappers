@@ -28,9 +28,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dbRoll = new AngleBox();
-            this.dbPitch = new AngleBox();
-            this.dbYaw = new AngleBox();
+            this.dbRoll = new s3piwrappers.RigEditor.Geometry.AngleBox();
+            this.dbPitch = new s3piwrappers.RigEditor.Geometry.AngleBox();
+            this.dbYaw = new s3piwrappers.RigEditor.Geometry.AngleBox();
             this.lbRoll = new System.Windows.Forms.Label();
             this.lbPitch = new System.Windows.Forms.Label();
             this.lbYaw = new System.Windows.Forms.Label();
@@ -39,8 +39,9 @@
             // dbRoll
             // 
             this.dbRoll.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dbRoll.DisplayUnits = s3piwrappers.RigEditor.Geometry.AngleBox.RotationUnit.Degrees;
             this.dbRoll.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbRoll.Location = new System.Drawing.Point(40, 55);
+            this.dbRoll.Location = new System.Drawing.Point(40, 51);
             this.dbRoll.Name = "dbRoll";
             this.dbRoll.Size = new System.Drawing.Size(100, 20);
             this.dbRoll.TabIndex = 11;
@@ -52,8 +53,9 @@
             // dbPitch
             // 
             this.dbPitch.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dbPitch.DisplayUnits = s3piwrappers.RigEditor.Geometry.AngleBox.RotationUnit.Degrees;
             this.dbPitch.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbPitch.Location = new System.Drawing.Point(40, 29);
+            this.dbPitch.Location = new System.Drawing.Point(40, 25);
             this.dbPitch.Name = "dbPitch";
             this.dbPitch.Size = new System.Drawing.Size(100, 20);
             this.dbPitch.TabIndex = 10;
@@ -65,8 +67,9 @@
             // dbYaw
             // 
             this.dbYaw.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dbYaw.DisplayUnits = s3piwrappers.RigEditor.Geometry.AngleBox.RotationUnit.Degrees;
             this.dbYaw.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbYaw.Location = new System.Drawing.Point(40, 3);
+            this.dbYaw.Location = new System.Drawing.Point(40, 0);
             this.dbYaw.Name = "dbYaw";
             this.dbYaw.Size = new System.Drawing.Size(100, 20);
             this.dbYaw.TabIndex = 9;
@@ -78,7 +81,7 @@
             // lbRoll
             // 
             this.lbRoll.AutoSize = true;
-            this.lbRoll.Location = new System.Drawing.Point(0, 58);
+            this.lbRoll.Location = new System.Drawing.Point(0, 54);
             this.lbRoll.Name = "lbRoll";
             this.lbRoll.Size = new System.Drawing.Size(28, 13);
             this.lbRoll.TabIndex = 8;
@@ -87,7 +90,7 @@
             // lbPitch
             // 
             this.lbPitch.AutoSize = true;
-            this.lbPitch.Location = new System.Drawing.Point(0, 32);
+            this.lbPitch.Location = new System.Drawing.Point(0, 28);
             this.lbPitch.Name = "lbPitch";
             this.lbPitch.Size = new System.Drawing.Size(34, 13);
             this.lbPitch.TabIndex = 7;
@@ -96,7 +99,7 @@
             // lbYaw
             // 
             this.lbYaw.AutoSize = true;
-            this.lbYaw.Location = new System.Drawing.Point(0, 6);
+            this.lbYaw.Location = new System.Drawing.Point(0, 3);
             this.lbYaw.Name = "lbYaw";
             this.lbYaw.Size = new System.Drawing.Size(31, 13);
             this.lbYaw.TabIndex = 6;
@@ -113,7 +116,7 @@
             this.Controls.Add(this.lbPitch);
             this.Controls.Add(this.lbYaw);
             this.Name = "EulerControl";
-            this.Size = new System.Drawing.Size(144, 78);
+            this.Size = new System.Drawing.Size(141, 72);
             this.ResumeLayout(false);
             this.PerformLayout();
 

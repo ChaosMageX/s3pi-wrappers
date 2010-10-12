@@ -30,29 +30,29 @@ namespace s3piwrappers.RigEditor.Geometry
         /// </summary>
         private void InitializeComponent()
         {
-            this.dbM11 = new DoubleBox();
-            this.dbM12 = new DoubleBox();
-            this.dbM13 = new DoubleBox();
-            this.dbM14 = new DoubleBox();
-            this.dbM24 = new DoubleBox();
-            this.dbM23 = new DoubleBox();
-            this.dbM22 = new DoubleBox();
-            this.dbM21 = new DoubleBox();
-            this.dbM44 = new DoubleBox();
-            this.dbM43 = new DoubleBox();
-            this.dbM42 = new DoubleBox();
-            this.dbM41 = new DoubleBox();
-            this.dbM34 = new DoubleBox();
-            this.dbM33 = new DoubleBox();
-            this.dbM32 = new DoubleBox();
-            this.dbM31 = new DoubleBox();
+            this.dbM11 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM12 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM13 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM14 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM24 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM23 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM22 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM21 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM44 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM43 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM42 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM41 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM34 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM33 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM32 = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbM31 = new s3piwrappers.RigEditor.Common.DoubleBox();
             this.SuspendLayout();
             // 
             // dbM11
             // 
             this.dbM11.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM11.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM11.Location = new System.Drawing.Point(3, 8);
+            this.dbM11.Location = new System.Drawing.Point(0, 3);
             this.dbM11.Name = "dbM11";
             this.dbM11.Size = new System.Drawing.Size(100, 20);
             this.dbM11.TabIndex = 11;
@@ -65,7 +65,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM12.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM12.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM12.Location = new System.Drawing.Point(109, 8);
+            this.dbM12.Location = new System.Drawing.Point(106, 3);
             this.dbM12.Name = "dbM12";
             this.dbM12.Size = new System.Drawing.Size(100, 20);
             this.dbM12.TabIndex = 13;
@@ -78,7 +78,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM13.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM13.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM13.Location = new System.Drawing.Point(215, 8);
+            this.dbM13.Location = new System.Drawing.Point(212, 3);
             this.dbM13.Name = "dbM13";
             this.dbM13.Size = new System.Drawing.Size(100, 20);
             this.dbM13.TabIndex = 15;
@@ -91,7 +91,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM14.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM14.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM14.Location = new System.Drawing.Point(321, 8);
+            this.dbM14.Location = new System.Drawing.Point(318, 3);
             this.dbM14.Name = "dbM14";
             this.dbM14.Size = new System.Drawing.Size(100, 20);
             this.dbM14.TabIndex = 17;
@@ -104,7 +104,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM24.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM24.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM24.Location = new System.Drawing.Point(321, 34);
+            this.dbM24.Location = new System.Drawing.Point(318, 29);
             this.dbM24.Name = "dbM24";
             this.dbM24.Size = new System.Drawing.Size(100, 20);
             this.dbM24.TabIndex = 25;
@@ -117,7 +117,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM23.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM23.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM23.Location = new System.Drawing.Point(215, 34);
+            this.dbM23.Location = new System.Drawing.Point(212, 29);
             this.dbM23.Name = "dbM23";
             this.dbM23.Size = new System.Drawing.Size(100, 20);
             this.dbM23.TabIndex = 23;
@@ -130,7 +130,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM22.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM22.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM22.Location = new System.Drawing.Point(109, 34);
+            this.dbM22.Location = new System.Drawing.Point(106, 29);
             this.dbM22.Name = "dbM22";
             this.dbM22.Size = new System.Drawing.Size(100, 20);
             this.dbM22.TabIndex = 21;
@@ -143,7 +143,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM21.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM21.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM21.Location = new System.Drawing.Point(3, 34);
+            this.dbM21.Location = new System.Drawing.Point(0, 29);
             this.dbM21.Name = "dbM21";
             this.dbM21.Size = new System.Drawing.Size(100, 20);
             this.dbM21.TabIndex = 19;
@@ -156,7 +156,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM44.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM44.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM44.Location = new System.Drawing.Point(321, 86);
+            this.dbM44.Location = new System.Drawing.Point(318, 81);
             this.dbM44.Name = "dbM44";
             this.dbM44.Size = new System.Drawing.Size(100, 20);
             this.dbM44.TabIndex = 41;
@@ -169,7 +169,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM43.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM43.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM43.Location = new System.Drawing.Point(215, 86);
+            this.dbM43.Location = new System.Drawing.Point(212, 81);
             this.dbM43.Name = "dbM43";
             this.dbM43.Size = new System.Drawing.Size(100, 20);
             this.dbM43.TabIndex = 39;
@@ -182,7 +182,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM42.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM42.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM42.Location = new System.Drawing.Point(109, 86);
+            this.dbM42.Location = new System.Drawing.Point(106, 81);
             this.dbM42.Name = "dbM42";
             this.dbM42.Size = new System.Drawing.Size(100, 20);
             this.dbM42.TabIndex = 37;
@@ -195,7 +195,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM41.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM41.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM41.Location = new System.Drawing.Point(3, 86);
+            this.dbM41.Location = new System.Drawing.Point(0, 81);
             this.dbM41.Name = "dbM41";
             this.dbM41.Size = new System.Drawing.Size(100, 20);
             this.dbM41.TabIndex = 35;
@@ -208,7 +208,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM34.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM34.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM34.Location = new System.Drawing.Point(321, 60);
+            this.dbM34.Location = new System.Drawing.Point(318, 55);
             this.dbM34.Name = "dbM34";
             this.dbM34.Size = new System.Drawing.Size(100, 20);
             this.dbM34.TabIndex = 33;
@@ -221,7 +221,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM33.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM33.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM33.Location = new System.Drawing.Point(215, 60);
+            this.dbM33.Location = new System.Drawing.Point(212, 55);
             this.dbM33.Name = "dbM33";
             this.dbM33.Size = new System.Drawing.Size(100, 20);
             this.dbM33.TabIndex = 31;
@@ -234,7 +234,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM32.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM32.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM32.Location = new System.Drawing.Point(109, 60);
+            this.dbM32.Location = new System.Drawing.Point(106, 55);
             this.dbM32.Name = "dbM32";
             this.dbM32.Size = new System.Drawing.Size(100, 20);
             this.dbM32.TabIndex = 29;
@@ -247,7 +247,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbM31.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbM31.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbM31.Location = new System.Drawing.Point(3, 60);
+            this.dbM31.Location = new System.Drawing.Point(0, 55);
             this.dbM31.Name = "dbM31";
             this.dbM31.Size = new System.Drawing.Size(100, 20);
             this.dbM31.TabIndex = 27;
@@ -276,9 +276,8 @@ namespace s3piwrappers.RigEditor.Geometry
             this.Controls.Add(this.dbM13);
             this.Controls.Add(this.dbM12);
             this.Controls.Add(this.dbM11);
-            this.MinimumSize = new System.Drawing.Size(425, 115);
             this.Name = "MatrixControl";
-            this.Size = new System.Drawing.Size(425, 115);
+            this.Size = new System.Drawing.Size(420, 101);
             this.ResumeLayout(false);
             this.PerformLayout();
 

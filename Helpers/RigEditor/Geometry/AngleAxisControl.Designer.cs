@@ -30,11 +30,11 @@ namespace s3piwrappers.RigEditor.Geometry
         /// </summary>
         private void InitializeComponent()
         {
-            this.dbAngle = new AngleBox();
+            this.dbAngle = new s3piwrappers.RigEditor.Geometry.AngleBox();
             this.lbAngle = new System.Windows.Forms.Label();
-            this.dbZ = new DoubleBox();
-            this.dbY = new DoubleBox();
-            this.dbX = new DoubleBox();
+            this.dbZ = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbY = new s3piwrappers.RigEditor.Common.DoubleBox();
+            this.dbX = new s3piwrappers.RigEditor.Common.DoubleBox();
             this.lbZ = new System.Windows.Forms.Label();
             this.lbY = new System.Windows.Forms.Label();
             this.lbX = new System.Windows.Forms.Label();
@@ -43,8 +43,9 @@ namespace s3piwrappers.RigEditor.Geometry
             // dbAngle
             // 
             this.dbAngle.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.dbAngle.DisplayUnits = s3piwrappers.RigEditor.Geometry.AngleBox.RotationUnit.Degrees;
             this.dbAngle.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbAngle.Location = new System.Drawing.Point(20, 83);
+            this.dbAngle.Location = new System.Drawing.Point(20, 78);
             this.dbAngle.Name = "dbAngle";
             this.dbAngle.Size = new System.Drawing.Size(100, 20);
             this.dbAngle.TabIndex = 15;
@@ -56,7 +57,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // lbAngle
             // 
             this.lbAngle.AutoSize = true;
-            this.lbAngle.Location = new System.Drawing.Point(4, 87);
+            this.lbAngle.Location = new System.Drawing.Point(3, 81);
             this.lbAngle.Name = "lbAngle";
             this.lbAngle.Size = new System.Drawing.Size(17, 13);
             this.lbAngle.TabIndex = 14;
@@ -66,7 +67,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbZ.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbZ.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbZ.Location = new System.Drawing.Point(20, 57);
+            this.dbZ.Location = new System.Drawing.Point(20, 52);
             this.dbZ.Name = "dbZ";
             this.dbZ.Size = new System.Drawing.Size(100, 20);
             this.dbZ.TabIndex = 13;
@@ -79,7 +80,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbY.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbY.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbY.Location = new System.Drawing.Point(20, 31);
+            this.dbY.Location = new System.Drawing.Point(20, 26);
             this.dbY.Name = "dbY";
             this.dbY.Size = new System.Drawing.Size(100, 20);
             this.dbY.TabIndex = 12;
@@ -92,7 +93,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // 
             this.dbX.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.dbX.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.dbX.Location = new System.Drawing.Point(20, 5);
+            this.dbX.Location = new System.Drawing.Point(20, 0);
             this.dbX.Name = "dbX";
             this.dbX.Size = new System.Drawing.Size(100, 20);
             this.dbX.TabIndex = 11;
@@ -104,7 +105,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // lbZ
             // 
             this.lbZ.AutoSize = true;
-            this.lbZ.Location = new System.Drawing.Point(4, 61);
+            this.lbZ.Location = new System.Drawing.Point(3, 55);
             this.lbZ.Name = "lbZ";
             this.lbZ.Size = new System.Drawing.Size(17, 13);
             this.lbZ.TabIndex = 10;
@@ -113,7 +114,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // lbY
             // 
             this.lbY.AutoSize = true;
-            this.lbY.Location = new System.Drawing.Point(4, 35);
+            this.lbY.Location = new System.Drawing.Point(3, 29);
             this.lbY.Name = "lbY";
             this.lbY.Size = new System.Drawing.Size(17, 13);
             this.lbY.TabIndex = 9;
@@ -122,7 +123,7 @@ namespace s3piwrappers.RigEditor.Geometry
             // lbX
             // 
             this.lbX.AutoSize = true;
-            this.lbX.Location = new System.Drawing.Point(4, 9);
+            this.lbX.Location = new System.Drawing.Point(3, 3);
             this.lbX.Name = "lbX";
             this.lbX.Size = new System.Drawing.Size(17, 13);
             this.lbX.TabIndex = 8;
@@ -141,7 +142,7 @@ namespace s3piwrappers.RigEditor.Geometry
             this.Controls.Add(this.lbY);
             this.Controls.Add(this.lbX);
             this.Name = "AngleAxisControl";
-            this.Size = new System.Drawing.Size(124, 108);
+            this.Size = new System.Drawing.Size(123, 99);
             this.ResumeLayout(false);
             this.PerformLayout();
 

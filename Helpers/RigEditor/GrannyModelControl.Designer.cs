@@ -30,13 +30,13 @@
         {
             this.lbName = new System.Windows.Forms.Label();
             this.tbName = new System.Windows.Forms.TextBox();
-            this.tcInitialPlacement = new GrannyTransformControl();
+            this.tcInitialPlacement = new s3piwrappers.RigEditor.GrannyTransformControl();
             this.SuspendLayout();
             // 
             // lbName
             // 
             this.lbName.AutoSize = true;
-            this.lbName.Location = new System.Drawing.Point(16, 8);
+            this.lbName.Location = new System.Drawing.Point(6, 6);
             this.lbName.Name = "lbName";
             this.lbName.Size = new System.Drawing.Size(38, 13);
             this.lbName.TabIndex = 0;
@@ -44,7 +44,7 @@
             // 
             // tbName
             // 
-            this.tbName.Location = new System.Drawing.Point(60, 5);
+            this.tbName.Location = new System.Drawing.Point(50, 3);
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(340, 20);
             this.tbName.TabIndex = 1;
@@ -67,7 +67,7 @@
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
             this.Name = "GrannyModelControl";
-            this.Size = new System.Drawing.Size(451, 300);
+            this.Size = new System.Drawing.Size(449, 300);
             this.ResumeLayout(false);
             this.PerformLayout();
 

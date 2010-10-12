@@ -36,7 +36,7 @@
             // btnCommit
             // 
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnCommit.Location = new System.Drawing.Point(596, 467);
+            this.btnCommit.Location = new System.Drawing.Point(587, 463);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
             this.btnCommit.TabIndex = 1;
@@ -47,7 +47,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(515, 467);
+            this.btnCancel.Location = new System.Drawing.Point(506, 463);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
@@ -61,19 +61,19 @@
             this.grannyFileInfoControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyFileInfoControl1.Name = "grannyFileInfoControl1";
             this.grannyFileInfoControl1.Size = new System.Drawing.Size(671, 461);
-            this.grannyFileInfoControl1.TabIndex = 3;
+            this.grannyFileInfoControl1.TabIndex = 0;
             this.grannyFileInfoControl1.Value = null;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(682, 497);
+            this.ClientSize = new System.Drawing.Size(672, 489);
             this.Controls.Add(this.grannyFileInfoControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
-            this.MaximumSize = new System.Drawing.Size(690, 525);
-            this.MinimumSize = new System.Drawing.Size(690, 525);
+            this.MaximumSize = new System.Drawing.Size(680, 530);
+            this.MinimumSize = new System.Drawing.Size(680, 525);
             this.Name = "MainForm";
             this.Text = "Rig Editor";
             this.ResumeLayout(false);

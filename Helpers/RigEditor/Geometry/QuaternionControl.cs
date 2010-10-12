@@ -32,24 +32,30 @@ namespace s3piwrappers.RigEditor.Geometry
         private void dbX_Validated(object sender, EventArgs e)
         {
             mValue.X = dbX.Value;
-            OnChanged(this, new EventArgs());
         }
 
         private void dbY_Validated(object sender, EventArgs e)
         {
             mValue.Y = dbY.Value;
-            OnChanged(this, new EventArgs());
         }
 
         private void dbZ_Validated(object sender, EventArgs e)
         {
             mValue.Z = dbZ.Value;
-            OnChanged(this, new EventArgs());
         }
 
         private void dbW_Validated(object sender, EventArgs e)
         {
             mValue.W = dbW.Value;
+        }
+        protected override void OnValidated(EventArgs e)
+        {
+            if(mValue.Magnitude() > 1d)
+            {
+                mValue.Normalize();
+            }
+            UpdateView();
+            base.OnValidated(e);
             OnChanged(this, new EventArgs());
         }
     }

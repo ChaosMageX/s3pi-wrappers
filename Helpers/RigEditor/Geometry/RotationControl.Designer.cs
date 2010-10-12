@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             this.gbQuat = new System.Windows.Forms.GroupBox();
+            this.quaternionControl = new s3piwrappers.RigEditor.Geometry.QuaternionControl();
             this.gbAngleAxis = new System.Windows.Forms.GroupBox();
+            this.angleAxisControl = new s3piwrappers.RigEditor.Geometry.AngleAxisControl();
             this.gbEuler = new System.Windows.Forms.GroupBox();
-            this.quaternionControl = new QuaternionControl();
-            this.angleAxisControl = new AngleAxisControl();
-            this.eulerControl = new EulerControl();
+            this.eulerControl = new s3piwrappers.RigEditor.Geometry.EulerControl();
             this.gbQuat.SuspendLayout();
             this.gbAngleAxis.SuspendLayout();
             this.gbEuler.SuspendLayout();
@@ -42,53 +42,53 @@
             // gbQuat
             // 
             this.gbQuat.Controls.Add(this.quaternionControl);
-            this.gbQuat.Location = new System.Drawing.Point(3, 3);
+            this.gbQuat.Location = new System.Drawing.Point(0, 0);
             this.gbQuat.Name = "gbQuat";
-            this.gbQuat.Size = new System.Drawing.Size(132, 131);
-            this.gbQuat.TabIndex = 3;
+            this.gbQuat.Size = new System.Drawing.Size(132, 132);
+            this.gbQuat.TabIndex = 0;
             this.gbQuat.TabStop = false;
             this.gbQuat.Text = "Quaternion";
+            // 
+            // quaternionControl
+            // 
+            this.quaternionControl.Location = new System.Drawing.Point(6, 15);
+            this.quaternionControl.Name = "quaternionControl";
+            this.quaternionControl.Size = new System.Drawing.Size(124, 108);
+            this.quaternionControl.TabIndex = 1;
             // 
             // gbAngleAxis
             // 
             this.gbAngleAxis.Controls.Add(this.angleAxisControl);
-            this.gbAngleAxis.Location = new System.Drawing.Point(141, 3);
+            this.gbAngleAxis.Location = new System.Drawing.Point(140, 0);
             this.gbAngleAxis.Name = "gbAngleAxis";
-            this.gbAngleAxis.Size = new System.Drawing.Size(132, 131);
-            this.gbAngleAxis.TabIndex = 4;
+            this.gbAngleAxis.Size = new System.Drawing.Size(132, 132);
+            this.gbAngleAxis.TabIndex = 2;
             this.gbAngleAxis.TabStop = false;
             this.gbAngleAxis.Text = "Angle Axis";
+            // 
+            // angleAxisControl
+            // 
+            this.angleAxisControl.Location = new System.Drawing.Point(6, 15);
+            this.angleAxisControl.Name = "angleAxisControl";
+            this.angleAxisControl.Size = new System.Drawing.Size(124, 108);
+            this.angleAxisControl.TabIndex = 3;
             // 
             // gbEuler
             // 
             this.gbEuler.Controls.Add(this.eulerControl);
-            this.gbEuler.Location = new System.Drawing.Point(279, 3);
+            this.gbEuler.Location = new System.Drawing.Point(280, 0);
             this.gbEuler.Name = "gbEuler";
-            this.gbEuler.Size = new System.Drawing.Size(156, 131);
+            this.gbEuler.Size = new System.Drawing.Size(150, 132);
             this.gbEuler.TabIndex = 4;
             this.gbEuler.TabStop = false;
             this.gbEuler.Text = "Euler";
             // 
-            // quaternionControl1
+            // eulerControl
             // 
-            this.quaternionControl.Location = new System.Drawing.Point(2, 17);
-            this.quaternionControl.Name = "quaternionControl";
-            this.quaternionControl.Size = new System.Drawing.Size(124, 108);
-            this.quaternionControl.TabIndex = 0;
-            // 
-            // angleAxisControl1
-            // 
-            this.angleAxisControl.Location = new System.Drawing.Point(6, 17);
-            this.angleAxisControl.Name = "angleAxisControl";
-            this.angleAxisControl.Size = new System.Drawing.Size(124, 108);
-            this.angleAxisControl.TabIndex = 0;
-            // 
-            // eulerControl1
-            // 
-            this.eulerControl.Location = new System.Drawing.Point(6, 17);
+            this.eulerControl.Location = new System.Drawing.Point(5, 15);
             this.eulerControl.Name = "eulerControl";
             this.eulerControl.Size = new System.Drawing.Size(144, 78);
-            this.eulerControl.TabIndex = 0;
+            this.eulerControl.TabIndex = 5;
             // 
             // RotationControl
             // 
@@ -98,7 +98,7 @@
             this.Controls.Add(this.gbAngleAxis);
             this.Controls.Add(this.gbQuat);
             this.Name = "RotationControl";
-            this.Size = new System.Drawing.Size(438, 138);
+            this.Size = new System.Drawing.Size(432, 135);
             this.gbQuat.ResumeLayout(false);
             this.gbAngleAxis.ResumeLayout(false);
             this.gbEuler.ResumeLayout(false);

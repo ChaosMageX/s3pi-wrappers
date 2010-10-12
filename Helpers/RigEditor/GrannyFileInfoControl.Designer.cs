@@ -45,16 +45,15 @@
             // 
             // grannyArtToolInfoControl1
             // 
-            this.grannyArtToolInfoControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grannyArtToolInfoControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyArtToolInfoControl1.Name = "grannyArtToolInfoControl1";
-            this.grannyArtToolInfoControl1.Size = new System.Drawing.Size(368, 247);
+            this.grannyArtToolInfoControl1.Size = new System.Drawing.Size(388, 256);
             this.grannyArtToolInfoControl1.TabIndex = 0;
             this.grannyArtToolInfoControl1.Value = null;
             // 
             // grannyModelControl1
             // 
-            this.grannyModelControl1.Location = new System.Drawing.Point(3, 3);
+            this.grannyModelControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyModelControl1.Name = "grannyModelControl1";
             this.grannyModelControl1.Size = new System.Drawing.Size(451, 300);
             this.grannyModelControl1.TabIndex = 0;
@@ -68,15 +67,15 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 29);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(665, 429);
-            this.tabControl1.TabIndex = 1;
+            this.tabControl1.Size = new System.Drawing.Size(665, 430);
+            this.tabControl1.TabIndex = 2;
             // 
             // tpSkeleton
             // 
             this.tpSkeleton.Controls.Add(this.grannySkeletonControl1);
             this.tpSkeleton.Location = new System.Drawing.Point(4, 22);
             this.tpSkeleton.Name = "tpSkeleton";
-            this.tpSkeleton.Size = new System.Drawing.Size(657, 403);
+            this.tpSkeleton.Size = new System.Drawing.Size(657, 404);
             this.tpSkeleton.TabIndex = 2;
             this.tpSkeleton.Text = "Skeleton";
             this.tpSkeleton.UseVisualStyleBackColor = true;
@@ -85,7 +84,7 @@
             // 
             this.grannySkeletonControl1.Location = new System.Drawing.Point(0, 0);
             this.grannySkeletonControl1.Name = "grannySkeletonControl1";
-            this.grannySkeletonControl1.Size = new System.Drawing.Size(648, 378);
+            this.grannySkeletonControl1.Size = new System.Drawing.Size(657, 401);
             this.grannySkeletonControl1.TabIndex = 0;
             this.grannySkeletonControl1.Value = null;
             // 
@@ -95,7 +94,7 @@
             this.tpModel.Location = new System.Drawing.Point(4, 22);
             this.tpModel.Name = "tpModel";
             this.tpModel.Padding = new System.Windows.Forms.Padding(3);
-            this.tpModel.Size = new System.Drawing.Size(657, 403);
+            this.tpModel.Size = new System.Drawing.Size(657, 404);
             this.tpModel.TabIndex = 1;
             this.tpModel.Text = "Model";
             this.tpModel.UseVisualStyleBackColor = true;
@@ -106,7 +105,7 @@
             this.tpArtToolInfo.Location = new System.Drawing.Point(4, 22);
             this.tpArtToolInfo.Name = "tpArtToolInfo";
             this.tpArtToolInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tpArtToolInfo.Size = new System.Drawing.Size(657, 403);
+            this.tpArtToolInfo.Size = new System.Drawing.Size(657, 404);
             this.tpArtToolInfo.TabIndex = 0;
             this.tpArtToolInfo.Text = "ArtToolInfo";
             this.tpArtToolInfo.UseVisualStyleBackColor = true;
@@ -117,7 +116,7 @@
             this.lbFromFileName.Location = new System.Drawing.Point(4, 7);
             this.lbFromFileName.Name = "lbFromFileName";
             this.lbFromFileName.Size = new System.Drawing.Size(77, 13);
-            this.lbFromFileName.TabIndex = 2;
+            this.lbFromFileName.TabIndex = 0;
             this.lbFromFileName.Text = "FromFileName:";
             // 
             // tbFromFileName
@@ -125,7 +124,7 @@
             this.tbFromFileName.Location = new System.Drawing.Point(85, 3);
             this.tbFromFileName.Name = "tbFromFileName";
             this.tbFromFileName.Size = new System.Drawing.Size(570, 20);
-            this.tbFromFileName.TabIndex = 3;
+            this.tbFromFileName.TabIndex = 1;
             this.tbFromFileName.TextChanged += new System.EventHandler(this.tbFromFileName_TextChanged);
             // 
             // GrannyFileInfoControl
@@ -137,7 +136,7 @@
             this.Controls.Add(this.lbFromFileName);
             this.Controls.Add(this.tabControl1);
             this.Name = "GrannyFileInfoControl";
-            this.Size = new System.Drawing.Size(671, 461);
+            this.Size = new System.Drawing.Size(670, 461);
             this.tabControl1.ResumeLayout(false);
             this.tpSkeleton.ResumeLayout(false);
             this.tpModel.ResumeLayout(false);

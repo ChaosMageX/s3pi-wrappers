@@ -28,10 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lbName = new System.Windows.Forms.Label();
+            this.tcLocalTransform = new s3piwrappers.RigEditor.GrannyTransformControl();
             this.tbName = new System.Windows.Forms.TextBox();
-            this.tcLocalTransform = new GrannyTransformControl();
+            this.lbName = new System.Windows.Forms.Label();
             this.SuspendLayout();
+            // 
+            // tcLocalTransform
+            // 
+            this.tcLocalTransform.Location = new System.Drawing.Point(0, 30);
+            this.tcLocalTransform.Name = "tcLocalTransform";
+            this.tcLocalTransform.Size = new System.Drawing.Size(451, 278);
+            this.tcLocalTransform.TabIndex = 2;
+            this.tcLocalTransform.Title = "Local Transform:";
+            this.tcLocalTransform.Value = null;
+            // 
+            // tbName
+            // 
+            this.tbName.Location = new System.Drawing.Point(45, 5);
+            this.tbName.Name = "tbName";
+            this.tbName.Size = new System.Drawing.Size(398, 20);
+            this.tbName.TabIndex = 1;
+            this.tbName.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // lbName
             // 
@@ -42,23 +59,6 @@
             this.lbName.TabIndex = 0;
             this.lbName.Text = "Name:";
             // 
-            // tbName
-            // 
-            this.tbName.Location = new System.Drawing.Point(45, 5);
-            this.tbName.Name = "tbName";
-            this.tbName.Size = new System.Drawing.Size(398, 20);
-            this.tbName.TabIndex = 1;
-            this.tbName.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            // 
-            // tcLocalTransform
-            // 
-            this.tcLocalTransform.Location = new System.Drawing.Point(0, 30);
-            this.tcLocalTransform.Name = "tcLocalTransform";
-            this.tcLocalTransform.Size = new System.Drawing.Size(451, 270);
-            this.tcLocalTransform.TabIndex = 0;
-            this.tcLocalTransform.Title = "Local Transform:";
-            this.tcLocalTransform.Value = null;
-            // 
             // GrannyBoneControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -67,7 +67,7 @@
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
             this.Name = "GrannyBoneControl";
-            this.Size = new System.Drawing.Size(450, 300);
+            this.Size = new System.Drawing.Size(450, 303);
             this.ResumeLayout(false);
             this.PerformLayout();
 

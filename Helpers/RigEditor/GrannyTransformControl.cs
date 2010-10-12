@@ -88,13 +88,11 @@ namespace s3piwrappers.RigEditor
             if (cbPositionEnabled.Checked)
             {
                 mValue.Flags |= TransformFlags.Position;
-                positionControl.Enabled = true;
             }
             else
             {
                 var mask = (TransformFlags)0xFFFFFFFF ^ TransformFlags.Position;
                 mValue.Flags &= mask;
-                positionControl.Enabled = false;
             }
         }
 
@@ -103,13 +101,11 @@ namespace s3piwrappers.RigEditor
             if (cbOrientationEnabled.Checked)
             {
                 mValue.Flags |= TransformFlags.Orientation;
-                rotationControl.Enabled = true;
             }
             else
             {
                 var mask = (TransformFlags)0xFFFFFFFF ^ TransformFlags.Orientation;
                 mValue.Flags &= mask;
-                rotationControl.Enabled = false;
             }
 
         }
@@ -119,13 +115,11 @@ namespace s3piwrappers.RigEditor
             if (cbScaleEnabled.Checked)
             {
                 mValue.Flags |= TransformFlags.ScaleShear;
-                scaleControl.Enabled = true;
             }
             else
             {
                 var mask = (TransformFlags)0xFFFFFFFF ^ TransformFlags.ScaleShear;
                 mValue.Flags &= mask;
-                scaleControl.Enabled = false;
             }
 
         }

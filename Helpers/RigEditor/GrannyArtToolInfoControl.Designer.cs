@@ -34,25 +34,25 @@ namespace s3piwrappers.RigEditor
             this.lbFromArtToolName = new System.Windows.Forms.Label();
             this.tbFromArtToolName = new System.Windows.Forms.TextBox();
             this.lbFromArtToolMajorRevision = new System.Windows.Forms.Label();
-            this.tbArtToolMajorRevision = new IntBox();
-            this.tbArtToolMinorRevision = new IntBox();
+            this.tbArtToolMajorRevision = new s3piwrappers.RigEditor.Common.IntBox();
+            this.tbArtToolMinorRevision = new s3piwrappers.RigEditor.Common.IntBox();
             this.lbFromArtToolMinorRevision = new System.Windows.Forms.Label();
             this.lbUnitsPerMeter = new System.Windows.Forms.Label();
-            this.tbUnitsPerMeter = new DoubleBox();
+            this.tbUnitsPerMeter = new s3piwrappers.RigEditor.Common.DoubleBox();
             this.lbOrigin = new System.Windows.Forms.Label();
-            this.v3cOrigin = new Vector3Control();
-            this.v3cRightVector = new Vector3Control();
+            this.v3cOrigin = new s3piwrappers.RigEditor.Geometry.Vector3Control();
+            this.v3cRightVector = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.lbRightVector = new System.Windows.Forms.Label();
-            this.v3cUpVector = new Vector3Control();
+            this.v3cUpVector = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.lbUpVector = new System.Windows.Forms.Label();
-            this.v3cBackVector = new Vector3Control();
+            this.v3cBackVector = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.lbBackVector = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbFromArtToolName
             // 
             this.lbFromArtToolName.AutoSize = true;
-            this.lbFromArtToolName.Location = new System.Drawing.Point(3, 4);
+            this.lbFromArtToolName.Location = new System.Drawing.Point(8, 8);
             this.lbFromArtToolName.Name = "lbFromArtToolName";
             this.lbFromArtToolName.Size = new System.Drawing.Size(98, 13);
             this.lbFromArtToolName.TabIndex = 0;
@@ -60,41 +60,41 @@ namespace s3piwrappers.RigEditor
             // 
             // tbFromArtToolName
             // 
-            this.tbFromArtToolName.Location = new System.Drawing.Point(149, 1);
+            this.tbFromArtToolName.Location = new System.Drawing.Point(150, 5);
             this.tbFromArtToolName.Name = "tbFromArtToolName";
-            this.tbFromArtToolName.Size = new System.Drawing.Size(125, 20);
+            this.tbFromArtToolName.Size = new System.Drawing.Size(101, 20);
             this.tbFromArtToolName.TabIndex = 1;
             this.tbFromArtToolName.TextChanged += new System.EventHandler(this.tbFromArtToolName_TextChanged);
             // 
             // lbFromArtToolMajorRevision
             // 
             this.lbFromArtToolMajorRevision.AutoSize = true;
-            this.lbFromArtToolMajorRevision.Location = new System.Drawing.Point(3, 27);
+            this.lbFromArtToolMajorRevision.Location = new System.Drawing.Point(8, 30);
             this.lbFromArtToolMajorRevision.Name = "lbFromArtToolMajorRevision";
-            this.lbFromArtToolMajorRevision.Size = new System.Drawing.Size(140, 13);
+            this.lbFromArtToolMajorRevision.Size = new System.Drawing.Size(117, 13);
             this.lbFromArtToolMajorRevision.TabIndex = 2;
-            this.lbFromArtToolMajorRevision.Text = "FromArtTool Major Revision:";
+            this.lbFromArtToolMajorRevision.Text = "ArtTool Major Revision:";
             // 
-            // tbFromArtToolMajorRevision
+            // tbArtToolMajorRevision
             // 
             this.tbArtToolMajorRevision.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.tbArtToolMajorRevision.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.tbArtToolMajorRevision.Location = new System.Drawing.Point(149, 24);
+            this.tbArtToolMajorRevision.Location = new System.Drawing.Point(150, 27);
             this.tbArtToolMajorRevision.Name = "tbArtToolMajorRevision";
-            this.tbArtToolMajorRevision.Size = new System.Drawing.Size(125, 20);
+            this.tbArtToolMajorRevision.Size = new System.Drawing.Size(101, 20);
             this.tbArtToolMajorRevision.TabIndex = 3;
             this.tbArtToolMajorRevision.Text = "0";
             this.tbArtToolMajorRevision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbArtToolMajorRevision.Value = 0;
             this.tbArtToolMajorRevision.Validated += new System.EventHandler(this.tbFromArtToolMajorRevision_Validated);
             // 
-            // tbFromArtToolMinorRevision
+            // tbArtToolMinorRevision
             // 
             this.tbArtToolMinorRevision.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.tbArtToolMinorRevision.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.tbArtToolMinorRevision.Location = new System.Drawing.Point(149, 47);
+            this.tbArtToolMinorRevision.Location = new System.Drawing.Point(150, 50);
             this.tbArtToolMinorRevision.Name = "tbArtToolMinorRevision";
-            this.tbArtToolMinorRevision.Size = new System.Drawing.Size(125, 20);
+            this.tbArtToolMinorRevision.Size = new System.Drawing.Size(101, 20);
             this.tbArtToolMinorRevision.TabIndex = 5;
             this.tbArtToolMinorRevision.Text = "0";
             this.tbArtToolMinorRevision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -104,16 +104,16 @@ namespace s3piwrappers.RigEditor
             // lbFromArtToolMinorRevision
             // 
             this.lbFromArtToolMinorRevision.AutoSize = true;
-            this.lbFromArtToolMinorRevision.Location = new System.Drawing.Point(3, 50);
+            this.lbFromArtToolMinorRevision.Location = new System.Drawing.Point(8, 53);
             this.lbFromArtToolMinorRevision.Name = "lbFromArtToolMinorRevision";
-            this.lbFromArtToolMinorRevision.Size = new System.Drawing.Size(140, 13);
+            this.lbFromArtToolMinorRevision.Size = new System.Drawing.Size(117, 13);
             this.lbFromArtToolMinorRevision.TabIndex = 4;
-            this.lbFromArtToolMinorRevision.Text = "FromArtTool Minor Revision:";
+            this.lbFromArtToolMinorRevision.Text = "ArtTool Minor Revision:";
             // 
             // lbUnitsPerMeter
             // 
             this.lbUnitsPerMeter.AutoSize = true;
-            this.lbUnitsPerMeter.Location = new System.Drawing.Point(3, 72);
+            this.lbUnitsPerMeter.Location = new System.Drawing.Point(8, 76);
             this.lbUnitsPerMeter.Name = "lbUnitsPerMeter";
             this.lbUnitsPerMeter.Size = new System.Drawing.Size(83, 13);
             this.lbUnitsPerMeter.TabIndex = 6;
@@ -123,9 +123,9 @@ namespace s3piwrappers.RigEditor
             // 
             this.tbUnitsPerMeter.DefaultColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.tbUnitsPerMeter.ErrorColour = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(200)))), ((int)(((byte)(200)))));
-            this.tbUnitsPerMeter.Location = new System.Drawing.Point(149, 72);
+            this.tbUnitsPerMeter.Location = new System.Drawing.Point(150, 73);
             this.tbUnitsPerMeter.Name = "tbUnitsPerMeter";
-            this.tbUnitsPerMeter.Size = new System.Drawing.Size(125, 20);
+            this.tbUnitsPerMeter.Size = new System.Drawing.Size(101, 20);
             this.tbUnitsPerMeter.TabIndex = 7;
             this.tbUnitsPerMeter.Text = "0.000000";
             this.tbUnitsPerMeter.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
@@ -135,7 +135,7 @@ namespace s3piwrappers.RigEditor
             // lbOrigin
             // 
             this.lbOrigin.AutoSize = true;
-            this.lbOrigin.Location = new System.Drawing.Point(3, 98);
+            this.lbOrigin.Location = new System.Drawing.Point(8, 99);
             this.lbOrigin.Name = "lbOrigin";
             this.lbOrigin.Size = new System.Drawing.Size(37, 13);
             this.lbOrigin.TabIndex = 8;
@@ -143,14 +143,14 @@ namespace s3piwrappers.RigEditor
             // 
             // v3cOrigin
             // 
-            this.v3cOrigin.Location = new System.Drawing.Point(6, 114);
+            this.v3cOrigin.Location = new System.Drawing.Point(11, 115);
             this.v3cOrigin.Name = "v3cOrigin";
             this.v3cOrigin.Size = new System.Drawing.Size(365, 20);
             this.v3cOrigin.TabIndex = 9;
             // 
-            // v3RightVector
+            // v3cRightVector
             // 
-            this.v3cRightVector.Location = new System.Drawing.Point(6, 151);
+            this.v3cRightVector.Location = new System.Drawing.Point(11, 154);
             this.v3cRightVector.Name = "v3cRightVector";
             this.v3cRightVector.Size = new System.Drawing.Size(365, 20);
             this.v3cRightVector.TabIndex = 11;
@@ -158,15 +158,15 @@ namespace s3piwrappers.RigEditor
             // lbRightVector
             // 
             this.lbRightVector.AutoSize = true;
-            this.lbRightVector.Location = new System.Drawing.Point(3, 135);
+            this.lbRightVector.Location = new System.Drawing.Point(8, 138);
             this.lbRightVector.Name = "lbRightVector";
             this.lbRightVector.Size = new System.Drawing.Size(69, 13);
             this.lbRightVector.TabIndex = 10;
             this.lbRightVector.Text = "Right Vector:";
             // 
-            // v3UpVector
+            // v3cUpVector
             // 
-            this.v3cUpVector.Location = new System.Drawing.Point(6, 190);
+            this.v3cUpVector.Location = new System.Drawing.Point(11, 193);
             this.v3cUpVector.Name = "v3cUpVector";
             this.v3cUpVector.Size = new System.Drawing.Size(365, 20);
             this.v3cUpVector.TabIndex = 13;
@@ -174,15 +174,15 @@ namespace s3piwrappers.RigEditor
             // lbUpVector
             // 
             this.lbUpVector.AutoSize = true;
-            this.lbUpVector.Location = new System.Drawing.Point(3, 174);
+            this.lbUpVector.Location = new System.Drawing.Point(8, 177);
             this.lbUpVector.Name = "lbUpVector";
             this.lbUpVector.Size = new System.Drawing.Size(58, 13);
             this.lbUpVector.TabIndex = 12;
             this.lbUpVector.Text = "Up Vector:";
             // 
-            // v3BackVector
+            // v3cBackVector
             // 
-            this.v3cBackVector.Location = new System.Drawing.Point(6, 227);
+            this.v3cBackVector.Location = new System.Drawing.Point(11, 232);
             this.v3cBackVector.Name = "v3cBackVector";
             this.v3cBackVector.Size = new System.Drawing.Size(365, 20);
             this.v3cBackVector.TabIndex = 15;
@@ -190,7 +190,7 @@ namespace s3piwrappers.RigEditor
             // lbBackVector
             // 
             this.lbBackVector.AutoSize = true;
-            this.lbBackVector.Location = new System.Drawing.Point(3, 211);
+            this.lbBackVector.Location = new System.Drawing.Point(8, 216);
             this.lbBackVector.Name = "lbBackVector";
             this.lbBackVector.Size = new System.Drawing.Size(69, 13);
             this.lbBackVector.TabIndex = 14;
@@ -217,7 +217,7 @@ namespace s3piwrappers.RigEditor
             this.Controls.Add(this.tbFromArtToolName);
             this.Controls.Add(this.lbFromArtToolName);
             this.Name = "GrannyArtToolInfoControl";
-            this.Size = new System.Drawing.Size(368, 247);
+            this.Size = new System.Drawing.Size(390, 255);
             this.ResumeLayout(false);
             this.PerformLayout();
 
