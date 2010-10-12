@@ -1,5 +1,6 @@
-2010-10-11:
-	*BoneTool(Helper): A GUI for the rig resource in its early stages.
+2010-10-12:
+New Helpers:
+	*RigEditor(Helper): A GUI for the rig resource in its early stages.
 2010-10-09:
 SkinToneResource:
 	*Fixed error in Value string

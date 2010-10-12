@@ -30,7 +30,7 @@
         {
             this.btnCommit = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.grannyFileInfoControl1 = new GrannyFileInfoControl();
+            this.grannyFileInfoControl1 = new s3piwrappers.RigEditor.GrannyFileInfoControl();
             this.SuspendLayout();
             // 
             // btnCommit
@@ -68,11 +68,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(681, 499);
+            this.ClientSize = new System.Drawing.Size(682, 497);
             this.Controls.Add(this.grannyFileInfoControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
-            this.MinimumSize = new System.Drawing.Size(675, 470);
+            this.MaximumSize = new System.Drawing.Size(690, 525);
+            this.MinimumSize = new System.Drawing.Size(690, 525);
             this.Name = "MainForm";
             this.Text = "Rig Editor";
             this.ResumeLayout(false);

@@ -35,7 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{559B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigExport", "Helpers\RigExport\RigExport.csproj", "{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoneTool", "Helpers\BoneTool\BoneTool.csproj", "{7F22563C-FBE0-496C-8DEF-E3812491935B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigEditor", "Helpers\RigEditor\RigEditor.csproj", "{7F22563C-FBE0-496C-8DEF-E3812491935B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
