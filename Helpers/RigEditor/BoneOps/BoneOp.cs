@@ -26,7 +26,7 @@ namespace s3piwrappers.RigEditor.BoneOps
             {
                 var op = (BoneOp)Activator.CreateInstance(t);
                 op.mBoneManager = manager;
-                op.mTargetBone = bone;
+                op.TargetBone = bone;
                 if (op.CanExecute())
                     ops.Add(op);
             }
@@ -41,10 +41,16 @@ namespace s3piwrappers.RigEditor.BoneOps
             set { mBoneManager = value; }
         }
 
-        
+        public Bone TargetBone
+        {
+            get { return mTargetBone; }
+            set { mTargetBone = value; }
+        }
+
+
         public virtual bool CanExecute()
         {
-            return mTargetBone != null;
+            return TargetBone != null;
         }
 
         public abstract void Execute(Bone bone);
@@ -55,7 +61,7 @@ namespace s3piwrappers.RigEditor.BoneOps
         }
         public void OnExecute(object sender, EventArgs e)
         {
-            Execute(mTargetBone);
+            Execute(TargetBone);
         }
     }
 }

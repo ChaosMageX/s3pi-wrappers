@@ -12,7 +12,7 @@ namespace s3piwrappers.RigEditor.Geometry
             Roll = r;
         }
 
-        public EulerAngle(Quaternion q) //:this(new Matrix(q))
+        public EulerAngle(Quaternion q)
         {
             double poleTest = q.X * q.Y + q.Z * q.W;
             if (poleTest > 0.499)
@@ -39,23 +39,23 @@ namespace s3piwrappers.RigEditor.Geometry
         public EulerAngle(AngleAxis a):this(new Quaternion(a)){}
         public EulerAngle(Matrix m)
         {
-            if (m.M21 > 0.998)
+            if (m.M10 > 0.998)
             {
-                Yaw = Math.Atan2(m.M13, m.M33);
+                Yaw = Math.Atan2(m.M02, m.M22);
                 Pitch = Math.PI / 2;
                 Roll = 0;
                 return;
             }
-            if (m.M21 < -0.998)
+            if (m.M10 < -0.998)
             {
-                Yaw = Math.Atan2(m.M13, m.M33);
+                Yaw = Math.Atan2(m.M02, m.M22);
                 Pitch = -Math.PI / 2;
                 Roll = 0;
                 return;
             }
-            Yaw = Math.Atan2(-m.M31, m.M11);
-            Pitch = Math.Atan2(-m.M23, m.M22);
-            Roll = Math.Asin(m.M21);
+            Yaw = Math.Atan2(-m.M20, m.M00);
+            Pitch = Math.Atan2(-m.M12, m.M11);
+            Roll = Math.Asin(m.M10);
 
         }
 

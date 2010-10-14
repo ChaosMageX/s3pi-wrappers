@@ -5,30 +5,30 @@ namespace s3piwrappers.RigEditor.Geometry
     public struct Matrix
     {
         public static Matrix Identity = new Matrix(1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d, 0d, 0d, 0d, 0d, 1d);
-        public double M11, M12, M13, M14;
-        public double M21, M22, M23, M24;
-        public double M31, M32, M33, M34;
-        public double M41, M42, M43, M44;
+        public double M00, M01, M02, M03;
+        public double M10, M11, M12, M13;
+        public double M20, M21, M22, M23;
+        public double M30, M31, M32, M33;
 
 
-        public Matrix(double m11, double m12, double m13, double m14, double m21, double m22, double m23, double m24, double m31, double m32, double m33, double m34, double m41, double m42, double m43, double m44)
+        public Matrix(double m00, double m01, double m02, double m03, double m10, double m11, double m12, double m13, double m20, double m21, double m22, double m23, double m30, double m31, double m32, double m33)
         {
+            M00 = m00;
+            M01 = m01;
+            M02 = m02;
+            M03 = m03;
+            M10 = m10;
             M11 = m11;
             M12 = m12;
             M13 = m13;
-            M14 = m14;
+            M20 = m20;
             M21 = m21;
             M22 = m22;
             M23 = m23;
-            M24 = m24;
+            M30 = m30;
             M31 = m31;
             M32 = m32;
             M33 = m33;
-            M34 = m34;
-            M41 = m41;
-            M42 = m42;
-            M43 = m43;
-            M44 = m44;
         }
 
         public Matrix(AngleAxis a)
@@ -44,145 +44,165 @@ namespace s3piwrappers.RigEditor.Geometry
             double xy = x * y;
             double xz = x * z;
             double yz = y * z;
-            M11 = xx + (cos * (1d - xx));
-            M12 = (xy - (cos * xy)) + (sin * z);
-            M13 = (xz - (cos * xz)) - (sin * y);
-            M14 = 0d;
-            M21 = (xy - (cos * xy)) - (sin * z);
-            M22 = yy + (cos * (1d - yy));
-            M23 = (yz - (cos * yz)) + (sin * x);
-            M24 = 0d;
-            M31 = (xz - (cos * xz)) + (sin * y);
-            M32 = (yz - (cos * yz)) - (sin * x);
-            M33 = zz + (cos * (1d - zz));
-            M34 = 0d;
-            M41 = 0d;
-            M42 = 0d;
-            M43 = 0d;
-            M44 = 1d;
+            M00 = xx + (cos * (1d - xx));
+            M01 = (xy - (cos * xy)) + (sin * z);
+            M02 = (xz - (cos * xz)) - (sin * y);
+            M03 = 0d;
+            M10 = (xy - (cos * xy)) - (sin * z);
+            M11 = yy + (cos * (1d - yy));
+            M12 = (yz - (cos * yz)) + (sin * x);
+            M13 = 0d;
+            M20 = (xz - (cos * xz)) + (sin * y);
+            M21 = (yz - (cos * yz)) - (sin * x);
+            M22 = zz + (cos * (1d - zz));
+            M23 = 0d;
+            M30 = 0d;
+            M31 = 0d;
+            M32 = 0d;
+            M33 = 1d;
         }
 
         public Matrix(EulerAngle euler) : this(new Quaternion(euler)) { }
-        public Matrix(Quaternion quaternion)
+        public Matrix(Quaternion q)
         {
-            double sqx = quaternion.X * quaternion.X;
-            double sqy = quaternion.Y * quaternion.Y;
-            double sqz = quaternion.Z * quaternion.Z;
-            double xy = quaternion.X * quaternion.Y;
-            double zw = quaternion.Z * quaternion.W;
-            double zx = quaternion.Z * quaternion.X;
-            double yw = quaternion.Y * quaternion.W;
-            double yz = quaternion.Y * quaternion.Z;
-            double xw = quaternion.X * quaternion.W;
-            M11 = 1d - (2D * (sqy + sqz));
-            M12 = 2f * (xy + zw);
-            M13 = 2f * (zx - yw);
-            M14 = 0d;
-            M21 = 2f * (xy - zw);
-            M22 = 1d - (2D * (sqz + sqx));
-            M23 = 2f * (yz + xw);
-            M24 = 0d;
-            M31 = 2f * (zx + yw);
-            M32 = 2f * (yz - xw);
-            M33 = 1d - (2D * (sqy + sqx));
-            M34 = 0d;
-            M41 = 0d;
-            M42 = 0d;
-            M43 = 0d;
-            M44 = 1d;
+            double sqx = q.X * q.X;
+            double sqy = q.Y * q.Y;
+            double sqz = q.Z * q.Z;
+            double sqw = q.W * q.W;
+
+            double xy = q.X * q.Y;
+            double zw = q.Z * q.W;
+            double xz = q.X * q.Z;
+            double yw = q.Y * q.W;
+            double yz = q.Y * q.Z;
+            double xw = q.X * q.W;
+            M00 = (sqx - sqy - sqz + sqw);
+            M01 = 2.0 * (xy - zw);
+            M02 = 2.0 * (xz + yw);
+            M03 = 0d;
+
+            M10 = 2.0 * (xy + zw);
+            M11 = (-sqx + sqy - sqz + sqw);
+            M12 = 2.0 * (yz - xw);
+            M13 = 0d;
+
+            M20 = 2.0 * (xz - yw);
+            M21 = 2.0 * (yz + xw);
+            M22 = (-sqx - sqy + sqz + sqw);
+            M23 = 0d;
+
+            M30 = 0d;
+            M31 = 0d;
+            M32 = 0d;
+            M33 = 1d;
         }
-        public  Matrix GetInverse()
+        public void Scale(double d)
         {
-            Matrix output;
-            double a = (M33 * M44) - (M34 * M43);
-            double b = (M32 * M44) - (M34 * M42);
-            double c = (M32 * M43) - (M33 * M42);
-            double d = (M31 * M44) - (M34 * M41);
-            double e = (M31 * M43) - (M33 * M41);
-            double f = (M31 * M42) - (M32 * M41);
-            double g = ((M22 * a) - (M23 * b)) + (M24 * c);
-            double h = -(((M21 * a) - (M23 * d)) + (M24 * e));
-            double i = ((M21 * b) - (M22 * d)) + (M24 * f);
-            double j = -(((M21 * c) - (M22 * e)) + (M23 * f));
-            double k = 1d / ((((M11 * g) + (M12 * h)) + (M13 * i)) + (M14 * j));
-            output.M11 = g * k;
-            output.M21 = h * k;
-            output.M31 = i * k;
-            output.M41 = j * k;
-            output.M12 = -(((M12 * a) - (M13 * b)) + (M14 * c)) * k;
-            output.M22 = (((M11 * a) - (M13 * d)) + (M14 * e)) * k;
-            output.M32 = -(((M11 * b) - (M12 * d)) + (M14 * f)) * k;
-            output.M42 = (((M11 * c) - (M12 * e)) + (M13 * f)) * k;
-            double l = (M23 * M44) - (M24 * M43);
-            double m = (M22 * M44) - (M24 * M42);
-            double n = (M22 * M43) - (M23 * M42);
-            double o = (M21 * M44) - (M24 * M41);
-            double p = (M21 * M43) - (M23 * M41);
-            double q = (M21 * M42) - (M22 * M41);
-            output.M13 = (((M12 * l) - (M13 * m)) + (M14 * n)) * k;
-            output.M23 = -(((M11 * l) - (M13 * o)) + (M14 * p)) * k;
-            output.M33 = (((M11 * m) - (M12 * o)) + (M14 * q)) * k;
-            output.M43 = -(((M11 * n) - (M12 * p)) + (M13 * q)) * k;
-            double r = (M23 * M34) - (M24 * M33);
-            double s = (M22 * M34) - (M24 * M32);
-            double t = (M22 * M33) - (M23 * M32);
-            double u = (M21 * M34) - (M24 * M31);
-            double v = (M21 * M33) - (M23 * M31);
-            double w = (M21 * M32) - (M22 * M31);
-            output.M14 = -(((M12 * r) - (M13 * s)) + (M14 * t)) * k;
-            output.M24 = (((M11 * r) - (M13 * u)) + (M14 * v)) * k;
-            output.M34 = -(((M11 * s) - (M12 * u)) + (M14 * w)) * k;
-            output.M44 = (((M11 * t) - (M12 * v)) + (M13 * w)) * k;
-            return output;
+            M00 *= d;
+            M01 *= d;
+            M02 *= d;
+            M03 *= d;
+
+            M10 *= d;
+            M11 *= d;
+            M12 *= d;
+            M13 *= d;
+
+            M20 *= d;
+            M21 *= d;
+            M22 *= d;
+            M23 *= d;
+
+            M30 *= d;
+            M31 *= d;
+            M32 *= d;
+            M33 *= d;
         }
-        public Vector3 Translation
+        public Matrix GetInverse()
         {
-            get
-            {
-                Vector3 vector;
-                vector.X = M41;
-                vector.Y = M42;
-                vector.Z = M43;
-                return vector;
-            }
-            set
-            {
-                M41 = value.X;
-                M42 = value.Y;
-                M43 = value.Z;
-            }
+            Matrix m;
+            m.M00 = M12 * M23 * M31 - M13 * M22 * M31 + M13 * M21 * M32 - M11 * M23 * M32 - M12 * M21 * M33 + M11 * M22 * M33;
+            m.M01 = M03 * M22 * M31 - M02 * M23 * M31 - M03 * M21 * M32 + M01 * M23 * M32 + M02 * M21 * M33 - M01 * M22 * M33;
+            m.M02 = M02 * M13 * M31 - M03 * M12 * M31 + M03 * M11 * M32 - M01 * M13 * M32 - M02 * M11 * M33 + M01 * M12 * M33;
+            m.M03 = M03 * M12 * M21 - M02 * M13 * M21 - M03 * M11 * M22 + M01 * M13 * M22 + M02 * M11 * M23 - M01 * M12 * M23;
+
+            m.M10 = M13 * M22 * M30 - M12 * M23 * M30 - M13 * M20 * M32 + M10 * M23 * M32 + M12 * M20 * M33 - M10 * M22 * M33;
+            m.M11 = M02 * M23 * M30 - M03 * M22 * M30 + M03 * M20 * M32 - M00 * M23 * M32 - M02 * M20 * M33 + M00 * M22 * M33;
+            m.M12 = M03 * M12 * M30 - M02 * M13 * M30 - M03 * M10 * M32 + M00 * M13 * M32 + M02 * M10 * M33 - M00 * M12 * M33;
+            m.M13 = M02 * M13 * M20 - M03 * M12 * M20 + M03 * M10 * M22 - M00 * M13 * M22 - M02 * M10 * M23 + M00 * M12 * M23;
+
+            m.M20 = M11 * M23 * M30 - M13 * M21 * M30 + M13 * M20 * M31 - M10 * M23 * M31 - M11 * M20 * M33 + M10 * M21 * M33;
+            m.M21 = M03 * M21 * M30 - M01 * M23 * M30 - M03 * M20 * M31 + M00 * M23 * M31 + M01 * M20 * M33 - M00 * M21 * M33;
+            m.M22 = M01 * M13 * M30 - M03 * M11 * M30 + M03 * M10 * M31 - M00 * M13 * M31 - M01 * M10 * M33 + M00 * M11 * M33;
+            m.M23 = M03 * M11 * M20 - M01 * M13 * M20 - M03 * M10 * M21 + M00 * M13 * M21 + M01 * M10 * M23 - M00 * M11 * M23;
+
+            m.M30 = M12 * M21 * M30 - M11 * M22 * M30 - M12 * M20 * M31 + M10 * M22 * M31 + M11 * M20 * M32 - M10 * M21 * M32;
+            m.M31 = M01 * M22 * M30 - M02 * M21 * M30 + M02 * M20 * M31 - M00 * M22 * M31 - M01 * M20 * M32 + M00 * M21 * M32;
+            m.M32 = M02 * M11 * M30 - M01 * M12 * M30 - M02 * M10 * M31 + M00 * M12 * M31 + M01 * M10 * M32 - M00 * M11 * M32;
+            m.M33 = M01 * M12 * M20 - M02 * M11 * M20 + M02 * M10 * M21 - M00 * M12 * M21 - M01 * M10 * M22 + M00 * M11 * M22;
+            m.Scale(1 / Determinant());
+            return m;
+        }
+        public double Determinant()
+        {
+            return  M03 * M12 * M21 * M30 - M02 * M13 * M21 * M30 - 
+                    M03 * M11 * M22 * M30 + M01 * M13 * M22 * M30 +
+                    M02 * M11 * M23 * M30 - M01 * M12 * M23 * M30 - 
+                    M03 * M12 * M20 * M31 + M02 * M13 * M20 * M31 +
+                    M03 * M10 * M22 * M31 - M00 * M13 * M22 * M31 - 
+                    M02 * M10 * M23 * M31 + M00 * M12 * M23 * M31 +
+                    M03 * M11 * M20 * M32 - M01 * M13 * M20 * M32 - 
+                    M03 * M10 * M21 * M32 + M00 * M13 * M21 * M32 +
+                    M01 * M10 * M23 * M32 - M00 * M11 * M23 * M32 - 
+                    M02 * M11 * M20 * M33 + M01 * M12 * M20 * M33 +
+                    M02 * M10 * M21 * M33 - M00 * M12 * M21 * M33 - 
+                    M01 * M10 * M22 * M33 + M00 * M11 * M22 * M33;
+
         }
         public Vector3 RightVector
         {
             get
             {
-                return new Vector3(M11, M12, M13);
+                return new Vector3(M00, M10, M20);
             }
             set
             {
-                M11 = value.X;
-                M12 = value.Y;
-                M13 = value.Z;
+                M00 = value.X;
+                M10 = value.Y;
+                M20 = value.Z;
             }
         }
         public Vector3 UpVector
         {
-            get { return new Vector3(M21, M22, M23); }
+            get { return new Vector3(M01, M11, M21); }
             set
             {
-                M21 = value.X;
-                M22 = value.Y;
-                M23 = value.Z;
+                M01 = value.X;
+                M11 = value.Y;
+                M21 = value.Z;
             }
         }
         public Vector3 BackVector
         {
-            get { return new Vector3(M31, M32, M33); }
+            get { return new Vector3(M02, M12, M22); }
             set
             {
-                M31 = value.X;
-                M32 = value.Y;
-                M33 = value.Z;
+                M02 = value.X;
+                M12 = value.Y;
+                M22 = value.Z;
+            }
+        }
+        public Vector3 Translation
+        {
+            get
+            {
+                return new Vector3(M03, M13, M23);
+            }
+            set
+            {
+                M03 = value.X;
+                M13 = value.Y;
+                M23 = value.Z;
             }
         }
         public override string ToString()

@@ -18,7 +18,6 @@ namespace s3piwrappers.RigEditor.Geometry
             {
                 mValue = value;
                 UpdateView();
-                OnChanged(this, new EventArgs());
             }
         }
 

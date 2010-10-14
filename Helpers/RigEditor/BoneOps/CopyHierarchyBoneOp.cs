@@ -1,4 +1,6 @@
 ﻿using s3piwrappers.Granny2;
+using System.Linq;
+using System.Linq;
 
 namespace s3piwrappers.RigEditor.BoneOps
 {
@@ -27,7 +29,10 @@ namespace s3piwrappers.RigEditor.BoneOps
             }
             return h;
         }
-
+        public override bool CanExecute()
+        {
+            return (base.CanExecute()&& BoneManager.GetChildren(TargetBone).Any());
+        }
         public void Paste(Bone bone)
         {
             sCurrentPasteOp = null;

@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Common;
-
+using System.Linq;
 namespace s3piwrappers.RigEditor.BoneOps
 {
     internal class ReplaceNameInHierarchyBoneOp : BoneOp
@@ -25,6 +25,10 @@ namespace s3piwrappers.RigEditor.BoneOps
                     RenameBone(descendant, dialog.FindString, dialog.ReplaceString);
                 }
             }
+        }
+        public override bool CanExecute()
+        {
+            return (base.CanExecute() && BoneManager.GetChildren(TargetBone).Any());
         }
         private void RenameBone(Bone bone,string find,string replace)
         {

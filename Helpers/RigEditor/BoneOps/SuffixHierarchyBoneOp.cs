@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
 using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Common;
-
+using System.Linq;
 namespace s3piwrappers.RigEditor.BoneOps
 {
     internal class SuffixHierarchyBoneOp : BoneOp
@@ -25,6 +25,10 @@ namespace s3piwrappers.RigEditor.BoneOps
                     Suffix(descendant, dialog.InputString);
                 }
             }
+        }
+        public override bool CanExecute()
+        {
+            return (base.CanExecute() && BoneManager.GetChildren(TargetBone).Any());
         }
         private void Suffix(Bone b, string suffix)
         {
