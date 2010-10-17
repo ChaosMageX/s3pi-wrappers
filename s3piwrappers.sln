@@ -33,8 +33,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Granny2Wrapper", "Granny2Wr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{559BF7E4-530B-4D52-8991-C4BA00C65AFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigExport", "Helpers\RigExport\RigExport.csproj", "{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigEditor", "Helpers\RigEditor\RigEditor.csproj", "{7F22563C-FBE0-496C-8DEF-E3812491935B}"
 EndProject
 Global
@@ -167,16 +165,6 @@ Global
 		{18623B28-A39C-4165-9D6C-ACF362FEE03F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{18623B28-A39C-4165-9D6C-ACF362FEE03F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{18623B28-A39C-4165-9D6C-ACF362FEE03F}.Release|x86.ActiveCfg = Release|Any CPU
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|x86.ActiveCfg = Debug|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Debug|x86.Build.0 = Debug|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Any CPU.ActiveCfg = Release|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Mixed Platforms.Build.0 = Release|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.ActiveCfg = Release|x86
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.Build.0 = Release|x86
 		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -192,7 +180,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6} = {559BF7E4-530B-4D52-8991-C4BA00C65AFB}
 		{7F22563C-FBE0-496C-8DEF-E3812491935B} = {559BF7E4-530B-4D52-8991-C4BA00C65AFB}
 	EndGlobalSection
 EndGlobal

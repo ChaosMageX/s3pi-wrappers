@@ -84,7 +84,7 @@ namespace s3piwrappers.RigEditor
             this.tbArtToolMajorRevision.Size = new System.Drawing.Size(101, 20);
             this.tbArtToolMajorRevision.TabIndex = 3;
             this.tbArtToolMajorRevision.Text = "0";
-            this.tbArtToolMajorRevision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.tbArtToolMajorRevision.Value = 0;
             this.tbArtToolMajorRevision.Validated += new System.EventHandler(this.tbFromArtToolMajorRevision_Validated);
             // 
@@ -97,7 +97,7 @@ namespace s3piwrappers.RigEditor
             this.tbArtToolMinorRevision.Size = new System.Drawing.Size(101, 20);
             this.tbArtToolMinorRevision.TabIndex = 5;
             this.tbArtToolMinorRevision.Text = "0";
-            this.tbArtToolMinorRevision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.tbArtToolMinorRevision.Value = 0;
             this.tbArtToolMinorRevision.Validated += new System.EventHandler(this.tbFromArtToolMinorRevision_Validated);
             // 
@@ -128,7 +128,7 @@ namespace s3piwrappers.RigEditor
             this.tbUnitsPerMeter.Size = new System.Drawing.Size(101, 20);
             this.tbUnitsPerMeter.TabIndex = 7;
             this.tbUnitsPerMeter.Text = "0.000000";
-            this.tbUnitsPerMeter.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.tbUnitsPerMeter.Value = 0D;
             this.tbUnitsPerMeter.Validated += new System.EventHandler(this.tbUnitsPerMeter_Validated);
             // 

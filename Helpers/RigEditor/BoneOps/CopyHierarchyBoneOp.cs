@@ -1,6 +1,5 @@
 ﻿using s3piwrappers.Granny2;
 using System.Linq;
-using System.Linq;
 
 namespace s3piwrappers.RigEditor.BoneOps
 {
@@ -45,6 +44,12 @@ namespace s3piwrappers.RigEditor.BoneOps
             {
                 AddHierarchy(child,h.Bone);
             }
+        }
+
+
+        public string GetSourceName()
+        {
+            return mCopy.Bone.Name + " Hierarchy";
         }
     }
 }

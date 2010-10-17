@@ -22,5 +22,11 @@ namespace s3piwrappers.RigEditor.BoneOps
             var newBone = new Bone(0, null, mCopy);
             BoneManager.AddBone(newBone,bone);
         }
+
+
+        public string GetSourceName()
+        {
+            return mCopy.Name;
+        }
     }
 }

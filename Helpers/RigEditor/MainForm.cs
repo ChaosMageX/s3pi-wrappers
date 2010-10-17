@@ -27,6 +27,7 @@ namespace s3piwrappers.RigEditor
             this.grannyFileInfoControl1.Value = grd.FileInfo;
         }
 
+
         private void btnCommit_Click(object sender, System.EventArgs e)
         {
             mResult = mRig.AsBytes;

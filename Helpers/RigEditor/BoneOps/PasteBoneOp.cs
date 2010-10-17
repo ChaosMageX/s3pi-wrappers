@@ -6,7 +6,7 @@ namespace s3piwrappers.RigEditor.BoneOps
     {
         public override string Name
         {
-            get { return string.Format("Paste({0})",((BoneOp)sCurrentPasteOp).Name); }
+            get { return string.Format("Paste({0})",sCurrentPasteOp.GetSourceName()); }
         }
         public override bool CanExecute()
         {

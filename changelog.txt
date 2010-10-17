@@ -1,3 +1,10 @@
+2010-10-18:
+RigEditor:
+	*Resizable
+	*"Bone Info" option for calculating matrix for RSLT/SKIN
+	*Hierarchy expanded
+SKIN:
+	*better defined "Transform" structure
 2010-10-12:
 New Helpers:
 	*RigEditor(Helper): A GUI for the rig resource in its early stages.

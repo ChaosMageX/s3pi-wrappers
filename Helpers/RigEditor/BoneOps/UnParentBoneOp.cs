@@ -9,7 +9,10 @@ namespace s3piwrappers.RigEditor.BoneOps
         {
             get { return "UnParent"; }
         }
-
+        public override bool CanExecute()
+        {
+            return base.CanExecute() && BoneManager.GetParent(TargetBone) != null;
+        }
         public override void Execute(Bone bone)
         {
             BoneManager.SetParent(bone,null);

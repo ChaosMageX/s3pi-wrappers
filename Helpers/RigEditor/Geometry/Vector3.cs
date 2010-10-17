@@ -13,7 +13,7 @@ namespace s3piwrappers.RigEditor.Geometry
         }
         public override string ToString()
         {
-            return String.Format("[{0,8:0.00000}\n{1,8:0.00000}\n{2,8:0.00000}]", X, Y, Z);
+            return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]", X, Y, Z);
         }
         public double Magnitude()
         {

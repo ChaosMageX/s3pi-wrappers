@@ -48,7 +48,7 @@
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(398, 20);
             this.tbName.TabIndex = 1;
-            this.tbName.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             // 
             // lbName
             // 

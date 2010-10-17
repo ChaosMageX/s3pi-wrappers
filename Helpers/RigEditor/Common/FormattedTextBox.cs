@@ -15,7 +15,6 @@ namespace s3piwrappers.RigEditor.Common
         public FormattedTextBox()
         {
             Text = FormatValue(mValue);
-            TextAlign = HorizontalAlignment.Right;
         }
         [Browsable(false)]
         public virtual T Value

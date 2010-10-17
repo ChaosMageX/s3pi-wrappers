@@ -33,7 +33,11 @@ namespace s3piwrappers.RigEditor
         private void AddNode(TreeNode child, TreeNode parent)
         {
             if (parent == null) Nodes.Add(child);
-            else parent.Nodes.Add(child);
+            else
+            {
+                parent.Nodes.Add(child);
+                if (!parent.IsExpanded) parent.Expand();
+            }
         }
         private void ContextMenu_Popup(object sender, EventArgs e)
         {
@@ -135,6 +139,7 @@ namespace s3piwrappers.RigEditor
         {
             var node = new TreeNode(b.Name);
             node.Tag = b;
+            node.ToolTipText = b.Value;
             return node;
         }
         public void BuildTree()
@@ -155,6 +160,7 @@ namespace s3piwrappers.RigEditor
                     Nodes.Add(nodes[i]);
                 }
             }
+            ExpandAll();
         }
     }
 }

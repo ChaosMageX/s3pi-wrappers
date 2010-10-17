@@ -46,7 +46,7 @@
             this.dbRoll.Size = new System.Drawing.Size(100, 20);
             this.dbRoll.TabIndex = 11;
             this.dbRoll.Text = "0.000000";
-            this.dbRoll.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbRoll.Value = 0D;
             this.dbRoll.Validated += new System.EventHandler(this.dbRoll_Validated);
             // 
@@ -60,7 +60,7 @@
             this.dbPitch.Size = new System.Drawing.Size(100, 20);
             this.dbPitch.TabIndex = 10;
             this.dbPitch.Text = "0.000000";
-            this.dbPitch.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbPitch.Value = 0D;
             this.dbPitch.Validated += new System.EventHandler(this.dbPitch_Validated);
             // 
@@ -74,7 +74,7 @@
             this.dbYaw.Size = new System.Drawing.Size(100, 20);
             this.dbYaw.TabIndex = 9;
             this.dbYaw.Text = "0.000000";
-            this.dbYaw.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbYaw.Value = 0D;
             this.dbYaw.Validated += new System.EventHandler(this.dbYaw_Validated);
             // 

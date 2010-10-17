@@ -61,6 +61,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoneOps\BoneHierarchy.cs" />
+    <Compile Include="BoneOps\GetBoneInfoOp.cs" />
+    <Compile Include="Common\InfoDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Common\InfoDialog.Designer.cs">
+      <DependentUpon>InfoDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common\IntBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -188,6 +195,9 @@
     <Compile Include="GrannyTransformControl.Designer.cs">
       <DependentUpon>GrannyTransformControl.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Common\InfoDialog.resx">
+      <DependentUpon>InfoDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Geometry\AngleAxisControl.resx">
       <DependentUpon>AngleAxisControl.cs</DependentUpon>
     </EmbeddedResource>

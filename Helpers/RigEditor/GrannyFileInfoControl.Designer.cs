@@ -88,6 +88,7 @@
             this.grannySkeletonControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.grannySkeletonControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grannySkeletonControl1.Location = new System.Drawing.Point(0, 0);
             this.grannySkeletonControl1.Name = "grannySkeletonControl1";
             this.grannySkeletonControl1.Size = new System.Drawing.Size(657, 404);

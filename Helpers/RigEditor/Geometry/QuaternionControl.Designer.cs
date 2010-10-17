@@ -76,7 +76,7 @@ namespace s3piwrappers.RigEditor.Geometry
             this.dbX.Size = new System.Drawing.Size(100, 20);
             this.dbX.TabIndex = 3;
             this.dbX.Text = "0.000000";
-            this.dbX.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbX.Value = 0D;
             this.dbX.Validated += new System.EventHandler(this.dbX_Validated);
             // 
@@ -89,7 +89,7 @@ namespace s3piwrappers.RigEditor.Geometry
             this.dbY.Size = new System.Drawing.Size(100, 20);
             this.dbY.TabIndex = 4;
             this.dbY.Text = "0.000000";
-            this.dbY.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbY.Value = 0D;
             this.dbY.Validated += new System.EventHandler(this.dbY_Validated);
             // 
@@ -102,7 +102,7 @@ namespace s3piwrappers.RigEditor.Geometry
             this.dbZ.Size = new System.Drawing.Size(100, 20);
             this.dbZ.TabIndex = 5;
             this.dbZ.Text = "0.000000";
-            this.dbZ.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbZ.Value = 0D;
             this.dbZ.Validated += new System.EventHandler(this.dbZ_Validated);
             // 
@@ -115,7 +115,7 @@ namespace s3piwrappers.RigEditor.Geometry
             this.dbW.Size = new System.Drawing.Size(100, 20);
             this.dbW.TabIndex = 7;
             this.dbW.Text = "0.000000";
-            this.dbW.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+
             this.dbW.Value = 0D;
             this.dbW.Validated += new System.EventHandler(this.dbW_Validated);
             // 

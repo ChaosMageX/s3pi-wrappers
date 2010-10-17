@@ -8,9 +8,9 @@ namespace s3piwrappers
 {
     public class SKIN : ARCOLBlock
     {
-        public class JointList : AResource.DependentList<Joint>
+        public class BoneList : AResource.DependentList<Bone>
         {
-            public JointList(EventHandler handler)
+            public BoneList(EventHandler handler)
                 : base(handler)
             {
             }
@@ -20,39 +20,33 @@ namespace s3piwrappers
                 base.Add(new object[] { });
             }
 
-            protected override Joint CreateElement(Stream s)
+            protected override Bone CreateElement(Stream s)
             {
-                throw new Exception();
+                throw new NotSupportedException();
             }
 
-            protected override void WriteElement(Stream s, Joint element)
+            protected override void WriteElement(Stream s, Bone element)
             {
-                throw new Exception();
+                throw new NotSupportedException();
             }
         }
-        public class Joint : AHandlerElement, IEquatable<Joint>
+        public class Bone : AHandlerElement, IEquatable<Bone>
         {
-            private UInt32 mJointNameHash;
-            private Single[] mTransformationMatrix;
-            public Joint(int APIversion, EventHandler handler)
+            private UInt32 mNameHash;
+            private Transformation mTransformation;
+            public Bone(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
-                mTransformationMatrix =
-                new Single[12]
-                {
-                    1,0,0,0,
-                    0,1,0,0,
-                    0,0,1,0
-                };
+                mTransformation = new Transformation(0, handler);
             }
-            public Joint(int APIversion, EventHandler handler, UInt32 joint, Single[] matrix)
+            public Bone(int APIversion, EventHandler handler, UInt32 Bone, Transformation transformation)
                 : base(APIversion, handler)
             {
-                mJointNameHash = joint;
-                mTransformationMatrix = matrix;
+                mNameHash = Bone;
+                mTransformation = new Transformation(0,handler,transformation);
             }
-            public Joint(int APIversion, EventHandler handler, Joint j)
-                : this(APIversion, handler, j.mJointNameHash, j.mTransformationMatrix)
+            public Bone(int APIversion, EventHandler handler, Bone j)
+                : this(APIversion, handler, j.mNameHash, j.mTransformation)
             {
             }
             public string Value
@@ -60,32 +54,28 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("JointNameHash:\t0x{0:X8}\n", mJointNameHash);
-                    sb.AppendFormat("Transformation:\n", mJointNameHash);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[0], mTransformationMatrix[4], mTransformationMatrix[8]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[1], mTransformationMatrix[5], mTransformationMatrix[9]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[2], mTransformationMatrix[6], mTransformationMatrix[10]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}]\n", mTransformationMatrix[3], mTransformationMatrix[7], mTransformationMatrix[11]);
+                    sb.AppendFormat("BoneNameHash:\t0x{0:X8}\r\n", mNameHash);
+                    sb.AppendFormat("Transformation:\r\n{0}", mTransformation.Value);
                     return sb.ToString();
                 }
             }
             [ElementPriority(1)]
-            public uint JointNameHash
+            public uint NameHash
             {
-                get { return mJointNameHash; }
-                set { mJointNameHash = value; OnElementChanged(); }
+                get { return mNameHash; }
+                set { mNameHash = value; OnElementChanged(); }
             }
 
             [ElementPriority(2)]
-            public float[] TransformationMatrix
+            public Transformation Transformation
             {
-                get { return mTransformationMatrix; }
-                set { mTransformationMatrix = value; OnElementChanged(); }
+                get { return mTransformation; }
+                set { mTransformation = value; OnElementChanged(); }
             }
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new Joint(0, handler, this);
+                return new Bone(0, handler, this);
             }
 
             public override List<string> ContentFields
@@ -98,16 +88,190 @@ namespace s3piwrappers
                 get { return kRecommendedApiVersion; }
             }
 
-            public bool Equals(Joint other)
+            public bool Equals(Bone other)
             {
-                return mJointNameHash.Equals(other.mJointNameHash);
+                return mNameHash.Equals(other.mNameHash);
+            }
+        }
+        [DataGridExpandable(true)]
+        public class Vector3 : AHandlerElement
+        {
+            private float mX, mY,mZ;
+            public Vector3(int APIversion, EventHandler handler, float x, float y, float z) : base(APIversion, handler)
+            {
+                mX = x;
+                mY = y;
+                mZ = z;
+            }
+
+            public Vector3(int APIversion, EventHandler handler) : base(APIversion, handler) { }
+            public Vector3(int APIversion, EventHandler handler,Vector3 basis) : this(APIversion, handler,basis.mX,basis.mY,basis.mZ) { }
+            [ElementPriority(1)]
+            public float X
+            {
+                get { return mX; }
+                set { mX = value;OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public float Y
+            {
+                get { return mY; }
+                set { mY = value;OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public float Z
+            {
+                get { return mZ; }
+                set { mZ = value; OnElementChanged(); }
+            }
+
+            public override string ToString()
+            {
+                return String.Format("[{0:0.000000},{1:0.000000},{2:0.000000}]", X, Y, Z);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Vector3(0, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion,GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
+        }
+        public class Transformation : AHandlerElement
+        {
+
+            private Vector3 mRight, mUp, mBack, mTranslate;
+
+            public Transformation(int APIversion, EventHandler handler) : base(APIversion, handler)
+            {
+                mBack = new Vector3(0,handler,0,0,1);
+                mRight = new Vector3(0, handler, 1, 0, 0);
+                mTranslate = new Vector3(0, handler, 0, 0, 0);
+                mUp = new Vector3(0, handler, 0, 1, 0);
+            }
+            public Transformation(int APIversion, EventHandler handler,Stream s)
+                : base(APIversion, handler)
+            {
+                Parse(s);
+            }
+
+            public Transformation(int APIversion, EventHandler handler, Vector3 back, Vector3 right, Vector3 translate, Vector3 up) : base(APIversion, handler)
+            {
+                mBack = new Vector3(0,handler,back);
+                mRight = new Vector3(0,handler,right);
+                mTranslate = new Vector3(0,handler,translate);
+                mUp = new Vector3(0,handler,up);
+            }
+            public Transformation(int APIversion, EventHandler handler,Transformation basis)
+                : this(APIversion, handler,basis.mBack,basis.mRight,basis.mTranslate,basis.mUp)
+            {
+            }
+            [ElementPriority(1)]
+            public Vector3 Right
+            {
+                get { return mRight; }
+                set { mRight = value;OnElementChanged(); }
+            }
+            [ElementPriority(2)]
+            public Vector3 Up
+            {
+                get { return mUp; }
+                set { mUp = value;OnElementChanged(); }
+            }
+            [ElementPriority(3)]
+            public Vector3 Back
+            {
+                get { return mBack; }
+                set { mBack = value;OnElementChanged(); }
+            }
+            [ElementPriority(4)]
+            public Vector3 Translate
+            {
+                get { return mTranslate; }
+                set { mTranslate = value;OnElementChanged(); }
+            }
+
+            private void Parse(Stream s)
+            {
+                float m00, m01, m02, m03;
+                float m10, m11, m12, m13;
+                float m20, m21, m22, m23;
+                var br = new BinaryReader(s);
+                m00 = br.ReadSingle();
+                m01 = br.ReadSingle();
+                m02 = br.ReadSingle();
+                m03 = br.ReadSingle();
+
+                m10 = br.ReadSingle();
+                m11 = br.ReadSingle();
+                m12 = br.ReadSingle();
+                m13 = br.ReadSingle();
+
+                m20 = br.ReadSingle();
+                m21 = br.ReadSingle();
+                m22 = br.ReadSingle();
+                m23 = br.ReadSingle();
+
+                mRight=new Vector3(0,handler,m00,m01,m02);
+                mUp = new Vector3(0, handler, m10, m11, m12);
+                mBack = new Vector3(0, handler, m20, m21, m22);
+                mTranslate = new Vector3(0, handler, m03, m13, m23);
+            }
+            public void UnParse(Stream s)
+            {
+                var bw = new BinaryWriter(s);
+                bw.Write(mRight.X);
+                bw.Write(mRight.Y);
+                bw.Write(mRight.Z);
+                bw.Write(mTranslate.X);
+
+                bw.Write(mUp.X);
+                bw.Write(mUp.Y);
+                bw.Write(mUp.Z);
+                bw.Write(mTranslate.Y);
+
+                bw.Write(mBack.X);
+                bw.Write(mBack.Y);
+                bw.Write(mBack.Z);
+                bw.Write(mTranslate.Z);
+            }
+            public string Value
+            {
+                get { return String.Format("{0}\r\n{1}\r\n{2}\r\n{3}",Right,Up,Back,Translate); }
+            }
+            public override string ToString()
+            {
+                return String.Format("{0},{1},{2},{3}", Right, Up, Back, Translate);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Transformation(0, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion,GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
             }
         }
         public SKIN(int APIversion, EventHandler handler)
             : base(APIversion, handler, null)
         {
             mVersion = 0x00000001;
-            mJoints = new JointList(handler);
+            mBones = new BoneList(handler);
         }
         public SKIN(int APIversion, EventHandler handler, SKIN basis)
             : base(APIversion, handler, null)
@@ -128,10 +292,10 @@ namespace s3piwrappers
         }
 
         [ElementPriority(2)]
-        public JointList Joints
+        public BoneList Bones
         {
-            get { return mJoints; }
-            set { mJoints = value; OnRCOLChanged(this,new EventArgs()); }
+            get { return mBones; }
+            set { mBones = value; OnRCOLChanged(this,new EventArgs()); }
         }
 
         public string Value
@@ -140,12 +304,12 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n",mVersion);
-                if(mJoints.Count >0)
+                if(mBones.Count >0)
                 {
-                    sb.AppendFormat("Joints:\n");
-                    for (int i = 0; i < mJoints.Count; i++)
+                    sb.AppendFormat("Bones:\n");
+                    for (int i = 0; i < mBones.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mJoints[i].Value);
+                        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mBones[i].Value);
                     }
                 }
                 return sb.ToString();
@@ -153,7 +317,7 @@ namespace s3piwrappers
         }
 
         private UInt32 mVersion;
-        private JointList mJoints;
+        private BoneList mBones;
         protected override void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
@@ -163,21 +327,19 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mJoints = new JointList(handler);
+            mBones = new BoneList(handler);
             int count = br.ReadInt32();
             uint[] names = new uint[count];
             for (int i = 0; i < count; i++)
             {
                 names[i] = br.ReadUInt32();
             }
+
             for (int i = 0; i < count; i++)
             {
-                Single[] matrix = new Single[12];
-                for (int j = 0; j < matrix.Length; j++)
-                {
-                    matrix[j] = br.ReadSingle();
-                }
-                mJoints.Add(new Joint(0, handler, names[i], matrix));
+
+                Transformation transformation = new Transformation(0, handler, s);
+                mBones.Add(new Bone(0, handler, names[i], transformation));
             }
         }
 
@@ -187,13 +349,10 @@ namespace s3piwrappers
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            if (mJoints == null) mJoints = new JointList(handler);
-            bw.Write(mJoints.Count);
-            foreach (var j in mJoints) bw.Write(j.JointNameHash);
-            foreach (var j in mJoints)
-            {
-                for (int i = 0; i < 12; i++) bw.Write(j.TransformationMatrix[i]);
-            }
+            if (mBones == null) mBones = new BoneList(handler);
+            bw.Write(mBones.Count);
+            foreach (var j in mBones) bw.Write(j.NameHash);
+            foreach (var j in mBones) j.Transformation.UnParse(s);
             return s;
         }
         public override AHandlerElement Clone(EventHandler handler)

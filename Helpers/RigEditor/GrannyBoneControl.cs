@@ -2,6 +2,7 @@
 using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Common;
 using s3piwrappers.RigEditor.Geometry;
+using System.Collections.Generic;
 
 namespace s3piwrappers.RigEditor
 {

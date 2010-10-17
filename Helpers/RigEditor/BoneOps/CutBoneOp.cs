@@ -42,5 +42,10 @@ namespace s3piwrappers.RigEditor.BoneOps
                 AddHierarchy(child, h.Bone);
             }
         }
+        
+        public string GetSourceName()
+        {
+            return mCopy.Bone.Name + " Hierarchy";
+        }
     }
 }

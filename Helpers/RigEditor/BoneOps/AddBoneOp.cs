@@ -27,5 +27,6 @@ namespace s3piwrappers.RigEditor.BoneOps
         {
             return true;
         }
+
     }
 }
