@@ -39,16 +39,27 @@ namespace s3piwrappers
     /// <remarks>TypeId:0x01D0E6FB</remarks>
     public class VBUF :ARCOLBlock
     {
+        [Flags]
+        private enum TypeFlags : uint
+        {
+            Collapsed = 0x4,
+            DifferencedVertices = 0x2,
+            Dynamic = 0x1,
+            None = 0x0
+        }
+
+ 
+
         private UInt32 mVersion;
         private UInt32 mUnknown01;
-        private UInt32 mVmapIndex;
+        private UInt32 mSwizzleInfo;
         private Byte[] mBuffer;
         [ElementPriority(1)] 
         public UInt32 Version { get { return mVersion; } set { mVersion = value; OnRCOLChanged(this, new EventArgs()); } }
         [ElementPriority(2)]
         public UInt32 Unknown01 { get { return mUnknown01; } set { mUnknown01 = value; OnRCOLChanged(this, new EventArgs()); } }
         [ElementPriority(3)]
-        public UInt32 VMAPIndex { get { return mVmapIndex; } set { mVmapIndex = value; OnRCOLChanged(this, new EventArgs()); } }
+        public UInt32 SwizzleInfo { get { return mSwizzleInfo; } set { mSwizzleInfo = value; OnRCOLChanged(this, new EventArgs()); } }
         [ElementPriority(4)]
         public Byte[] Buffer { get { return mBuffer; } set { mBuffer = value; OnRCOLChanged(this, new EventArgs()); } }
         public string Value
@@ -58,7 +69,7 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                sb.AppendFormat("VMAP Index:\t0x{0:X8}\n", mVmapIndex);
+                sb.AppendFormat("Swizzle Info:\t0x{0:X8}\n", mSwizzleInfo);
                 sb.AppendFormat("Buffer[{0}]\n", mBuffer.Length);
                 return sb.ToString();
             }
@@ -95,7 +106,7 @@ namespace s3piwrappers
             }
             mVersion = br.ReadUInt32();
             mUnknown01 = br.ReadUInt32();
-            mVmapIndex = br.ReadUInt32();
+            mSwizzleInfo = br.ReadUInt32();
             mBuffer = new Byte[s.Length - s.Position];
             s.Read(mBuffer, 0, mBuffer.Length);
         }
@@ -107,7 +118,7 @@ namespace s3piwrappers
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write(mUnknown01);
-            bw.Write(mVmapIndex);
+            bw.Write(mSwizzleInfo);
             if(mBuffer == null)mBuffer= new byte[0];
             bw.Write(mBuffer);
             return s;

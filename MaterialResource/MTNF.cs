@@ -210,7 +210,7 @@ namespace s3piwrappers
                     case MATD.DataType.dtFloat: return typeof(FloatShaderKey);
                     case MATD.DataType.dtUInt32_1: return typeof(Int1ShaderKey);
                     case MATD.DataType.dtUInt32_2: return typeof(Int2ShaderKey);
-                    default: throw new InvalidDataException("Invalid MTNF ShaderKey DataType:" + type.ToString());
+                    default: throw new InvalidDataException("Invalid MaterialBlock ShaderKey DataType:" + type.ToString());
                 }
             }
             public static ShaderKey CreateInstance(int apiVersion, EventHandler handler, MATD.DataType type, MATD.FieldType field)

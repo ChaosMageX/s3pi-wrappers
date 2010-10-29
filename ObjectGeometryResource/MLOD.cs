@@ -5,6 +5,33 @@ using System.Text;
 using System.Collections.Generic;
 namespace s3piwrappers
 {
+    [Flags]
+    public enum MeshFlags
+    {
+        BasinInterior = 0x00000001,
+        HDExteriorLit = 0x00000002,
+        PortalSide = 0x00000004,
+        DropShadow = 0x00000008,
+        ShadowCaster = 0x00000010,
+        Foundation = 0x00000020,
+        Pickable = 0x00000040
+
+    }
+    public enum ModelPrimitiveType
+    {
+        PointList,
+        LineList,
+        LineStrip,
+        TriangleList,
+        TriangleFan,
+        TriangleStrip,
+        RectList,
+        QuadList,
+        DisplayList
+    }
+
+
+
     public class MLOD : ARCOLBlock
     {
         public class GeometryStateList : AResource.DependentList<GeometryState>
@@ -225,17 +252,17 @@ namespace s3piwrappers
                 return mJointNameHash.Equals(other.mJointNameHash);
             }
         }
-        #region GroupList
-        public class GroupList : AResource.DependentList<Group>
+        #region MeshList
+        public class MeshList : AResource.DependentList<Mesh>
         {
             private MLOD mOwner;
-            public GroupList(EventHandler handler, MLOD owner)
+            public MeshList(EventHandler handler, MLOD owner)
                 : base(handler)
             {
                 mOwner = owner;
             }
 
-            public GroupList(EventHandler handler, MLOD owner, Stream s)
+            public MeshList(EventHandler handler, MLOD owner, Stream s)
                 : this(handler, owner)
             {
                 Parse(s);
@@ -243,51 +270,52 @@ namespace s3piwrappers
 
             public override void Add()
             {
-                ((IList<Group>)this).Add(new Group(0, this.elementHandler, mOwner));
+                ((IList<Mesh>)this).Add(new Mesh(0, this.elementHandler, mOwner));
             }
 
-            protected override Group CreateElement(Stream s)
+            protected override Mesh CreateElement(Stream s)
             {
-                return new Group(0, handler, mOwner, s);
+                return new Mesh(0, handler, mOwner, s);
             }
 
-            protected override void WriteElement(Stream s, Group element)
+            protected override void WriteElement(Stream s, Mesh element)
             {
                 element.UnParse(s);
             }
         }
         #endregion
 
-        #region Group
+        #region Mesh
 
-        public class Group : AHandlerElement, IEquatable<Group>
+        public class Mesh : AHandlerElement, IEquatable<Mesh>
         {
-            private UInt32 mGroupNameHash;
-            private UInt32 mMATDIndex01;
+            private UInt32 mNameHash;
+            private UInt32 mMATDIndex;
             private UInt32 mVRTFIndex;
             private UInt32 mVBUFIndex;
             private UInt32 mIBUFIndex;
-            private UInt32 mVBUFType;
+            private ModelPrimitiveType mPrimitiveType;
+            private MeshFlags mFlags;
             private UInt64 mVBUFOffset;
             private UInt64 mIBUFOffset;
             private UInt32 mVBUFCount;
             private UInt32 mIBUFCount;
             private UInt32 mSKINIndex;
-            private UInt32 mMATDIndex02;
+            private UInt32 mUvIndex;
 
 
             private JointReferenceList mJointReferences;
             private BoundingBox mBounds;
             private GeometryStateList mGeometryStates;
-            private Single mUnknown01;
-            private Single mUnknown02;
-            private Single mUnknown03;
-            private Single mUnknown04;
-            private Single mUnknown05;
+            private UInt32 mParentName;
+            private Single mMirrorPlaneX;
+            private Single mMirrorPlaneY;
+            private Single mMirrorPlaneZ;
+            private Single mMirrorPlaneW;
             private MLOD mOwner;
 
 
-            public Group(int APIversion, EventHandler handler, MLOD owner)
+            public Mesh(int APIversion, EventHandler handler, MLOD owner)
                 : base(APIversion, handler)
             {
                 mOwner = owner;
@@ -295,12 +323,12 @@ namespace s3piwrappers
                 mJointReferences = new JointReferenceList(handler);
                 mGeometryStates = new GeometryStateList(handler);
             }
-            public Group(int APIversion, EventHandler handler, MLOD owner, Stream s)
+            public Mesh(int APIversion, EventHandler handler, MLOD owner, Stream s)
                 : this(APIversion, handler, owner)
             {
                 Parse(s);
             }
-            public Group(int APIversion, EventHandler handler, Group basis)
+            public Mesh(int APIversion, EventHandler handler, Mesh basis)
                 : base(APIversion, handler)
             {
                 mOwner = basis.mOwner;
@@ -310,16 +338,16 @@ namespace s3piwrappers
                 Parse(s);
             }
             [ElementPriority(1)]
-            public uint GroupNameHash
+            public uint NameHash
             {
-                get { return mGroupNameHash; }
-                set { mGroupNameHash = value; OnElementChanged(); }
+                get { return mNameHash; }
+                set { mNameHash = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
-            public uint MatdIndex01
+            public uint MatdIndex
             {
-                get { return mMATDIndex01; }
-                set { mMATDIndex01 = value; OnElementChanged(); }
+                get { return mMATDIndex; }
+                set { mMATDIndex = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
             public uint VrtfIndex
@@ -340,30 +368,36 @@ namespace s3piwrappers
                 set { mIBUFIndex = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
-            public uint VbufType
+            public ModelPrimitiveType PrimitiveType
             {
-                get { return mVBUFType; }
-                set { mVBUFType = value; OnElementChanged(); }
+                get { return mPrimitiveType; }
+                set { mPrimitiveType = value; OnElementChanged(); }
             }
             [ElementPriority(7)]
+            public MeshFlags Flags
+            {
+                get { return mFlags; }
+                set { mFlags = value; OnElementChanged(); }
+            }
+            [ElementPriority(8)]
             public ulong VbufOffset
             {
                 get { return mVBUFOffset; }
                 set { mVBUFOffset = value; OnElementChanged(); }
             }
-            [ElementPriority(8)]
+            [ElementPriority(9)]
             public ulong IbufOffset
             {
                 get { return mIBUFOffset; }
                 set { mIBUFOffset = value; OnElementChanged(); }
             }
-            [ElementPriority(9)]
+            [ElementPriority(10)]
             public uint VbufCount
             {
                 get { return mVBUFCount; }
                 set { mVBUFCount = value; OnElementChanged(); }
             }
-            [ElementPriority(10)]
+            [ElementPriority(11)]
             public uint IbufCount
             {
                 get { return mIBUFCount; }
@@ -375,60 +409,60 @@ namespace s3piwrappers
                 get { return mBounds; }
                 set { mBounds = value; OnElementChanged(); }
             }
-            [ElementPriority(13)]
+            [ElementPriority(12)]
             public uint SkinIndex
             {
                 get { return mSKINIndex; }
                 set { mSKINIndex = value; OnElementChanged(); }
             }
 
-            [ElementPriority(14)]
-            public uint MatdIndex02
+            [ElementPriority(13)]
+            public uint UvIndex
             {
-                get { return mMATDIndex02; }
-                set { mMATDIndex02 = value; }
+                get { return mUvIndex; }
+                set { mUvIndex = value; }
             }
-            [ElementPriority(15)]
+            [ElementPriority(14)]
             public JointReferenceList JointReferences
             {
                 get { return mJointReferences; }
                 set { mJointReferences = value; OnElementChanged(); }
             }
-            [ElementPriority(16)]
+            [ElementPriority(15)]
             public GeometryStateList GeometryStates
             {
                 get { return mGeometryStates; }
                 set { mGeometryStates = value; OnElementChanged(); }
             }
-            [ElementPriority(17)]
-            public float Unknown01
+            [ElementPriority(16)]
+            public UInt32 ParentName
             {
-                get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                get { return mParentName; }
+                set { mParentName = value; OnElementChanged(); }
+            }
+            [ElementPriority(17)]
+            public float MirrorPlaneX
+            {
+                get { return mMirrorPlaneX; }
+                set { mMirrorPlaneX = value; OnElementChanged(); }
             }
             [ElementPriority(18)]
-            public float Unknown02
+            public float MirrorPlaneY
             {
-                get { return mUnknown02; }
-                set { mUnknown02 = value; OnElementChanged(); }
+                get { return mMirrorPlaneY; }
+                set { mMirrorPlaneY = value; OnElementChanged(); }
             }
             [ElementPriority(19)]
-            public float Unknown03
+            public float MirrorPlaneZ
             {
-                get { return mUnknown03; }
-                set { mUnknown03 = value; OnElementChanged(); }
+                get { return mMirrorPlaneZ; }
+                set { mMirrorPlaneZ = value; OnElementChanged(); }
             }
             [ElementPriority(20)]
-            public float Unknown04
+            public float MirrorPlaneW
             {
-                get { return mUnknown04; }
-                set { mUnknown04 = value; OnElementChanged(); }
-            }
-            [ElementPriority(21)]
-            public float Unknown05
-            {
-                get { return mUnknown05; }
-                set { mUnknown05 = value; OnElementChanged(); }
+                get { return mMirrorPlaneW; }
+                set { mMirrorPlaneW = value; OnElementChanged(); }
             }
 
 
@@ -439,12 +473,14 @@ namespace s3piwrappers
                 BinaryReader br = new BinaryReader(s);
                 long expectedSize = br.ReadUInt32();
                 long start = s.Position;
-                mGroupNameHash = br.ReadUInt32();
-                mMATDIndex01 = br.ReadUInt32();
+                mNameHash = br.ReadUInt32();
+                mMATDIndex = br.ReadUInt32();
                 mVRTFIndex = br.ReadUInt32();
                 mVBUFIndex = br.ReadUInt32();
                 mIBUFIndex = br.ReadUInt32();
-                mVBUFType = br.ReadUInt32();
+                uint val = br.ReadUInt32();
+                mPrimitiveType = (ModelPrimitiveType)(val & 0x000000FF);
+                mFlags = (MeshFlags)(val >> 8);
                 mVBUFOffset = br.ReadUInt64();
                 mIBUFOffset = br.ReadUInt64();
                 mVBUFCount = br.ReadUInt32();
@@ -452,15 +488,15 @@ namespace s3piwrappers
                 mBounds = new BoundingBox(0, handler, s);
                 mSKINIndex = br.ReadUInt32();
                 mJointReferences = new JointReferenceList(handler, s);
-                mMATDIndex02 = br.ReadUInt32();
+                mUvIndex = br.ReadUInt32();
                 mGeometryStates = new GeometryStateList(handler, s);
                 if (mOwner.Version > 0x00000201)
                 {
-                    mUnknown01 = br.ReadSingle();
-                    mUnknown02 = br.ReadSingle();
-                    mUnknown03 = br.ReadSingle();
-                    mUnknown04 = br.ReadSingle();
-                    mUnknown05 = br.ReadSingle();
+                    mParentName = br.ReadUInt32();
+                    mMirrorPlaneX = br.ReadSingle();
+                    mMirrorPlaneY = br.ReadSingle();
+                    mMirrorPlaneZ = br.ReadSingle();
+                    mMirrorPlaneW = br.ReadSingle();
                 }
                 long actualSize = s.Position - start;
                 if (checking && actualSize != expectedSize)
@@ -474,12 +510,12 @@ namespace s3piwrappers
                 long sizeOffset = s.Position;
                 bw.Write(0);
                 long start = s.Position;
-                bw.Write(mGroupNameHash);
-                bw.Write(mMATDIndex01);
+                bw.Write(mNameHash);
+                bw.Write(mMATDIndex);
                 bw.Write(mVRTFIndex);
                 bw.Write(mVBUFIndex);
                 bw.Write(mIBUFIndex);
-                bw.Write(mVBUFType);
+                bw.Write((UInt32)mPrimitiveType | ((UInt32)mFlags << 8));
                 bw.Write(mVBUFOffset);
                 bw.Write(mIBUFOffset);
                 bw.Write(mVBUFCount);
@@ -487,15 +523,15 @@ namespace s3piwrappers
                 mBounds.UnParse(s);
                 bw.Write(mSKINIndex);
                 mJointReferences.UnParse(s);
-                bw.Write(mMATDIndex02);
+                bw.Write(mUvIndex);
                 mGeometryStates.UnParse(s);
                 if (mOwner.Version > 0x00000201)
                 {
-                    bw.Write(mUnknown01);
-                    bw.Write(mUnknown02);
-                    bw.Write(mUnknown03);
-                    bw.Write(mUnknown04);
-                    bw.Write(mUnknown05);
+                    bw.Write(mParentName);
+                    bw.Write(mMirrorPlaneX);
+                    bw.Write(mMirrorPlaneY);
+                    bw.Write(mMirrorPlaneZ);
+                    bw.Write(mMirrorPlaneW);
                 }
                 long end = s.Position;
                 long size = end - start;
@@ -508,27 +544,28 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Name: 0x{0:X8}\n", mGroupNameHash);
-                    sb.AppendFormat("Material01 Index: 0x{0:X8}\n", mMATDIndex01);
-                    sb.AppendFormat("VRTF: 0x{0:X8}\n", mVRTFIndex);
-                    sb.AppendFormat("VBUF: 0x{0:X8}\n", mVBUFIndex);
-                    sb.AppendFormat("VBUF Type: 0x{0:X8}\n", mVBUFType);
+                    sb.AppendFormat("Name: 0x{0:X8}\n", mNameHash);
+                    sb.AppendFormat("Material: 0x{0:X8}\n", mMATDIndex);
+                    sb.AppendFormat("Vertex Format: 0x{0:X8}\n", mVRTFIndex);
+                    sb.AppendFormat("Vertex Buffer: 0x{0:X8}\n", mVBUFIndex);
+                    sb.AppendFormat("Primitive Type: {0}\n", this["PrimitiveType"]);
+                    sb.AppendFormat("Flags: {0}\n", this["Flags"]);
                     sb.AppendFormat("VBUF Offset: 0x{0:X16}\n", mVBUFOffset);
                     sb.AppendFormat("IBUF Offset: 0x{0:X16}\n", mIBUFOffset);
                     sb.AppendFormat("Vertex Count: {0}\n", mVBUFCount);
                     sb.AppendFormat("Face Count: {0}\n", mIBUFCount);
                     sb.AppendFormat("Bounds:\n{0}\n", mBounds.Value);
-                    sb.AppendFormat("SKIN: 0x{0:X8}\n", mSKINIndex);
+                    sb.AppendFormat("Skin Controller: 0x{0:X8}\n", mSKINIndex);
 
                     if (mJointReferences.Count > 0)
                     {
-                        sb.AppendFormat("Joint References:\n");
+                        sb.AppendFormat("Joints:\n");
                         for (int i = 0; i < mJointReferences.Count; i++)
                         {
                             sb.AppendFormat("[{0:00}]\t{1}\n", i, mJointReferences[i].Value);
                         }
                     }
-                    sb.AppendFormat("Material02 Index: 0x{0:X8}\n", mMATDIndex02);
+                    sb.AppendFormat("UV Settings: 0x{0:X8}\n", mUvIndex);
                     if (mGeometryStates.Count > 0)
                     {
                         sb.AppendFormat("Geometry States:\n");
@@ -536,14 +573,14 @@ namespace s3piwrappers
                         {
                             sb.AppendFormat("=Geometry State[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
                         }
-                    } 
+                    }
                     if (mOwner.Version >= 0x00000202)
                     {
-                        sb.AppendFormat("Unknown01: {0,8:0.00000}\n", mUnknown01);
-                        sb.AppendFormat("Unknown02: {0,8:0.00000}\n", mUnknown02);
-                        sb.AppendFormat("Unknown03: {0,8:0.00000}\n", mUnknown03);
-                        sb.AppendFormat("Unknown04: {0,8:0.00000}\n", mUnknown04);
-                        sb.AppendFormat("Unknown05: {0,8:0.00000}\n", mUnknown05);
+                        sb.AppendFormat("ParentName: 0x{0:X8}\n", mParentName);
+                        sb.AppendFormat("MirrorPlaneX: {0,8:0.00000}\n", mMirrorPlaneX);
+                        sb.AppendFormat("MirrorPlaneY: {0,8:0.00000}\n", mMirrorPlaneY);
+                        sb.AppendFormat("MirrorPlaneZ: {0,8:0.00000}\n", mMirrorPlaneZ);
+                        sb.AppendFormat("MirrorPlaneW: {0,8:0.00000}\n", mMirrorPlaneW);
                     }
                     return sb.ToString();
                 }
@@ -551,7 +588,7 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new Group(0, handler, this);
+                return new Mesh(0, handler, this);
             }
 
             public override List<string> ContentFields
@@ -561,11 +598,11 @@ namespace s3piwrappers
                     var fields = GetContentFields(base.requestedApiVersion, GetType());
                     if (mOwner.Version < 0x00000202)
                     {
-                        fields.Remove("Unknown01");
-                        fields.Remove("Unknown02");
-                        fields.Remove("Unknown03");
-                        fields.Remove("Unknown04");
-                        fields.Remove("Unknown05");
+                        fields.Remove("ParentName");
+                        fields.Remove("MirrorPlaneX");
+                        fields.Remove("MirrorPlaneY");
+                        fields.Remove("MirrorPlaneZ");
+                        fields.Remove("MirrorPlaneW");
                     }
                     return fields;
                 }
@@ -576,7 +613,7 @@ namespace s3piwrappers
                 get { return kRecommendedApiVersion; }
             }
 
-            public bool Equals(Group other)
+            public bool Equals(Mesh other)
             {
                 return base.Equals(other);
             }
@@ -594,7 +631,7 @@ namespace s3piwrappers
             : base(APIversion, handler, null)
         {
             mVersion = 0x00000203;
-            mGroups = new GroupList(handler, this);
+            mMeshes = new MeshList(handler, this);
         }
         public MLOD(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)
@@ -608,10 +645,10 @@ namespace s3piwrappers
         }
 
         [ElementPriority(2)]
-        public GroupList Groups
+        public MeshList Meshes
         {
-            get { return mGroups; }
-            set { mGroups = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mMeshes; }
+            set { mMeshes = value; OnRCOLChanged(this, new EventArgs()); }
         }
 
         public string Value
@@ -620,12 +657,12 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
-                if (mGroups.Count > 0)
+                if (mMeshes.Count > 0)
                 {
-                    sb.AppendFormat("Groups:\n");
-                    for (int i = 0; i < mGroups.Count; i++)
+                    sb.AppendFormat("Meshes:\n");
+                    for (int i = 0; i < mMeshes.Count; i++)
                     {
-                        sb.AppendFormat("==Group[{0}]==\n{1}\n", i, mGroups[i].Value);
+                        sb.AppendFormat("==Mesh[{0}]==\n{1}\n", i, mMeshes[i].Value);
                     }
                 }
                 return sb.ToString();
@@ -633,7 +670,7 @@ namespace s3piwrappers
         }
 
         private UInt32 mVersion;
-        private GroupList mGroups;
+        private MeshList mMeshes;
         protected override void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
@@ -643,7 +680,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mGroups = new GroupList(handler, this, s);
+            mMeshes = new MeshList(handler, this, s);
         }
 
         public override Stream UnParse()
@@ -652,8 +689,8 @@ namespace s3piwrappers
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            if (mGroups == null) mGroups = new GroupList(handler, this);
-            mGroups.UnParse(s);
+            if (mMeshes == null) mMeshes = new MeshList(handler, this);
+            mMeshes.UnParse(s);
             return s;
         }
         public override AHandlerElement Clone(EventHandler handler)

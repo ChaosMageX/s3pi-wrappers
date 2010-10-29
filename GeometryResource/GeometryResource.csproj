@@ -55,10 +55,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GEOM.cs" />
-    <Compile Include="GeometryResource.cs" />
-    <Compile Include="GeometryResourceHandler.cs" />
-    <Compile Include="MTNF.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MaterialResource\MaterialResource.csproj">
+      <Project>{E4D1085B-6431-434C-90EC-E13DC8C701CC}</Project>
+      <Name>MaterialResource</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

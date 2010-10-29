@@ -136,18 +136,18 @@ namespace s3piwrappers
         private const int kRecommendedApiVersion = 1;
         private static bool checking = Settings.Checking;
 
-        public ANIM(int APIversion, EventHandler handler, ANIM basis) : this(APIversion, handler, basis.mVersion, basis.mUnknown01, basis.mTextures) { }
+        public ANIM(int APIversion, EventHandler handler, ANIM basis) : this(APIversion, handler, basis.mVersion, basis.mFramerate, basis.mTextures) { }
         public ANIM(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }
         public ANIM(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
-        public ANIM(int APIversion, EventHandler handler, uint version, float unknown01, IList<Texture> textures)
+        public ANIM(int APIversion, EventHandler handler, uint version, float framerate, IList<Texture> textures)
             : this(APIversion, handler)
         {
             mVersion = version;
-            mUnknown01 = unknown01;
+            mFramerate = framerate;
             mTextures = new TextureList(handler, textures);
         }
         private UInt32 mVersion;
-        private Single mUnknown01;
+        private Single mFramerate;
         private TextureList mTextures;
 
         [ElementPriority(1)]
@@ -157,10 +157,10 @@ namespace s3piwrappers
             set { mVersion = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(2)]
-        public float Unknown01
+        public float Framerate
         {
-            get { return mUnknown01; }
-            set { mUnknown01 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mFramerate; }
+            set { mFramerate = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
         public TextureList Textures
@@ -175,7 +175,7 @@ namespace s3piwrappers
             var tag = FOURCC((ulong)br.ReadUInt32());
             if (checking && !tag.Equals(Tag)) throw new InvalidDataException("Bad tag: expected " + Tag + ", but got " + tag);
             mVersion = br.ReadUInt32();
-            mUnknown01 = br.ReadSingle();
+            mFramerate = br.ReadSingle();
             mTextures = new TextureList(handler, s);
 
         }
@@ -187,7 +187,7 @@ namespace s3piwrappers
             var bw = new BinaryWriter(s);
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            bw.Write(mUnknown01);
+            bw.Write(mFramerate);
             if (mTextures == null) mTextures = new TextureList(handler);
             mTextures.UnParse(s);
             return s;
@@ -198,7 +198,7 @@ namespace s3piwrappers
             { 
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
-                sb.AppendFormat("Unknown01:\t{0}\r\n", mUnknown01);
+                sb.AppendFormat("Framerate:\t{0}\r\n", mFramerate);
                 sb.AppendFormat("Textures[{0}]\r\n", mTextures.Count);
                 return sb.ToString();
             }

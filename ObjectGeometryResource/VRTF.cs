@@ -12,17 +12,31 @@ namespace s3piwrappers
             Position,
             Normal,
             UV,
-            Assignment,
-            Weight,
+            BlendIndex,
+            BlendWeight,
             Tangent,
-            Unknown
+            Colour
         }
         public enum VertexElementFormat : byte
         {
-            F3_3I16_SU16 = 0x07,
-            F2_2I16 = 0x06,
-            F3_3I8_SU8 = 0x05,
-            I4 = 0x04
+            Float1,
+            Float2,
+            Float3,
+            Float4,
+            UByte4,
+            ColorUByte4,
+            Short2,
+            Short4,
+            UByte4N,
+            Short2N,
+            Short4N,
+            UShort2N,
+            UShort4N,
+            Dec3N,
+            UDec3N,
+            Float16_2,
+            Float16_4
+
 
         }
         public class VertexElementLayoutList : AResource.DependentList<VertexElementLayout>
@@ -65,15 +79,15 @@ namespace s3piwrappers
         }
         public class VertexElementLayout : AHandlerElement, IEquatable<VertexElementLayout>
         {
-            private VertexElementUsage mVertexElementUsage;
+            private VertexElementUsage mUsage;
             private byte mUsageIndex;
-            private VertexElementFormat mVertexElementFormat;
+            private VertexElementFormat mType;
             private byte mOffset;
             [ElementPriority(1)]
             public VertexElementUsage VertexElementUsage
             {
-                get { return mVertexElementUsage; }
-                set { mVertexElementUsage = value; OnElementChanged(); }
+                get { return mUsage; }
+                set { mUsage = value; OnElementChanged(); }
             }
             [ElementPriority(2)]
             public byte UsageIndex
@@ -84,8 +98,8 @@ namespace s3piwrappers
             [ElementPriority(3)]
             public VertexElementFormat VertexElementFormat
             {
-                get { return mVertexElementFormat; }
-                set { mVertexElementFormat = value; OnElementChanged(); }
+                get { return mType; }
+                set { mType = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
             public byte Offset
@@ -99,9 +113,9 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Usage:\t{0}\n", mVertexElementUsage);
+                    sb.AppendFormat("Usage:\t{0}\n", mUsage);
                     sb.AppendFormat("Index:\t0x{0:X2}\n", mUsageIndex);
-                    sb.AppendFormat("Format:\t{0}\n", mVertexElementFormat);
+                    sb.AppendFormat("Format:\t{0}\n", mType);
                     sb.AppendFormat("Offset:\t0x{0:X2}\n", mOffset);
                     return sb.ToString();
                 }
@@ -113,9 +127,9 @@ namespace s3piwrappers
             public VertexElementLayout(int APIversion, EventHandler handler, VertexElementLayout basis)
                 : base(APIversion, handler)
             {
-                mVertexElementUsage = basis.mVertexElementUsage;
+                mUsage = basis.mUsage;
                 mUsageIndex = basis.mUsageIndex;
-                mVertexElementFormat = basis.mVertexElementFormat;
+                mType = basis.mType;
                 mOffset = basis.mOffset;
             }
 
@@ -127,17 +141,17 @@ namespace s3piwrappers
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mVertexElementUsage = (VertexElementUsage)br.ReadByte();
+                mUsage = (VertexElementUsage)br.ReadByte();
                 mUsageIndex = br.ReadByte();
-                mVertexElementFormat = (VertexElementFormat)br.ReadByte();
+                mType = (VertexElementFormat)br.ReadByte();
                 mOffset = br.ReadByte();
             }
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write((byte)mVertexElementUsage);
+                bw.Write((byte)mUsage);
                 bw.Write((byte)mUsageIndex);
-                bw.Write((byte)mVertexElementFormat);
+                bw.Write((byte)mType);
                 bw.Write((byte)mOffset);
             }
             public override AHandlerElement Clone(EventHandler handler)
@@ -185,16 +199,16 @@ namespace s3piwrappers
             set { mVersion = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(2)]
-        public uint VertexSize
+        public uint Stride
         {
-            get { return mVertexSize; }
-            set { mVertexSize = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mStride; }
+            set { mStride = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
-        public uint Unknown01
+        public bool ExtendedFormat
         {
-            get { return mUnknown01; }
-            set { mUnknown01 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mExtendedFormat; }
+            set { mExtendedFormat = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
         public VertexElementLayoutList Layouts
@@ -209,8 +223,8 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
-                sb.AppendFormat("Vertex Size:\t0x{0:X8}\n", mVertexSize);
-                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
+                sb.AppendFormat("Stride:\t0x{0:X8}\n", mStride);
+                sb.AppendFormat("Extended Format:\t{0}\n", mExtendedFormat);
                 if (mLayouts.Count > 0)
                 {
                     sb.AppendFormat("Vertex Element Layouts:\n");
@@ -224,8 +238,8 @@ namespace s3piwrappers
         }
 
         private UInt32 mVersion;
-        private UInt32 mUnknown01;
-        private UInt32 mVertexSize;
+        private UInt32 mStride;
+        private bool mExtendedFormat;
         private VertexElementLayoutList mLayouts;
         protected override void Parse(Stream s)
         {
@@ -237,9 +251,9 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mVertexSize = br.ReadUInt32();
+            mStride = br.ReadUInt32();
             uint count = br.ReadUInt32();
-            mUnknown01 = br.ReadUInt32();
+            mExtendedFormat = br.ReadUInt32() > 0 ? true : false;
             mLayouts = new VertexElementLayoutList(handler, s, count);
 
 
@@ -253,9 +267,9 @@ namespace s3piwrappers
 
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
-            bw.Write(mVertexSize);
+            bw.Write(mStride);
             bw.Write(mLayouts.Count);
-            bw.Write(mUnknown01);
+            bw.Write(mExtendedFormat?1:0);
             mLayouts.UnParse(s);
             return s;
         }

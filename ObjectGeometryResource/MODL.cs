@@ -5,6 +5,15 @@ using s3pi.Interfaces;
 using System.IO;
 namespace s3piwrappers
 {
+    [Flags]
+    public enum LODInfoFlag : uint
+    {
+        Door = 0x2,
+        Portal = 0x1
+    }
+
+ 
+
     public class MODL : ARCOLBlock
     {
         public class LODEntryList : AResource.DependentList<LODEntry>
@@ -58,20 +67,20 @@ namespace s3piwrappers
             }
             private UInt16 mIndex;
             private IndexTypes mIndexType;
-            private UInt32 mUnknown01;
-            private UInt32 mLodKey;
-            private UInt32 mUnknown02;
-            private UInt32 mUnknown03;
+            private LODInfoFlag mFlags;
+            private UInt32 mId;
+            private float mMinZValue = float.MinValue;
+            private float mMaxZValue = float.MaxValue;
             public string Value
             {
                 get
                 {
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Index:\t0x{0:X8}({1})\n", mIndex, mIndexType);
-                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                    sb.AppendFormat("LOD Key:\t0x{0:X8}\n", mLodKey);
-                    sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                    sb.AppendFormat("Unknown03:\t0x{0:X8}\n", mUnknown03);
+                    sb.AppendFormat("Flags:\t{0}\n", this["Flags"]);
+                    sb.AppendFormat("Id:\t0x{0:X8}\n", mId);
+                    sb.AppendFormat("MinZValue:\t{0}\n", mMinZValue);
+                    sb.AppendFormat("MaxZValue:\t{0}\n", mMaxZValue);
 
                     return sb.ToString();
                 }
@@ -84,10 +93,10 @@ namespace s3piwrappers
             {
                 mIndex = basis.mIndex;
                 mIndexType = basis.mIndexType;
-                mUnknown01 = basis.mUnknown01;
-                mLodKey = basis.mLodKey;
-                mUnknown02 = basis.mUnknown01;
-                mUnknown03 = basis.mUnknown01;
+                mFlags = basis.mFlags;
+                mId = basis.mId;
+                mMinZValue = basis.mMinZValue;
+                mMaxZValue = basis.mMaxZValue;
             }
 
             public LODEntry(int APIversion, EventHandler handler,Stream s)
@@ -108,28 +117,28 @@ namespace s3piwrappers
                 set { mIndexType = value; OnElementChanged(); }
             }
             [ElementPriority(3)]
-            public uint Unknown01
+            public LODInfoFlag Flags
             {
-                get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                get { return mFlags; }
+                set { mFlags = value; OnElementChanged(); }
             }
             [ElementPriority(4)]
-            public uint LodKey
+            public uint Id
             {
-                get { return mLodKey; }
-                set { mLodKey = value; OnElementChanged(); }
+                get { return mId; }
+                set { mId = value; OnElementChanged(); }
             }
             [ElementPriority(5)]
-            public uint Unknown02
+            public float MinZValue
             {
-                get { return mUnknown02; }
-                set { mUnknown02 = value; OnElementChanged(); }
+                get { return mMinZValue; }
+                set { mMinZValue = value; OnElementChanged(); }
             }
             [ElementPriority(6)]
-            public uint Unknown03
+            public float MaxZValue
             {
-                get { return mUnknown03; }
-                set { mUnknown03 = value; OnElementChanged(); }
+                get { return mMaxZValue; }
+                set { mMaxZValue = value; OnElementChanged(); }
             }
 
             private void Parse(Stream s)
@@ -138,10 +147,10 @@ namespace s3piwrappers
                 BinaryReader br = new BinaryReader(s);
                 mIndex = br.ReadUInt16();
                 mIndexType = (IndexTypes)br.ReadUInt16();
-                mUnknown01 = br.ReadUInt32();
-                mLodKey = br.ReadUInt32();
-                mUnknown02 = br.ReadUInt32();
-                mUnknown03 = br.ReadUInt32();
+                mFlags = (LODInfoFlag)br.ReadUInt32();
+                mId = br.ReadUInt32();
+                mMinZValue = br.ReadSingle();
+                mMaxZValue = br.ReadSingle();
             }
 
             public void UnParse(Stream s)
@@ -149,10 +158,10 @@ namespace s3piwrappers
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mIndex);
                 bw.Write((ushort)mIndexType);
-                bw.Write(mUnknown01);
-                bw.Write(mLodKey);
-                bw.Write(mUnknown02);
-                bw.Write(mUnknown03);
+                bw.Write((UInt32)mFlags);
+                bw.Write(mId);
+                bw.Write(mMinZValue);
+                bw.Write(mMaxZValue);
             }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -178,8 +187,8 @@ namespace s3piwrappers
         
         private UInt32 mVersion;
         private BoundingBox mBounds;
-        private UInt32 mUnknown01;
-        private UInt32 mUnknown02;
+        private UInt32 mFadeType;
+        private float mCustomFadeDistance;
         private BoundingBoxList mExtraBounds;
         private LODEntryList mEntries;
         
@@ -200,8 +209,8 @@ namespace s3piwrappers
                                 sb.AppendFormat("=={0}==\n{1}\n", i, mExtraBounds[i].Value);
                             }
                         }
-                        sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                        sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
+                        sb.AppendFormat("FadeType:\t0x{0:X8}\n", mFadeType);
+                        sb.AppendFormat("CustomFadeDistance:\t{0:0.00000}\n", mCustomFadeDistance);
                     }
                     if (mEntries.Count > 0)
                     {
@@ -254,16 +263,16 @@ namespace s3piwrappers
             set { mExtraBounds = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
-        public uint Unknown01
+        public uint FadeType
         {
-            get { return mUnknown01; }
-            set { mUnknown01 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mFadeType; }
+            set { mFadeType = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
-        public uint Unknown02
+        public float CustomFadeDistance
         {
-            get { return mUnknown02; }
-            set { mUnknown02 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mCustomFadeDistance; }
+            set { mCustomFadeDistance = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(6)]
         public LODEntryList Entries
@@ -291,8 +300,8 @@ namespace s3piwrappers
             if(mVersion >= 258)
             {
                 mExtraBounds = new BoundingBoxList(handler, s);
-                mUnknown01 = br.ReadUInt32();
-                mUnknown02 = br.ReadUInt32();
+                mFadeType = br.ReadUInt32();
+                mCustomFadeDistance = br.ReadSingle();
             }
             mEntries= new LODEntryList(handler,s,count);
         }
@@ -313,8 +322,8 @@ namespace s3piwrappers
             if (mVersion >= 258)
             {
                 mExtraBounds.UnParse(s);
-                bw.Write(mUnknown01);
-                bw.Write(mUnknown02);
+                bw.Write(mFadeType);
+                bw.Write(mCustomFadeDistance);
             }
             mEntries.UnParse(s);
             return s;
