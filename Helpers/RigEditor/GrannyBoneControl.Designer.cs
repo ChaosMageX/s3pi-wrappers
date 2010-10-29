@@ -48,7 +48,6 @@
             this.tbName.Name = "tbName";
             this.tbName.Size = new System.Drawing.Size(398, 20);
             this.tbName.TabIndex = 1;
-
             // 
             // lbName
             // 
@@ -67,7 +66,7 @@
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
             this.Name = "GrannyBoneControl";
-            this.Size = new System.Drawing.Size(450, 303);
+            this.Size = new System.Drawing.Size(450, 302);
             this.ResumeLayout(false);
             this.PerformLayout();
 

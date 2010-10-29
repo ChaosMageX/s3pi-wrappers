@@ -199,6 +199,9 @@ namespace LightResource
 
             }
 
+            [ElementPriority(0)]
+            public abstract LightType Type { get; }
+
             [ElementPriority(1)]
             public Vector3 Transform
             {
@@ -245,8 +248,6 @@ namespace LightResource
                 mColour.UnParse(s);
                 bw.Write(mIntensity);
             }
-            [ElementPriority(0)]
-            public abstract LightType Type { get; }
             public override List<string> ContentFields
             {
                 get { return GetContentFields(requestedApiVersion, GetType()); }
@@ -1029,13 +1030,11 @@ namespace LightResource
             int val1 = br.ReadInt32();
             byte lightCount = br.ReadByte();
             byte occluderCount = br.ReadByte();
-            int valExpected1 = 4 + 128 * lightCount + 14 * occluderCount;
-            if (val1 != valExpected1 && Settings.Checking)
-                throw new InvalidDataException(String.Format("Values don't match. Expected 0x{0:X8}, but got 0x{1:X8}", valExpected1, val1));
+            //int valExpected1 = 4 + 128 * lightCount + 14 * occluderCount;
+            //if (val1 != valExpected1 && Settings.Checking)throw new InvalidDataException(String.Format("Values don't match. Expected 0x{0:X8}, but got 0x{1:X8}", valExpected1, val1));
             int val2 = br.ReadUInt16();
-            int valExpected2 = 14 * occluderCount;
-            if (val2 != valExpected2 && Settings.Checking)
-                throw new InvalidDataException(String.Format("Values don't match. Expected 0x{0:X8}, but got 0x{1:X8}", valExpected1, val2));
+            //int valExpected2 = 14 * occluderCount;
+            //if (val2 != valExpected2 && Settings.Checking)throw new InvalidDataException(String.Format("Values don't match. Expected 0x{0:X8}, but got 0x{1:X8}", valExpected1, val2));
             mLights = new LightList(handler, s, lightCount);
             mOccluders = new OccluderList(handler, s, occluderCount);
 

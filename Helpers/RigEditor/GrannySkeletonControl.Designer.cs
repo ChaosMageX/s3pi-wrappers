@@ -33,6 +33,7 @@
             this.gbBones = new System.Windows.Forms.GroupBox();
             this.boneTreeView = new s3piwrappers.RigEditor.BoneTreeView();
             this.grannyBoneControl = new s3piwrappers.RigEditor.GrannyBoneControl();
+            this.llbMatrixInfo = new System.Windows.Forms.LinkLabel();
             this.gbBones.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -92,10 +93,23 @@
             this.grannyBoneControl.Value = null;
             this.grannyBoneControl.Visible = false;
             // 
+            // llbMatrixInfo
+            // 
+            this.llbMatrixInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.llbMatrixInfo.AutoSize = true;
+            this.llbMatrixInfo.Location = new System.Drawing.Point(571, 10);
+            this.llbMatrixInfo.Name = "llbMatrixInfo";
+            this.llbMatrixInfo.Size = new System.Drawing.Size(76, 13);
+            this.llbMatrixInfo.TabIndex = 4;
+            this.llbMatrixInfo.TabStop = true;
+            this.llbMatrixInfo.Text = "Get Matrix Info";
+            this.llbMatrixInfo.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llbMatrixInfo_LinkClicked);
+            // 
             // GrannySkeletonControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.llbMatrixInfo);
             this.Controls.Add(this.gbBones);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
@@ -114,5 +128,6 @@
         private System.Windows.Forms.GroupBox gbBones;
         private BoneTreeView boneTreeView;
         private GrannyBoneControl grannyBoneControl;
+        private System.Windows.Forms.LinkLabel llbMatrixInfo;
     }
 }

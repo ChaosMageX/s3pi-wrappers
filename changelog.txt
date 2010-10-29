@@ -1,7 +1,11 @@
+2010-10-30:
+New Wrappers:
+	*LightResource (More descriptive than original)
+ObjectGeometry:
+	*Better names for unknowns
 2010-10-18:
 RigEditor:
 	*Resizable
-	*"Bone Info" option for calculating matrix for RSLT/SKIN
 	*Hierarchy expanded
 SKIN:
 	*better defined "Transform" structure

@@ -134,6 +134,8 @@ namespace s3piwrappers
         {
         }
 
+        public BoundingBoxList(EventHandler handler, IList<BoundingBox> ilt) : base(handler, ilt) {}
+
         public override void Add()
         {
             base.Add(new object[] { });

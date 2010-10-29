@@ -2,6 +2,7 @@
 using System.IO;
 using s3pi.Interfaces;
 using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 namespace s3piwrappers
 {
@@ -51,6 +52,8 @@ namespace s3piwrappers
             {
                 Parse(s, count);
             }
+
+            public VertexElementLayoutList(EventHandler handler, IList<VertexElementLayout> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {
@@ -182,9 +185,10 @@ namespace s3piwrappers
         public VRTF(int APIversion, EventHandler handler, VRTF basis)
             : base(APIversion, handler, null)
         {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
+            mVersion = basis.mVersion;
+            mStride = basis.mStride;
+            mExtendedFormat = basis.mExtendedFormat;
+            mLayouts= new VertexElementLayoutList(handler,basis.mLayouts.Select(l=>l.Clone(handler)).Cast<VertexElementLayout>().ToList());
         }
         public VRTF(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)

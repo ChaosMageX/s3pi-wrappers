@@ -55,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GEOM.cs" />
+    <Compile Include="GeometryResource.cs" />
+    <Compile Include="GeometryResourceHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

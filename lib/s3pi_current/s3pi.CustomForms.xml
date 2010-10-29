@@ -21,23 +21,6 @@
             the contents of this method with the code editor.
             </summary>
         </member>
-        <member name="F:System.Windows.Forms.TopicRatingList.components">
-            <summary> 
-            Required designer variable.
-            </summary>
-        </member>
-        <member name="M:System.Windows.Forms.TopicRatingList.Dispose(System.Boolean)">
-            <summary> 
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        </member>
-        <member name="M:System.Windows.Forms.TopicRatingList.InitializeComponent">
-            <summary> 
-            Required method for Designer support - do not modify 
-            the contents of this method with the code editor.
-            </summary>
-        </member>
         <member name="F:System.Windows.Forms.TGIBlockCombo.components">
             <summary> 
             Required designer variable.
@@ -50,23 +33,6 @@
             <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         </member>
         <member name="M:System.Windows.Forms.TGIBlockCombo.InitializeComponent">
-            <summary> 
-            Required method for Designer support - do not modify 
-            the contents of this method with the code editor.
-            </summary>
-        </member>
-        <member name="F:System.Windows.Forms.TopicRatingPanel.components">
-            <summary> 
-            Required designer variable.
-            </summary>
-        </member>
-        <member name="M:System.Windows.Forms.TopicRatingPanel.Dispose(System.Boolean)">
-            <summary> 
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        </member>
-        <member name="M:System.Windows.Forms.TopicRatingPanel.InitializeComponent">
             <summary> 
             Required method for Designer support - do not modify 
             the contents of this method with the code editor.

@@ -85,6 +85,7 @@ namespace s3piwrappers
         public IBUF(int apiVersion, EventHandler handler)
             : base(apiVersion, handler, null)
         {
+            
         }
         public IBUF(int apiVersion, EventHandler handler, Stream s)
             : base(apiVersion, handler, s)
@@ -115,6 +116,7 @@ namespace s3piwrappers
         {
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
+            if(mBuffer==null)mBuffer=new byte[0];
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write((UInt32)mFlags);

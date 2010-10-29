@@ -3,10 +3,11 @@ using System.IO;
 using s3pi.Interfaces;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 namespace s3piwrappers
 {
     [Flags]
-    public enum MeshFlags
+    public enum MeshFlags : uint
     {
         BasinInterior = 0x00000001,
         HDExteriorLit = 0x00000002,
@@ -29,7 +30,6 @@ namespace s3piwrappers
         QuadList,
         DisplayList
     }
-
 
 
     public class MLOD : ARCOLBlock
@@ -268,6 +268,12 @@ namespace s3piwrappers
                 Parse(s);
             }
 
+            public MeshList(EventHandler handler, MLOD owner, IList<Mesh> ilt)
+                : base(handler, ilt)
+            {
+                mOwner = owner;
+            }
+
             public override void Add()
             {
                 ((IList<Mesh>)this).Add(new Mesh(0, this.elementHandler, mOwner));
@@ -302,8 +308,6 @@ namespace s3piwrappers
             private UInt32 mIBUFCount;
             private UInt32 mSKINIndex;
             private UInt32 mUvIndex;
-
-
             private JointReferenceList mJointReferences;
             private BoundingBox mBounds;
             private GeometryStateList mGeometryStates;
@@ -623,15 +627,12 @@ namespace s3piwrappers
         public MLOD(int APIversion, EventHandler handler, MLOD basis)
             : base(APIversion, handler, null)
         {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
+            mVersion = basis.mVersion;
+            mMeshes = new MeshList(handler,this, basis.mMeshes.Select(x=>x.Clone(handler)).Cast<Mesh>().ToList());
         }
         public MLOD(int APIversion, EventHandler handler)
             : base(APIversion, handler, null)
         {
-            mVersion = 0x00000203;
-            mMeshes = new MeshList(handler, this);
         }
         public MLOD(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)
@@ -669,7 +670,7 @@ namespace s3piwrappers
             }
         }
 
-        private UInt32 mVersion;
+        private UInt32 mVersion = 0x00000202;
         private MeshList mMeshes;
         protected override void Parse(Stream s)
         {

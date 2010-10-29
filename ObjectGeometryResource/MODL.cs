@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using s3pi.Interfaces;
 using System.IO;
+using System.Linq;
 namespace s3piwrappers
 {
     [Flags]
@@ -26,6 +27,9 @@ namespace s3piwrappers
             {
                 Parse(s,count);
             }
+
+            public LODEntryList(EventHandler handler, IList<LODEntry> ilt) : base(handler, ilt) {}
+
             private void Parse(Stream s, uint count)
             {
                 BinaryReader br = new BinaryReader(s);
@@ -235,9 +239,11 @@ namespace s3piwrappers
         public MODL(int APIversion, EventHandler handler,MODL basis)
             : base(APIversion, handler, null)
         {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
+            mVersion = basis.mVersion;
+            mBounds = new BoundingBox(0,handler,basis.mBounds);
+            mExtraBounds= new BoundingBoxList(handler,basis.mExtraBounds.Select(b=>b.Clone(handler)).Cast<BoundingBox>().ToList());
+            mEntries = new LODEntryList(handler, basis.mEntries.Select(lodEntry => lodEntry.Clone(handler)).Cast<LODEntry>().ToList());
+            
         }
         public MODL(int APIversion, EventHandler handler, Stream s) 
             : base(APIversion, handler, s)
