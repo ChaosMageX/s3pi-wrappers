@@ -138,41 +138,23 @@
             The maximum size of the list, or -1 for no limit.
             </summary>
         </member>
-        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler)">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Collections.Generic.AHandlerList`1"/> class
-            that is empty
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list.</param>
-        </member>
-        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0})">
-            <summary>
-            Initializes a new instance of the <see cref="T:System.Collections.Generic.AHandlerList`1"/> class,
-            filled with the content of <paramref name="ilt"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list.</param>
-            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
-        </member>
         <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:System.Collections.Generic.AHandlerList`1"/> class
             that is empty
-            and with maximum size of <paramref name="size"/>.
+            and with maximum size of <paramref name="size"/> (default is unlimited).
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list.</param>
-            <param name="size">Maximum number of elements in the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Int64,System.Collections.Generic.IList{`0})">
+        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:System.Collections.Generic.AHandlerList`1"/> class,
-            filled with the content of <paramref name="ilt"/>
-            and with maximum size of <paramref name="size"/>.
+            filled with the content of <paramref name="ilt"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
             <remarks>Does not throw an exception if <paramref name="ilt"/>.Count is greater than <paramref name="size"/>.
             An exception will be thrown on any attempt to add further items unless the Count is reduced first.</remarks>
         </member>

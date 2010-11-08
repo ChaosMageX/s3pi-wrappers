@@ -689,6 +689,58 @@
             Flag the <see cref="T:s3pi.Interfaces.AHandlerElement"/> as dirty and invoke the <see cref="T:System.EventHandler"/> delegate.
             </summary>
         </member>
+        <member name="T:s3pi.Interfaces.HandlerElement`1">
+            <summary>
+            An extension to <see cref="T:s3pi.Interfaces.AHandlerElement"/>, for simple data types (such as <see cref="T:System.UInt32"/>).
+            </summary>
+            <typeparam name="T">A simple data type (such as <see cref="T:System.UInt32"/>).</typeparam>
+            <remarks>For an example of use, see <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</remarks>
+            <seealso cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>
+        </member>
+        <member name="M:s3pi.Interfaces.HandlerElement`1.#ctor(System.Int32,System.EventHandler)">
+            <summary>
+            Initialize a new instance with a default value.
+            </summary>
+            <param name="APIversion">The requested API version.</param>
+            <param name="handler">The <see cref="T:System.EventHandler"/> delegate to invoke if the <see cref="T:s3pi.Interfaces.AHandlerElement"/> changes.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.HandlerElement`1.#ctor(System.Int32,System.EventHandler,`0)">
+            <summary>
+            Initialize a new instance with an initial value of <paramref name="basis"/>.
+            </summary>
+            <param name="APIversion">The requested API version.</param>
+            <param name="handler">The <see cref="T:System.EventHandler"/> delegate to invoke if the <see cref="T:s3pi.Interfaces.AHandlerElement"/> changes.</param>
+            <param name="basis">Initial value for instance.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.HandlerElement`1.Clone(System.EventHandler)">
+            <summary>
+            Get a copy of the HandlerElement but with a new change <see cref="T:System.EventHandler"/>.
+            </summary>
+            <param name="handler">The replacement HandlerElement delegate.</param>
+            <returns>Return a copy of the HandlerElement but with a new change <see cref="T:System.EventHandler"/>.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.HandlerElement`1.Equals(s3pi.Interfaces.HandlerElement{`0})">
+            <summary>
+            Indicates whether the current object is equal to another object of the same type.
+            </summary>
+            <param name="other">An object to compare with this object.</param>
+            <returns>true if the current object is equal to the other parameter; otherwise, false.</returns>
+        </member>
+        <member name="P:s3pi.Interfaces.HandlerElement`1.RecommendedApiVersion">
+            <summary>
+            The best supported version of the API available
+            </summary>
+        </member>
+        <member name="P:s3pi.Interfaces.HandlerElement`1.ContentFields">
+            <summary>
+            The list of available field names on this API object.
+            </summary>
+        </member>
+        <member name="P:s3pi.Interfaces.HandlerElement`1.Val">
+            <summary>
+            The value of the object.
+            </summary>
+        </member>
         <member name="T:s3pi.Interfaces.ElementPriorityAttribute">
             <summary>
             Element priority is used when displaying elements
@@ -1072,7 +1124,7 @@
         </member>
         <member name="P:s3pi.Interfaces.AResource.ContentFields">
             <summary>
-            A <c>List&lt;string&gt;</c> of available field names on object
+            A <see cref="T:System.Collections.Generic.List`1"/> of available field names on object
             </summary>
         </member>
         <member name="P:s3pi.Interfaces.AResource.Stream">
@@ -1131,61 +1183,33 @@
             </summary>
             <remarks>Work around for list event handler triggering during stream constructor and other places.</remarks>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            that is empty
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-        </member>
         <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            that is empty
-            and with an unlimited size.
+            that is empty.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0})">
+        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            filled with the content of <paramref name="ilt"/>
-            and with an unlimited size.
+            filled with the content of <paramref name="ilt"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
             <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Int64,System.Collections.Generic.IList{`0})">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            filled with the content of <paramref name="ilt"/>
-            and with maximum size of <paramref name="size"/>.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
-            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
             <remarks>Does not throw an exception if <paramref name="ilt"/>.Count is greater than <paramref name="size"/>.
             An exception will be thrown on any attempt to add further items unless the Count is reduced first.</remarks>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.IO.Stream)">
+        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            filled from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            and with an unlimited size.
+            filled from <see cref="T:System.IO.Stream"/> <paramref name="s"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
             <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Int64,System.IO.Stream)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
-            filled from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
-            <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
             <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
         </member>
         <member name="M:s3pi.Interfaces.AResource.DependentList`1.Parse(System.IO.Stream)">
@@ -1606,206 +1630,101 @@
             A TGIBlock list class where the count of elements is separate from the stored list
             </summary>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            that is empty
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with the content of <paramref name="ilt"/>
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.UInt32,System.IO.Stream)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="count">The number of list elements to read.</param>
-            <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            that is empty
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with the content of <paramref name="ilt"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.UInt32,System.IO.Stream)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="count">The number of list elements to read.</param>
-            <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            that is empty
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with the content of <paramref name="ilt"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.UInt32,System.IO.Stream)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
-            filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with an unlimited size.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="count">The number of list elements to read.</param>
-            <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
-        </member>
         <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             that is empty
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with a specified maximum number of entries.
+            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI".
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with a specified maximum number of entries.
+            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI".
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
+            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,System.UInt32,System.IO.Stream)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.UInt32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI"
-            and with a specified maximum number of entries.
+            with <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of "TGI".
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="count">The number of list elements to read.</param>
             <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,s3pi.Interfaces.AResource.TGIBlock.Order)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             that is empty
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,s3pi.Interfaces.AResource.TGIBlock.Order,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
+            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,s3pi.Interfaces.AResource.TGIBlock.Order,System.UInt32,System.IO.Stream)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.UInt32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
             <param name="count">The number of list elements to read.</param>
             <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,System.String)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             that is empty
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,System.String,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock})">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
+            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int64,System.String,System.UInt32,System.IO.Stream)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.UInt32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
-            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>
-            and with a specified maximum number of entries.
+            with the specified <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="size">Maximum number of elements in the list.</param>
             <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
             <param name="count">The number of list elements to read.</param>
             <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
+            <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
         <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.CreateElement(System.IO.Stream)">
             <summary>
@@ -1895,7 +1814,7 @@
             filled with the content of <paramref name="ilt"/>.
             </summary>
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="ilt">The <c>IList&lt;TGIBlock&gt;</c> to use as the initial content of the list.</param>
+            <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
             <param name="addEight">When true, invoke fudge factor in parse/unparse</param>
         </member>
         <member name="M:s3pi.Interfaces.AResource.TGIBlockList.#ctor(System.EventHandler,System.IO.Stream,System.Int64,System.Int64,System.Boolean)">
@@ -1947,6 +1866,232 @@
             <summary>
             A displayable string representing the list.
             </summary>
+        </member>
+        <member name="T:s3pi.Interfaces.AResource.SimpleList`1">
+            <summary>
+            A flexible generic list that implements <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> for
+            a simple data type (such as <see cref="T:System.UInt32"/>).
+            </summary>
+            <typeparam name="T">A simple data type (such as <see cref="T:System.UInt32"/>).</typeparam>
+            <example>
+            The following method shows a way to create a list of UInt32 values, with a UInt32 entry count
+            stored in the stream immediately before the list.
+            <code>
+            <![CDATA[
+            SimpleList<UInt32> ReadUInt32List(EventHandler e, Stream s)
+            {
+                return new SimpleList<UInt32>(e,
+                    s => new BinaryReader(s).ReadUInt32(),
+                    (s, value) => new BinaryWriter(s).Write(value));
+            }
+            ]]>
+            </code>
+            For more complex cases, or where repeated use of the same kind of <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is needed,
+            it can be worthwhile extending the class, as shown below.  This example is for a list of byte values prefixed
+            by a one byte count.  It shows that the list length can also be specified (here using <c>Byte.MaxValue</c>
+            <code>
+            <![CDATA[
+            public class ByteList : AResource.SimpleList<Byte>
+            {
+                static string fmt = "0x{1:X2}; ";
+                
+                public ByteList(EventHandler handler) : base(handler, ReadByte, WriteByte, fmt, Byte.MaxValue, ReadListCount, WriteListCount) { }
+                public ByteList(EventHandler handler, Stream s) : base(handler, s, ReadByte, WriteByt, fmte, Byte.MaxValue, ReadListCount, WriteListCount) { }
+                public ByteList(EventHandler handler, IList<HandlerElement<Byte>> le) : base(handler, le, ReadByte, WriteByte fmt,, Byte.MaxValue, ReadListCount, WriteListCount) { }
+                
+                static uint ReadListCount(Stream s) { return new BinaryReader(s).ReadByte(); }
+                static void WriteListCount(Stream s, uint count) { new BinaryWriter(s).Write((byte)count); }
+                static byte ReadByte(Stream s) { return new BinaryReader(s).ReadByte(); }
+                static void WriteByte(Stream s, byte value) { new BinaryWriter(s).Write(value); }
+            }
+            ]]>
+            </code>
+            </example>
+            <seealso cref="T:s3pi.Interfaces.HandlerElement`1"/>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
+            that is empty.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.HandlerElement{`0}},s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
+            from <paramref name="iList"/>.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="iList">The source to use as the initial content of the list.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
+            from <paramref name="iList"/>, wrapping each entry in a <see cref="T:s3pi.Interfaces.HandlerElement`1"/> instance.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="iList">The source to use as the initial content of the list.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.IO.Stream,s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
+            from <paramref name="s"/>.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> to read for the initial content of the list.</param>
+            <param name="createElement">Required; the method to create a new element in the list from a stream.</param>
+            <param name="writeElement">Required; the method to create a new element in the list from a stream.</param>
+            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.ReadCount(System.IO.Stream)">
+            <summary>
+            Return the number of elements to be created.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> being processed.</param>
+            <returns>The number of elements to be created.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.WriteCount(System.IO.Stream,System.UInt32)">
+            <summary>
+            Write the count of list elements to the stream.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> to write <paramref name="count"/> to.</param>
+            <param name="count">Value to write to <see cref="T:System.IO.Stream"/> <paramref name="s"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.CreateElement(System.IO.Stream)">
+            <summary>
+            Creates an new list element of type <typeparamref name="T"/> by reading <paramref name="s"/>.
+            </summary>
+            <param name="s"><see cref="P:s3pi.Interfaces.AResource.Stream"/> containing data.</param>
+            <returns>New list element.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.WriteElement(System.IO.Stream,s3pi.Interfaces.HandlerElement{`0})">
+            <summary>
+            Writes the value of a list element to <paramref name="s"/>.
+            </summary>
+            <param name="s"><see cref="P:s3pi.Interfaces.AResource.Stream"/> containing data.</param>
+            <param name="element">List element for which to write the value to the <seealso cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Add">
+            <summary>
+            Add a default element to a <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            </summary>
+            <exception cref="T:System.NotImplementedException">Lists of abstract classes will fail
+            with a NotImplementedException.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Add(`0)">
+            <summary>
+            Adds an entry to a <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            </summary>
+            <param name="item">The object to add.</param>
+            <returns>True on success</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds the elements of the specified collection to the end of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            </summary>
+            <param name="collection">The collection whose elements should be added to the end of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
+            <remarks>Calls <see cref="M:s3pi.Interfaces.AResource.SimpleList`1.Add(`0)"/> for each item in <paramref name="collection"/>.</remarks>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserts an item to the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which item should be inserted.</param>
+            <param name="item">The object to insert into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Inserts the elements of a collection into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which the new elements should be inserted.</param>
+            <param name="collection">The collection whose elements should be inserted into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="index"/> is less than 0.
+            -or-
+            <paramref name="index"/> is greater than <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.Count.
+            </exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
+            <remarks>Calls <see cref="M:s3pi.Interfaces.AResource.SimpleList`1.Insert(System.Int32,`0)"/> for each item in <paramref name="collection"/>.</remarks>
+        </member>
+        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Remove(`0)">
+            <summary>
+            Removes the first occurrence of an entry from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> with the value given.
+            </summary>
+            <param name="item">The value to remove from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</param>
+            <returns>
+            true if item was successfully removed from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>
+            otherwise, false. This method also returns false if item is not found in
+            the original <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
+            </returns>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.AHandlerList`1"/> is read-only.</exception>
+        </member>
+        <member name="P:s3pi.Interfaces.AResource.SimpleList`1.Value">
+            <summary>
+            Return the list content, formated for display only, using the element format supplied on the list constructor.
+            </summary>
+        </member>
+        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.CreateElementMethod">
+            <summary>
+            Create a new element of type <typeparamref name="T"/> from a <see cref="P:s3pi.Interfaces.AResource.Stream"/>.
+            </summary>
+            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> from which to read the element data.</param>
+            <returns>A new element of type <typeparamref name="T"/>.</returns>
+        </member>
+        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.WriteElementMethod">
+            <summary>
+            Write an element of type <typeparamref name="T"/> to a <see cref="P:s3pi.Interfaces.AResource.Stream"/>.
+            </summary>
+            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> to which to write the value.</param>
+            <param name="value">The value of type <typeparamref name="T"/> to write.</param>
+        </member>
+        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.ReadCountMethod">
+            <summary>
+            Return the number of list elements to read.
+            </summary>
+            <param name="s">A <see cref="P:s3pi.Interfaces.AResource.Stream"/> that may contain the number of elements.</param>
+            <returns>The number of list elements to read.</returns>
+        </member>
+        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.WriteCountMethod">
+            <summary>
+            Store the number of elements in the list.
+            </summary>
+            <param name="s">A <see cref="P:s3pi.Interfaces.AResource.Stream"/> to which list elements will be written after the count.</param>
+            <param name="count">The number of list elements.</param>
         </member>
         <member name="T:s3pi.Interfaces.StringTableSingleton">
             <summary>

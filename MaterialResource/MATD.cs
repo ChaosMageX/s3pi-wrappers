@@ -7,7 +7,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers
 {
-    public class MATD : ARCOLBlock
+    public class MaterialDefinition : ARCOLBlock
     {
         private UInt32 mVersion;
         private UInt32 mName;

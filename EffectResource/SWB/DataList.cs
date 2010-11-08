@@ -11,23 +11,8 @@ namespace s3piwrappers.SWB
     {
         public DataList(EventHandler handler) : base(handler) { }
         public DataList(EventHandler handler, Stream s) : base(handler, s) { }
-
-        public DataList(EventHandler handler, long size) : base(handler, size)
-        {
-        }
-
-        public DataList(EventHandler handler, IList<TElement> ilt) : base(handler, ilt)
-        {
-        }
-
-        public DataList(EventHandler handler, long size, IList<TElement> ilt) : base(handler, size, ilt)
-        {
-        }
-
-        public DataList(EventHandler handler, long size, Stream s) : base(handler, size, s)
-        {
-        }
-
+        public DataList(EventHandler handler, long size) : base(handler, size){}
+        public DataList(EventHandler handler, IList<TElement> ilt) : base(handler, ilt){}
         protected override uint ReadCount(Stream s)
         {
             return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();

@@ -10,7 +10,6 @@ namespace LightResource
 {
     public enum LightType : uint
     {
-        Unknown=0,
         Ambient = 1,
         Directional = 2,
         Point = 3,
@@ -157,7 +156,7 @@ namespace LightResource
 
             public override string ToString()
             {
-                return String.Format("R:[{0:0.000000},G:{1:0.000000},B:{2:0.000000}]", mRed, mGreen, mBlue);
+                return String.Format("[R:{0:0.000000},G:{1:0.000000},B:{2:0.000000}]", mRed, mGreen, mBlue);
             }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -731,7 +730,6 @@ namespace LightResource
 
         public class LightList : AResource.DependentList<Light>
         {
-            public LightList(EventHandler handler, long size, IList<Light> ilt) : base(handler, size, ilt) { }
             public LightList(EventHandler handler, Stream s, uint count) : base(handler) { Parse(s,count);}
             public LightList(EventHandler handler) : base(handler) { }
             public LightList(EventHandler handler, long size) : base(handler, size) { }
@@ -946,7 +944,6 @@ namespace LightResource
         }
         public class OccluderList : AResource.DependentList<Occluder>
         {
-            public OccluderList(EventHandler handler, long size, IList<Occluder> ilt) : base(handler, size, ilt) { }
             public OccluderList(EventHandler handler, Stream s, uint count)
                 : base(handler)
             {

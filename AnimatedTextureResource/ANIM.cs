@@ -79,9 +79,7 @@ namespace s3piwrappers
             public TextureList(EventHandler handler) : base(handler) { }
             public TextureList(EventHandler handler, long size) : base(handler, size) { }
             public TextureList(EventHandler handler, IList<Texture> ilt) : base(handler, ilt) { }
-            public TextureList(EventHandler handler, long size, IList<Texture> ilt) : base(handler, size, ilt) { }
             public TextureList(EventHandler handler, Stream s) : base(handler, s) { }
-            public TextureList(EventHandler handler, long size, Stream s) : base(handler, size, s) { }
             protected override void Parse(Stream s)
             {
                 var br = new BinaryReader(s);

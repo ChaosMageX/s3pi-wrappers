@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using s3pi.GenericRCOLResource;
+using System.Linq;
 namespace s3piwrappers
 {
     public class GEOM : ARCOLBlock
@@ -121,123 +122,61 @@ namespace s3piwrappers
                 get { return kRecommendedApiVersion; }
             }
         }
-        public class IndexDataList : AResource.DependentList<IndexData>
+        public class IndexBuffer : AResource.DependentList<UInt32>
         {
+            private byte mFormat = 2;
 
-            public IndexDataList(EventHandler handler)
+            public IndexBuffer(EventHandler handler)
                 : base(handler)
             {
             }
 
-            public IndexDataList(EventHandler handler, Stream s)
+            public IndexBuffer(EventHandler handler, Stream s)
                 : base(handler, s)
             {
             }
-            protected override uint ReadCount(Stream s)
+
+            public IndexBuffer(EventHandler handler, IList<uint> ilt) : base(handler, ilt) {}
+
+            protected override void Parse(Stream s)
             {
-                return base.ReadCount(s) / 3;
+                mFormat = new BinaryReader(s).ReadByte();
+                base.Parse(s);
             }
-            protected override void WriteCount(Stream s, uint count)
+            public override void UnParse(Stream s)
             {
-                base.WriteCount(s, count * 3);
+                mFormat = (byte) (Count >0?(this.Max() > ushort.MaxValue ? 4 : 2):2);
+                new BinaryWriter(s).Write(mFormat);
+                base.UnParse(s);
             }
             public override void Add()
             {
                 base.Add(new object[] { });
             }
 
-            protected override IndexData CreateElement(Stream s)
+            protected override UInt32 CreateElement(Stream s)
             {
-                return new IndexData(0, handler, s);
+                var br = new BinaryReader(s);
+                switch(mFormat)
+                {
+                    case 0x02: return br.ReadUInt16();
+                    case 0x04: return br.ReadUInt32();
+                    default: throw new Exception("Unknown index format "+mFormat);
+                }
             }
 
-            protected override void WriteElement(Stream s, IndexData element)
+            protected override void WriteElement(Stream s, UInt32 element)
             {
-                element.UnParse(s);
+                var bw = new BinaryWriter(s);
+                switch (mFormat)
+                {
+                    case 0x02: bw.Write((UInt16) element); break;
+                    case 0x04: bw.Write((UInt32)element); break;
+                    default: throw new Exception("Unknown index format " + mFormat);
+                }
             }
         }
-        public class IndexData : AHandlerElement, IEquatable<IndexData>
-        {
-            public IndexData(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
-            {
-            }
-            public IndexData(int APIversion, EventHandler handler, IndexData basis)
-                : base(APIversion, handler)
-            {
-                mIndex0 = basis.mIndex0;
-                mIndex1 = basis.mIndex1;
-                mIndex2 = basis.mIndex2;
-            }
-            public IndexData(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
-            {
-                Parse(s);
-            }
-
-            private UInt16 mIndex0;
-            private UInt16 mIndex1;
-            private UInt16 mIndex2;
-            public string Value { get { return ToString(); } }
-            public override string ToString()
-            {
-                return String.Format("[{0:X4},{1:X4},{2:X4}]", mIndex0, mIndex1, mIndex2);
-            }
-            [ElementPriority(1)]
-            public ushort Index0
-            {
-                get { return mIndex0; }
-                set { mIndex0 = value; OnElementChanged(); }
-            }
-            [ElementPriority(2)]
-            public ushort Index1
-            {
-                get { return mIndex1; }
-                set { mIndex1 = value; OnElementChanged(); }
-            }
-            [ElementPriority(3)]
-            public ushort Index2
-            {
-                get { return mIndex2; }
-                set { mIndex2 = value; OnElementChanged(); }
-            }
-
-            protected void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                mIndex0 = br.ReadUInt16();
-                mIndex1 = br.ReadUInt16();
-                mIndex2 = br.ReadUInt16();
-
-            }
-            public void UnParse(Stream s)
-            {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(mIndex0);
-                bw.Write(mIndex1);
-                bw.Write(mIndex2);
-            }
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                return new IndexData(0, handler, this);
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return kRecommendedApiVersion; }
-            }
-
-            public bool Equals(IndexData other)
-            {
-                return base.Equals(other);
-            }
-        }
+        
         public class JointReferenceList : AResource.DependentList<JointReference>
         {
 
@@ -250,6 +189,8 @@ namespace s3piwrappers
                 : base(handler, s)
             {
             }
+
+            public JointReferenceList(EventHandler handler, IList<JointReference> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {
@@ -329,96 +270,7 @@ namespace s3piwrappers
                 return mJointName.Equals(other.mJointName);
             }
         }
-        public class IndexElementFormatList : AResource.DependentList<IndexElementFormat>
-        {
-
-            public IndexElementFormatList(EventHandler handler)
-                : base(handler)
-            {
-            }
-
-            public IndexElementFormatList(EventHandler handler, Stream s)
-                : base(handler, s)
-            {
-            }
-
-            public override void Add()
-            {
-                base.Add(new object[] { });
-            }
-
-            protected override IndexElementFormat CreateElement(Stream s)
-            {
-                return new IndexElementFormat(0, handler, s);
-            }
-
-            protected override void WriteElement(Stream s, IndexElementFormat element)
-            {
-                element.UnParse(s);
-            }
-        }
-        public class IndexElementFormat : AHandlerElement, IEquatable<IndexElementFormat>
-        {
-            public IndexElementFormat(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
-            {
-            }
-            public IndexElementFormat(int APIversion, EventHandler handler, IndexElementFormat basis)
-                : base(APIversion, handler)
-            {
-
-            }
-            public IndexElementFormat(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
-            {
-                Parse(s);
-            }
-            public override string ToString()
-            {
-                return String.Format("IndexSize: 0x{0:X2}", mIndexSize);
-            }
-
-            public String Value { get { return ToString(); } }
-            private byte mIndexSize;
-            [ElementPriority(1)]
-            public byte IndexSize
-            {
-                get { return mIndexSize; }
-                set { mIndexSize = value; OnElementChanged(); }
-            }
-
-            protected void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                mIndexSize = br.ReadByte();
-
-            }
-            public void UnParse(Stream s)
-            {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(mIndexSize);
-            }
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                return new IndexElementFormat(0, handler, this);
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return kRecommendedApiVersion; }
-            }
-
-            public bool Equals(IndexElementFormat other)
-            {
-                return mIndexSize.Equals(other.mIndexSize);
-            }
-        }
+        
         public class VertexElementList : AHandlerList<VertexElement>
         {
             public VertexElementList(EventHandler handler) : base(handler) { }
@@ -936,11 +788,17 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public class VertexDataList : AHandlerList<VertexData>, IGenericAdd
+        public class VertexBuffer : AHandlerList<VertexData>, IGenericAdd
         {
             private GEOM mRoot;
-            public VertexDataList(EventHandler handler, GEOM root)
+            public VertexBuffer(EventHandler handler, GEOM root)
                 : base(handler)
+            {
+                mRoot = root;
+            }
+
+            public VertexBuffer(EventHandler handler, GEOM root, IList<VertexData> ilt)
+                : base(handler, ilt)
             {
                 mRoot = root;
             }
@@ -986,9 +844,18 @@ namespace s3piwrappers
                 mVertexId = new VertexId(0, handler);
 
             }
-            public VertexData(int APIversion, EventHandler handler, VertexData basis)
+            public VertexData(int APIversion, EventHandler handler, VertexData basis, GEOM root)
                 : base(APIversion, handler)
             {
+                mRoot = root;
+                mPosition = new VertexPosition(0, handler,basis.mPosition);
+                mNormal = new VertexNormal(0, handler,basis.mNormal);
+                mUV = new VertexUV(0, handler,basis.mUV);
+                mAssignments = new VertexAssignment(0, handler,basis.mAssignments);
+                mWeights = new VertexWeights(0, handler,basis.mWeights);
+                mTangent = new VertexTangent(0, handler,basis.mTangent);
+                mColour = new VertexColour(0, handler,basis.mColour);
+                mVertexId = new VertexId(0, handler,basis.mVertexId);
             }
             public VertexData(int APIversion, EventHandler handler, Stream s, GEOM root)
                 : this(APIversion, handler, root)
@@ -1093,7 +960,7 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new VertexData(0, handler, this);
+                return new VertexData(0, handler, this,mRoot);
             }
 
             public override List<string> ContentFields
@@ -1140,6 +1007,8 @@ namespace s3piwrappers
                 : base(handler, s)
             {
             }
+
+            public VertexElementFormatList(EventHandler handler, IList<VertexElementFormat> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {
@@ -1218,67 +1087,6 @@ namespace s3piwrappers
             }
 
         }
-        public class IndexDataFormat : AHandlerElement
-        {
-            public IndexDataFormat(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
-            {
-                mElements = new IndexElementFormatList(handler);
-            }
-            public IndexDataFormat(int APIversion, EventHandler handler, IndexDataFormat basis)
-                : base(APIversion, handler)
-            {
-                mElements = new IndexElementFormatList(handler);
-                foreach (var e in basis.mElements) mElements.Add(e.Clone(handler));
-            }
-            public IndexDataFormat(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
-            {
-                Parse(s);
-            }
-            public string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var ef in mElements) sb.AppendFormat("{0}\n", ef.Value);
-                    return sb.ToString();
-                }
-            }
-            private IndexElementFormatList mElements;
-            [ElementPriority(1)]
-            public IndexElementFormatList Elements
-            {
-                get { return mElements; }
-                set { mElements = value; OnElementChanged(); }
-            }
-
-            protected void Parse(Stream s)
-            {
-                mElements = new IndexElementFormatList(handler, s);
-
-            }
-            public void UnParse(Stream s)
-            {
-                mElements.UnParse(s);
-            }
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                return new IndexDataFormat(0, handler, this);
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return kRecommendedApiVersion; }
-            }
-
-        }
         public class VertexElementFormat : AHandlerElement, IEquatable<VertexElementFormat>, IComparable<VertexElementFormat>
         {
             protected VertexElementType mVertexElementType;
@@ -1289,7 +1097,7 @@ namespace s3piwrappers
             {
             }
             public VertexElementFormat(int APIversion, EventHandler handler, VertexElementFormat basis)
-                : base(APIversion, handler)
+                : this(APIversion, handler,basis.mVertexDataType,basis.mVertexElementSize,basis.mVertexElementType)
             {
 
             }
@@ -1298,6 +1106,14 @@ namespace s3piwrappers
             {
                 Parse(s);
             }
+
+            public VertexElementFormat(int APIversion, EventHandler handler, VertexDataType vertexDataType, byte vertexElementSize, VertexElementType vertexElementType) : base(APIversion, handler)
+            {
+                mVertexDataType = vertexDataType;
+                mVertexElementSize = vertexElementSize;
+                mVertexElementType = vertexElementType;
+            }
+
             public string Value
             {
                 get { return String.Format("{0}:{1}({2:X2})", mVertexElementType, mVertexDataType, mVertexElementSize); }
@@ -1368,16 +1184,29 @@ namespace s3piwrappers
         {
         }
         public GEOM(int APIversion, EventHandler handler, GEOM basis)
-            : base(APIversion, handler, null)
+            : this(APIversion, handler, basis.mIndices,basis.mJoints,basis.mMaterial,basis.mMergeGroup,basis.mReferences,basis.mSkinControllerIndex,basis.mSortOrder,basis.mVersion,basis.mVertexFormat,basis.mVertices)
         {
-            Stream s = basis.UnParse();
-            s.Position = 0L;
-            Parse(s);
         }
         public GEOM(int APIversion, EventHandler handler, Stream s)
             : base(APIversion, handler, s)
         {
         }
+
+        public GEOM(int APIversion, EventHandler handler, IndexBuffer indices, JointReferenceList joints, MaterialBlock material, uint mergeGroup, AResource.TGIBlockList references, uint skinControllerIndex, uint sortOrder, uint version, VertexDataFormat vertexFormat, VertexBuffer vertices) 
+            : base(APIversion, handler, null)
+        {
+            mIndices = new IndexBuffer(handler, indices);
+            mJoints = new JointReferenceList(handler,joints.Select(x=>x.Clone(handler)).Cast<JointReference>().ToList());
+            mMaterial = material;
+            mMergeGroup = mergeGroup;
+            mReferences = new AResource.TGIBlockList(handler,references);
+            mSkinControllerIndex = skinControllerIndex;
+            mSortOrder = sortOrder;
+            mVersion = version;
+            mVertexFormat = new VertexDataFormat(0,handler,vertexFormat);
+            mVertices = new VertexBuffer(handler, this, vertices.Select(x => x.Clone(handler)).Cast<VertexData>().ToList());
+        }
+
         [ElementPriority(1)]
         public uint Version
         {
@@ -1391,16 +1220,16 @@ namespace s3piwrappers
             set { mMaterial = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(3)]
-        public uint Unknown01
+        public uint MergeGroup
         {
-            get { return mUnknown01; }
-            set { mUnknown01 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mMergeGroup; }
+            set { mMergeGroup = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(4)]
-        public uint Unknown02
+        public uint SortOrder
         {
-            get { return mUnknown02; }
-            set { mUnknown02 = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mSortOrder; }
+            set { mSortOrder = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(5)]
         public VertexDataFormat VertexFormat
@@ -1409,37 +1238,31 @@ namespace s3piwrappers
             set { mVertexFormat = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(6)]
-        public VertexDataList VertexDataEntries
+        public VertexBuffer Vertices
         {
-            get { return mVertexDataEntries; }
-            set { mVertexDataEntries = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mVertices; }
+            set { mVertices = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(7)]
-        public IndexDataFormat IndexFormat
+        public IndexBuffer Indices
         {
-            get { return mIndexDataFormat; }
-            set { mIndexDataFormat = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mIndices; }
+            set { mIndices = value; OnRCOLChanged(this, new EventArgs()); }
         }
         [ElementPriority(8)]
-        public IndexDataList IndexDataEntries
-        {
-            get { return mIndexDataEntries; }
-            set { mIndexDataEntries = value; OnRCOLChanged(this, new EventArgs()); }
-        }
-        [ElementPriority(9)]
         [TGIBlockListContentField("References")]
         public UInt32 SkinControllerIndex
         {
             get { return mSkinControllerIndex; }
             set { mSkinControllerIndex = value; OnRCOLChanged(this, new EventArgs()); }
         }
-        [ElementPriority(10)]
-        public JointReferenceList JointReferences
+        [ElementPriority(9)]
+        public JointReferenceList Joints
         {
-            get { return mJointReferences; }
-            set { mJointReferences = value; OnRCOLChanged(this, new EventArgs()); }
+            get { return mJoints; }
+            set { mJoints = value; OnRCOLChanged(this, new EventArgs()); }
         }
-        [ElementPriority(11)]
+        [ElementPriority(10)]
         public AResource.TGIBlockList References
         {
             get { return mReferences; }
@@ -1457,34 +1280,34 @@ namespace s3piwrappers
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Material:\n{0}\n", mMaterial.Value);
-                sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
+                sb.AppendFormat("MergeGroup:\t0x{0:X8}\n", mMergeGroup);
+                sb.AppendFormat("SortOrder:\t0x{0:X8}\n", mSortOrder);
                 sb.AppendFormat("\nVertex Format:\n{0}\n", mVertexFormat.Value);
-                //if (mVertexDataEntries.Count > 0)
+                //if (mVertices.Count > 0)
                 //{
                 //    sb.AppendFormat("Vertex Data:\n");
-                //    for (int i = 0; i < mVertexDataEntries.Count; i++)
+                //    for (int i = 0; i < mVertices.Count; i++)
                 //    {
-                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mVertexDataEntries[i].Value);
+                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mVertices[i].Value);
                 //    }
                 //}
 
                 //sb.AppendFormat("Index Format:\n{0}\n", mIndexDataFormat.Value);
-                //if (mIndexDataEntries.Count > 0)
+                //if (mIndices.Count > 0)
                 //{
                 //    sb.AppendFormat("Index Data:\n");
-                //    for (int i = 0; i < mIndexDataEntries.Count; i++)
+                //    for (int i = 0; i < mIndices.Count; i++)
                 //    {
-                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mIndexDataEntries[i].Value);
+                //        sb.AppendFormat("[0x{0:X8}]\n{1}\n", i, mIndices[i].Value);
                 //    }
                 //}
                 sb.AppendFormat("SkinControllerIndex:\t0x{0:X8}\n", mSkinControllerIndex);
-                if (mJointReferences.Count > 0)
+                if (mJoints.Count > 0)
                 {
                     sb.AppendFormat("Joint References:\n");
-                    for (int i = 0; i < mJointReferences.Count; i++)
+                    for (int i = 0; i < mJoints.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}]{1}\n", i, mJointReferences[i].Value);
+                        sb.AppendFormat("[0x{0:X8}]{1}\n", i, mJoints[i].Value);
                     }
                 }
                 if (mReferences.Count > 0)
@@ -1500,14 +1323,13 @@ namespace s3piwrappers
         }
         private UInt32 mVersion;
         private MaterialBlock mMaterial;
-        private UInt32 mUnknown01;
-        private UInt32 mUnknown02;
+        private UInt32 mMergeGroup;
+        private UInt32 mSortOrder;
         private VertexDataFormat mVertexFormat;
-        private VertexDataList mVertexDataEntries;
-        private IndexDataFormat mIndexDataFormat;
-        private IndexDataList mIndexDataEntries;
+        private VertexBuffer mVertices;
+        private IndexBuffer mIndices;
         private UInt32 mSkinControllerIndex;
-        private JointReferenceList mJointReferences;
+        private JointReferenceList mJoints;
         private AResource.TGIBlockList mReferences;
 
         protected override void Parse(Stream s)
@@ -1521,19 +1343,20 @@ namespace s3piwrappers
             long tgiOffset = br.ReadUInt32() + s.Position;
             long tgiSize = br.ReadUInt32();
             mMaterial = new MaterialBlock(0, handler, s);
-            mUnknown01 = br.ReadUInt32();
-            mUnknown02 = br.ReadUInt32();
+            mMergeGroup = br.ReadUInt32();
+            mSortOrder = br.ReadUInt32();
             uint vertexCount = br.ReadUInt32();
             mVertexFormat = new VertexDataFormat(0, handler, s);
-            mVertexDataEntries = new VertexDataList(handler, this);
+            mVertices = new VertexBuffer(handler, this);
             for (uint i = 0; i < vertexCount; i++)
             {
-                mVertexDataEntries.Add(new VertexData(0, handler, s, this));
+                mVertices.Add(new VertexData(0, handler, s, this));
             }
-            mIndexDataFormat = new IndexDataFormat(0, handler, s);
-            mIndexDataEntries = new IndexDataList(handler, s);
+            if(br.ReadUInt32()!=0x01&&checking)
+                throw new InvalidDataException("Expected 0x01 at 0x"+(s.Position-1).ToString("X8"));
+            mIndices = new IndexBuffer(handler, s);
             mSkinControllerIndex = br.ReadUInt32();
-            mJointReferences = new JointReferenceList(handler, s);
+            mJoints = new JointReferenceList(handler, s);
             mReferences = new AResource.TGIBlockList(handler, s, tgiOffset, tgiSize, false);
         }
 
@@ -1549,20 +1372,19 @@ namespace s3piwrappers
             s.Seek(4, SeekOrigin.Current);
             if (mMaterial == null) mMaterial = new MaterialBlock(0, handler);
             mMaterial.UnParse(s);
-            bw.Write(mUnknown01);
-            bw.Write(mUnknown02);
-            if (mVertexDataEntries == null) mVertexDataEntries = new VertexDataList(handler, this);
-            bw.Write(mVertexDataEntries.Count);
+            bw.Write(mMergeGroup);
+            bw.Write(mSortOrder);
+            if (mVertices == null) mVertices = new VertexBuffer(handler, this);
+            bw.Write(mVertices.Count);
             if (mVertexFormat == null) mVertexFormat = new VertexDataFormat(0, handler);
             mVertexFormat.UnParse(s);
-            foreach (var v in mVertexDataEntries) v.UnParse(s);
-            if (mIndexDataFormat == null) mIndexDataFormat = new IndexDataFormat(0, handler);
-            mIndexDataFormat.UnParse(s);
-            if (mIndexDataEntries == null) mIndexDataEntries = new IndexDataList(handler);
-            mIndexDataEntries.UnParse(s);
+            foreach (var v in mVertices) v.UnParse(s);
+            bw.Write(1U);
+            if (mIndices == null) mIndices = new IndexBuffer(handler);
+            mIndices.UnParse(s);
             bw.Write((uint)mSkinControllerIndex);
-            if (mJointReferences == null) mJointReferences = new JointReferenceList(handler);
-            mJointReferences.UnParse(s);
+            if (mJoints == null) mJoints = new JointReferenceList(handler);
+            mJoints.UnParse(s);
             if (mReferences == null) mReferences = new AResource.TGIBlockList(handler, false);
             long tgiOffset = s.Position;
             mReferences.UnParse(s);
@@ -1572,7 +1394,6 @@ namespace s3piwrappers
             bw.Write((uint)(tgiOffset - startOffset));
             bw.Write((uint)tgiSize);
             s.Seek(endOffset, SeekOrigin.Begin);
-
             return s;
 
         }
