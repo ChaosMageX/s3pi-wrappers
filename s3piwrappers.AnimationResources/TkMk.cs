@@ -16,19 +16,21 @@ namespace s3piwrappers
 
         public class TrackMaskList : AResource.SimpleList<Single>
         {
-            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
-            public TrackMaskList(EventHandler handler, IList<HandlerElement<Single>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
-            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
+            private static string sFormat = "{1,8:0.00000}\n";
+            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement, sFormat) { }
+            public TrackMaskList(EventHandler handler, IList<HandlerElement<Single>> ilt) : base(handler, ilt, ReadElement, WriteElement, sFormat) { }
+            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement, sFormat) { }
             static Single ReadElement(Stream s) { return new BinaryReader(s).ReadSingle(); }
             static void WriteElement(Stream s, Single element) { new BinaryWriter(s).Write(element); }
         }
         public TkMk(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
-        public TkMk(int APIversion, EventHandler handler, TkMk basis)
-            : base(APIversion, handler, null)
+        public TkMk(int APIversion, EventHandler handler, TkMk basis): this(APIversion, handler, basis.Version,basis.Unused,basis.TrackMasks){}
+        public TkMk(int APIversion, EventHandler handler) : this(APIversion, handler, 0x00000200, null,null) { }
+        public TkMk(int APIversion, EventHandler handler, uint version, byte[] unused, TrackMaskList trackMasks) : base(APIversion, handler, null)
         {
-            mVersion = basis.mVersion;
-            mUnused = (Byte[])basis.mUnused.Clone();
-            mTrackMasks = new TrackMaskList(handler, basis.mTrackMasks);
+            mVersion = version;
+            mUnused = unused??new byte[48];
+            mTrackMasks = trackMasks??new TrackMaskList(handler);
         }
 
         [ElementPriority(1)]
@@ -80,11 +82,7 @@ namespace s3piwrappers
             {
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
-                sb.AppendLine("Track Mask Values:");
-                for (int i = 0; i < mTrackMasks.Count; i++)
-                {
-                    sb.AppendFormat("Bone[0x{0:X8}]:{1,8:0.00000}\r\n", i, mTrackMasks[i]);
-                }
+                sb.Append(mTrackMasks.Value);
                 return sb.ToString();
 
             }
