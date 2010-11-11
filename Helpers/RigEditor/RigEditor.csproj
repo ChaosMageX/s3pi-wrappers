@@ -54,10 +54,8 @@
       <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoneOps\BoneHierarchy.cs" />
@@ -266,16 +264,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Granny2Wrapper\Granny2Wrapper.csproj">
-      <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
-      <Name>Granny2Wrapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RigResource\RigResource.csproj">
-      <Project>{96239738-405A-437E-903A-C51B9521912D}</Project>
-      <Name>RigResource</Name>
+    <ProjectReference Include="..\..\s3piwrappers.RigResource\s3piwrappers.RigResource.csproj">
+      <Project>{E0F1EFF6-9420-4448-8EB8-8F5CB0BF0D4B}</Project>
+      <Name>s3piwrappers.RigResource</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
