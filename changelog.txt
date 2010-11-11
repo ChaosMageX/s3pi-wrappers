@@ -1,5 +1,8 @@
+2010-11-11:
+	Re-structured project.
+	Various bugfixes.
 2010-11-07:
-Updated to latest s3pi libs
+	Updated to latest s3pi libs
 2010-10-30:
 New Wrappers:
 	*LightResource (More descriptive than original)

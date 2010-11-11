@@ -26,10 +26,7 @@ namespace s3piwrappers
 
         public override uint ResourceType
         {
-            get
-            {
-                return 0x0229684F;
-            }
+            get { return 0x0229684F; }
         }
     }
     public class IBUF : ARCOLBlock
@@ -48,8 +45,9 @@ namespace s3piwrappers
         private Byte[] mBuffer;
         public IBUF(int apiVersion, EventHandler handler) : base(apiVersion, handler, null) { }
         public IBUF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
-        public IBUF(int apiVersion, EventHandler handler,IBUF basis) : this(apiVersion, handler, basis.Version,basis.Flags,basis.DisplayListUsage,basis.Buffer) { }
-        public IBUF(int APIversion, EventHandler handler, uint version, IndexBufferFlags flags, uint displayListUsage, byte[] buffer) : base(APIversion, handler, null)
+        public IBUF(int apiVersion, EventHandler handler, IBUF basis) : this(apiVersion, handler, basis.Version, basis.Flags, basis.DisplayListUsage, basis.Buffer) { }
+        public IBUF(int APIversion, EventHandler handler, uint version, IndexBufferFlags flags, uint displayListUsage, byte[] buffer)
+            : base(APIversion, handler, null)
         {
             mVersion = version;
             mFlags = flags;
@@ -58,14 +56,14 @@ namespace s3piwrappers
         }
 
         [ElementPriority(1)]
-        public UInt32 Version { get { return mVersion; } set { if(mVersion!=value){mVersion = value; OnRCOLChanged(this, new EventArgs());} } }
+        public UInt32 Version { get { return mVersion; } set { if (mVersion != value) { mVersion = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(2)]
-        public IndexBufferFlags Flags { get { return mFlags; } set { if(mFlags!=value){mFlags = value; OnRCOLChanged(this, new EventArgs());} } }
+        public IndexBufferFlags Flags { get { return mFlags; } set { if (mFlags != value) { mFlags = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(3)]
-        public UInt32 DisplayListUsage { get { return mDisplayListUsage; } set { if(mDisplayListUsage!=value){mDisplayListUsage = value; OnRCOLChanged(this, new EventArgs());} } }
+        public UInt32 DisplayListUsage { get { return mDisplayListUsage; } set { if (mDisplayListUsage != value) { mDisplayListUsage = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(4)]
-        public Byte[] Buffer { get { return mBuffer; } set { if(mBuffer!=value){mBuffer = value; OnRCOLChanged(this, new EventArgs());} } }
-        
+        public Byte[] Buffer { get { return mBuffer; } set { if (mBuffer != value) { mBuffer = value; OnRCOLChanged(this, new EventArgs()); } } }
+
         public string Value
         {
             get
@@ -92,17 +90,17 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mFlags = (IndexBufferFlags) br.ReadUInt32();
+            mFlags = (IndexBufferFlags)br.ReadUInt32();
             mDisplayListUsage = br.ReadUInt32();
-            mBuffer = br.ReadBytes((int)(s.Length-s.Position));
-            
+            mBuffer = br.ReadBytes((int)(s.Length - s.Position));
+
         }
 
         public override Stream UnParse()
         {
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
-            if(mBuffer==null)mBuffer=new byte[0];
+            if (mBuffer == null) mBuffer = new byte[0];
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write((UInt32)mFlags);

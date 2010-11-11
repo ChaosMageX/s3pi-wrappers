@@ -8,7 +8,6 @@ using s3pi.Settings;
 using LightResource;
 
 namespace s3piwrappers
-
 {
     public enum LightType : uint
     {
@@ -29,12 +28,8 @@ namespace s3piwrappers
         Disc,
         Rectangle
     }
-
-
     public class LITE : ARCOLBlock
     {
-        
-
         public abstract class Light : AHandlerElement, IEquatable<Light>
         {
             private Vector3 mTransform;

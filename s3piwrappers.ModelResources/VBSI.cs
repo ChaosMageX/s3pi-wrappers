@@ -117,12 +117,10 @@ namespace s3piwrappers
             public SegmentList(EventHandler handler): base(handler){}
             public SegmentList(EventHandler handler, Stream s): base(handler, s){}
             public SegmentList(EventHandler handler, IList<SegmentInfo> ilt) : base(handler, ilt) { }
-
             public override void Add()
             {
                 base.Add(new object[] { });
             }
-            protected override void WriteCount(Stream s, uint count){}
             protected override SegmentInfo CreateElement(Stream s)
             {
                 return new SegmentInfo(0, handler, s);
@@ -153,7 +151,7 @@ namespace s3piwrappers
             public uint VertexSize
             {
                 get { return mVertexSize; }
-                set { if(mVertexSize!=value){mVertexSize = value;} }
+                set { if (mVertexSize != value) { mVertexSize = value; OnElementChanged();} }
             }
             [ElementPriority(2)]
             public uint VertexCount
@@ -266,17 +264,12 @@ namespace s3piwrappers
         private SegmentList mSegments;
         protected override void Parse(Stream s)
         {
-            BinaryReader br = new BinaryReader(s);
             mSegments = new SegmentList(handler, s);
-
         }
         public override Stream UnParse()
         {
             if (mSegments == null) mSegments = new SegmentList(handler);
             MemoryStream s = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(s);
-
-            bw.Write(mSegments.Count);
             mSegments.UnParse(s);
             return s;
 

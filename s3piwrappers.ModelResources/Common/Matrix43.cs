@@ -10,21 +10,10 @@ namespace s3piwrappers
 
         private Vector3 mRight, mUp, mBack, mTranslate;
 
-        public Matrix43(int APIversion, EventHandler handler)
-            : base(APIversion, handler)
-        {
-            mRight = new Vector3(0, handler, 1, 0, 0);
-            mUp = new Vector3(0, handler, 0, 1, 0);
-            mBack = new Vector3(0, handler, 0, 0, 1);
-            mTranslate = new Vector3(0, handler, 0, 0, 0);
-        }
-        public Matrix43(int APIversion, EventHandler handler, Stream s)
-            : base(APIversion, handler)
-        {
-            Parse(s);
-        }
-
-        public Matrix43(int APIversion, EventHandler handler, Vector3 back, Vector3 right, Vector3 translate, Vector3 up)
+        public Matrix43(int APIversion, EventHandler handler) : this(APIversion, handler, new Vector3(0, handler, 1, 0, 0), new Vector3(0, handler, 0, 1, 0), new Vector3(0, handler, 0, 0, 1), new Vector3(0, handler, 0, 0, 0)) { }
+        public Matrix43(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
+        public Matrix43(int APIversion, EventHandler handler, Matrix43 basis) : this(APIversion, handler, basis.mRight, basis.mUp, basis.mBack, basis.mTranslate) { }
+        public Matrix43(int APIversion, EventHandler handler, Vector3 right, Vector3 up, Vector3 back, Vector3 translate)
             : base(APIversion, handler)
         {
             mRight = new Vector3(0, handler, right);
@@ -32,33 +21,29 @@ namespace s3piwrappers
             mBack = new Vector3(0, handler, back);
             mTranslate = new Vector3(0, handler, translate);
         }
-        public Matrix43(int APIversion, EventHandler handler, Matrix43 basis)
-            : this(APIversion, handler, basis.mBack, basis.mRight, basis.mTranslate, basis.mUp)
-        {
-        }
         [ElementPriority(1)]
         public Vector3 Right
         {
             get { return mRight; }
-            set { if(mRight!=value){mRight = value; OnElementChanged();} }
+            set { if (mRight != value) { mRight = value; OnElementChanged(); } }
         }
         [ElementPriority(2)]
         public Vector3 Up
         {
             get { return mUp; }
-            set { if(mUp!=value){mUp = value; OnElementChanged();} }
+            set { if (mUp != value) { mUp = value; OnElementChanged(); } }
         }
         [ElementPriority(3)]
         public Vector3 Back
         {
             get { return mBack; }
-            set { if (mBack != value){mBack = value; OnElementChanged();} }
+            set { if (mBack != value) { mBack = value; OnElementChanged(); } }
         }
         [ElementPriority(4)]
         public Vector3 Translate
         {
             get { return mTranslate; }
-            set { if(mTranslate!=value){mTranslate = value; OnElementChanged();} }
+            set { if (mTranslate != value) { mTranslate = value; OnElementChanged(); } }
         }
 
         private void Parse(Stream s)
