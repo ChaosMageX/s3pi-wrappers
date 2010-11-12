@@ -81,7 +81,7 @@ namespace s3piwrappers
             public JointList(EventHandler handler) : base(handler, ReadElement, WriteElement, sFormat) { }
             public JointList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement, sFormat) { }
             public JointList(EventHandler handler, IList<HandlerElement<UInt32>> ilt) : base(handler, ilt, ReadElement, WriteElement, sFormat) { }
-            private static string sFormat = "0x{0:X8}";
+            private static string sFormat = "0x{1:X8}\n";
             static UInt32 ReadElement(Stream s) { return new BinaryReader(s).ReadUInt32(); }
             static void WriteElement(Stream s, UInt32 element) { new BinaryWriter(s).Write(element); }
         }

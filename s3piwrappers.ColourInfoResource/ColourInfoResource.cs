@@ -45,7 +45,10 @@ namespace s3piwrappers
             {
                 get { return GetContentFields(requestedApiVersion,GetType()); }
             }
-
+            public override string ToString()
+            {
+                return mVal.ToString();
+            }
             public override int RecommendedApiVersion
             {
                 get { return kRecommendedApiVersion; }

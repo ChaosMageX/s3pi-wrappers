@@ -11,6 +11,8 @@ namespace s3piwrappers
         {
             public BoneList(EventHandler handler) : base(handler) { }
 
+            public BoneList(EventHandler handler, IList<Bone> ilt) : base(handler, ilt) {}
+
             public override void Add()
             {
                 base.Add(new object[] {});
@@ -91,6 +93,7 @@ namespace s3piwrappers
             if (base.stream == null)
             {
                 base.stream = this.UnParse();
+                OnResourceChanged(this,new EventArgs());
             }
             base.stream.Position = 0L;
             Parse(base.stream);
@@ -102,8 +105,8 @@ namespace s3piwrappers
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                sb.AppendFormat("\nEntries:\n");
-                for (int i = 0; i < mBones.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mBones[i].Value);
+                sb.AppendFormat("\nBones:\n");
+                for (int i = 0; i < mBones.Count; i++) sb.AppendFormat("==Bone[{0}]==\n{1}\n", i, mBones[i].Value);
                 return sb.ToString();
             }
         }
@@ -125,21 +128,25 @@ namespace s3piwrappers
         {
             BinaryReader br = new BinaryReader(s, Encoding.BigEndianUnicode);
             List<string> names = new List<string>();
+            List<Bone> bones = new List<Bone>();
             mVersion = br.ReadUInt32();
             int count1 = br.ReadInt32();
             for (int i = 0; i < count1; i++) names.Add(br.ReadString());
             int count2 = br.ReadInt32();
-            if (checking && count2 != count1) throw new Exception("Expected name count and matrix to be equal.");
+            if (checking && count2 != count1) 
+                throw new Exception("Expected name count and matrix to be equal.");
             for (int i = 0; i < count2; i++)
             {
-                mBones.Add(new Bone(0, this.OnResourceChanged, names[i], new Matrix43(0, OnResourceChanged, s)));
+                bones.Add(new Bone(0, this.OnResourceChanged, names[i], new Matrix43(0, OnResourceChanged, s)));
             }
+            mBones = new BoneList(OnResourceChanged,bones);
         }
         protected override Stream UnParse()
         {
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(mVersion);
+            if(mBones!=null)mBones=new BoneList(OnResourceChanged);
             bw.Write(mBones.Count);
             foreach (var entry in mBones) Write7BitStr(s, entry.Name, Encoding.BigEndianUnicode);
             bw.Write(mBones.Count);
