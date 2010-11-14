@@ -67,26 +67,26 @@ namespace s3piwrappers
             m22 = br.ReadSingle();
             m23 = br.ReadSingle();
 
-            mRight = new Vector3(0, handler, m00, m01, m02);
-            mUp = new Vector3(0, handler, m10, m11, m12);
-            mBack = new Vector3(0, handler, m20, m21, m22);
+            mRight = new Vector3(0, handler, m00, m10, m20);
+            mUp = new Vector3(0, handler, m01, m11, m21);
+            mBack = new Vector3(0, handler, m02, m12, m22);
             mTranslate = new Vector3(0, handler, m03, m13, m23);
         }
         public void UnParse(Stream s)
         {
             var bw = new BinaryWriter(s);
             bw.Write(mRight.X);
-            bw.Write(mRight.Y);
-            bw.Write(mRight.Z);
+            bw.Write(mUp.X);
+            bw.Write(mBack.X);
             bw.Write(mTranslate.X);
 
-            bw.Write(mUp.X);
+            bw.Write(mRight.Y);
             bw.Write(mUp.Y);
-            bw.Write(mUp.Z);
+            bw.Write(mBack.Y);
             bw.Write(mTranslate.Y);
 
-            bw.Write(mBack.X);
-            bw.Write(mBack.Y);
+            bw.Write(mRight.Z);
+            bw.Write(mUp.Z);
             bw.Write(mBack.Z);
             bw.Write(mTranslate.Z);
         }
