@@ -73,16 +73,9 @@ namespace s3piwrappers.RigEditor
             sb.AppendFormat("Name:\t{0}\r\n", bone.Name);
             sb.AppendFormat("Hashed:\t0x{0:X8}\r\n", FNV32.GetHash(bone.Name));
             sb.AppendLine("Absolute Transform (RSLT):");
-            sb.AppendLine(ti.RightVector.ToString());
-            sb.AppendLine(ti.UpVector.ToString());
-            sb.AppendLine(ti.BackVector.ToString());
-            sb.AppendLine(t.Translation.ToString());
+            sb.AppendLine(t.TransposedString()); 
             sb.AppendLine("Absolute Transform Inverse (SKIN):");
-            sb.AppendLine(t.RightVector.ToString());
-            sb.AppendLine(t.UpVector.ToString());
-            sb.AppendLine(t.BackVector.ToString());
-            sb.AppendLine(ti.Translation.ToString());
-
+            sb.AppendLine(ti.ToString());
 
         }
         private void UpdateView()
