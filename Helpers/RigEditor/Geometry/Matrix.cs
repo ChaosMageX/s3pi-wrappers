@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace s3piwrappers.RigEditor.Geometry
 {
@@ -235,6 +236,14 @@ namespace s3piwrappers.RigEditor.Geometry
                 M13 = value.Y;
                 M23 = value.Z;
             }
+        }
+        public string TransposedString()
+        {
+            var sb = new StringBuilder();
+            sb.AppendFormat("X:[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}] Pos:{3,8:0.00000}\r\n", M00, M01, M02, M03);
+            sb.AppendFormat("Y:[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}] Pos:{3,8:0.00000}\r\n", M10, M11, M12, M13);
+            sb.AppendFormat("Z:[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000}] Pos:{3,8:0.00000}\r\n", M20, M21, M22, M23);
+            return sb.ToString();
         }
         public override string ToString()
         {
