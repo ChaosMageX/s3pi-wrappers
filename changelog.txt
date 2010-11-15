@@ -1,3 +1,13 @@
+2010-11-14:
+RigEditor:
+	*Simplified rotation input
+	*Scale added to matrix calculations
+	*Readonly hashed bone name textbox for convenience
+2010-11-13:
+RigEditor:
+	*Formatted RSLT matrix to match the wrapper
+SKIN:
+	*Fixed matrix order
 2010-11-11:
 	Re-structured project.
 	Various bugfixes.

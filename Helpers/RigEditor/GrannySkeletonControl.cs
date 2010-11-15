@@ -25,7 +25,7 @@ namespace s3piwrappers.RigEditor
         public Skeleton Value
         {
             get { return mValue; }
-            set { mValue = value;if(mValue!=null)UpdateView(); }
+            set { mValue = value; if (mValue != null)UpdateView(); }
         }
 
         public BoneManager BoneManager
@@ -38,10 +38,11 @@ namespace s3piwrappers.RigEditor
             List<Matrix> transforms = new List<Matrix>();
             while (b != null)
             {
-                var q = b.LocalTransform.Orientation;
-                var p = b.LocalTransform.Position;
-                Matrix t = new Matrix(new Quaternion(q.X, q.Y, q.Z, q.W));
-                t.Translation = new Vector3(p.X, p.Y, p.Z);
+                var q = new Quaternion(b.LocalTransform.Orientation.X,b.LocalTransform.Orientation.Y,b.LocalTransform.Orientation.Z,b.LocalTransform.Orientation.W);
+                var p = new Vector3(b.LocalTransform.Position.X,b.LocalTransform.Position.Y,b.LocalTransform.Position.Z);
+                var s = new Vector3(b.LocalTransform.ScaleShearX.X, b.LocalTransform.ScaleShearY.Y,
+                                    b.LocalTransform.ScaleShearZ.Z);
+                Matrix t = Matrix.CreateTransformMatrix(q,s,p);
                 transforms.Add(t);
                 b = BoneManager.GetParent(b);
             }
@@ -73,7 +74,7 @@ namespace s3piwrappers.RigEditor
             sb.AppendFormat("Name:\t{0}\r\n", bone.Name);
             sb.AppendFormat("Hashed:\t0x{0:X8}\r\n", FNV32.GetHash(bone.Name));
             sb.AppendLine("Absolute Transform (RSLT):");
-            sb.AppendLine(t.TransposedString()); 
+            sb.AppendLine(t.TransposedString());
             sb.AppendLine("Absolute Transform Inverse (SKIN):");
             sb.AppendLine(ti.ToString());
 

@@ -19,7 +19,6 @@ namespace s3piwrappers.RigEditor.Geometry
             double c1 = Math.Cos(e.Yaw * 0.5d);
             double c2 = Math.Cos(e.Pitch * 0.5d);
             double c3 = Math.Cos(e.Roll * 0.5d);
-            
             double s1 = Math.Sin(e.Yaw * 0.5d);
             double s2 = Math.Sin(e.Pitch * 0.5d);
             double s3 = Math.Sin(e.Roll * 0.5d);
@@ -29,23 +28,12 @@ namespace s3piwrappers.RigEditor.Geometry
             Z = c1 * s2 * c3 - s1 * c2 * s3;
 
         }
-        public Quaternion(AngleAxis angleAxis)
-        {
-            double s = Math.Sin(angleAxis.Angle / 2);
-            X = angleAxis.Axis.X * s;
-            Y = angleAxis.Axis.Y * s;
-            Z = angleAxis.Axis.Z * s;
-            W = Math.Cos(angleAxis.Angle / 2);
-
-        }
         public double Magnitude()
         {
             return Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
         }
-
         public void Normalize()
         {
-            
             double magnitude = Magnitude();
             if (magnitude != 0)
             {

@@ -35,40 +35,6 @@ namespace s3piwrappers.RigEditor.Geometry
             M33 = m33;
         }
 
-        public Matrix(AngleAxis a)
-        {
-            double x = a.Axis.X;
-            double y = a.Axis.Y;
-            double z = a.Axis.Z;
-            double sin = Math.Sin(a.Angle);
-            double cos = Math.Cos(a.Angle);
-            double xx = x * x;
-            double yy = y * y;
-            double zz = z * z;
-            double xy = x * y;
-            double xz = x * z;
-            double yz = y * z;
-            M00 = xx + (cos * (1d - xx));
-            M01 = (xy - (cos * xy)) + (sin * z);
-            M02 = (xz - (cos * xz)) - (sin * y);
-            M03 = 0d;
-
-            M10 = (xy - (cos * xy)) - (sin * z);
-            M11 = yy + (cos * (1d - yy));
-            M12 = (yz - (cos * yz)) + (sin * x);
-            M13 = 0d;
-
-            M20 = (xz - (cos * xz)) + (sin * y);
-            M21 = (yz - (cos * yz)) - (sin * x);
-            M22 = zz + (cos * (1d - zz));
-            M23 = 0d;
-
-            M30 = 0d;
-            M31 = 0d;
-            M32 = 0d;
-            M33 = 1d;
-        }
-
         public Matrix(EulerAngle euler) : this(new Quaternion(euler)) { }
         public Matrix(Quaternion q)
         {
@@ -153,17 +119,17 @@ namespace s3piwrappers.RigEditor.Geometry
         public double Determinant()
         {
             return M03 * M12 * M21 * M30 - M02 * M13 * M21 * M30 -
-                    M03 * M11 * M22 * M30 + M01 * M13 * M22 * M30 +
-                    M02 * M11 * M23 * M30 - M01 * M12 * M23 * M30 -
-                    M03 * M12 * M20 * M31 + M02 * M13 * M20 * M31 +
-                    M03 * M10 * M22 * M31 - M00 * M13 * M22 * M31 -
-                    M02 * M10 * M23 * M31 + M00 * M12 * M23 * M31 +
-                    M03 * M11 * M20 * M32 - M01 * M13 * M20 * M32 -
-                    M03 * M10 * M21 * M32 + M00 * M13 * M21 * M32 +
-                    M01 * M10 * M23 * M32 - M00 * M11 * M23 * M32 -
-                    M02 * M11 * M20 * M33 + M01 * M12 * M20 * M33 +
-                    M02 * M10 * M21 * M33 - M00 * M12 * M21 * M33 -
-                    M01 * M10 * M22 * M33 + M00 * M11 * M22 * M33;
+                   M03 * M11 * M22 * M30 + M01 * M13 * M22 * M30 +
+                   M02 * M11 * M23 * M30 - M01 * M12 * M23 * M30 -
+                   M03 * M12 * M20 * M31 + M02 * M13 * M20 * M31 +
+                   M03 * M10 * M22 * M31 - M00 * M13 * M22 * M31 -
+                   M02 * M10 * M23 * M31 + M00 * M12 * M23 * M31 +
+                   M03 * M11 * M20 * M32 - M01 * M13 * M20 * M32 -
+                   M03 * M10 * M21 * M32 + M00 * M13 * M21 * M32 +
+                   M01 * M10 * M23 * M32 - M00 * M11 * M23 * M32 -
+                   M02 * M11 * M20 * M33 + M01 * M12 * M20 * M33 +
+                   M02 * M10 * M21 * M33 - M00 * M12 * M21 * M33 -
+                   M01 * M10 * M22 * M33 + M00 * M11 * M22 * M33;
 
         }
         public static Matrix operator *(Matrix a, Matrix b)
@@ -191,51 +157,48 @@ namespace s3piwrappers.RigEditor.Geometry
 
             return m;
         }
+        public static Matrix CreateScaleMatrix(Vector3 scale)
+        {
+            Matrix m = Matrix.Identity;
+            m.M00 = scale.X;
+            m.M11 = scale.Y;
+            m.M22 = scale.Z;
+            return m;
+        }
+        public static Matrix CreateTranslateMatrix(Vector3 translate)
+        {
+            Matrix m = Matrix.Identity;
+            m.M03 = translate.X;
+            m.M13 = translate.Y;
+            m.M23 = translate.Z;
+            return m;
+        }
+        public static Matrix CreateTransformMatrix(Quaternion rotation, Vector3 scale, Vector3 translate)
+        {
+            Matrix r = new Matrix(rotation);
+            Matrix s = CreateScaleMatrix(scale);
+            Matrix t = CreateTranslateMatrix(translate);
+            return r * s * t;
+        }
         public Vector3 RightVector
         {
-            get
-            {
-                return new Vector3(M00, M10, M20);
-            }
-            set
-            {
-                M00 = value.X;
-                M10 = value.Y;
-                M20 = value.Z;
-            }
+            get { return new Vector3(M00, M10, M20); }
+            set { M00 = value.X; M10 = value.Y; M20 = value.Z; }
         }
         public Vector3 UpVector
         {
             get { return new Vector3(M01, M11, M21); }
-            set
-            {
-                M01 = value.X;
-                M11 = value.Y;
-                M21 = value.Z;
-            }
+            set { M01 = value.X; M11 = value.Y; M21 = value.Z; }
         }
         public Vector3 BackVector
         {
             get { return new Vector3(M02, M12, M22); }
-            set
-            {
-                M02 = value.X;
-                M12 = value.Y;
-                M22 = value.Z;
-            }
+            set { M02 = value.X; M12 = value.Y; M22 = value.Z; }
         }
         public Vector3 Translation
         {
-            get
-            {
-                return new Vector3(M03, M13, M23);
-            }
-            set
-            {
-                M03 = value.X;
-                M13 = value.Y;
-                M23 = value.Z;
-            }
+            get { return new Vector3(M03, M13, M23); }
+            set { M03 = value.X; M13 = value.Y; M23 = value.Z; }
         }
         public string TransposedString()
         {

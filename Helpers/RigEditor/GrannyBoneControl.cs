@@ -3,6 +3,7 @@ using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Common;
 using s3piwrappers.RigEditor.Geometry;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 namespace s3piwrappers.RigEditor
 {
@@ -30,14 +31,16 @@ namespace s3piwrappers.RigEditor
             Enabled = true;
             tbName.Text = mValue.Name;
             tcLocalTransform.Value = mValue.LocalTransform;
+            tbHashedName.Text = String.Format("0x{0:X8}", FNV32.GetHash(mValue.Name));
 
         }
         private void UpdateInverseWorld()
         {
-            Matrix m = new Matrix(tcLocalTransform.Orientation);
-            m.Translation = tcLocalTransform.Position;
-            Matrix mi = m.GetInverse();
-            var f = mValue.InverseWorld4X4.Clone(null);
+            var q = new Quaternion(mValue.LocalTransform.Orientation.X, mValue.LocalTransform.Orientation.Y, mValue.LocalTransform.Orientation.Z, mValue.LocalTransform.Orientation.W);
+            var p = new Vector3(mValue.LocalTransform.Position.X, mValue.LocalTransform.Position.Y, mValue.LocalTransform.Position.Z);
+            var s = new Vector3(mValue.LocalTransform.ScaleShearX.X, mValue.LocalTransform.ScaleShearY.Y,
+                                mValue.LocalTransform.ScaleShearZ.Z);
+            Matrix mi = Matrix.CreateTransformMatrix(q, s, p).GetInverse();
             Matrix4x4 g = mValue.InverseWorld4X4;
             g.M0.X = (float)mi.M00;
             g.M0.Y = (float)mi.M10;
@@ -68,6 +71,7 @@ namespace s3piwrappers.RigEditor
         void tbName_TextChanged(object sender, EventArgs e)
         {
             mValue.Name = tbName.Text;
+            tbHashedName.Text = String.Format("0x{0:X8}", FNV32.GetHash(tbName.Text));
             OnChanged(this, new EventArgs());
         }
 

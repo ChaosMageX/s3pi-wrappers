@@ -36,7 +36,7 @@
             // 
             this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnCommit.Location = new System.Drawing.Point(707, 533);
+            this.btnCommit.Location = new System.Drawing.Point(587, 463);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
             this.btnCommit.TabIndex = 1;
@@ -48,7 +48,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(626, 533);
+            this.btnCancel.Location = new System.Drawing.Point(506, 463);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
@@ -64,7 +64,7 @@
             this.grannyFileInfoControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.grannyFileInfoControl1.Location = new System.Drawing.Point(0, 0);
             this.grannyFileInfoControl1.Name = "grannyFileInfoControl1";
-            this.grannyFileInfoControl1.Size = new System.Drawing.Size(791, 531);
+            this.grannyFileInfoControl1.Size = new System.Drawing.Size(671, 461);
             this.grannyFileInfoControl1.TabIndex = 0;
             this.grannyFileInfoControl1.Value = null;
             // 
@@ -72,7 +72,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(792, 568);
+            this.ClientSize = new System.Drawing.Size(672, 498);
             this.Controls.Add(this.grannyFileInfoControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);

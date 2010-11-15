@@ -18,7 +18,7 @@ namespace s3piwrappers.RigEditor
         {
             InitializeComponent();
             positionControl.ValueChanged += new EventHandler(positionControl_Changed);
-            rotationControl.ValueChanged += new EventHandler(orientationControl_Changed);
+            rotationControl.ValueChanged += new EventHandler(rotationControl_Changed);
             scaleControl.ValueChanged += new EventHandler(scaleControl_Changed);
         }
 
@@ -30,12 +30,13 @@ namespace s3piwrappers.RigEditor
             OnChanged(this, new EventArgs());
         }
 
-        void orientationControl_Changed(object sender, EventArgs e)
+        void rotationControl_Changed(object sender, EventArgs e)
         {
-            mValue.Orientation.X = (float)rotationControl.Quaternion.X;
-            mValue.Orientation.Y = (float)rotationControl.Quaternion.Y;
-            mValue.Orientation.Z = (float)rotationControl.Quaternion.Z;
-            mValue.Orientation.W = (float)rotationControl.Quaternion.W;
+            var quat = new Quaternion(rotationControl.Value);
+            mValue.Orientation.X = (float)quat.X;
+            mValue.Orientation.Y = (float)quat.Y;
+            mValue.Orientation.Z = (float)quat.Z;
+            mValue.Orientation.W = (float)quat.W;
             OnChanged(this, new EventArgs());
         }
 
@@ -53,10 +54,10 @@ namespace s3piwrappers.RigEditor
             get { return positionControl.Value; }
             set { positionControl.Value = value; }
         }
-        public Quaternion Orientation
+        public EulerAngle Rotation
         {
-            get { return rotationControl.Quaternion; }
-            set { rotationControl.Quaternion = value; }
+            get { return rotationControl.Value; }
+            set { rotationControl.Value = value; }
         }
         public Vector3 ScaleXYZ
         {
@@ -76,7 +77,7 @@ namespace s3piwrappers.RigEditor
         protected override void UpdateView()
         {
             Position = new Vector3(mValue.Position.X, mValue.Position.Y, mValue.Position.Z);
-            Orientation = new Quaternion(mValue.Orientation.X, mValue.Orientation.Y, mValue.Orientation.Z, mValue.Orientation.W);
+            Rotation = new EulerAngle(new Quaternion(mValue.Orientation.X, mValue.Orientation.Y, mValue.Orientation.Z, mValue.Orientation.W));
             ScaleXYZ = new Vector3(mValue.ScaleShearX.X,mValue.ScaleShearY.Y,mValue.ScaleShearZ.Z);
             cbPositionEnabled.Checked = (mValue.Flags & TransformFlags.Position) > 0;
             cbOrientationEnabled.Checked = cbPositionEnabled.Checked = (mValue.Flags & TransformFlags.Orientation) > 0;

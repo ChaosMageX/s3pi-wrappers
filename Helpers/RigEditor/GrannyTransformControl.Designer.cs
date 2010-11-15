@@ -30,13 +30,13 @@ namespace s3piwrappers.RigEditor
         private void InitializeComponent()
         {
             this.gbMain = new System.Windows.Forms.GroupBox();
+            this.rotationControl = new s3piwrappers.RigEditor.Geometry.EulerControl();
             this.lbPosition = new System.Windows.Forms.Label();
             this.cbScaleEnabled = new System.Windows.Forms.CheckBox();
-            this.rotationControl = new s3piwrappers.RigEditor.Geometry.RotationControl();
             this.scaleControl = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.positionControl = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.lbScale = new System.Windows.Forms.Label();
-            this.lbOrientation = new System.Windows.Forms.Label();
+            this.lbRotation = new System.Windows.Forms.Label();
             this.cbPositionEnabled = new System.Windows.Forms.CheckBox();
             this.cbOrientationEnabled = new System.Windows.Forms.CheckBox();
             this.gbMain.SuspendLayout();
@@ -44,21 +44,28 @@ namespace s3piwrappers.RigEditor
             // 
             // gbMain
             // 
+            this.gbMain.Controls.Add(this.rotationControl);
             this.gbMain.Controls.Add(this.lbPosition);
             this.gbMain.Controls.Add(this.cbScaleEnabled);
-            this.gbMain.Controls.Add(this.rotationControl);
             this.gbMain.Controls.Add(this.scaleControl);
             this.gbMain.Controls.Add(this.positionControl);
             this.gbMain.Controls.Add(this.lbScale);
-            this.gbMain.Controls.Add(this.lbOrientation);
+            this.gbMain.Controls.Add(this.lbRotation);
             this.gbMain.Controls.Add(this.cbPositionEnabled);
             this.gbMain.Controls.Add(this.cbOrientationEnabled);
             this.gbMain.Location = new System.Drawing.Point(0, 0);
             this.gbMain.Name = "gbMain";
-            this.gbMain.Size = new System.Drawing.Size(445, 272);
+            this.gbMain.Size = new System.Drawing.Size(370, 143);
             this.gbMain.TabIndex = 9;
             this.gbMain.TabStop = false;
             this.gbMain.Text = "Transform";
+            // 
+            // rotationControl
+            // 
+            this.rotationControl.Location = new System.Drawing.Point(3, 74);
+            this.rotationControl.Name = "rotationControl";
+            this.rotationControl.Size = new System.Drawing.Size(364, 21);
+            this.rotationControl.TabIndex = 1;
             // 
             // lbPosition
             // 
@@ -73,25 +80,18 @@ namespace s3piwrappers.RigEditor
             // cbScaleEnabled
             // 
             this.cbScaleEnabled.AutoSize = true;
-            this.cbScaleEnabled.Location = new System.Drawing.Point(75, 227);
+            this.cbScaleEnabled.Location = new System.Drawing.Point(75, 99);
             this.cbScaleEnabled.Name = "cbScaleEnabled";
-            this.cbScaleEnabled.Size = new System.Drawing.Size(66, 17);
+            this.cbScaleEnabled.Size = new System.Drawing.Size(65, 17);
             this.cbScaleEnabled.TabIndex = 8;
             this.cbScaleEnabled.TabStop = false;
             this.cbScaleEnabled.Text = "Enabled";
             this.cbScaleEnabled.UseVisualStyleBackColor = true;
             this.cbScaleEnabled.CheckedChanged += new System.EventHandler(this.cbScaleEnabled_CheckedChanged);
             // 
-            // rotationControl
-            // 
-            this.rotationControl.Location = new System.Drawing.Point(3, 86);
-            this.rotationControl.Name = "rotationControl";
-            this.rotationControl.Size = new System.Drawing.Size(438, 138);
-            this.rotationControl.TabIndex = 1;
-            // 
             // scaleControl
             // 
-            this.scaleControl.Location = new System.Drawing.Point(3, 244);
+            this.scaleControl.Location = new System.Drawing.Point(3, 116);
             this.scaleControl.Name = "scaleControl";
             this.scaleControl.Size = new System.Drawing.Size(365, 20);
             this.scaleControl.TabIndex = 2;
@@ -107,28 +107,28 @@ namespace s3piwrappers.RigEditor
             // 
             this.lbScale.AutoSize = true;
             this.lbScale.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbScale.Location = new System.Drawing.Point(8, 227);
+            this.lbScale.Location = new System.Drawing.Point(8, 99);
             this.lbScale.Name = "lbScale";
             this.lbScale.Size = new System.Drawing.Size(37, 13);
             this.lbScale.TabIndex = 6;
             this.lbScale.Text = "Scale:";
             // 
-            // lbOrientation
+            // lbRotation
             // 
-            this.lbOrientation.AutoSize = true;
-            this.lbOrientation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbOrientation.Location = new System.Drawing.Point(8, 68);
-            this.lbOrientation.Name = "lbOrientation";
-            this.lbOrientation.Size = new System.Drawing.Size(61, 13);
-            this.lbOrientation.TabIndex = 3;
-            this.lbOrientation.Text = "Orientation:";
+            this.lbRotation.AutoSize = true;
+            this.lbRotation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbRotation.Location = new System.Drawing.Point(8, 56);
+            this.lbRotation.Name = "lbRotation";
+            this.lbRotation.Size = new System.Drawing.Size(50, 13);
+            this.lbRotation.TabIndex = 3;
+            this.lbRotation.Text = "Rotation:";
             // 
             // cbPositionEnabled
             // 
             this.cbPositionEnabled.AutoSize = true;
             this.cbPositionEnabled.Location = new System.Drawing.Point(75, 16);
             this.cbPositionEnabled.Name = "cbPositionEnabled";
-            this.cbPositionEnabled.Size = new System.Drawing.Size(66, 17);
+            this.cbPositionEnabled.Size = new System.Drawing.Size(65, 17);
             this.cbPositionEnabled.TabIndex = 5;
             this.cbPositionEnabled.TabStop = false;
             this.cbPositionEnabled.Text = "Enabled";
@@ -138,9 +138,9 @@ namespace s3piwrappers.RigEditor
             // cbOrientationEnabled
             // 
             this.cbOrientationEnabled.AutoSize = true;
-            this.cbOrientationEnabled.Location = new System.Drawing.Point(75, 68);
+            this.cbOrientationEnabled.Location = new System.Drawing.Point(75, 56);
             this.cbOrientationEnabled.Name = "cbOrientationEnabled";
-            this.cbOrientationEnabled.Size = new System.Drawing.Size(66, 17);
+            this.cbOrientationEnabled.Size = new System.Drawing.Size(65, 17);
             this.cbOrientationEnabled.TabIndex = 4;
             this.cbOrientationEnabled.TabStop = false;
             this.cbOrientationEnabled.Text = "Enabled";
@@ -153,25 +153,22 @@ namespace s3piwrappers.RigEditor
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.gbMain);
             this.Name = "GrannyTransformControl";
-            this.Size = new System.Drawing.Size(447, 279);
+            this.Size = new System.Drawing.Size(371, 146);
             this.gbMain.ResumeLayout(false);
             this.gbMain.PerformLayout();
             this.ResumeLayout(false);
 
         }
-
-        
-
-        private Geometry.RotationControl rotationControl;
         private System.Windows.Forms.Label lbPosition;
         private Geometry.Vector3Control positionControl;
-        private System.Windows.Forms.Label lbOrientation;
+        private System.Windows.Forms.Label lbRotation;
         private System.Windows.Forms.CheckBox cbOrientationEnabled;
         private System.Windows.Forms.CheckBox cbPositionEnabled;
         private System.Windows.Forms.CheckBox cbScaleEnabled;
         private Geometry.Vector3Control scaleControl;
         private System.Windows.Forms.Label lbScale;
         private System.Windows.Forms.GroupBox gbMain;
+        private EulerControl rotationControl;
 
     }
 }

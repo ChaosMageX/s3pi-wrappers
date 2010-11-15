@@ -36,7 +36,7 @@ namespace s3piwrappers.RigEditor.Geometry
             Pitch = Math.Asin(2 * poleTest);
             Roll = Math.Atan2(2 * q.X * q.W - 2 * q.Y * q.Z, 1 - 2 * sqx - 2 * sqz);
         }
-        public EulerAngle(AngleAxis a):this(new Quaternion(a)){}
+        //public EulerAngle(AngleAxis a):this(new Quaternion(a)){}
         public EulerAngle(Matrix m)
         {
             if (m.M10 > 0.998)

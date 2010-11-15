@@ -68,12 +68,6 @@
     <Compile Include="Common\IntBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Geometry\Matrix3Control.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Geometry\Matrix3Control.Designer.cs">
-      <DependentUpon>Matrix3Control.cs</DependentUpon>
-    </Compile>
     <Compile Include="GrannyArtToolInfoControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,12 +91,6 @@
     </Compile>
     <Compile Include="Geometry\AngleBox.cs">
       <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="Geometry\AngleAxisControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Geometry\AngleAxisControl.Designer.cs">
-      <DependentUpon>AngleAxisControl.cs</DependentUpon>
     </Compile>
     <Compile Include="BoneActionEventArgs.cs" />
     <Compile Include="BoneActionEventHandler.cs" />
@@ -145,16 +133,9 @@
     <Compile Include="Common\FormattedTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Geometry\AngleAxis.cs" />
     <Compile Include="Geometry\EulerAngle.cs" />
     <Compile Include="Geometry\Matrix.cs" />
     <Compile Include="Geometry\Quaternion.cs" />
-    <Compile Include="Geometry\RotationControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Geometry\RotationControl.Designer.cs">
-      <DependentUpon>RotationControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Geometry\QuaternionControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -195,12 +176,6 @@
     <EmbeddedResource Include="Common\InfoDialog.resx">
       <DependentUpon>InfoDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Geometry\AngleAxisControl.resx">
-      <DependentUpon>AngleAxisControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Geometry\Matrix3Control.resx">
-      <DependentUpon>Matrix3Control.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GrannyArtToolInfoControl.resx">
       <DependentUpon>GrannyArtToolInfoControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -212,9 +187,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Common\FindAndReplaceDialog.resx">
       <DependentUpon>FindAndReplaceDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Geometry\RotationControl.resx">
-      <DependentUpon>RotationControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Geometry\QuaternionControl.resx">
       <DependentUpon>QuaternionControl.cs</DependentUpon>
@@ -268,14 +240,6 @@
       <Project>{E0F1EFF6-9420-4448-8EB8-8F5CB0BF0D4B}</Project>
       <Name>s3piwrappers.RigResource</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="changelog.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="gpl-3.0.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

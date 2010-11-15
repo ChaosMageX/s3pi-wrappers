@@ -19,10 +19,8 @@ namespace s3piwrappers.RigEditor.Geometry
         {
             return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
-
         public void Normalize()
         {
-
             double magnitude = Magnitude();
             X /= magnitude;
             Y /= magnitude;
