@@ -275,6 +275,10 @@ namespace s3piwrappers
                 mFadeType = br.ReadUInt32();
                 mCustomFadeDistance = br.ReadSingle();
             }
+            else
+            {
+                mExtraBounds = new BoundingBoxList(handler);
+            }
             mEntries = new LODEntryList(handler, s, count);
         }
 
