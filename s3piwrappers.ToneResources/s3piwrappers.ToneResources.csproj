@@ -55,6 +55,7 @@
     <Compile Include="HairToneResource.cs" />
     <Compile Include="HairToneResourceHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResourceKeyTable.cs" />
     <Compile Include="SkinToneResource.cs" />
     <Compile Include="SkinToneResourceHandler.cs" />
   </ItemGroup>
