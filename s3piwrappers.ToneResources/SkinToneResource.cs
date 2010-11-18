@@ -133,23 +133,14 @@ namespace s3piwrappers
             private UInt32 mDetailLightKeyIndex;
             private UInt32 mNormalMapKeyIndex;
             private UInt32 mOverlayKeyIndex;
+            private UInt32 mMuscleNormalMapKeyIndex;
+            private UInt32 mCleavageNormalMapKeyIndex;
 
 
-
-            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner)
-                : base(APIversion, handler)
-            {
-                mOwner = owner;
-            }
-            public TextureKey(int APIversion, EventHandler handler, TextureKey basis)
-                : this(APIversion, handler, basis.mOwner, basis.AgeGenderFlags, basis.mTypeFlags, basis.SpecularKeyIndex, basis.DetailDarkKeyIndex, basis.DetailLightKeyIndex, basis.NormalMapKeyIndex, basis.OverlayKeyIndex)
-            {
-            }
-            public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner)
-                : this(APIversion, handler, owner) { Parse(s); }
-
-
-            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner, AgeGenderFlags ageGenderFlags, DataTypeFlags typeFlags, uint specularKeyIndex, uint detailDarkKeyIndex, uint detailLightKeyIndex, uint normalMapKeyIndex, uint overlayKeyIndex)
+            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner): base(APIversion, handler){mOwner = owner;}
+            public TextureKey(int APIversion, EventHandler handler, TextureKey basis): this(APIversion, handler, basis.mOwner, basis.AgeGenderFlags, basis.mTypeFlags, basis.SpecularKeyIndex, basis.DetailDarkKeyIndex, basis.DetailLightKeyIndex, basis.NormalMapKeyIndex, basis.OverlayKeyIndex,basis.MuscleNormalMapKeyIndex,basis.CleavageNormalMapKeyIndex){}
+            public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner): this(APIversion, handler, owner) { Parse(s); }
+            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner, AgeGenderFlags ageGenderFlags, DataTypeFlags typeFlags, uint specularKeyIndex, uint detailDarkKeyIndex, uint detailLightKeyIndex, uint normalMapKeyIndex, uint overlayKeyIndex, uint muscleNormalMapMapKeyIndex, uint cleavageNormalMapKeyIndex)
                 : this(APIversion, handler, owner)
             {
                 mAgeGenderFlags = ageGenderFlags;
@@ -159,6 +150,8 @@ namespace s3piwrappers
                 mDetailLightKeyIndex = detailLightKeyIndex;
                 mNormalMapKeyIndex = normalMapKeyIndex;
                 mOverlayKeyIndex = overlayKeyIndex;
+                mMuscleNormalMapKeyIndex = muscleNormalMapMapKeyIndex;
+                mCleavageNormalMapKeyIndex = cleavageNormalMapKeyIndex;
             }
 
             [ElementPriority(1)]
@@ -208,6 +201,20 @@ namespace s3piwrappers
                 get { return mOverlayKeyIndex; }
                 set { if (mOverlayKeyIndex != value) { mOverlayKeyIndex = value; OnElementChanged(); } }
             }
+            [ElementPriority(8)]
+            [TGIBlockListContentField("References")]
+            public UInt32 MuscleNormalMapKeyIndex
+            {
+                get { return mMuscleNormalMapKeyIndex; }
+                set { if (mMuscleNormalMapKeyIndex != value) { mMuscleNormalMapKeyIndex = value; OnElementChanged(); } }
+            }
+            [ElementPriority(9)]
+            [TGIBlockListContentField("References")]
+            public UInt32 CleavageNormalMapKeyIndex
+            {
+                get { return mCleavageNormalMapKeyIndex; }
+                set { if (mCleavageNormalMapKeyIndex != value) { mCleavageNormalMapKeyIndex = value; OnElementChanged(); } }
+            }
             public TGIBlockList References
             {
                 get { return mOwner.References; }
@@ -235,7 +242,16 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(base.requestedApiVersion, base.GetType()); }
+                get
+                {
+                    var fields =GetContentFields(base.requestedApiVersion, base.GetType());
+                    if(mOwner.Version<6)
+                    {
+                        fields.Remove("MuscleNormalMapKeyIndex");
+                        fields.Remove("CleavageNormalMapKeyIndex");
+                    }
+                    return fields;
+                }
             }
 
             public override int RecommendedApiVersion
@@ -259,6 +275,11 @@ namespace s3piwrappers
                 mDetailLightKeyIndex = br.ReadUInt32();
                 mNormalMapKeyIndex = br.ReadUInt32();
                 mOverlayKeyIndex = br.ReadUInt32();
+                if (mOwner.Version >= 6)
+                {
+                    mMuscleNormalMapKeyIndex = br.ReadUInt32();
+                    mCleavageNormalMapKeyIndex = br.ReadUInt32();
+                }
             }
             public void UnParse(Stream s)
             {
@@ -270,6 +291,11 @@ namespace s3piwrappers
                 bw.Write(mDetailLightKeyIndex);
                 bw.Write(mNormalMapKeyIndex);
                 bw.Write(mOverlayKeyIndex);
+                if (mOwner.Version >= 6)
+                {
+                    bw.Write(mMuscleNormalMapKeyIndex);
+                    bw.Write(mCleavageNormalMapKeyIndex);
+                }
             }
         }
 
@@ -282,7 +308,7 @@ namespace s3piwrappers
 
             public override void Add()
             {
-                this.Add(new object[]{});
+                this.Add(new object[] { });
             }
 
             protected override ShaderKey CreateElement(Stream s)
@@ -300,26 +326,13 @@ namespace s3piwrappers
         public class TextureKeyList : DependentList<TextureKey>
         {
             private SkinToneResource mOwner;
-            public TextureKeyList(EventHandler handler, SkinToneResource owner)
-                : base(handler)
-            {
-                mOwner = owner;
-            }
-            public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner)
-                : this(handler, owner)
-            {
-                Parse(s);
-            }
-
-            public TextureKeyList(EventHandler handler, IList<TextureKey> ilt, SkinToneResource owner)
-                : base(handler, ilt)
-            {
-                mOwner = owner;
-            }
+            public TextureKeyList(EventHandler handler, SkinToneResource owner) : base(handler) { mOwner = owner; }
+            public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner) : this(handler, owner) { Parse(s); }
+            public TextureKeyList(EventHandler handler, IList<TextureKey> ilt, SkinToneResource owner) : base(handler, ilt) { mOwner = owner; }
 
             public override void Add()
             {
-                this.Add(new object[]{mOwner});
+                this.Add(new object[] { mOwner });
             }
 
             protected override TextureKey CreateElement(Stream s)
@@ -336,8 +349,8 @@ namespace s3piwrappers
 
         private UInt32 mVersion;
         private ShaderKeyList mShaderKeyList;
-        private UInt32 mSkinRampIndex1;
-        private UInt32 mSkinRampIndex2;
+        private UInt32 mSkinSubSRampIndex;
+        private UInt32 mToneRampIndex;
         private TextureKeyList mTextureKeyList;
         private Byte mIsDominant;
         private TGIBlockList mReferences;
@@ -357,17 +370,17 @@ namespace s3piwrappers
         }
         [ElementPriority(3)]
         [TGIBlockListContentField("References")]
-        public UInt32 SkinRampIndex1
+        public UInt32 SkinSubSRampIndex
         {
-            get { return mSkinRampIndex1; }
-            set { if (mSkinRampIndex1 != value) { mSkinRampIndex1 = value; OnResourceChanged(this, new EventArgs()); } }
+            get { return mSkinSubSRampIndex; }
+            set { if (mSkinSubSRampIndex != value) { mSkinSubSRampIndex = value; OnResourceChanged(this, new EventArgs()); } }
         }
         [ElementPriority(4)]
         [TGIBlockListContentField("References")]
-        public UInt32 SkinRampIndex2
+        public UInt32 ToneRampIndex
         {
-            get { return mSkinRampIndex2; }
-            set { if (mSkinRampIndex2 != value) { mSkinRampIndex2 = value; OnResourceChanged(this, new EventArgs()); } }
+            get { return mToneRampIndex; }
+            set { if (mToneRampIndex != value) { mToneRampIndex = value; OnResourceChanged(this, new EventArgs()); } }
         }
         [ElementPriority(5)]
         public TextureKeyList TextureKeys
@@ -401,8 +414,8 @@ namespace s3piwrappers
                         sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
                     }
                 }
-                sb.AppendFormat("SkinRampIndex1: 0X{0:x8}\n", mSkinRampIndex1);
-                sb.AppendFormat("SkinRampIndex2: 0X{0:x8}\n", mSkinRampIndex2);
+                sb.AppendFormat("SkinRampIndex1: 0X{0:x8}\n", mSkinSubSRampIndex);
+                sb.AppendFormat("SkinRampIndex2: 0X{0:x8}\n", mToneRampIndex);
 
                 if (mTextureKeyList.Count > 0)
                 {
@@ -433,6 +446,7 @@ namespace s3piwrappers
             if (base.stream == null)
             {
                 base.stream = this.UnParse();
+                base.OnResourceChanged(this,new EventArgs());
             }
             base.stream.Position = 0L;
             Parse(base.stream);
@@ -444,8 +458,8 @@ namespace s3piwrappers
             long tgioffset = br.ReadUInt32() + s.Position;
             long tgisize = br.ReadUInt32();
             mShaderKeyList = new ShaderKeyList(this.OnResourceChanged, s);
-            mSkinRampIndex1 = br.ReadUInt32();
-            mSkinRampIndex2 = br.ReadUInt32();
+            mSkinSubSRampIndex = br.ReadUInt32();
+            mToneRampIndex = br.ReadUInt32();
             mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s, this);
             mIsDominant = br.ReadByte();
             mReferences = new TGIBlockList(this.OnResourceChanged, s, tgioffset, tgisize);
@@ -460,8 +474,8 @@ namespace s3piwrappers
             bw.Write(0);
             if (mShaderKeyList == null) mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
-            bw.Write(mSkinRampIndex1);
-            bw.Write(mSkinRampIndex2);
+            bw.Write(mSkinSubSRampIndex);
+            bw.Write(mToneRampIndex);
             if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged, this);
             mTextureKeyList.UnParse(s);
             bw.Write(mIsDominant);
