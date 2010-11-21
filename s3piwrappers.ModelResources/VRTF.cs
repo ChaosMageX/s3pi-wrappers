@@ -47,7 +47,7 @@ namespace s3piwrappers
             {
             }
 
-            public VertexElementLayoutList(EventHandler handler, Stream s, uint count)
+            public VertexElementLayoutList(EventHandler handler, Stream s, int count)
                 : base(handler)
             {
                 Parse(s, count);
@@ -59,8 +59,8 @@ namespace s3piwrappers
             {
                 base.Add(new object[] { });
             }
-            protected override void WriteCount(Stream s, uint count){}
-            private void Parse(Stream s, uint count)
+            protected override void WriteCount(Stream s, int count){}
+            private void Parse(Stream s, int count)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -244,7 +244,7 @@ namespace s3piwrappers
             }
             mVersion = br.ReadUInt32();
             mStride = br.ReadUInt32();
-            uint count = br.ReadUInt32();
+            int count = br.ReadInt32();
             mExtendedFormat = br.ReadUInt32() > 0 ? true : false;
             mLayouts = new VertexElementLayoutList(handler, s, count);
 

@@ -148,7 +148,7 @@ namespace s3piwrappers
             bw.Write(mVersion);
             if(mBones!=null)mBones=new BoneList(OnResourceChanged);
             bw.Write(mBones.Count);
-            foreach (var entry in mBones) Write7BitStr(s, entry.Name, Encoding.BigEndianUnicode);
+            foreach (var entry in mBones) SevenBitString.Write(s, Encoding.BigEndianUnicode, entry.Name);
             bw.Write(mBones.Count);
             foreach (var entry in mBones) entry.InverseBindPose.UnParse(s);
             return s;

@@ -34,8 +34,8 @@ namespace s3piwrappers
         {
             private byte mFormat = 2;
 
-            public IndexList(EventHandler handler): base(handler){}
-            public IndexList(EventHandler handler, Stream s): base(handler, s){}
+            public IndexList(EventHandler handler) : base(handler) { }
+            public IndexList(EventHandler handler, Stream s) : base(handler, s) { }
             public IndexList(EventHandler handler, IList<uint> ilt) : base(handler, ilt) { }
             protected override void Parse(Stream s)
             {
@@ -76,12 +76,11 @@ namespace s3piwrappers
             }
         }
 
-        public class JointList : AResource.SimpleList<UInt32>
+        public class JointList : SimpleList<UInt32>
         {
-            public JointList(EventHandler handler) : base(handler, ReadElement, WriteElement, sFormat) { }
-            public JointList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement, sFormat) { }
-            public JointList(EventHandler handler, IList<HandlerElement<UInt32>> ilt) : base(handler, ilt, ReadElement, WriteElement, sFormat) { }
-            private static string sFormat = "0x{1:X8}\n";
+            public JointList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
+            public JointList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
+            public JointList(EventHandler handler, IList<HandlerElement<UInt32>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
             static UInt32 ReadElement(Stream s) { return new BinaryReader(s).ReadUInt32(); }
             static void WriteElement(Stream s, UInt32 element) { new BinaryWriter(s).Write(element); }
         }
@@ -89,7 +88,7 @@ namespace s3piwrappers
         {
             private GEOM mRoot;
             public VertexList(EventHandler handler, GEOM root) : base(handler) { mRoot = root; }
-            public VertexList(EventHandler handler, GEOM root, Stream s, uint count) : this(handler, root) { Parse(s, count); }
+            public VertexList(EventHandler handler, GEOM root, Stream s, int count) : this(handler, root) { Parse(s, count); }
             public VertexList(EventHandler handler, GEOM root, IList<Vertex> ilt) : base(handler, ilt) { mRoot = root; }
             public override void Add()
             {
@@ -103,9 +102,9 @@ namespace s3piwrappers
             {
                 element.UnParse(s);
             }
-            protected override void WriteCount(Stream s, uint count) { }
+            protected override void WriteCount(Stream s, int count) { }
             protected override void Parse(Stream s) { throw new NotSupportedException("Use Parse(Stream,uint) instead!"); }
-            protected virtual void Parse(Stream s, uint count)
+            protected virtual void Parse(Stream s, int count)
             {
                 for (uint i = 0; i < count; i++) ((IList<Vertex>)this).Add(CreateElement(s));
             }
@@ -280,8 +279,8 @@ namespace s3piwrappers
         }
         public class VertexElementFormatList : AResource.DependentList<VertexElementFormat>
         {
-            public VertexElementFormatList(EventHandler handler): base(handler){}
-            public VertexElementFormatList(EventHandler handler, Stream s): base(handler, s){}
+            public VertexElementFormatList(EventHandler handler) : base(handler) { }
+            public VertexElementFormatList(EventHandler handler, Stream s) : base(handler, s) { }
             public VertexElementFormatList(EventHandler handler, IList<VertexElementFormat> ilt) : base(handler, ilt) { }
             public override void Add()
             {
@@ -299,9 +298,9 @@ namespace s3piwrappers
         public class VertexDataFormat : AHandlerElement
         {
             private VertexElementFormatList mElements;
-            public VertexDataFormat(int APIversion, EventHandler handler): base(APIversion, handler){mElements = new VertexElementFormatList(handler);}
-            public VertexDataFormat(int APIversion, EventHandler handler, VertexDataFormat basis): base(APIversion, handler){mElements = new VertexElementFormatList(handler,basis.Elements);}
-            public VertexDataFormat(int APIversion, EventHandler handler, Stream s): base(APIversion, handler){Parse(s);}
+            public VertexDataFormat(int APIversion, EventHandler handler) : base(APIversion, handler) { mElements = new VertexElementFormatList(handler); }
+            public VertexDataFormat(int APIversion, EventHandler handler, VertexDataFormat basis) : base(APIversion, handler) { mElements = new VertexElementFormatList(handler, basis.Elements); }
+            public VertexDataFormat(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
 
             public string Value
             {
@@ -535,8 +534,23 @@ namespace s3piwrappers
                 sb.AppendFormat("SortOrder:\t0x{0:X8}\n", mSortOrder);
                 sb.AppendFormat("Vertex Format:\n{0}\n", mVertexFormat.Value);
                 sb.AppendFormat("SkinControllerIndex:\t0x{0:X8}\n", mSkinControllerIndex);
-                sb.AppendFormat("Joint References:\n{0}", mJoints.Value);
-                sb.AppendFormat("TGI References:\n{0}", mReferences.Value);
+
+                if (mJoints.Count > 0)
+                {
+                    sb.AppendLine("Joint References:");
+                    for (int i = 0; i < mJoints.Count; i++)
+                    {
+                        sb.AppendFormat("[{0}]0x{1:X8}\n", i, mJoints[i]);
+                    }
+                }
+                if (mReferences.Count > 0)
+                {
+                    sb.AppendLine("TGI References:");
+                    for (int i = 0; i < mReferences.Count; i++)
+                    {
+                        sb.AppendFormat("[{0}]{1}\n", i, mReferences[i].ToString());
+                    }
+                }
                 return sb.ToString();
             }
         }
@@ -552,10 +566,10 @@ namespace s3piwrappers
             long tgiOffset = br.ReadUInt32() + s.Position;
             long tgiSize = br.ReadUInt32();
             mShader = br.ReadUInt32();
-            mMaterialBlock = mShader == 0 ? new byte[0] :br.ReadBytes(br.ReadInt32());
+            mMaterialBlock = mShader == 0 ? new byte[0] : br.ReadBytes(br.ReadInt32());
             mMergeGroup = br.ReadUInt32();
             mSortOrder = br.ReadUInt32();
-            uint vertexCount = br.ReadUInt32();
+            int vertexCount = br.ReadInt32();
             mVertexFormat = new VertexDataFormat(0, handler, s);
             mVertices = new VertexList(handler, this, s, vertexCount);
             if (br.ReadUInt32() != 0x01 && Settings.Checking)

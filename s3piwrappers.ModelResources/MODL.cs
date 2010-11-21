@@ -48,7 +48,7 @@ namespace s3piwrappers
                 : base(handler)
             {
             }
-            public LODEntryList(EventHandler handler, Stream s, uint count)
+            public LODEntryList(EventHandler handler, Stream s, int count)
                 : base(handler)
             {
                 Parse(s, count);
@@ -56,7 +56,7 @@ namespace s3piwrappers
 
             public LODEntryList(EventHandler handler, IList<LODEntry> ilt) : base(handler, ilt) { }
 
-            private void Parse(Stream s, uint count)
+            private void Parse(Stream s, int count)
             {
                 BinaryReader br = new BinaryReader(s);
                 for (uint i = 0; i < count; i++)
@@ -267,7 +267,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            uint count = br.ReadUInt32();
+            int count = br.ReadInt32();
             mBounds = new BoundingBox(0, handler, s);
             if (mVersion >= 258)
             {

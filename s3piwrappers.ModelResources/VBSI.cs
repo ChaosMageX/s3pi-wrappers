@@ -82,7 +82,7 @@ namespace s3piwrappers
             {
             }
 
-            public SwizzleList(EventHandler handler, Stream s, uint count)
+            public SwizzleList(EventHandler handler, Stream s, int count)
                 : base(handler)
             {
                 Parse(s, count);
@@ -90,7 +90,7 @@ namespace s3piwrappers
 
             public SwizzleList(EventHandler handler, IList<SwizzleEntry> ilt) : base(handler, ilt) { }
 
-            private void Parse(Stream s, uint count)
+            private void Parse(Stream s, int count)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -101,7 +101,7 @@ namespace s3piwrappers
             {
                 base.Add(new object[] { });
             }
-            protected override void WriteCount(Stream s, uint count){}
+            protected override void WriteCount(Stream s, int count){}
             protected override SwizzleEntry CreateElement(Stream s)
             {
                 return new SwizzleEntry(0, handler, s);
@@ -197,7 +197,7 @@ namespace s3piwrappers
                 mVertexSize = br.ReadUInt32();
                 mVertexCount = br.ReadUInt32();
                 mByteOffset = br.ReadUInt32();
-                mSwizzles = new SwizzleList(handler, s, mVertexSize / 4);
+                mSwizzles = new SwizzleList(handler, s, (int)mVertexSize / 4);
             }
             public void UnParse(Stream s)
             {

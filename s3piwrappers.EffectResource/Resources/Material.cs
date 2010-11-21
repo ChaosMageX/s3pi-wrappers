@@ -39,11 +39,11 @@ namespace s3piwrappers.Resources
         {
             public PropertyList(EventHandler handler) : base(handler) { }
             public PropertyList(EventHandler handler, Stream s) : base(handler, s) { }
-            protected override uint ReadCount(Stream s)
+            protected override int ReadCount(Stream s)
             {
-                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+                return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
             }
-            protected override void WriteCount(Stream s, uint count)
+            protected override void WriteCount(Stream s, int count)
             {
                 new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
             }

@@ -585,7 +585,7 @@ namespace s3piwrappers
 
         public class LightList : AResource.DependentList<Light>
         {
-            public LightList(EventHandler handler, Stream s, uint count) : base(handler) { Parse(s,count);}
+            public LightList(EventHandler handler, Stream s, int count) : base(handler) { Parse(s,count);}
             public LightList(EventHandler handler) : base(handler) { }
             public LightList(EventHandler handler, long size) : base(handler, size) { }
             public LightList(EventHandler handler, IList<Light> ilt) : base(handler, ilt) { }
@@ -623,9 +623,9 @@ namespace s3piwrappers
                 element.UnParse(s);
                 if (s.Position != end) bw.Write(new byte[end - s.Position]);
             }
-            protected override void WriteCount(Stream s, uint count) { }
+            protected override void WriteCount(Stream s, int count) { }
 
-            private void Parse(Stream s, uint count)
+            private void Parse(Stream s, int count)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -797,7 +797,7 @@ namespace s3piwrappers
         }
         public class OccluderList : AResource.DependentList<Occluder>
         {
-            public OccluderList(EventHandler handler, Stream s, uint count)
+            public OccluderList(EventHandler handler, Stream s, int count)
                 : base(handler)
             {
                 Parse(s, count);
@@ -805,7 +805,7 @@ namespace s3piwrappers
             public OccluderList(EventHandler handler) : base(handler) { }
             public OccluderList(EventHandler handler, long size) : base(handler, size) { }
             public OccluderList(EventHandler handler, IList<Occluder> ilt) : base(handler, ilt) { }
-            private void Parse(Stream s, uint count)
+            private void Parse(Stream s, int count)
             {
                 for (int i = 0; i < count; i++)
                 {
@@ -827,7 +827,7 @@ namespace s3piwrappers
             {
                 element.UnParse(s);
             }
-            protected override void WriteCount(Stream s, uint count) { }
+            protected override void WriteCount(Stream s, int count) { }
         }
 
         private UInt32 mVersion = 4;

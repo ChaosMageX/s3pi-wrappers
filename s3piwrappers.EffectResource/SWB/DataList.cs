@@ -13,12 +13,12 @@ namespace s3piwrappers.SWB
         public DataList(EventHandler handler, Stream s) : base(handler, s) { }
         public DataList(EventHandler handler, long size) : base(handler, size){}
         public DataList(EventHandler handler, IList<TElement> ilt) : base(handler, ilt){}
-        protected override uint ReadCount(Stream s)
+        protected override int ReadCount(Stream s)
         {
-            return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadUInt32();
+            return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
         }
 
-        protected override void WriteCount(Stream s, uint count)
+        protected override void WriteCount(Stream s, int count)
         {
             new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
         }

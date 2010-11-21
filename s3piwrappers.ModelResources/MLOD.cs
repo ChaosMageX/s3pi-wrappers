@@ -555,6 +555,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Material: 0x{0:X8}\n", mMaterialIndex);
                     sb.AppendFormat("VertexFormat: 0x{0:X8}\n", mVertexFormatIndex);
                     sb.AppendFormat("VertexBuffer: 0x{0:X8}\n", mVertexBufferIndex);
+                    sb.AppendFormat("IndexBuffer: 0x{0:X8}\n", mIndexBufferIndex);
                     sb.AppendFormat("PrimitiveType: {0}\n", this["PrimitiveType"]);
                     sb.AppendFormat("Flags: {0}\n", this["Flags"]);
                     sb.AppendFormat("StreamOffset: 0x{0:X8}\n", mStreamOffset);

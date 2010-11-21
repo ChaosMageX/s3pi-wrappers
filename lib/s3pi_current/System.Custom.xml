@@ -4,6 +4,46 @@
         <name>System.Custom</name>
     </assembly>
     <members>
+        <member name="T:System.Text.SevenBitString">
+            <summary>
+            Read and write a seven-bit encoded length-prefixed string in a given <see cref="T:System.Text.Encoding"/> from or to a <see cref="T:System.IO.Stream"/>.
+            </summary>
+        </member>
+        <member name="M:System.Text.SevenBitString.Read(System.IO.Stream,System.Text.Encoding)">
+            <summary>
+            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
+            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when reading.</param>
+            <returns>A <see cref="T:System.String"/> value.</returns>
+        </member>
+        <member name="M:System.Text.SevenBitString.Write(System.IO.Stream,System.Text.Encoding,System.String)">
+            <summary>
+            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
+            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when writing.</param>
+            <param name="value">The <see cref="T:System.String"/> to write.</param>
+        </member>
+        <member name="T:System.Text.BigEndianUnicodeString">
+            <summary>
+            Read and write a seven-bit encoded length-prefixed string in <see cref="P:System.Text.Encoding.BigEndianUnicode"/> from or to a <see cref="T:System.IO.Stream"/>.
+            </summary>
+        </member>
+        <member name="M:System.Text.BigEndianUnicodeString.Read(System.IO.Stream)">
+            <summary>
+            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
+            <returns>A <see cref="T:System.String"/> value.</returns>
+        </member>
+        <member name="M:System.Text.BigEndianUnicodeString.Write(System.IO.Stream,System.String)">
+            <summary>
+            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
+            <param name="value">The <see cref="T:System.String"/> to write.</param>
+        </member>
         <member name="T:System.Security.Cryptography.FNVHash">
             <summary>
             Base class implementing <see cref="T:System.Security.Cryptography.HashAlgorithm"/>.
@@ -102,25 +142,6 @@
             Gets the size, in bits, of the computed hash code.
             </summary>
         </member>
-        <member name="T:System.Collections.Generic.IDependentList`2">
-            <summary>
-            An extention to IList&lt;<typeparamref name="T"/>&gt; that has a parent object of class type <typeparamref name="U"/>
-            </summary>
-            <typeparam name="T">Type of list element</typeparam>
-            <typeparam name="U">Type of parent class</typeparam>
-        </member>
-        <member name="T:System.ICloneableWithParent">
-            <summary>
-            Defines an object as having a parent object that can be changed on Clone()
-            </summary>
-        </member>
-        <member name="M:System.ICloneableWithParent.Clone(System.Object)">
-            <summary>
-            Return a clone of the object with a new parent object.
-            </summary>
-            <param name="newParent">The new parent object</param>
-            <returns>A clone of the object with <paramref name="newParent"/> as its new parent object.</returns>
-        </member>
         <member name="T:System.Collections.Generic.AHandlerList`1">
             <summary>
             Abstract extension of <see cref="T:System.Collections.Generic.List`1"/>
@@ -147,7 +168,7 @@
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},System.Int64)">
+        <member name="M:System.Collections.Generic.AHandlerList`1.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{`0},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:System.Collections.Generic.AHandlerList`1"/> class,
             filled with the content of <paramref name="ilt"/>.
@@ -190,7 +211,7 @@
             <summary>
             Removes the all the elements that match the conditions defined by the specified predicate.
             </summary>
-            <param name="match">The System.Predicate&lt;T&gt; delegate that defines the conditions of the elements to remove.</param>
+            <param name="match">The System.Predicate{T} delegate that defines the conditions of the elements to remove.</param>
             <returns>The number of elements removed from the <see cref="T:System.Collections.Generic.AHandlerList`1"/>.</returns>
             <exception cref="T:System.ArgumentNullException"><paramref name="match"/> is null.</exception>
             <exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.AHandlerList`1"/> is read-only.</exception>
@@ -445,29 +466,6 @@
             </summary>
             <param name="format">format string</param>
             <param name="formatparams">format string substitutions</param>
-        </member>
-        <member name="M:System.Collections.Generic.ADependentList`2.Clone(System.Object)">
-            <summary>
-            Creates a copy of the list with the given parent
-            </summary>
-            <returns>Object of the same type as the list</returns>
-        </member>
-        <member name="M:System.Collections.Generic.ADependentList`2.Clone(`1)">
-            <summary>
-            Creates a copy of the list with the given parent
-            </summary>
-            <returns>Object of the same type as the list</returns>
-        </member>
-        <member name="M:System.Collections.Generic.ADependentList`2.Clone">
-            <summary>
-            Creates a copy of the list with the same parent
-            </summary>
-            <returns>Object of the same type as the list</returns>
-        </member>
-        <member name="T:System.Boolset">
-            <summary>
-            A Boolset provides an easy way to handle (unsigned) integer types as a set of bitwise flags.
-            </summary>
         </member>
     </members>
 </doc>

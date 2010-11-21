@@ -94,7 +94,7 @@ namespace s3piwrappers
             {
                 base.Clear();
                 BinaryReader br = new BinaryReader(s);
-                uint count = ReadCount(s);
+                int count = ReadCount(s);
                 long startOffset = s.Position;
                 long[] offsets = new long[count];
                 for (int i = 0; i < count; i++)
@@ -113,7 +113,7 @@ namespace s3piwrappers
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 uint[] offsets = new uint[base.Count];
-                WriteCount(s, (uint)base.Count);
+                WriteCount(s, Count);
                 long startOffset = s.Position;
                 for (int i = 0; i < base.Count; i++) { bw.Write(offsets[i]); }
                 for (int i = 0; i < base.Count; i++)
@@ -362,7 +362,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                uint count = ReadCount(s);
+                int count = ReadCount(s);
                 long endOffset = br.ReadUInt32() + 4 + s.Position;
                 long startOffset = br.ReadUInt32();
                 if (checking && count > 0 && startOffset != 4)
@@ -374,7 +374,7 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                WriteCount(s, (uint)base.Count);
+                WriteCount(s, Count);
                 long offsetPos = s.Position;
                 bw.Write(0);
                 bw.Write(base.Count > 0 ? 4 : 0);

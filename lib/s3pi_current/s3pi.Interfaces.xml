@@ -144,21 +144,6 @@
             <param name="t">API data type to query</param>
             <returns></returns>
         </member>
-        <member name="M:s3pi.Interfaces.AApiVersionedFields.Write7BitStr(System.IO.Stream,System.String,System.Text.Encoding)">
-            <summary>
-            Write a 7BITSTR value to a stream
-            </summary>
-            <param name="s">Stream to write to</param>
-            <param name="value">String to write, prefixed by length, seven bits at a time</param>
-            <param name="enc">encoding to use on the <see cref="M:System.IO.BinaryWriter.#ctor(System.IO.Stream,System.Text.Encoding)"/></param>
-        </member>
-        <member name="M:s3pi.Interfaces.AApiVersionedFields.Write7BitStr(System.IO.Stream,System.String)">
-            <summary>
-            Write a 7BITSTR value to a stream with Default encoding
-            </summary>
-            <param name="s">Stream to write to</param>
-            <param name="value">String to write, prefixed by length, seven bits at a time</param>
-        </member>
         <member name="M:s3pi.Interfaces.AApiVersionedFields.FOURCC(System.String)">
             <summary>
             Convert a string (up to 8 characters) to a UInt64
@@ -694,8 +679,8 @@
             An extension to <see cref="T:s3pi.Interfaces.AHandlerElement"/>, for simple data types (such as <see cref="T:System.UInt32"/>).
             </summary>
             <typeparam name="T">A simple data type (such as <see cref="T:System.UInt32"/>).</typeparam>
-            <remarks>For an example of use, see <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</remarks>
-            <seealso cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>
+            <remarks>For an example of use, see <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</remarks>
+            <seealso cref="T:s3pi.Interfaces.SimpleList`1"/>
         </member>
         <member name="M:s3pi.Interfaces.HandlerElement`1.#ctor(System.Int32,System.EventHandler)">
             <summary>
@@ -725,6 +710,13 @@
             </summary>
             <param name="other">An object to compare with this object.</param>
             <returns>true if the current object is equal to the other parameter; otherwise, false.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.HandlerElement`1.op_Implicit(s3pi.Interfaces.HandlerElement{`0})~`0">
+            <summary>
+            Implicit cast from <see cref="T:s3pi.Interfaces.HandlerElement`1"/> to <typeparamref name="T"/>.
+            </summary>
+            <param name="value">Value to cast.</param>
+            <returns>Cast value.</returns>
         </member>
         <member name="P:s3pi.Interfaces.HandlerElement`1.RecommendedApiVersion">
             <summary>
@@ -1191,7 +1183,7 @@
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.DependentList`1.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{`0},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> class
             filled with the content of <paramref name="ilt"/>.
@@ -1248,7 +1240,7 @@
             </summary>
             <param name="s">Stream to receive list entries</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.DependentList`1.WriteCount(System.IO.Stream,System.UInt32)">
+        <member name="M:s3pi.Interfaces.AResource.DependentList`1.WriteCount(System.IO.Stream,System.Int32)">
             <summary>
             Write the count of list elements to the stream.
             </summary>
@@ -1639,7 +1631,7 @@
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
@@ -1649,7 +1641,7 @@
             <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.UInt32,System.IO.Stream,System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.Int32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
@@ -1670,7 +1662,7 @@
             <param name="order">The <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Collections.Generic.IEnumerable{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
@@ -1681,7 +1673,7 @@
             <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.UInt32,System.IO.Stream,System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,s3pi.Interfaces.AResource.TGIBlock.Order,System.Int32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
@@ -1703,7 +1695,7 @@
             <param name="order">A string representing the <see cref="T:s3pi.Interfaces.AResource.TGIBlock.Order"/> of the <see cref="T:s3pi.Interfaces.AResource.TGIBlock"/> values.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Collections.Generic.IEnumerable{s3pi.Interfaces.AResource.TGIBlock},System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>
@@ -1714,7 +1706,7 @@
             <param name="ilt">The <see cref="T:System.Collections.Generic.IList`1"/> to use as the initial content of the list.</param>
             <param name="size">Optional; -1 for unlimited size, otherwise the maximum number of elements in the list.</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.UInt32,System.IO.Stream,System.Int64)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.#ctor(System.EventHandler,System.String,System.Int32,System.IO.Stream,System.Int64)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> class
             filled with <paramref name="count"/> elements from <see cref="T:System.IO.Stream"/> <paramref name="s"/>
@@ -1747,7 +1739,7 @@
             <param name="s"><see cref="T:System.IO.Stream"/> being processed -- ignored.</param>
             <returns>The number of elements to be created, as provided to the <see cref="T:s3pi.Interfaces.AResource.CountedTGIBlockList"/> constructor.</returns>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.WriteCount(System.IO.Stream,System.UInt32)">
+        <member name="M:s3pi.Interfaces.AResource.CountedTGIBlockList.WriteCount(System.IO.Stream,System.Int32)">
             <summary>
             This list does not manage a count within the <see cref="T:System.IO.Stream"/>.
             </summary>
@@ -1790,11 +1782,6 @@
             <remarks>A new element is created rather than using the element passed
             as the order (TGI/ITG/etc) may be different.</remarks>
         </member>
-        <member name="P:s3pi.Interfaces.AResource.CountedTGIBlockList.Value">
-            <summary>
-            A displayable string representing the list.
-            </summary>
-        </member>
         <member name="T:s3pi.Interfaces.AResource.TGIBlockList">
             <summary>
             A TGIBlock list class where the count and size of the list are stored separately (but managed by this class)
@@ -1808,7 +1795,7 @@
             <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
             <param name="addEight">When true, invoke fudge factor in parse/unparse</param>
         </member>
-        <member name="M:s3pi.Interfaces.AResource.TGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.AResource.TGIBlock},System.Boolean)">
+        <member name="M:s3pi.Interfaces.AResource.TGIBlockList.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{s3pi.Interfaces.AResource.TGIBlock},System.Boolean)">
             <summary>
             Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.TGIBlockList"/> class
             filled with the content of <paramref name="ilt"/>.
@@ -1860,248 +1847,6 @@
         <member name="M:s3pi.Interfaces.AResource.TGIBlockList.Add">
             <summary>
             Add a new default element to the list
-            </summary>
-        </member>
-        <member name="P:s3pi.Interfaces.AResource.TGIBlockList.Value">
-            <summary>
-            A displayable string representing the list.
-            </summary>
-        </member>
-        <member name="T:s3pi.Interfaces.AResource.SimpleList`1">
-            <summary>
-            A flexible generic list that implements <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> for
-            a simple data type (such as <see cref="T:System.UInt32"/>).
-            </summary>
-            <typeparam name="T">A simple data type (such as <see cref="T:System.UInt32"/>).</typeparam>
-            <example>
-            The following method shows a way to create a list of UInt32 values, with a UInt32 entry count
-            stored in the stream immediately before the list.
-            <code>
-            <![CDATA[
-            SimpleList<UInt32> ReadUInt32List(EventHandler e, Stream s)
-            {
-                return new SimpleList<UInt32>(e,
-                    s => new BinaryReader(s).ReadUInt32(),
-                    (s, value) => new BinaryWriter(s).Write(value));
-            }
-            ]]>
-            </code>
-            For more complex cases, or where repeated use of the same kind of <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is needed,
-            it can be worthwhile extending the class, as shown below.  This example is for a list of byte values prefixed
-            by a one byte count.  It shows that the list length can also be specified (here using <c>Byte.MaxValue</c>
-            <code>
-            <![CDATA[
-            public class ByteList : AResource.SimpleList<Byte>
-            {
-                static string fmt = "0x{1:X2}; ";
-                
-                public ByteList(EventHandler handler) : base(handler, ReadByte, WriteByte, fmt, Byte.MaxValue, ReadListCount, WriteListCount) { }
-                public ByteList(EventHandler handler, Stream s) : base(handler, s, ReadByte, WriteByt, fmte, Byte.MaxValue, ReadListCount, WriteListCount) { }
-                public ByteList(EventHandler handler, IList<HandlerElement<Byte>> le) : base(handler, le, ReadByte, WriteByte fmt,, Byte.MaxValue, ReadListCount, WriteListCount) { }
-                
-                static uint ReadListCount(Stream s) { return new BinaryReader(s).ReadByte(); }
-                static void WriteListCount(Stream s, uint count) { new BinaryWriter(s).Write((byte)count); }
-                static byte ReadByte(Stream s) { return new BinaryReader(s).ReadByte(); }
-                static void WriteByte(Stream s, byte value) { new BinaryWriter(s).Write(value); }
-            }
-            ]]>
-            </code>
-            </example>
-            <seealso cref="T:s3pi.Interfaces.HandlerElement`1"/>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
-            that is empty.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
-            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
-            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
-            <param name="size">Optional maximum number of elements in the list.</param>
-            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{s3pi.Interfaces.HandlerElement{`0}},s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
-            from <paramref name="iList"/>.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="iList">The source to use as the initial content of the list.</param>
-            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
-            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
-            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
-            <param name="size">Optional maximum number of elements in the list.</param>
-            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IList{`0},s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
-            from <paramref name="iList"/>, wrapping each entry in a <see cref="T:s3pi.Interfaces.HandlerElement`1"/> instance.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="iList">The source to use as the initial content of the list.</param>
-            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
-            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
-            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
-            <param name="size">Optional maximum number of elements in the list.</param>
-            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.#ctor(System.EventHandler,System.IO.Stream,s3pi.Interfaces.AResource.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteElementMethod,System.String,System.Int64,s3pi.Interfaces.AResource.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.AResource.SimpleList{`0}.WriteCountMethod)">
-            <summary>
-            Initializes a new instance of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> class
-            from <paramref name="s"/>.
-            </summary>
-            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
-            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> to read for the initial content of the list.</param>
-            <param name="createElement">Required; the method to create a new element in the list from a stream.</param>
-            <param name="writeElement">Required; the method to create a new element in the list from a stream.</param>
-            <param name="valFormat">Optional, default is <c>"0x{1:X8}\n"</c>; the method to create a new element in the list from a stream.</param>
-            <param name="size">Optional maximum number of elements in the list.</param>
-            <param name="readCount">Optional; default is to read a <see cref="T:System.UInt32"/> from the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-            <param name="writeCount">Optional; default is to write a <see cref="T:System.UInt32"/> to the <see cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.ReadCount(System.IO.Stream)">
-            <summary>
-            Return the number of elements to be created.
-            </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> being processed.</param>
-            <returns>The number of elements to be created.</returns>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.WriteCount(System.IO.Stream,System.UInt32)">
-            <summary>
-            Write the count of list elements to the stream.
-            </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> to write <paramref name="count"/> to.</param>
-            <param name="count">Value to write to <see cref="T:System.IO.Stream"/> <paramref name="s"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.CreateElement(System.IO.Stream)">
-            <summary>
-            Creates an new list element of type <typeparamref name="T"/> by reading <paramref name="s"/>.
-            </summary>
-            <param name="s"><see cref="P:s3pi.Interfaces.AResource.Stream"/> containing data.</param>
-            <returns>New list element.</returns>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.WriteElement(System.IO.Stream,s3pi.Interfaces.HandlerElement{`0})">
-            <summary>
-            Writes the value of a list element to <paramref name="s"/>.
-            </summary>
-            <param name="s"><see cref="P:s3pi.Interfaces.AResource.Stream"/> containing data.</param>
-            <param name="element">List element for which to write the value to the <seealso cref="P:s3pi.Interfaces.AResource.Stream"/>.</param>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Add">
-            <summary>
-            Add a default element to a <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            </summary>
-            <exception cref="T:System.NotImplementedException">Lists of abstract classes will fail
-            with a NotImplementedException.</exception>
-            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> is read-only.</exception>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Add(`0)">
-            <summary>
-            Adds an entry to a <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            </summary>
-            <param name="item">The object to add.</param>
-            <returns>True on success</returns>
-            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> is read-only.</exception>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Adds the elements of the specified collection to the end of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            </summary>
-            <param name="collection">The collection whose elements should be added to the end of the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
-            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
-            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
-            <remarks>Calls <see cref="M:s3pi.Interfaces.AResource.SimpleList`1.Add(`0)"/> for each item in <paramref name="collection"/>.</remarks>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Insert(System.Int32,`0)">
-            <summary>
-            Inserts an item to the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> at the specified index.
-            </summary>
-            <param name="index">The zero-based index at which item should be inserted.</param>
-            <param name="item">The object to insert into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</param>
-            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</exception>
-            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Inserts the elements of a collection into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> at the specified index.
-            </summary>
-            <param name="index">The zero-based index at which the new elements should be inserted.</param>
-            <param name="collection">The collection whose elements should be inserted into the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
-            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">
-            <paramref name="index"/> is less than 0.
-            -or-
-            <paramref name="index"/> is greater than <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.Count.
-            </exception>
-            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> is read-only.</exception>
-            <remarks>Calls <see cref="M:s3pi.Interfaces.AResource.SimpleList`1.Insert(System.Int32,`0)"/> for each item in <paramref name="collection"/>.</remarks>
-        </member>
-        <member name="M:s3pi.Interfaces.AResource.SimpleList`1.Remove(`0)">
-            <summary>
-            Removes the first occurrence of an entry from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/> with the value given.
-            </summary>
-            <param name="item">The value to remove from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.</param>
-            <returns>
-            true if item was successfully removed from the <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>
-            otherwise, false. This method also returns false if item is not found in
-            the original <see cref="T:s3pi.Interfaces.AResource.SimpleList`1"/>.
-            </returns>
-            <exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.AHandlerList`1"/> is read-only.</exception>
-        </member>
-        <member name="P:s3pi.Interfaces.AResource.SimpleList`1.Value">
-            <summary>
-            Return the list content, formated for display only, using the element format supplied on the list constructor.
-            </summary>
-        </member>
-        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.CreateElementMethod">
-            <summary>
-            Create a new element of type <typeparamref name="T"/> from a <see cref="P:s3pi.Interfaces.AResource.Stream"/>.
-            </summary>
-            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> from which to read the element data.</param>
-            <returns>A new element of type <typeparamref name="T"/>.</returns>
-        </member>
-        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.WriteElementMethod">
-            <summary>
-            Write an element of type <typeparamref name="T"/> to a <see cref="P:s3pi.Interfaces.AResource.Stream"/>.
-            </summary>
-            <param name="s">The <see cref="P:s3pi.Interfaces.AResource.Stream"/> to which to write the value.</param>
-            <param name="value">The value of type <typeparamref name="T"/> to write.</param>
-        </member>
-        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.ReadCountMethod">
-            <summary>
-            Return the number of list elements to read.
-            </summary>
-            <param name="s">A <see cref="P:s3pi.Interfaces.AResource.Stream"/> that may contain the number of elements.</param>
-            <returns>The number of list elements to read.</returns>
-        </member>
-        <member name="T:s3pi.Interfaces.AResource.SimpleList`1.WriteCountMethod">
-            <summary>
-            Store the number of elements in the list.
-            </summary>
-            <param name="s">A <see cref="P:s3pi.Interfaces.AResource.Stream"/> to which list elements will be written after the count.</param>
-            <param name="count">The number of list elements.</param>
-        </member>
-        <member name="T:s3pi.Interfaces.StringTableSingleton">
-            <summary>
-            Strings used in a number of places in the game.
-            </summary>
-            <remarks>Currently only in <c>CatalogResource</c>.</remarks>
-        </member>
-        <member name="P:s3pi.Interfaces.StringTableSingleton.Table">
-            <summary>
-            Table of defined strings.
             </summary>
         </member>
         <member name="T:s3pi.Interfaces.IResourceIndexEntry">
@@ -2199,6 +1944,868 @@
             <summary>
             True if the index entry has been deleted from the package index
             </summary>
+        </member>
+        <member name="T:s3pi.Interfaces.SimpleList`1">
+            <summary>
+            A flexible generic list that implements <see cref="T:s3pi.Interfaces.AResource.DependentList`1"/> for
+            a simple data type (such as <see cref="T:System.UInt32"/>).
+            </summary>
+            <typeparam name="T">A simple data type (such as <see cref="T:System.UInt32"/>).</typeparam>
+            <example>
+            The following method shows a way to create a list of UInt32 values, with an Int32 entry count
+            stored in the stream immediately before the list.
+            <code>
+            <![CDATA[
+            SimpleList<UInt32> ReadUInt32List(EventHandler e, Stream s)
+            {
+                return new SimpleList<UInt32>(e, s,
+                    s => new BinaryReader(s).ReadUInt32(),
+                    (s, value) => new BinaryWriter(s).Write(value));
+            }
+            ]]>
+            </code>
+            For more complex cases, or where repeated use of the same kind of <see cref="T:s3pi.Interfaces.SimpleList`1"/> is needed in different contexts,
+            it can be worthwhile extending the class, as shown below.  This example is for a list of byte values prefixed
+            by a one byte count.  It shows that the list length can also be specified (here using <c>Byte.MaxValue</c>
+            <code>
+            <![CDATA[
+            public class ByteList : SimpleList<Byte>
+            {
+                public ByteList(EventHandler handler) : base(handler, ReadByte, WriteByte, Byte.MaxValue, ReadListCount, WriteListCount) { }
+                public ByteList(EventHandler handler, Stream s) : base(handler, s, ReadByte, WriteByte, Byte.MaxValue, ReadListCount, WriteListCount) { }
+                public ByteList(EventHandler handler, IList<Byte> le) : base(handler, le, ReadByte, WriteByte Byte.MaxValue, ReadListCount, WriteListCount) { }
+                
+                static uint ReadListCount(Stream s) { return new BinaryReader(s).ReadByte(); }
+                static void WriteListCount(Stream s, uint count) { new BinaryWriter(s).Write((byte)count); }
+                static byte ReadByte(Stream s) { return new BinaryReader(s).ReadByte(); }
+                static void WriteByte(Stream s, byte value) { new BinaryWriter(s).Write(value); }
+            }
+            ]]>
+            </code>
+            </example>
+            <seealso cref="T:s3pi.Interfaces.HandlerElement`1"/>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.#ctor(System.EventHandler,s3pi.Interfaces.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.SimpleList{`0}.WriteElementMethod,System.Int64,s3pi.Interfaces.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.SimpleList`1"/> class
+            that is empty.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.Int32"/> from the <see cref="T:System.IO.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.Int32"/> to the <see cref="T:System.IO.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.#ctor(System.EventHandler,System.IO.Stream,s3pi.Interfaces.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.SimpleList{`0}.WriteElementMethod,System.Int64,s3pi.Interfaces.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.SimpleList`1"/> class
+            from <paramref name="s"/>.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="s">The <see cref="T:System.IO.Stream"/> to read for the initial content of the list.</param>
+            <param name="createElement">Required; the method to create a new element in the list from a stream.</param>
+            <param name="writeElement">Required; the method to create a new element in the list from a stream.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.Int32"/> from the <see cref="T:System.IO.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.Int32"/> to the <see cref="T:System.IO.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{`0},s3pi.Interfaces.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.SimpleList{`0}.WriteElementMethod,System.Int64,s3pi.Interfaces.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.SimpleList`1"/> class
+            from <paramref name="collection"/>, wrapping each entry in a <see cref="T:s3pi.Interfaces.HandlerElement`1"/> instance.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="collection">The source to use as the initial content of the list.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.Int32"/> from the <see cref="T:System.IO.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.Int32"/> to the <see cref="T:System.IO.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.#ctor(System.EventHandler,System.Collections.Generic.IEnumerable{s3pi.Interfaces.HandlerElement{`0}},s3pi.Interfaces.SimpleList{`0}.CreateElementMethod,s3pi.Interfaces.SimpleList{`0}.WriteElementMethod,System.Int64,s3pi.Interfaces.SimpleList{`0}.ReadCountMethod,s3pi.Interfaces.SimpleList{`0}.WriteCountMethod)">
+            <summary>
+            Initializes a new instance of the <see cref="T:s3pi.Interfaces.SimpleList`1"/> class from the existing <paramref name="collection"/>.
+            </summary>
+            <param name="handler">The <see cref="T:System.EventHandler"/> to call on changes to the list or its elements.</param>
+            <param name="collection">The source to use as the initial content of the list.</param>
+            <param name="createElement">Optional; the method to create a new element in the list from a stream.  If null, return default{T}.</param>
+            <param name="writeElement">Optional; the method to create a new element in the list from a stream.  No operation if null.</param>
+            <param name="size">Optional maximum number of elements in the list.</param>
+            <param name="readCount">Optional; default is to read a <see cref="T:System.Int32"/> from the <see cref="T:System.IO.Stream"/>.</param>
+            <param name="writeCount">Optional; default is to write a <see cref="T:System.Int32"/> to the <see cref="T:System.IO.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.ReadCount(System.IO.Stream)">
+            <summary>
+            Return the number of elements to be created.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> being processed.</param>
+            <returns>The number of elements to be created.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.WriteCount(System.IO.Stream,System.Int32)">
+            <summary>
+            Write the count of list elements to the stream.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> to write <paramref name="count"/> to.</param>
+            <param name="count">Value to write to <see cref="T:System.IO.Stream"/> <paramref name="s"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.CreateElement(System.IO.Stream)">
+            <summary>
+            Creates an new list element of type <typeparamref name="T"/> by reading <paramref name="s"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> containing data.</param>
+            <returns>New list element.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.WriteElement(System.IO.Stream,s3pi.Interfaces.HandlerElement{`0})">
+            <summary>
+            Writes the value of a list element to <paramref name="s"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> containing data.</param>
+            <param name="element">List element for which to write the value to the <seealso cref="T:System.IO.Stream"/>.</param>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Add">
+            <summary>
+            Add a default element to a <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <exception cref="T:System.NotImplementedException">Lists of abstract classes will fail
+            with a NotImplementedException.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Add(`0)">
+            <summary>
+            Adds an entry to a <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="item">The object to add.</param>
+            <returns>True on success</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds the elements of the specified collection to the end of the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="collection">The collection whose elements should be added to the end of the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+            <remarks>Calls <see cref="M:s3pi.Interfaces.SimpleList`1.Add(`0)"/> for each item in <paramref name="collection"/>.</remarks>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.BinarySearch(`0)">
+            <summary>
+                Searches a the entire sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                for an element using the default comparer and returns the zero-based index
+                of the element.
+            </summary>
+            <param name="item">
+                The object to locate.
+            </param>
+            <returns>
+                The zero-based index of item in the sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>,
+                if item is found; otherwise, a negative number that is the bitwise complement
+                of the index of the next element that is larger than item or, if there is
+                no larger element, the bitwise complement of <see cref="T:s3pi.Interfaces.SimpleList`1"/>.Count.
+            </returns>
+            <exception cref="T:System.InvalidOperationException">
+                The default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>
+                cannot find an implementation of the <see cref="T:System.IComparable`1"/> generic interface
+                or the <see cref="T:System.IComparable"/> interface for type T.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.BinarySearch(`0,System.Collections.Generic.IComparer{`0})">
+            <summary>
+                Searches a the entire sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                for an element using the specified comparer and returns the zero-based index
+                of the element.
+            </summary>
+            <param name="item">
+                The object to locate.
+            </param>
+            <param name="comparer">
+                The <see cref="T:System.Collections.Generic.IComparer`1"/> implementation to use when comparing
+                elements.
+                <br/>-or-<br/>
+                null to use the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>.
+            </param>
+            <returns>
+                The zero-based index of item in the sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>,
+                if item is found; otherwise, a negative number that is the bitwise complement
+                of the index of the next element that is larger than item or, if there is
+                no larger element, the bitwise complement of <see cref="T:s3pi.Interfaces.SimpleList`1"/>.Count.
+            </returns>
+            <exception cref="T:System.InvalidOperationException">
+                <paramref name="comparer"/> is null, and the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>
+                cannot find an implementation of the <see cref="T:System.IComparable`1"/> generic interface
+                or the <see cref="T:System.IComparable"/> interface for type T.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.BinarySearch(System.Int32,System.Int32,`0,System.Collections.Generic.IComparer{`0})">
+            <summary>
+                Searches a range of elements in the sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                for an element using the specified comparer and returns the zero-based index
+                of the element.
+            </summary>
+            <param name="index">
+                The zero-based starting index of the range to search.
+            </param>
+            <param name="count">
+                The length of the range to search.
+            </param>
+            <param name="item">
+                The object to locate.
+            </param>
+            <param name="comparer">
+                The <see cref="T:System.Collections.Generic.IComparer`1"/> implementation to use when comparing
+                elements, or null to use the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>.
+            </param>
+            <returns>
+                The zero-based index of item in the sorted <see cref="T:s3pi.Interfaces.SimpleList`1"/>,
+                if item is found; otherwise, a negative number that is the bitwise complement
+                of the index of the next element that is larger than item or, if there is
+                no larger element, the bitwise complement of <see cref="T:s3pi.Interfaces.SimpleList`1"/>.Count.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="index"/> is less than 0.
+                <br/>-or-<br/>
+                <paramref name="count"/> is less than 0.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="index"/> and <paramref name="count"/> do not denote a valid range in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+            <exception cref="T:System.InvalidOperationException">
+                <paramref name="comparer"/> is null, and the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>
+                cannot find an implementation of the <see cref="T:System.IComparable`1"/> generic interface
+                or the <see cref="T:System.IComparable"/> interface for type T.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.ConvertAll``1(System.Converter{`0,``0})">
+            <summary>
+                Converts the elements in the current <see cref="T:s3pi.Interfaces.SimpleList`1"/> to
+                another type, and returns a list containing the converted elements.
+            </summary>
+            <typeparam name="TOutput">
+                The target type of the elements of the <see cref="T:System.Collections.Generic.List`1"/>.
+            </typeparam>
+            <param name="converter">
+                A <see cref="T:System.Converter`2"/> delegate that converts each element from
+                one type to another type.
+            </param>
+            <returns>
+                A <see cref="T:System.Collections.Generic.List`1"/> of the target type containing the converted
+                elements from the current <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="converter"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.CopyTo(`0[])">
+            <summary>
+                Copies the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/> to
+                a compatible one-dimensional array, starting at the beginning of the target array.
+            </summary>
+            <param name="array">
+                The one-dimensional System.Array that is the destination of the elements
+                copied from <see cref="T:s3pi.Interfaces.SimpleList`1"/>. The <see cref="T:System.Array"/> must have
+                zero-based indexing.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="array"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                The number of elements in the source <see cref="T:s3pi.Interfaces.SimpleList`1"/> is
+                greater than the number of elements that the destination <paramref name="array"/> can contain.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.CopyTo(`0[],System.Int32)">
+            <summary>
+                Copies the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/> to
+                a compatible one-dimensional array.
+            </summary>
+            <param name="array">
+                The one-dimensional System.Array that is the destination of the elements
+                copied from <see cref="T:s3pi.Interfaces.SimpleList`1"/>. The <see cref="T:System.Array"/> must have
+                zero-based indexing.
+            </param>
+            <param name="arrayIndex">
+                The zero-based index in <paramref name="array"/> at which copying begins.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="array"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="arrayIndex"/> is less than 0.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="arrayIndex"/> is equal to or greater than the length of array.
+            <br/>-or-<br/>
+                The number of elements in the source <see cref="T:s3pi.Interfaces.SimpleList`1"/> is greater
+                than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.CopyTo(System.Int32,`0[],System.Int32,System.Int32)">
+            <summary>
+                Copies a range of elements from the <see cref="T:s3pi.Interfaces.SimpleList`1"/> to
+                a compatible one-dimensional array, starting at the specified <paramref name="index"/> of the
+                target <paramref name="array"/>.
+            </summary>
+            <param name="index">
+                The zero-based index in the source <see cref="T:s3pi.Interfaces.SimpleList`1"/> at
+                which copying begins.
+            </param>
+            <param name="array">
+                The one-dimensional System.Array that is the destination of the elements
+                copied from <see cref="T:s3pi.Interfaces.SimpleList`1"/>. The <see cref="T:System.Array"/> must have
+                zero-based indexing.
+            </param>
+            <param name="arrayIndex">
+                The zero-based index in <paramref name="array"/> at which copying begins.
+            </param>
+            <param name="count">
+                The number of elements to copy.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="array"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="index"/> is less than 0.
+            <br/>-or-<br/>
+                <paramref name="arrayIndex"/> is less than 0.
+            <br/>-or-<br/>
+                <paramref name="count"/> is less than 0.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+                <paramref name="index"/> is equal to or greater than the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.Count
+                of the source <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            <br/>-or-<br/>
+                <paramref name="arrayIndex"/> is equal to or greater than the length of array.
+            <br/>-or-<br/>
+                The number of elements from
+                <paramref name="index"/> to the end of the source <see cref="T:s3pi.Interfaces.SimpleList`1"/> is greater
+                than the available space from <paramref name="arrayIndex"/> to the end of the destination <paramref name="array"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Contains(`0)">
+            <summary>
+            Determines whether an element is in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="item">The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</param>
+            <returns>true if item is found in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>; otherwise, false.</returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Exists(System.Predicate{`0})">
+            <summary>
+                Determines whether the <see cref="T:s3pi.Interfaces.SimpleList`1"/> contains elements
+                that match the conditions defined by the specified predicate.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the elements
+                to search for.
+            </param>
+            <returns>
+                true if the <see cref="T:s3pi.Interfaces.SimpleList`1"/> contains one or more elements
+                that match the conditions defined by the specified predicate; otherwise,
+                false.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                match is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Find(System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the first occurrence within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The first element that matches the conditions defined by the specified predicate,
+                if found; otherwise, the default value for type <typeparamref name="T"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindAll(System.Predicate{`0})">
+            <summary>
+                Retrieves all the elements that match the conditions defined by the specified predicate.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the elements
+                to search for.
+            </param>
+            <returns>
+                A <see cref="T:System.Collections.Generic.List`1"/> containing all the elements that match
+                the conditions defined by the specified predicate, if found; otherwise, an
+                empty <see cref="T:System.Collections.Generic.List`1"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindIndex(System.Predicate{`0})">
+            <summary>
+                Retrieves all the elements that match the conditions defined by the specified predicate.
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the first occurrence within
+                the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindIndex(System.Int32,System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the first occurrence within
+                the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that extends
+                from the specified index to the last element.
+            </summary>
+            <param name="startIndex">
+                The zero-based starting index of the search.
+            </param>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="startIndex"/> is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindIndex(System.Int32,System.Int32,System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the first occurrence within
+                the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that starts
+                at the specified index and contains the specified number of elements.
+            </summary>
+            <param name="startIndex">
+                The zero-based starting index of the search.
+            </param>
+            <param name="count">
+                The number of elements in the section to search.
+            </param>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="startIndex"/> is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            <br/>-or-<br/>
+                <paramref name="count"/> is less than 0.
+            <br/>-or-<br/>
+                <paramref name="startIndex"/> and <paramref name="count"/> do not specify a valid section in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindLast(System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the last occurrence within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The last element that matches the conditions defined by the specified predicate,
+                if found; otherwise, the default value for type <typeparamref name="T"/>.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindLastIndex(System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the last occurrence within
+                the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindLastIndex(System.Int32,System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the last occurrence within
+                the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that
+                extends from the first element to the specified index.
+            </summary>
+            <param name="startIndex">
+                The zero-based starting index of the backward search.
+            </param>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="startIndex"/> is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.FindLastIndex(System.Int32,System.Int32,System.Predicate{`0})">
+            <summary>
+                Searches for an element that matches the conditions defined by the specified
+                predicate, and returns the zero-based index of the last occurrence within
+                the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that
+                contains the specified number of elements and ends at the specified index.
+            </summary>
+            <param name="startIndex">
+                The zero-based starting index of the backward search.
+            </param>
+            <param name="count">
+                The number of elements in the section to search.
+            </param>
+            <param name="match">
+                The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the element
+                to search for.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of an element that matches the
+                conditions defined by <paramref name="match"/>, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="match"/> is null.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                <paramref name="startIndex"/> is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            <br/>-or-<br/>
+                <paramref name="count"/> is less than 0.
+            <br/>-or-<br/>
+                <paramref name="startIndex"/> and <paramref name="count"/> do not specify a valid section in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.ForEach(System.Action{`0})">
+            <summary>
+            Performs the specified action on each element of the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="action">
+            The <see cref="T:System.Action`1"/> delegate to perform on each element of the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <exception cref="T:System.ArgumentNullException">
+                <paramref name="action"/> is null.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.InsertRange(System.Int32,System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Inserts the elements of a collection into the <see cref="T:s3pi.Interfaces.SimpleList`1"/> at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which the new elements should be inserted.</param>
+            <param name="collection">The collection whose elements should be inserted into the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            The collection itself cannot be null, but it can contain elements that are null, if type <typeparamref name="T"/> is a reference type.</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="collection"/> is null.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="index"/> is less than 0.
+            <br/>-or-<br/>
+            <paramref name="index"/> is greater than <see cref="T:s3pi.Interfaces.SimpleList`1"/>.Count.
+            </exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size would be exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+            <remarks>Calls <see cref="M:s3pi.Interfaces.SimpleList`1.Insert(System.Int32,`0)"/> for each item in <paramref name="collection"/>.</remarks>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.IndexOf(`0,System.Int32)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                first occurrence within the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                that extends from the specified index to the last element.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <param name="index">
+                The zero-based starting index of the search.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of item within the range of
+                elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that extends from index
+                to the last element, if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                index is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.IndexOf(`0,System.Int32,System.Int32)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                first occurrence within the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                that starts at the specified index and contains the specified number of elements.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <param name="index">
+                The zero-based starting index of the search.
+            </param>
+            <param name="count">
+                The number of elements in the section to search.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of item within the range of
+                elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that
+                starts at <paramref name="index"/> and contains <paramref name="count"/> number of elements,
+                if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                index is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+                <br/>-or-<br/>
+                count is less than 0.
+                <br/>-or-<br/>
+                index and count do not specify a valid section in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.LastIndexOf(`0)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                last occurrence within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of item within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>,
+                if found; otherwise, –1.
+            </returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.LastIndexOf(`0,System.Int32)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                last occurrence within the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                that extends from the first element to the specified index.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <param name="index">
+                The zero-based starting index of the backward search.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of item within the range of
+                elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that
+                extends from the first element and ends at <paramref name="index"/>,
+                if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                index is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.LastIndexOf(`0,System.Int32,System.Int32)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                last occurrence within the range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                that contains the specified number of elements and ends at the specified index.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <param name="index">
+                The zero-based starting index of the backward search.
+            </param>
+            <param name="count">
+                The number of elements in the section to search.
+            </param>
+            <returns>
+                The zero-based index of the last occurrence of item within the range of
+                elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> that
+                contains <paramref name="count"/> number of elements and ends at <paramref name="index"/>,
+                if found; otherwise, –1.
+            </returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+                index is outside the range of valid indexes for the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+                <br/>-or-<br/>
+                count is less than 0.
+                <br/>-or-<br/>
+                index and count do not specify a valid section in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Remove(`0)">
+            <summary>
+            Removes the first occurrence of an entry from the <see cref="T:s3pi.Interfaces.SimpleList`1"/> with the value given.
+            </summary>
+            <param name="item">The value to remove from the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</param>
+            <returns>
+            true if item was successfully removed from the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+            otherwise, false. This method also returns false if item is not found in
+            the original <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </returns>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:System.Collections.Generic.AHandlerList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.RemoveAll(System.Predicate{`0})">
+            <summary>
+            Removes the all the elements that match the conditions defined by the specified predicate.
+            </summary>
+            <param name="match">The <see cref="T:System.Predicate`1"/> delegate that defines the conditions of the elements to remove.</param>
+            <returns>The number of elements removed from the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="match"/> is null.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Sort(System.Comparison{`0})">
+            <summary>
+            Sorts the elements in the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/> using the specified <see cref="T:System.Comparison`1"/>.
+            </summary>
+            <param name="comparison">The <see cref="T:System.Comparison`1"/> to use when comparing elements.</param>
+            <exception cref="T:System.ArgumentException">The implementation of <paramref name="comparison"/> caused an error during the sort.
+            For example, <paramref name="comparison"/> might not return 0 when comparing an item with itself.</exception>
+            <exception cref="T:System.ArgumentNullException"><paramref name="comparison"/> is null.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Sort(System.Collections.Generic.IComparer{`0})">
+            <summary>
+            Sorts the elements in the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/> using the specified comparer.
+            </summary>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IComparer`1"/> implementation to use when comparing elements,
+            or null to use the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            The implementation of <paramref name="comparer"/> caused an error during the sort.
+            For example, <paramref name="comparer"/> might not return 0 when comparing an item with itself.
+            </exception>
+            <exception cref="T:System.InvalidOperationException">
+            <paramref name="comparer"/> is null, and the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>
+            cannot find implementation of the <see cref="T:System.IComparable`1"/> generic interface
+            or the System.IComparable interface for type <typeparamref name="T"/>.
+            </exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Sort(System.Int32,System.Int32,System.Collections.Generic.IComparer{`0})">
+            <summary>
+            Sorts the elements in a range of elements in <see cref="T:s3pi.Interfaces.SimpleList`1"/> using the specified comparer.
+            </summary>
+            <param name="index">The zero-based starting index of the range to sort.</param>
+            <param name="count">The number of elements in the range to sort.</param>
+            <param name="comparer">The <see cref="T:System.Collections.Generic.IComparer`1"/> implementation to use when comparing elements,
+            or null to use the default comparer <see cref="P:System.Collections.Generic.Comparer`1.Default"/>.</param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="index"/> and <paramref name="count"/> do not denote a valid range of elements in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            <br/>-or-<br/>
+            The implementation of <paramref name="comparer"/> caused an error during the sort.
+            For example, <paramref name="comparer"/> might not return 0 when comparing an item with itself.
+            <br/>-or-<br/>
+            <paramref name="comparer"/> is null, and an implementation of the <see cref="T:System.IComparable`1"/> generic interface
+            or the <see cref="T:System.IComparable"/> interface for type <typeparamref name="T"/> cannot be found.
+            </exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            <paramref name="index"/> is less than 0.
+            <br/>-or-<br/>
+            <paramref name="count"/> is less than 0.
+            </exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.ToArray">
+            <summary>
+                Copies the elements of the <see cref="T:s3pi.Interfaces.SimpleList`1"/> to a new array.
+            </summary>
+            <returns>
+                An array containing copies of the elements of the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.TrueForAll(System.Predicate{`0})">
+            <summary>
+                Determines whether every element in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>
+                matches the conditions defined by the specified predicate.
+            </summary>
+            <param name="match">The <see cref="T:System.Predicate`1"/> delegate that defines the conditions to check against the elements.</param>
+            <returns>
+                true if every element in the <see cref="T:s3pi.Interfaces.SimpleList`1"/> matches the
+                conditions defined by the specified predicate; otherwise, false. If the list
+                has no elements, the return value is true.
+            </returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="match"/> is null.</exception>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.IndexOf(`0)">
+            <summary>
+                Searches for the specified object and returns the zero-based index of the
+                first occurrence within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </summary>
+            <param name="item">
+                The object to locate in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.
+            </param>
+            <returns>
+                The zero-based index of the first occurrence of item within the entire <see cref="T:s3pi.Interfaces.SimpleList`1"/>,
+                if found; otherwise, –1.
+            </returns>
+        </member>
+        <member name="M:s3pi.Interfaces.SimpleList`1.Insert(System.Int32,`0)">
+            <summary>
+            Inserts an item to the <see cref="T:s3pi.Interfaces.SimpleList`1"/> at the specified index.
+            </summary>
+            <param name="index">The zero-based index at which item should be inserted.</param>
+            <param name="item">The object to insert into the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</param>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown when list size exceeded.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="P:s3pi.Interfaces.SimpleList`1.Item(System.Int32)">
+            <summary>
+            Gets or sets the element at the specified index.
+            </summary>
+            <param name="index">The zero-based index of the element to get or set.</param>
+            <returns>The element at the specified index.</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is not a valid index in the <see cref="T:s3pi.Interfaces.SimpleList`1"/>.</exception>
+            <exception cref="T:System.NotSupportedException">The <see cref="T:s3pi.Interfaces.SimpleList`1"/> is read-only.</exception>
+        </member>
+        <member name="T:s3pi.Interfaces.SimpleList`1.CreateElementMethod">
+            <summary>
+            Create a new element of type <typeparamref name="T"/> from a <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="s">The <see cref="T:System.IO.Stream"/> from which to read the element data.</param>
+            <returns>A new element of type <typeparamref name="T"/>.</returns>
+        </member>
+        <member name="T:s3pi.Interfaces.SimpleList`1.WriteElementMethod">
+            <summary>
+            Write an element of type <typeparamref name="T"/> to a <see cref="T:System.IO.Stream"/>.
+            </summary>
+            <param name="s">The <see cref="T:System.IO.Stream"/> to which to write the value.</param>
+            <param name="value">The value of type <typeparamref name="T"/> to write.</param>
+        </member>
+        <member name="T:s3pi.Interfaces.SimpleList`1.ReadCountMethod">
+            <summary>
+            Return the number of list elements to read.
+            </summary>
+            <param name="s">A <see cref="T:System.IO.Stream"/> that may contain the number of elements.</param>
+            <returns>The number of list elements to read.</returns>
+        </member>
+        <member name="T:s3pi.Interfaces.SimpleList`1.WriteCountMethod">
+            <summary>
+            Store the number of elements in the list.
+            </summary>
+            <param name="s">A <see cref="T:System.IO.Stream"/> to which list elements will be written after the count.</param>
+            <param name="count">The number of list elements.</param>
         </member>
         <member name="T:s3pi.Interfaces.TGIBlockListContentFieldAttribute">
             <summary>

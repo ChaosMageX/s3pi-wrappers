@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using s3pi.DemoPlugins;
+using s3pi.Helpers;
 
 namespace s3piwrappers.RigEditor
 {

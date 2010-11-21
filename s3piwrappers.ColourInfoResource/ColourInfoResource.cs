@@ -277,7 +277,7 @@ namespace s3piwrappers
             {
                 throw new InvalidDataException(string.Format("Position of TGIBlock read: 0x{0:X8}, actual: 0x{1:X8}", offset, s.Position));
             }
-            uint count = br.ReadByte();
+            int count = br.ReadByte();
             mReferences = new CountedTGIBlockList(this.OnResourceChanged, "IGT", count, s);
         }
         protected override Stream UnParse()

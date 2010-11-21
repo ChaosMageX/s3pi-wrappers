@@ -14,12 +14,11 @@ namespace s3piwrappers
         private byte[] mUnused;
         private TrackMaskList mTrackMasks;
 
-        public class TrackMaskList : AResource.SimpleList<Single>
+        public class TrackMaskList : SimpleList<Single>
         {
-            private static string sFormat = "{1,8:0.00000}\n";
-            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement, sFormat) { }
-            public TrackMaskList(EventHandler handler, IList<HandlerElement<Single>> ilt) : base(handler, ilt, ReadElement, WriteElement, sFormat) { }
-            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement, sFormat) { }
+            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
+            public TrackMaskList(EventHandler handler, IList<HandlerElement<Single>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
+            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
             static Single ReadElement(Stream s) { return new BinaryReader(s).ReadSingle(); }
             static void WriteElement(Stream s, Single element) { new BinaryWriter(s).Write(element); }
         }
@@ -82,7 +81,14 @@ namespace s3piwrappers
             {
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
-                sb.Append(mTrackMasks.Value);
+                if (mTrackMasks.Count > 0)
+                {
+                    sb.AppendLine("Values:");
+                    for (int i = 0; i < mTrackMasks.Count; i++)
+                    {
+                        sb.AppendFormat("[{0}]0x{1:X8}\n", i, mTrackMasks[i]);
+                    }
+                }
                 return sb.ToString();
 
             }

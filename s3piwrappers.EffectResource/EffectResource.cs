@@ -7,6 +7,7 @@ using s3piwrappers.Resources;
 using s3piwrappers.SWB;
 using s3piwrappers.SWB.IO;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace s3piwrappers
 {
@@ -602,7 +603,7 @@ namespace s3piwrappers
             get
             {
                 var sb = new StringBuilder();
-                foreach (var e in mVisualEffectHandles) sb.AppendFormat("0x{0:X8}:{1}\r\n",e.Index,e.EffectName);
+                foreach (var e in mVisualEffectHandles) sb.AppendFormat("(0x{0:X8}):{1}\r\n",FNV32.GetHash(e.EffectName),e.EffectName);
                 return sb.ToString();
 
             }

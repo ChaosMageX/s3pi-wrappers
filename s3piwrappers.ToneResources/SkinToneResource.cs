@@ -337,7 +337,7 @@ namespace s3piwrappers
             }
             public void UnParse(Stream s, ResourceKeyTable keys)
             {
-                WriteCount(s, (uint)Count);
+                WriteCount(s, Count);
                 for (int i = 0; i < Count; i++)
                 {
                     this[i].UnParse(s, keys);
@@ -357,8 +357,8 @@ namespace s3piwrappers
 
         private UInt32 mVersion;
         private ShaderKeyList mShaderKeyList;
-        private AResource.TGIBlock mSkinSubSRampIndex;
-        private AResource.TGIBlock mToneRampIndex;
+        private AResource.TGIBlock mSkinSubSRampKey;
+        private AResource.TGIBlock mToneRampKey;
         private TextureKeyList mTextureKeyList;
         private bool mIsDominant;
 
@@ -375,16 +375,16 @@ namespace s3piwrappers
             set { if (mShaderKeyList != value) { mShaderKeyList = value; OnResourceChanged(this, new EventArgs()); } }
         }
         [ElementPriority(3)]
-        public AResource.TGIBlock SkinSubSRampIndex
+        public AResource.TGIBlock SkinSubSRampKey
         {
-            get { return mSkinSubSRampIndex; }
-            set { if (mSkinSubSRampIndex != value) { mSkinSubSRampIndex = value; OnResourceChanged(this, new EventArgs()); } }
+            get { return mSkinSubSRampKey; }
+            set { if (mSkinSubSRampKey != value) { mSkinSubSRampKey = value; OnResourceChanged(this, new EventArgs()); } }
         }
         [ElementPriority(4)]
-        public AResource.TGIBlock ToneRampIndex
+        public AResource.TGIBlock ToneRampKey
         {
-            get { return mToneRampIndex; }
-            set { if (mToneRampIndex != value) { mToneRampIndex = value; OnResourceChanged(this, new EventArgs()); } }
+            get { return mToneRampKey; }
+            set { if (mToneRampKey != value) { mToneRampKey = value; OnResourceChanged(this, new EventArgs()); } }
         }
         [ElementPriority(5)]
         public TextureKeyList TextureKeys
@@ -413,8 +413,8 @@ namespace s3piwrappers
                         sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
                     }
                 }
-                sb.AppendFormat("SkinSubSRampIndex: {0}\n", mSkinSubSRampIndex);
-                sb.AppendFormat("ToneRampIndex: {0}\n", mToneRampIndex);
+                sb.AppendFormat("SkinSubSRampIndex: {0}\n", mSkinSubSRampKey);
+                sb.AppendFormat("ToneRampIndex: {0}\n", mToneRampKey);
 
                 if (mTextureKeyList.Count > 0)
                 {
@@ -450,9 +450,9 @@ namespace s3piwrappers
             var keys = new ResourceKeyTable();
             var ptr = keys.BeginRead(s);
             mShaderKeyList = new ShaderKeyList(this.OnResourceChanged, s);
-            mSkinSubSRampIndex = new AResource.TGIBlock(0, OnResourceChanged, keys[br.ReadInt32()]);
-            mToneRampIndex = new AResource.TGIBlock(0, OnResourceChanged, keys[br.ReadInt32()]);
-            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s, this,keys);
+            mSkinSubSRampKey = new AResource.TGIBlock(0, OnResourceChanged, keys[br.ReadInt32()]);
+            mToneRampKey = new AResource.TGIBlock(0, OnResourceChanged, keys[br.ReadInt32()]);
+            mTextureKeyList = new TextureKeyList(this.OnResourceChanged, s, this, keys);
             mIsDominant = br.ReadByte() == 1;
             keys.EndRead(s, ptr);
         }
@@ -465,10 +465,12 @@ namespace s3piwrappers
             long startPos = keys.BeginWrite(s);
             if (mShaderKeyList == null) mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
-            bw.Write(keys.Add(mSkinSubSRampIndex));
-            bw.Write(keys.Add(mToneRampIndex));
+            if (mSkinSubSRampKey == null) mSkinSubSRampKey = new TGIBlock(0, OnResourceChanged);
+            if (mToneRampKey == null) mToneRampKey = new TGIBlock(0, OnResourceChanged);
+            bw.Write(keys.Add(mSkinSubSRampKey));
+            bw.Write(keys.Add(mToneRampKey));
             if (mTextureKeyList == null) mTextureKeyList = new TextureKeyList(OnResourceChanged, this);
-            mTextureKeyList.UnParse(s,keys);
+            mTextureKeyList.UnParse(s, keys);
             bw.Write(mIsDominant ? (byte)1 : (byte)0);
             keys.EndWrite(s, startPos);
             return s;

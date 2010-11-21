@@ -10,7 +10,7 @@ namespace s3piwrappers
     public class BodyRig : AbstractRig
     {
 
-        public class GrannyBoneReferenceList : AResource.SimpleList<Int32>
+        public class GrannyBoneReferenceList : SimpleList<Int32>
         {
             public GrannyBoneReferenceList(EventHandler handler) : base(handler, CreateElement, WriteElement) { }
             public GrannyBoneReferenceList(EventHandler handler, IList<Int32> ilt) : base(handler, ilt, CreateElement, WriteElement) { }
@@ -106,7 +106,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 var br = new BinaryReader(s);
-                uint count = ReadCount(s);
+                int count = ReadCount(s);
                 long[] offsets = new long[count];
                 long startOffset = s.Position;
                 for (int i = 0; i < count; i++)
@@ -123,7 +123,7 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 var bw = new BinaryWriter(s);
-                WriteCount(s, (uint)base.Count);
+                WriteCount(s, Count);
                 long[] offsets = new long[Count];
                 long startOffset = s.Position;
                 s.Seek(4 * Count,SeekOrigin.Current);
@@ -646,7 +646,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Slot Joints:\n");
                     for (int i = 0; i < mSlotJoints.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mSlotJoints[i].Val));
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mSlotJoints[i]));
                     }
                 }
                 if (mExportJoints.Count > 0)
@@ -654,7 +654,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Export Joints:\n");
                     for (int i = 0; i < mExportJoints.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mExportJoints[i].Val));
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mExportJoints[i]));
                     }
                 }
                 if (mGrowthJoints.Count > 0)
@@ -662,7 +662,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Growth Joints:\n");
                     for (int i = 0; i < mGrowthJoints.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mGrowthJoints[i].Val));
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mGrowthJoints[i]));
                     }
                 }
                 if (mSortedJoints.Count > 0)
@@ -670,7 +670,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Sorted Joints:\n");
                     for (int i = 0; i < mSortedJoints.Count; i++)
                     {
-                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mSortedJoints[i].Val));
+                        sb.AppendFormat("[0x{0:X8}] {1}\n", i, GetBoneIndexName(mSortedJoints[i]));
                     }
                 }
                 return sb.ToString();
