@@ -86,7 +86,7 @@ namespace s3piwrappers
                     sb.AppendLine("Values:");
                     for (int i = 0; i < mTrackMasks.Count; i++)
                     {
-                        sb.AppendFormat("[{0}]0x{1:X8}\n", i, mTrackMasks[i]);
+                        sb.AppendFormat("[{0}]{1}\n", i, mTrackMasks[i]);
                     }
                 }
                 return sb.ToString();

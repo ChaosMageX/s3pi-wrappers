@@ -1,3 +1,9 @@
+2010-11-21:
+	Updated to latest s3pi libs
+SkinTone:
+	*Version 6 support
+MLOD:
+	*Added indexBuffer to value string	
 2010-11-14:
 RigEditor:
 	*Simplified rotation input
