@@ -14,6 +14,7 @@ namespace s3piwrappers.RigEditor.Geometry
 
         public EulerAngle(Quaternion q)
         {
+            q.Normalize();
             double poleTest = q.X * q.Y + q.Z * q.W;
             if (poleTest > 0.499)
             {

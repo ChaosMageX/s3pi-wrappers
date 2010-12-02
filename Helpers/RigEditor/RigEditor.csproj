@@ -35,6 +35,9 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RigEditor, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <ExecutableExtension>.exe</ExecutableExtension>
+    </Reference>
     <Reference Include="s3pi.CustomForms">
       <HintPath>..\..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
       <Private>False</Private>
@@ -54,8 +57,10 @@
       <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoneOps\BoneHierarchy.cs" />
@@ -68,24 +73,6 @@
     <Compile Include="Common\IntBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="GrannyArtToolInfoControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GrannyArtToolInfoControl.Designer.cs">
-      <DependentUpon>GrannyArtToolInfoControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GrannyFileInfoControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GrannyFileInfoControl.Designer.cs">
-      <DependentUpon>GrannyFileInfoControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GrannyModelControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GrannyModelControl.Designer.cs">
-      <DependentUpon>GrannyModelControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Common\ValueControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -94,6 +81,12 @@
     </Compile>
     <Compile Include="BoneActionEventArgs.cs" />
     <Compile Include="BoneActionEventHandler.cs" />
+    <Compile Include="Geometry\MatrixInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Geometry\MatrixInputDialog.Designer.cs">
+      <DependentUpon>MatrixInputDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="GrannyBoneControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -176,8 +169,8 @@
     <EmbeddedResource Include="Common\InfoDialog.resx">
       <DependentUpon>InfoDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GrannyArtToolInfoControl.resx">
-      <DependentUpon>GrannyArtToolInfoControl.cs</DependentUpon>
+    <EmbeddedResource Include="Geometry\MatrixInputDialog.resx">
+      <DependentUpon>MatrixInputDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GrannyBoneControl.resx">
       <DependentUpon>GrannyBoneControl.cs</DependentUpon>
@@ -193,12 +186,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Geometry\Vector3Control.resx">
       <DependentUpon>Vector3Control.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GrannyFileInfoControl.resx">
-      <DependentUpon>GrannyFileInfoControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GrannyModelControl.resx">
-      <DependentUpon>GrannyModelControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Common\InputStringDialog.resx">
       <DependentUpon>InputStringDialog.cs</DependentUpon>

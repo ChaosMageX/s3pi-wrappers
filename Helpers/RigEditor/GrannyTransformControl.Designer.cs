@@ -30,13 +30,13 @@ namespace s3piwrappers.RigEditor
         private void InitializeComponent()
         {
             this.gbMain = new System.Windows.Forms.GroupBox();
+            this.llbRotation = new System.Windows.Forms.LinkLabel();
             this.rotationControl = new s3piwrappers.RigEditor.Geometry.EulerControl();
             this.lbPosition = new System.Windows.Forms.Label();
             this.cbScaleEnabled = new System.Windows.Forms.CheckBox();
             this.scaleControl = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.positionControl = new s3piwrappers.RigEditor.Geometry.Vector3Control();
             this.lbScale = new System.Windows.Forms.Label();
-            this.lbRotation = new System.Windows.Forms.Label();
             this.cbPositionEnabled = new System.Windows.Forms.CheckBox();
             this.cbOrientationEnabled = new System.Windows.Forms.CheckBox();
             this.gbMain.SuspendLayout();
@@ -44,13 +44,13 @@ namespace s3piwrappers.RigEditor
             // 
             // gbMain
             // 
+            this.gbMain.Controls.Add(this.llbRotation);
             this.gbMain.Controls.Add(this.rotationControl);
             this.gbMain.Controls.Add(this.lbPosition);
             this.gbMain.Controls.Add(this.cbScaleEnabled);
             this.gbMain.Controls.Add(this.scaleControl);
             this.gbMain.Controls.Add(this.positionControl);
             this.gbMain.Controls.Add(this.lbScale);
-            this.gbMain.Controls.Add(this.lbRotation);
             this.gbMain.Controls.Add(this.cbPositionEnabled);
             this.gbMain.Controls.Add(this.cbOrientationEnabled);
             this.gbMain.Location = new System.Drawing.Point(0, 0);
@@ -59,6 +59,17 @@ namespace s3piwrappers.RigEditor
             this.gbMain.TabIndex = 9;
             this.gbMain.TabStop = false;
             this.gbMain.Text = "Transform";
+            // 
+            // llbRotation
+            // 
+            this.llbRotation.AutoSize = true;
+            this.llbRotation.Location = new System.Drawing.Point(5, 57);
+            this.llbRotation.Name = "llbRotation";
+            this.llbRotation.Size = new System.Drawing.Size(50, 13);
+            this.llbRotation.TabIndex = 9;
+            this.llbRotation.TabStop = true;
+            this.llbRotation.Text = "Rotation:";
+            this.llbRotation.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.llbRotation_LinkClicked);
             // 
             // rotationControl
             // 
@@ -71,7 +82,7 @@ namespace s3piwrappers.RigEditor
             // 
             this.lbPosition.AutoSize = true;
             this.lbPosition.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbPosition.Location = new System.Drawing.Point(8, 16);
+            this.lbPosition.Location = new System.Drawing.Point(5, 16);
             this.lbPosition.Name = "lbPosition";
             this.lbPosition.Size = new System.Drawing.Size(47, 13);
             this.lbPosition.TabIndex = 1;
@@ -107,21 +118,11 @@ namespace s3piwrappers.RigEditor
             // 
             this.lbScale.AutoSize = true;
             this.lbScale.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbScale.Location = new System.Drawing.Point(8, 99);
+            this.lbScale.Location = new System.Drawing.Point(5, 99);
             this.lbScale.Name = "lbScale";
             this.lbScale.Size = new System.Drawing.Size(37, 13);
             this.lbScale.TabIndex = 6;
             this.lbScale.Text = "Scale:";
-            // 
-            // lbRotation
-            // 
-            this.lbRotation.AutoSize = true;
-            this.lbRotation.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbRotation.Location = new System.Drawing.Point(8, 56);
-            this.lbRotation.Name = "lbRotation";
-            this.lbRotation.Size = new System.Drawing.Size(50, 13);
-            this.lbRotation.TabIndex = 3;
-            this.lbRotation.Text = "Rotation:";
             // 
             // cbPositionEnabled
             // 
@@ -138,14 +139,14 @@ namespace s3piwrappers.RigEditor
             // cbOrientationEnabled
             // 
             this.cbOrientationEnabled.AutoSize = true;
-            this.cbOrientationEnabled.Location = new System.Drawing.Point(75, 56);
+            this.cbOrientationEnabled.Location = new System.Drawing.Point(75, 57);
             this.cbOrientationEnabled.Name = "cbOrientationEnabled";
             this.cbOrientationEnabled.Size = new System.Drawing.Size(65, 17);
             this.cbOrientationEnabled.TabIndex = 4;
             this.cbOrientationEnabled.TabStop = false;
             this.cbOrientationEnabled.Text = "Enabled";
             this.cbOrientationEnabled.UseVisualStyleBackColor = true;
-            this.cbOrientationEnabled.CheckedChanged += new System.EventHandler(this.cbOrientationEnabled_CheckedChanged);
+            this.cbOrientationEnabled.CheckedChanged += new System.EventHandler(this.cbRotationEnabled_CheckedChanged);
             // 
             // GrannyTransformControl
             // 
@@ -161,7 +162,6 @@ namespace s3piwrappers.RigEditor
         }
         private System.Windows.Forms.Label lbPosition;
         private Geometry.Vector3Control positionControl;
-        private System.Windows.Forms.Label lbRotation;
         private System.Windows.Forms.CheckBox cbOrientationEnabled;
         private System.Windows.Forms.CheckBox cbPositionEnabled;
         private System.Windows.Forms.CheckBox cbScaleEnabled;
@@ -169,6 +169,7 @@ namespace s3piwrappers.RigEditor
         private System.Windows.Forms.Label lbScale;
         private System.Windows.Forms.GroupBox gbMain;
         private EulerControl rotationControl;
+        private System.Windows.Forms.LinkLabel llbRotation;
 
     }
 }

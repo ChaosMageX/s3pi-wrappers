@@ -29,14 +29,14 @@
         {
             this.btnCommit = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.grannyFileInfoControl1 = new s3piwrappers.RigEditor.GrannyFileInfoControl();
+            this.grannySkeletonControl1 = new s3piwrappers.RigEditor.GrannySkeletonControl();
             this.SuspendLayout();
             // 
             // btnCommit
             // 
             this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnCommit.Location = new System.Drawing.Point(587, 463);
+            this.btnCommit.Location = new System.Drawing.Point(699, 527);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(75, 23);
             this.btnCommit.TabIndex = 1;
@@ -48,7 +48,7 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(506, 463);
+            this.btnCancel.Location = new System.Drawing.Point(618, 527);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
@@ -56,27 +56,26 @@
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
-            // grannyFileInfoControl1
+            // grannySkeletonControl1
             // 
-            this.grannyFileInfoControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.grannySkeletonControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.grannyFileInfoControl1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.grannyFileInfoControl1.Location = new System.Drawing.Point(0, 0);
-            this.grannyFileInfoControl1.Name = "grannyFileInfoControl1";
-            this.grannyFileInfoControl1.Size = new System.Drawing.Size(671, 461);
-            this.grannyFileInfoControl1.TabIndex = 0;
-            this.grannyFileInfoControl1.Value = null;
+            this.grannySkeletonControl1.Location = new System.Drawing.Point(5, 12);
+            this.grannySkeletonControl1.Name = "grannySkeletonControl1";
+            this.grannySkeletonControl1.Size = new System.Drawing.Size(769, 509);
+            this.grannySkeletonControl1.TabIndex = 3;
+            this.grannySkeletonControl1.Value = null;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(672, 498);
-            this.Controls.Add(this.grannyFileInfoControl1);
+            this.ClientSize = new System.Drawing.Size(784, 562);
+            this.Controls.Add(this.grannySkeletonControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
-            this.MinimumSize = new System.Drawing.Size(680, 530);
+            this.MinimumSize = new System.Drawing.Size(690, 340);
             this.Name = "MainForm";
             this.Text = "Rig Editor";
             this.ResumeLayout(false);
@@ -87,7 +86,7 @@
 
         private System.Windows.Forms.Button btnCommit;
         private System.Windows.Forms.Button btnCancel;
-        private GrannyFileInfoControl grannyFileInfoControl1;
+        private GrannySkeletonControl grannySkeletonControl1;
 
     }
 }

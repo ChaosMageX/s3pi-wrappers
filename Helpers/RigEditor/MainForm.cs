@@ -13,7 +13,7 @@ namespace s3piwrappers.RigEditor
         }
 
         private byte[] mResult;
-        private RigResource mRig;
+        private readonly RigResource mRig;
         public MainForm(Stream s)
         {
             InitializeComponent();
@@ -24,12 +24,16 @@ namespace s3piwrappers.RigEditor
             {
                 throw new Exception("Could not read Granny2 data.  Ensure that the correct granny2.dll is installed.");
             }
-            this.grannyFileInfoControl1.Value = grd.FileInfo;
+            this.grannySkeletonControl1.Value = grd.FileInfo.Skeleton;
+            
         }
 
 
         private void btnCommit_Click(object sender, System.EventArgs e)
         {
+            var grd = mRig.Rig.GrannyData as WrappedGrannyData;
+            if (!grd.FileInfo.Skeleton.Name.Equals(grd.FileInfo.Model.Name)) //sync names since model name is no longer displayed
+                grd.FileInfo.Model.Name = grd.FileInfo.Skeleton.Name;
             mResult = mRig.AsBytes;
             Environment.ExitCode = 0;
             Close();

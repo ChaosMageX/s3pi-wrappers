@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Forms;
 using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Common;
 using s3piwrappers.RigEditor.Geometry;
@@ -97,7 +98,7 @@ namespace s3piwrappers.RigEditor
             }
         }
 
-        private void cbOrientationEnabled_CheckedChanged(object sender, EventArgs e)
+        private void cbRotationEnabled_CheckedChanged(object sender, EventArgs e)
         {
             if (cbOrientationEnabled.Checked)
             {
@@ -123,6 +124,21 @@ namespace s3piwrappers.RigEditor
                 mValue.Flags &= mask;
             }
 
+        }
+
+        private void llbRotation_LinkClicked(object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
+        {
+            MatrixInputDialog d = new MatrixInputDialog(new Matrix(new Quaternion(Value.Orientation.X,Value.Orientation.Y,Value.Orientation.Z,Value.Orientation.W)));
+            DialogResult result = d.ShowDialog(this);
+            if(result == DialogResult.OK)
+            {
+                Quaternion q = new Quaternion(d.Value);
+                this.Value.Orientation.X = (float)q.X;
+                this.Value.Orientation.Y = (float)q.Y;
+                this.Value.Orientation.Z = (float)q.Z;
+                this.Value.Orientation.W = (float)q.W;
+                this.UpdateView();
+            }
         }
 
     }

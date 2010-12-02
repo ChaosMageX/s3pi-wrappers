@@ -1,3 +1,7 @@
+2010-12-02:
+RigEditor:
+	*simplified interface by removing several values ignored by game
+	*added matrix input to rotations(click the "Rotation" link text for a dialog)
 2010-12-01:
 AnimationResources:
 	*removed offset check that caused an error with clips modified by the animtool
