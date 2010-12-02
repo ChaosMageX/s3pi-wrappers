@@ -77,7 +77,7 @@ namespace s3piwrappers
         public class TextureList : AResource.DependentList<Texture>
         {
             public TextureList(EventHandler handler) : base(handler) { }
-            public TextureList(EventHandler handler, IList<Texture> ilt) : base(handler, ilt) { }
+            public TextureList(EventHandler handler, IEnumerable<Texture> ilt) : base(handler, ilt) { }
             public TextureList(EventHandler handler, Stream s) : base(handler, s) { }
             protected override void Parse(Stream s)
             {

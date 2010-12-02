@@ -53,7 +53,7 @@ namespace s3piwrappers
                 Parse(s, count);
             }
 
-            public VertexElementLayoutList(EventHandler handler, IList<VertexElementLayout> ilt) : base(handler, ilt) {}
+            public VertexElementLayoutList(EventHandler handler, IEnumerable<VertexElementLayout> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {

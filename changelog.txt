@@ -1,3 +1,11 @@
+2010-12-01:
+AnimationResources:
+	*removed offset check that caused an error with clips modified by the animtool
+2010-11-27:
+RigEditor:
+	*fixed transformation order in matrix calculation
+AnimationResources:
+	*refactoring of ClipResource
 2010-11-21:
 	Updated to latest s3pi libs
 SkinTone:

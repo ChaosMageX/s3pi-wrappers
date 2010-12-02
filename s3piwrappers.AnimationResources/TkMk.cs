@@ -17,7 +17,7 @@ namespace s3piwrappers
         public class TrackMaskList : SimpleList<Single>
         {
             public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
-            public TrackMaskList(EventHandler handler, IList<HandlerElement<Single>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
+            public TrackMaskList(EventHandler handler, IEnumerable<float> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
             public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
             static Single ReadElement(Stream s) { return new BinaryReader(s).ReadSingle(); }
             static void WriteElement(Stream s, Single element) { new BinaryWriter(s).Write(element); }

@@ -263,7 +263,7 @@ namespace s3piwrappers
                 Parse(s);
             }
 
-            public MeshList(EventHandler handler, MLOD owner, IList<Mesh> ilt)
+            public MeshList(EventHandler handler, MLOD owner, IEnumerable<Mesh> ilt)
                 : base(handler, ilt)
             {
                 mOwner = owner;

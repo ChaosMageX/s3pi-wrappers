@@ -64,7 +64,7 @@ namespace s3piwrappers
         public class ARGBList : DependentList<ARGB>
         {
             public ARGBList(EventHandler handler, Stream s) : base(handler, s) {}
-            public ARGBList(EventHandler handler, IList<ARGB> ilt) : base(handler, ilt) {}
+            public ARGBList(EventHandler handler, IEnumerable<ARGB> ilt) : base(handler, ilt) {}
             public ARGBList(EventHandler handler) : base(handler) {}
 
             public override void Add()

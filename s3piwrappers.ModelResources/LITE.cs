@@ -588,7 +588,7 @@ namespace s3piwrappers
             public LightList(EventHandler handler, Stream s, int count) : base(handler) { Parse(s,count);}
             public LightList(EventHandler handler) : base(handler) { }
             public LightList(EventHandler handler, long size) : base(handler, size) { }
-            public LightList(EventHandler handler, IList<Light> ilt) : base(handler, ilt) { }
+            public LightList(EventHandler handler, IEnumerable<Light> ilt) : base(handler, ilt) { }
 
             public override void Add()
             {
@@ -804,7 +804,7 @@ namespace s3piwrappers
             }
             public OccluderList(EventHandler handler) : base(handler) { }
             public OccluderList(EventHandler handler, long size) : base(handler, size) { }
-            public OccluderList(EventHandler handler, IList<Occluder> ilt) : base(handler, ilt) { }
+            public OccluderList(EventHandler handler, IEnumerable<Occluder> ilt) : base(handler, ilt) { }
             private void Parse(Stream s, int count)
             {
                 for (int i = 0; i < count; i++)

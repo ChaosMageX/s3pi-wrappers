@@ -28,7 +28,7 @@ namespace s3piwrappers
         {
             public BoundingBoxList(EventHandler handler) : base(handler) { }
             public BoundingBoxList(EventHandler handler, Stream s) : base(handler, s) { }
-            public BoundingBoxList(EventHandler handler, IList<BoundingBox> ilt) : base(handler, ilt) { }
+            public BoundingBoxList(EventHandler handler, IEnumerable<BoundingBox> ilt) : base(handler, ilt) { }
             public override void Add()
             {
                 base.Add(new object[] { });
@@ -54,7 +54,7 @@ namespace s3piwrappers
                 Parse(s, count);
             }
 
-            public LODEntryList(EventHandler handler, IList<LODEntry> ilt) : base(handler, ilt) { }
+            public LODEntryList(EventHandler handler, IEnumerable<LODEntry> ilt) : base(handler, ilt) { }
 
             private void Parse(Stream s, int count)
             {

@@ -297,7 +297,7 @@ namespace s3piwrappers
         {
             public ShaderKeyList(EventHandler handler) : base(handler) { }
             public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s) { }
-            public ShaderKeyList(EventHandler handler, IList<ShaderKey> ilt) : base(handler, ilt) { }
+            public ShaderKeyList(EventHandler handler, IEnumerable<ShaderKey> ilt) : base(handler, ilt) { }
 
             public override void Add()
             {
@@ -321,7 +321,7 @@ namespace s3piwrappers
             private SkinToneResource mOwner;
             public TextureKeyList(EventHandler handler, SkinToneResource owner) : base(handler) { mOwner = owner; }
             public TextureKeyList(EventHandler handler, Stream s, SkinToneResource owner, ResourceKeyTable keys) : this(handler, owner) { Parse(s, keys); }
-            public TextureKeyList(EventHandler handler, IList<TextureKey> ilt, SkinToneResource owner) : base(handler, ilt) { mOwner = owner; }
+            public TextureKeyList(EventHandler handler, IEnumerable<TextureKey> ilt, SkinToneResource owner) : base(handler, ilt) { mOwner = owner; }
 
             public override void Add()
             {

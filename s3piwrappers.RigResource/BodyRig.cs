@@ -13,7 +13,7 @@ namespace s3piwrappers
         public class GrannyBoneReferenceList : SimpleList<Int32>
         {
             public GrannyBoneReferenceList(EventHandler handler) : base(handler, CreateElement, WriteElement) { }
-            public GrannyBoneReferenceList(EventHandler handler, IList<Int32> ilt) : base(handler, ilt, CreateElement, WriteElement) { }
+            public GrannyBoneReferenceList(EventHandler handler, IEnumerable<int> ilt) : base(handler, ilt, CreateElement, WriteElement) { }
             public GrannyBoneReferenceList(EventHandler handler, Stream s) : base(handler, s, CreateElement, WriteElement) { }
             static new Int32 CreateElement(Stream s)
             {
@@ -28,7 +28,7 @@ namespace s3piwrappers
         public class IkLinkList : AResource.DependentList<IkLink>
         {
             public IkLinkList(EventHandler handler) : base(handler) { }
-            public IkLinkList(EventHandler handler, IList<IkLink> ilt) : base(handler, ilt) { }
+            public IkLinkList(EventHandler handler, IEnumerable<IkLink> ilt) : base(handler, ilt) { }
 
             public override void Add()
             {

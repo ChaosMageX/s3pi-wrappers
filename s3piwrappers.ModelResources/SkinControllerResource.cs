@@ -11,7 +11,7 @@ namespace s3piwrappers
         {
             public BoneList(EventHandler handler) : base(handler) { }
 
-            public BoneList(EventHandler handler, IList<Bone> ilt) : base(handler, ilt) {}
+            public BoneList(EventHandler handler, IEnumerable<Bone> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {

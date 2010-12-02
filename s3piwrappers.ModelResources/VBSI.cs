@@ -88,7 +88,7 @@ namespace s3piwrappers
                 Parse(s, count);
             }
 
-            public SwizzleList(EventHandler handler, IList<SwizzleEntry> ilt) : base(handler, ilt) { }
+            public SwizzleList(EventHandler handler, IEnumerable<SwizzleEntry> ilt) : base(handler, ilt) { }
 
             private void Parse(Stream s, int count)
             {
@@ -116,7 +116,7 @@ namespace s3piwrappers
         {
             public SegmentList(EventHandler handler): base(handler){}
             public SegmentList(EventHandler handler, Stream s): base(handler, s){}
-            public SegmentList(EventHandler handler, IList<SegmentInfo> ilt) : base(handler, ilt) { }
+            public SegmentList(EventHandler handler, IEnumerable<SegmentInfo> ilt) : base(handler, ilt) { }
             public override void Add()
             {
                 base.Add(new object[] { });

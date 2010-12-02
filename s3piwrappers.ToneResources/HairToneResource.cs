@@ -168,7 +168,7 @@ namespace s3piwrappers
         {
             public ShaderKeyList(EventHandler handler) : base(handler) { }
             public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s) { }
-            public ShaderKeyList(EventHandler handler, IList<ShaderKey> ilt) : base(handler, ilt) {}
+            public ShaderKeyList(EventHandler handler, IEnumerable<ShaderKey> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {

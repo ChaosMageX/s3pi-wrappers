@@ -22,74 +22,13 @@ namespace s3piwrappers
     }
     public class ClipResource : AResource
     {
-        public abstract class DependentElement : AHandlerElement
+        public abstract class CountedOffsetItemList<T> : DependentList<T>
+            where T : IEquatable<T>
         {
-            protected DependentElement(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
-            {
+            protected CountedOffsetItemList(EventHandler handler) : base(handler) { }
+            protected CountedOffsetItemList(EventHandler handler, Stream s) : base(handler, s) { }
+            protected CountedOffsetItemList(EventHandler handler, IEnumerable<T> ilt) : base(handler, ilt) { }
 
-            }
-            protected DependentElement(int apiVersion, EventHandler handler, Stream s)
-                : base(apiVersion, handler)
-            {
-                Parse(s);
-            }
-            protected DependentElement(int apiVersion, EventHandler handler, DependentElement basis)
-                : base(apiVersion, handler)
-            {
-                MemoryStream ms = new MemoryStream();
-                basis.UnParse(ms);
-                ms.Position = 0L;
-                Parse(ms);
-            }
-            protected abstract void Parse(Stream s);
-            public abstract void UnParse(Stream s);
-
-
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                MemoryStream ms = new MemoryStream();
-                UnParse(ms);
-                return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, ms });
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return 1; }
-            }
-        }
-
-        public class DependentElementList<T> : AResource.DependentList<T>
-            where T : DependentElement, IEquatable<T>
-        {
-            public DependentElementList(EventHandler handler) : base(handler) { }
-            public DependentElementList(EventHandler handler, Stream s) : base(handler, s) { }
-            public override void Add()
-            {
-                base.Add(new object[] { });
-            }
-
-            protected override T CreateElement(Stream s)
-            {
-                return (T)Activator.CreateInstance(typeof(T), new object[] { 0, elementHandler, s });
-            }
-
-            protected override void WriteElement(Stream s, T element)
-            {
-                element.UnParse(s);
-            }
-        }
-        public class CountedOffsetItemList<T> : DependentElementList<T>
-            where T : DependentElement, IEquatable<T>
-        {
-            public CountedOffsetItemList(EventHandler handler) : base(handler) { }
-            public CountedOffsetItemList(EventHandler handler, Stream s) : base(handler, s) { }
             protected override void Parse(Stream s)
             {
                 base.Clear();
@@ -126,23 +65,116 @@ namespace s3piwrappers
                 for (int i = 0; i < base.Count; i++) { bw.Write(offsets[i]); }
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
-        }
-        
-        public class IKTargetTable : DependentElement
-        {
-            private CountedOffsetItemList<IKChainEntry> mIkChains;
-            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler)
-            {
-                mIkChains = new CountedOffsetItemList<IKChainEntry>(base.handler);
-            }
-            public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-            public CountedOffsetItemList<IKChainEntry> IKChains
+            public override void Add()
+            {
+                base.Add(new object[] { });
+            }
+
+            protected abstract override T CreateElement(Stream s);
+
+            protected abstract override void WriteElement(Stream s, T element);
+        }
+        public class IKChainList : CountedOffsetItemList<IKChainEntry>
+        {
+            public IKChainList(EventHandler handler)
+                : base(handler)
+            {
+            }
+
+            public IKChainList(EventHandler handler, Stream s)
+                : base(handler, s)
+            {
+            }
+
+            public IKChainList(EventHandler handler, IEnumerable<IKChainEntry> ilt)
+                : base(handler, ilt)
+            {
+            }
+
+            protected override IKChainEntry CreateElement(Stream s)
+            {
+                return new IKChainEntry(0, handler, s);
+            }
+
+            protected override void WriteElement(Stream s, IKChainEntry element)
+            {
+                element.UnParse(s);
+            }
+        }
+        public class IKTargetList : CountedOffsetItemList<IKTarget>
+        {
+            public IKTargetList(EventHandler handler)
+                : base(handler)
+            {
+            }
+
+            public IKTargetList(EventHandler handler, Stream s)
+                : base(handler, s)
+            {
+            }
+
+            public IKTargetList(EventHandler handler, IEnumerable<IKTarget> ilt)
+                : base(handler, ilt)
+            {
+            }
+
+            protected override IKTarget CreateElement(Stream s)
+            {
+                return new IKTarget(0, handler, s);
+            }
+
+            protected override void WriteElement(Stream s, IKTarget element)
+            {
+                element.UnParse(s);
+            }
+        }
+        public class IKTargetTable : AHandlerElement
+        {
+            private IKChainList mIkChains;
+            public IKTargetTable(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+                mIkChains = new IKChainList(base.handler);
+            }
+            public IKTargetTable(int apiVersion, EventHandler handler, IKTargetTable basis) : this(apiVersion, handler, basis.IKChains) { }
+            public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+
+            public IKTargetTable(int APIversion, EventHandler handler, IKChainList ikChains)
+                : base(APIversion, handler)
+            {
+                mIkChains = ikChains;
+            }
+
+            public IKChainList IKChains
             {
                 get { return mIkChains; }
-                set { mIkChains = value; OnElementChanged(); }
+                set { if (mIkChains != value) { mIkChains = value; OnElementChanged(); } }
             }
 
+            private void Parse(Stream s)
+            {
+                mIkChains = new IKChainList(handler, s);
+            }
+            public void UnParse(Stream s)
+            {
+                mIkChains.UnParse(s);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKTargetTable(0, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
             public string Value
             {
                 get
@@ -155,30 +187,63 @@ namespace s3piwrappers
                     return sb.ToString();
                 }
             }
-            protected override void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                mIkChains = new CountedOffsetItemList<IKChainEntry>(handler, s);
-            }
-            public override void UnParse(Stream s)
-            {
-                BinaryWriter bw = new BinaryWriter(s);
-                mIkChains.UnParse(s);
-            }
         }
-        public class IKChainEntry : DependentElement, IEquatable<IKChainEntry>
+        public class IKChainEntry : AHandlerElement, IEquatable<IKChainEntry>
         {
-            private CountedOffsetItemList<IKTarget> mIkTargets;
+            private IKTargetList mIkTargets;
             public IKChainEntry(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
-                mIkTargets = new CountedOffsetItemList<IKTarget>(handler);
+                mIkTargets = new IKTargetList(handler);
             }
-            public IKChainEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            public IKChainEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
 
-            public IKChainEntry(int apiVersion, EventHandler handler, IKChainEntry basis)
-                : base(apiVersion, handler, basis)
+            public IKChainEntry(int apiVersion, EventHandler handler, IKChainEntry basis) : this(apiVersion, handler, basis.IKTargets) { }
+
+            public IKChainEntry(int APIversion, EventHandler handler, IKTargetList ikTargets)
+                : base(APIversion, handler)
             {
+                mIkTargets = ikTargets;
+            }
+
+            public IKTargetList IKTargets
+            {
+                get { return mIkTargets; }
+                set { if (mIkTargets != value) { mIkTargets = value; OnElementChanged(); } }
+            }
+
+            private void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                if (br.ReadUInt32() != 0x7E7E7E7E) throw new InvalidDataException(String.Format("Expected 0x7E7E7E7E Padding at 0x{0:X8}", s.Position - 4)); //7E7E7E7E padding
+                mIkTargets = new IKTargetList(handler, s);
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
+                mIkTargets.UnParse(s);
+            }
+            public bool Equals(IKChainEntry other)
+            {
+                return base.Equals(other);
+            }
+
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKChainEntry(0, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
             }
 
             public string Value
@@ -193,94 +258,89 @@ namespace s3piwrappers
                     return sb.ToString();
                 }
             }
-            public CountedOffsetItemList<IKTarget> IKTargets
-            {
-                get { return mIkTargets; }
-                set { mIkTargets = value; OnElementChanged(); }
-            }
-
-            protected override void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                if (br.ReadUInt32() != 0x7E7E7E7E) throw new InvalidDataException(String.Format("Expected 0x7E7E7E7E Padding at 0x{0:X8}", s.Position - 4)); //7E7E7E7E padding
-                mIkTargets = new CountedOffsetItemList<IKTarget>(handler, s);
-            }
-
-            public override void UnParse(Stream s)
-            {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
-                mIkTargets.UnParse(s);
-            }
-            public bool Equals(IKChainEntry other)
-            {
-                return base.Equals(other);
-            }
-
         }
-        public class IKTarget : DependentElement, IEquatable<IKTarget>
+        public class IKTarget : AHandlerElement, IEquatable<IKTarget>
         {
             private UInt32 mIndex;
-            private string mTargetNamespace = String.Empty;
-            private string mTargetName = String.Empty;
+            private string mTargetNamespace;
+            private string mTargetName;
             public IKTarget(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public IKTarget(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+            public IKTarget(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public IKTarget(int apiVersion, EventHandler handler, IKTarget basis) : this(apiVersion, handler, basis.Index, basis.TargetNamespace, basis.TargetName) { }
+            public IKTarget(int APIversion, EventHandler handler, uint index, string targetNamespace, string targetName)
+                : base(APIversion, handler)
+            {
+                mIndex = index;
+                mTargetNamespace = targetNamespace;
+                mTargetName = targetName;
+            }
 
-            public IKTarget(int apiVersion, EventHandler handler, IKTarget basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
-            public string Value
-            {
-                get { return ToString(); }
-            }
             [ElementPriority(1)]
             public uint Index
             {
                 get { return mIndex; }
-                set { mIndex = value; OnElementChanged(); }
+                set { if (mIndex != value) { mIndex = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
             public string TargetNamespace
             {
                 get { return mTargetNamespace; }
-                set { mTargetNamespace = value; OnElementChanged(); }
+                set { if (mTargetNamespace != value) { mTargetNamespace = value; OnElementChanged(); } }
             }
             [ElementPriority(3)]
             public string TargetName
             {
                 get { return mTargetName; }
-                set { mTargetName = value; OnElementChanged(); }
+                set { if (mTargetName != value) { mTargetName = value; OnElementChanged(); } }
             }
 
-            protected override void Parse(Stream s)
+            private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mIndex = br.ReadUInt32();
-                mTargetNamespace = ReadZString(br,512);
-                mTargetName = ReadZString(br,512);
+                mTargetNamespace = ReadZString(br, 512);
+                mTargetName = ReadZString(br, 512);
             }
 
-            public override void UnParse(Stream s)
+            public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mIndex);
-                WriteZString(bw,mTargetNamespace, 0x23, 512);
-                WriteZString(bw,mTargetName, 0x23, 512);
+                WriteZString(bw, mTargetNamespace, 0x23, 512);
+                WriteZString(bw, mTargetName, 0x23, 512);
+            }
+            public bool Equals(IKTarget other)
+            {
+                return mIndex.Equals(other.mIndex) && mTargetNamespace.Equals(other.mTargetNamespace) && mTargetName.Equals(other.mTargetName);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKTarget(requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
             }
             public override string ToString()
             {
                 return String.Format("(0x{0:X8}){1}:{2}", mIndex, mTargetNamespace, mTargetName);
             }
 
-            public bool Equals(IKTarget other)
+            public string Value
             {
-                return mIndex.Equals(other.mIndex) && mTargetNamespace.Equals(other.mTargetNamespace) && mTargetName.Equals(other.mTargetName);
+                get { return ToString(); }
             }
         }
-        
 
-                public class EventTable : DependentElement
+
+        public class EventTable : AHandlerElement
         {
             private UInt32 mVersion;
             private EventList mEvents;
@@ -289,12 +349,64 @@ namespace s3piwrappers
             {
                 mEvents = new EventList(handler);
             }
-            public EventTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
-            public EventTable(int apiVersion, EventHandler handler, EventTable basis)
-                : base(apiVersion, handler, basis)
+            public EventTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public EventTable(int apiVersion, EventHandler handler, EventTable basis) : this(apiVersion, handler, basis.Version, basis.Events) { }
+
+            public EventTable(int APIversion, EventHandler handler, uint version, EventList events)
+                : base(APIversion, handler)
             {
+                mVersion = version;
+                mEvents = events;
             }
 
+            [ElementPriority(1)]
+            public uint Version
+            {
+                get { return mVersion; }
+                set { if (mVersion != value) { mVersion = value; OnElementChanged(); } }
+            }
+            [ElementPriority(2)]
+            public EventList Events
+            {
+                get { return mEvents; }
+                set { if (mEvents != value) { mEvents = value; OnElementChanged(); } }
+            }
+
+
+            private void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
+                if (magic != "=CE=")
+                    throw new InvalidDataException(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
+                mVersion = br.ReadUInt32();
+                mEvents = new EventList(handler, s);
+            }
+
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(Encoding.ASCII.GetBytes("=CE="));
+                bw.Write(mVersion);
+                mEvents.UnParse(s);
+
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new EventTable(requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
             public string Value
             {
                 get
@@ -309,56 +421,13 @@ namespace s3piwrappers
                     return sb.ToString();
                 }
             }
-            [ElementPriority(1)]
-            public uint Version
-            {
-                get { return mVersion; }
-                set { mVersion = value; OnElementChanged(); }
-            }
-            [ElementPriority(2)]
-            public EventList Events
-            {
-                get { return mEvents; }
-                set { mEvents = value; OnElementChanged(); }
-            }
-
-
-            protected override void Parse(Stream s)
-            {
-                BinaryReader br = new BinaryReader(s);
-                string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
-                if (magic != "=CE=")
-                    throw new InvalidDataException(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
-                mVersion = br.ReadUInt32();
-                mEvents = new EventList(handler, s);
-            }
-
-
-            public override void UnParse(Stream s)
-            {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(Encoding.ASCII.GetBytes("=CE="));
-                bw.Write(mVersion);
-                mEvents.UnParse(s);
-
-            }
         }
-        public class EventList : DependentElementList<Event>
+        public class EventList : DependentList<Event>
         {
 
             public EventList(EventHandler handler) : base(handler) { }
             public EventList(EventHandler handler, Stream s) : base(handler, s) { }
-            public override bool Add(params object[] fields)
-            {
-                if (fields.Length == 0) return false;
-                if (fields.Length == 1 && typeof(Event).IsAssignableFrom(fields[0].GetType()))
-                {
-                    ((IList<Event>)this).Add((Event)fields[0]);
-                    return true;
-                }
-                Add(Event.CreateInstance(0, this.handler, (ClipEventType)(int)fields[0]));
-                return true;
-            }
+
             protected override void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
@@ -368,8 +437,7 @@ namespace s3piwrappers
                 if (checking && count > 0 && startOffset != 4)
                     throw new Exception(String.Format("Expected startOffset of 4 at =CE= section, but got 0x{0:X8}", startOffset));
                 for (uint i = 0; i < count; i++) { ((IList<Event>)this).Add(CreateElement(s)); }
-                if (checking && s.Position != endOffset)
-                    throw new Exception(String.Format("Expected endOffset of 0x{0:X8} at =CE= section, but got 0x{1:X8}", endOffset, s.Position));
+                s.Seek(endOffset, SeekOrigin.Begin);
             }
             public override void UnParse(Stream s)
             {
@@ -390,46 +458,73 @@ namespace s3piwrappers
             }
             protected override Event CreateElement(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
-                ClipEventType type = (ClipEventType)br.ReadUInt16();
+                ClipEventType type = (ClipEventType)new BinaryReader(s).ReadUInt16();
                 return Event.CreateInstance(0, handler, type, s);
             }
             protected override void WriteElement(Stream s, Event element)
             {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write((ushort)element.Type);
-                base.WriteElement(s, element);
+                new BinaryWriter(s).Write((ushort)element.Type);
+                element.UnParse(s);
+            }
+            protected override Type GetElementType(params object[] fields)
+            {
+                if (fields != null && fields.Length > 0)
+                {
+                    if (typeof(Event).IsAssignableFrom(fields[0].GetType()))
+                    {
+                        return fields[0].GetType();
+                    }
+                    if (typeof(ClipEventType).IsAssignableFrom(fields[0].GetType()))
+                    {
+                        ClipEventType type = (ClipEventType)fields[0];
+                        switch (type)
+                        {
+                            case ClipEventType.Parent: return typeof(ParentEvent);
+                            case ClipEventType.DestroyProp: return typeof(DestroyPropEvent);
+                            case ClipEventType.Effect: return typeof(EffectEvent);
+                            case ClipEventType.Sound: return typeof(SoundEvent);
+                            case ClipEventType.Script: return typeof(ScriptEvent);
+                            case ClipEventType.Visibility: return typeof(VisibilityEvent);
+                            case ClipEventType.StopEffect: return typeof(StopEffectEvent);
+                            case ClipEventType.UnParent: return typeof(UnparentEvent);
+                            default: throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
+                        }
+                    }
+                }
+                return base.GetElementType(fields);
+            }
+            public override void Add()
+            {
+                throw new NotSupportedException();
             }
         }
-        public abstract class Event : DependentElement, IEquatable<Event>
+        public abstract class Event : AHandlerElement, IEquatable<Event>
         {
 
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type)
-                : base(apiVersion, handler)
-            {
-                mType = type;
-                mFloat01 = -1f;
-                mFloat02 = -1f;
-                mShort01 = 0xC1E4;
-            }
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
-                : this(apiVersion, handler, type)
-            {
-                if (s != null) Parse(s);
-            }
-            protected Event(int apiVersion, EventHandler handler, Event basis)
-                : base(apiVersion, handler)
-            {
-                mType = basis.Type;
-            }
-            private ClipEventType mType;
+            private readonly ClipEventType mType;
             private UInt16 mShort01;
             private UInt32 mId;
             private Single mTimecode;
             private Single mFloat01;
             private Single mFloat02;
             private UInt32 mInt01;
-            private String mEventName = String.Empty;
+            private String mEventName;
+
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type) : this(apiVersion, handler, type, 0xC1E4, 0, 0f, -1f, -1f, 0,"") { }
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : this(apiVersion, handler, type) { mType = type; Parse(s); }
+            protected Event(int apiVersion, EventHandler handler, Event basis) : this(apiVersion, handler, basis.Type, basis.Short01, basis.Id, basis.Timecode, basis.Float01, basis.Float02, basis.Int01,basis.EventName) { }
+            protected Event(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01,string eventName)
+                : base(APIversion, handler)
+            {
+                mType = type;
+                mShort01 = short01;
+                mId = id;
+                mTimecode = timecode;
+                mFloat01 = float01;
+                mFloat02 = float02;
+                mInt01 = int01;
+                mEventName = eventName;
+            }
 
             public virtual string Value
             {
@@ -455,43 +550,43 @@ namespace s3piwrappers
             public string EventName
             {
                 get { return mEventName; }
-                set { mEventName = value; OnElementChanged(); }
+                set { if (mEventName != value) { mEventName = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set { if (mFloat01 != value) { mFloat01 = value; OnElementChanged(); } }
             }
             [ElementPriority(3)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set { if (mFloat02 != value) { mFloat02 = value; OnElementChanged(); } }
             }
             [ElementPriority(4)]
             public uint Id
             {
                 get { return mId; }
-                set { mId = value; OnElementChanged(); }
+                set { if (mId != value) { mId = value; OnElementChanged(); } }
             }
             [ElementPriority(5)]
             public uint Int01
             {
                 get { return mInt01; }
-                set { mInt01 = value; OnElementChanged(); }
+                set { if (mInt01 != value) { mInt01 = value; OnElementChanged(); } }
             }
             [ElementPriority(6)]
             public ushort Short01
             {
                 get { return mShort01; }
-                set { mShort01 = value; OnElementChanged(); }
+                set { if (mShort01 != value) { mShort01 = value; OnElementChanged(); } }
             }
             [ElementPriority(7)]
             public float Timecode
             {
                 get { return mTimecode; }
-                set { mTimecode = value; OnElementChanged(); }
+                set { if (mTimecode != value) { mTimecode = value; OnElementChanged(); } }
             }
             public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type)
             {
@@ -513,7 +608,7 @@ namespace s3piwrappers
                     default: throw new InvalidDataException(String.Format("Event type: {0} not implemented", type));
                 }
             }
-            protected override void Parse(Stream s)
+            protected virtual void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mShort01 = br.ReadUInt16();
@@ -526,7 +621,7 @@ namespace s3piwrappers
                 mEventName = ReadZString(br);
                 while ((s.Position % 4) != 0) br.ReadByte(); //padding to next DWORD
             }
-            public override void UnParse(Stream s)
+            public virtual void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mShort01);
@@ -536,7 +631,7 @@ namespace s3piwrappers
                 bw.Write(mFloat02);
                 bw.Write(mInt01);
                 bw.Write(mEventName.Length);
-                WriteZString(bw,mEventName);
+                WriteZString(bw, mEventName);
                 while ((s.Position % 4) != 0) bw.Write((byte)0x00); //padding to next DWORD
             }
             public override string ToString()
@@ -548,26 +643,51 @@ namespace s3piwrappers
             {
                 return base.Equals(other);
             }
+
+            public abstract override AHandlerElement Clone(EventHandler handler);
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
         }
         [ConstructorParameters(new object[] { ClipEventType.Parent })]
         public class ParentEvent : Event
         {
-            internal ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
-                : base(apiVersion, handler, type)
-            {
-                mMatrix4x4 = new Single[16];
-                if (s != null) Parse(s);
-            }
-            public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
+
 
             private UInt32 mActorNameHash;
             private UInt32 mObjectNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown01;
-            private Single[] mMatrix4x4;
+            private Single[] mTransform;
+
+            public ParentEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { mTransform = new Single[16]; }
+            public ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            
+            public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis) : base(apiVersion, handler, basis)
+            {
+                mActorNameHash = basis.ActorNameHash;
+                mObjectNameHash = basis.ObjectNameHash;
+                mSlotNameHash = basis.SlotNameHash;
+                mUnknown01 = basis.Unknown01;
+                mTransform = basis.Transform;
+            }
+
+
+            public ParentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName, uint actorNameHash, uint objectNameHash, uint slotNameHash, uint unknown01, float[] transform) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            {
+                mActorNameHash = actorNameHash;
+                mObjectNameHash = objectNameHash;
+                mSlotNameHash = slotNameHash;
+                mUnknown01 = unknown01;
+                mTransform = transform;
+            }
 
             public override string Value
             {
@@ -578,15 +698,15 @@ namespace s3piwrappers
                     sb.AppendFormat("Object:\t0x{0:X8}\n", mObjectNameHash);
                     sb.AppendFormat("Slot:\t0x{0:X8}\n", mSlotNameHash);
                     sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                    sb.AppendFormat("Matrix:\n");
+                    sb.AppendFormat("Transform:\n");
                     sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
-                        , mMatrix4x4[0], mMatrix4x4[1], mMatrix4x4[2], mMatrix4x4[3]);
+                        , mTransform[0], mTransform[1], mTransform[2], mTransform[3]);
                     sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
-                        , mMatrix4x4[4], mMatrix4x4[5], mMatrix4x4[6], mMatrix4x4[7]);
+                        , mTransform[4], mTransform[5], mTransform[6], mTransform[7]);
                     sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
-                        , mMatrix4x4[8], mMatrix4x4[9], mMatrix4x4[10], mMatrix4x4[11]);
+                        , mTransform[8], mTransform[9], mTransform[10], mTransform[11]);
                     sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n"
-                        , mMatrix4x4[12], mMatrix4x4[13], mMatrix4x4[14], mMatrix4x4[15]);
+                        , mTransform[12], mTransform[13], mTransform[14], mTransform[15]);
                     return sb.ToString();
                 }
             }
@@ -594,31 +714,31 @@ namespace s3piwrappers
             public uint ActorNameHash
             {
                 get { return mActorNameHash; }
-                set { mActorNameHash = value; OnElementChanged(); }
+                set { if (mActorNameHash != value) { mActorNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(9)]
             public uint ObjectNameHash
             {
                 get { return mObjectNameHash; }
-                set { mObjectNameHash = value; OnElementChanged(); }
+                set { if (mObjectNameHash != value) { mObjectNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(10)]
             public uint SlotNameHash
             {
                 get { return mSlotNameHash; }
-                set { mSlotNameHash = value; OnElementChanged(); }
+                set { if (mSlotNameHash != value) { mSlotNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(11)]
             public uint Unknown01
             {
                 get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                set { if (mUnknown01 != value) { mUnknown01 = value; OnElementChanged(); } }
             }
             [ElementPriority(12)]
-            public float[] Matrix4X4
+            public float[] Transform
             {
-                get { return mMatrix4x4; }
-                set { mMatrix4x4 = value; OnElementChanged(); }
+                get { return mTransform; }
+                set { if (mTransform != value) { mTransform = value; OnElementChanged(); } }
             }
             protected override void Parse(Stream s)
             {
@@ -628,8 +748,8 @@ namespace s3piwrappers
                 mObjectNameHash = br.ReadUInt32();
                 mSlotNameHash = br.ReadUInt32();
                 mUnknown01 = br.ReadUInt32();
-                mMatrix4x4 = new Single[16];
-                for (int i = 0; i < 16; i++) { mMatrix4x4[i] = br.ReadSingle(); }
+                mTransform = new Single[16];
+                for (int i = 0; i < 16; i++) { mTransform[i] = br.ReadSingle(); }
             }
             public override void UnParse(Stream s)
             {
@@ -639,19 +759,40 @@ namespace s3piwrappers
                 bw.Write(mObjectNameHash);
                 bw.Write(mSlotNameHash);
                 bw.Write(mUnknown01);
-                for (int i = 0; i < 16; i++) bw.Write(mMatrix4x4[i]);
+                for (int i = 0; i < 16; i++) bw.Write(mTransform[i]);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ParentEvent(requestedApiVersion, handler, this);
             }
         }
         [ConstructorParameters(new object[] { ClipEventType.UnParent })]
         public class UnparentEvent : Event
         {
-            internal UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            private UInt32 mObjectNameHash;
+
+            public UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
 
             public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis)
                 : base(apiVersion, handler, basis)
             {
+                mObjectNameHash = basis.ObjectNameHash;
             }
-            private UInt32 mObjectNameHash;
+
+            public UnparentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint objectNameHash,string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mObjectNameHash = objectNameHash;
+            }
 
             public override string Value
             {
@@ -666,7 +807,7 @@ namespace s3piwrappers
             public uint ObjectNameHash
             {
                 get { return mObjectNameHash; }
-                set { mObjectNameHash = value; OnElementChanged(); }
+                set { if (mObjectNameHash != value) { mObjectNameHash = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
@@ -681,17 +822,38 @@ namespace s3piwrappers
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mObjectNameHash);
             }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new UnparentEvent(requestedApiVersion, handler, this);
+            }
         }
         [ConstructorParameters(new object[] { ClipEventType.Sound })]
         public class SoundEvent : Event
         {
-            internal SoundEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            private String mSoundName;
+
+            public SoundEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public SoundEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
 
             public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis)
                 : base(apiVersion, handler, basis)
             {
+                mSoundName = basis.SoundName;
             }
-            private String mSoundName;
+
+            public SoundEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string soundName, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mSoundName = soundName;
+            }
 
             public override string Value
             {
@@ -706,14 +868,14 @@ namespace s3piwrappers
             public string SoundName
             {
                 get { return mSoundName; }
-                set { mSoundName = value; OnElementChanged(); }
+                set { if (mSoundName != value) { mSoundName = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
                 BinaryReader br = new BinaryReader(s);
-                mSoundName = ReadZString(br,128);
+                mSoundName = ReadZString(br, 128);
             }
             public override void UnParse(Stream s)
             {
@@ -721,31 +883,89 @@ namespace s3piwrappers
                 BinaryWriter bw = new BinaryWriter(s);
                 WriteZString(bw, mSoundName, 0x00, 128);
             }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new SoundEvent(requestedApiVersion, handler, this);
+            }
         }
         [ConstructorParameters(new object[] { ClipEventType.Script })]
         public class ScriptEvent : Event
         {
-            internal ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+
             public ScriptEvent(int apiVersion, EventHandler handler, ScriptEvent basis)
                 : base(apiVersion, handler, basis)
             {
+            }
+
+            public ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
+
+            public ScriptEvent(int apiVersion, EventHandler handler, Event basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ScriptEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ScriptEvent(requestedApiVersion, handler, this);
             }
         }
 
         [ConstructorParameters(new object[] { ClipEventType.Effect })]
         public class EffectEvent : Event
         {
-            internal EffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
-            public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
+
             private UInt32 mUnknown01;
             private UInt32 mUnknown02;
             private UInt32 mEffectNameHash;
             private UInt32 mActorNameHash;
             private UInt32 mSlotNameHash;
             private UInt32 mUnknown03;
+
+            public EffectEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public EffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
+
+            public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis)
+                : base(apiVersion, handler, basis)
+            {
+                mUnknown01 = basis.Unknown01;
+                mUnknown02 = basis.Unknown02;
+                mEffectNameHash = basis.EffectNameHash;
+                mActorNameHash = basis.ActorNameHash;
+                mSlotNameHash = basis.SlotNameHash;
+                mUnknown03 = basis.Unknown03;
+            }
+
+            public EffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint unknown01, uint unknown02, uint effectNameHash, uint actorNameHash, uint slotNameHash, uint unknown03, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mUnknown01 = unknown01;
+                mUnknown02 = unknown02;
+                mEffectNameHash = effectNameHash;
+                mActorNameHash = actorNameHash;
+                mSlotNameHash = slotNameHash;
+                mUnknown03 = unknown03;
+            }
 
             public override string Value
             {
@@ -765,37 +985,37 @@ namespace s3piwrappers
             public uint Unknown01
             {
                 get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                set { if (mUnknown01 != value) { mUnknown01 = value; OnElementChanged(); } }
             }
             [ElementPriority(9)]
             public uint Unknown02
             {
                 get { return mUnknown02; }
-                set { mUnknown02 = value; OnElementChanged(); }
+                set { if (mUnknown02 != value) { mUnknown02 = value; OnElementChanged(); } }
             }
             [ElementPriority(10)]
             public uint EffectNameHash
             {
                 get { return mEffectNameHash; }
-                set { mEffectNameHash = value; OnElementChanged(); }
+                set { if (mEffectNameHash != value) { mEffectNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(11)]
             public uint ActorNameHash
             {
                 get { return mActorNameHash; }
-                set { mActorNameHash = value; OnElementChanged(); }
+                set { if (mActorNameHash != value) { mActorNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(12)]
             public uint SlotNameHash
             {
                 get { return mSlotNameHash; }
-                set { mSlotNameHash = value; OnElementChanged(); }
+                set { if (mSlotNameHash != value) { mSlotNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(13)]
             public uint Unknown03
             {
                 get { return mUnknown03; }
-                set { mUnknown03 = value; OnElementChanged(); }
+                set { if (mUnknown03 != value) { mUnknown03 = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
@@ -821,16 +1041,38 @@ namespace s3piwrappers
                 bw.Write(mUnknown03);
             }
 
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new EffectEvent(requestedApiVersion, handler, this);
+            }
         }
         [ConstructorParameters(new object[] { ClipEventType.Visibility })]
         public class VisibilityEvent : Event
         {
-            internal VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            private Single mVisibility;
+
+            public VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
+
             public VisibilityEvent(int apiVersion, EventHandler handler, VisibilityEvent basis)
                 : base(apiVersion, handler, basis)
             {
+                mVisibility = basis.Visibility;
             }
-            private Single mVisibility;
+
+            public VisibilityEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, float visibility, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mVisibility = visibility;
+            }
 
             public override string Value
             {
@@ -845,7 +1087,7 @@ namespace s3piwrappers
             public float Visibility
             {
                 get { return mVisibility; }
-                set { mVisibility = value; OnElementChanged(); }
+                set { if (mVisibility != value) { mVisibility = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
@@ -860,17 +1102,40 @@ namespace s3piwrappers
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mVisibility);
             }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new VisibilityEvent(requestedApiVersion, handler, this);
+            }
         }
 
         [ConstructorParameters(new object[] { ClipEventType.DestroyProp })]
         public class DestroyPropEvent : Event
         {
-            internal DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+
+            private UInt32 mPropNameHash;
+
+            public DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
+
             public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis)
                 : base(apiVersion, handler, basis)
             {
+                mPropNameHash = basis.PropNameHash;
             }
-            private UInt32 mPropNameHash;
+
+            public DestroyPropEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint propNameHash, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mPropNameHash = propNameHash;
+            }
 
             public override string Value
             {
@@ -885,7 +1150,7 @@ namespace s3piwrappers
             public uint PropNameHash
             {
                 get { return mPropNameHash; }
-                set { mPropNameHash = value; OnElementChanged(); }
+                set { if (mPropNameHash != value) { mPropNameHash = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
@@ -900,6 +1165,11 @@ namespace s3piwrappers
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mPropNameHash);
             }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new DestroyPropEvent(requestedApiVersion, handler, this);
+            }
         }
 
         [ConstructorParameters(new object[] { ClipEventType.StopEffect })]
@@ -907,10 +1177,29 @@ namespace s3piwrappers
         {
             private UInt32 mEffectNameHash;
             private UInt32 mUnknown01;
-            internal StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+
+            public StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type)
+                : base(apiVersion, handler, type)
+            {
+            }
+
+            public StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : base(apiVersion, handler, type, s)
+            {
+            }
+
             public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis)
                 : base(apiVersion, handler, basis)
             {
+                mEffectNameHash = basis.EffectNameHash;
+                mUnknown01 = basis.Unknown01;
+            }
+
+            public StopEffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint effectNameHash, uint unknown01, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01,eventName)
+            {
+                mEffectNameHash = effectNameHash;
+                mUnknown01 = unknown01;
             }
 
             public override string Value
@@ -927,13 +1216,13 @@ namespace s3piwrappers
             public uint EffectNameHash
             {
                 get { return mEffectNameHash; }
-                set { mEffectNameHash = value; OnElementChanged(); }
+                set { if (mEffectNameHash != value) { mEffectNameHash = value; OnElementChanged(); } }
             }
             [ElementPriority(9)]
             public uint Unknown01
             {
                 get { return mUnknown01; }
-                set { mUnknown01 = value; OnElementChanged(); }
+                set { if (mUnknown01 != value) { mUnknown01 = value; OnElementChanged(); } }
             }
 
             protected override void Parse(Stream s)
@@ -951,59 +1240,62 @@ namespace s3piwrappers
                 bw.Write(mUnknown01);
             }
 
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new StopEffectEvent(requestedApiVersion, handler, this);
+            }
         }
-        
-        public class ClipEndSection : DependentElement
+
+        public class ClipEndSection : AHandlerElement
         {
             private Single mX;
             private Single mY;
             private Single mZ;
             private Single mW;
 
-            public ClipEndSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+            public ClipEndSection(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public ClipEndSection(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : this(apiVersion, handler, basis.X, basis.Y, basis.Z, basis.W) { }
+            public ClipEndSection(int APIversion, EventHandler handler, float x, float y, float z, float w)
+                : base(APIversion, handler)
             {
+                mX = x;
+                mY = y;
+                mZ = z;
+                mW = w;
             }
 
-            public ClipEndSection(int apiVersion, EventHandler handler, Stream s)
-                : base(apiVersion, handler, s)
-            {
-            }
-
-            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
             [ElementPriority(1)]
             public float X
             {
                 get { return mX; }
-                set { mX = value; OnElementChanged(); }
+                set { if (mX != value) { mX = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
             public float Y
             {
                 get { return mY; }
-                set { mY = value; OnElementChanged(); }
+                set { if (mY != value) { mY = value; OnElementChanged(); } }
             }
             [ElementPriority(3)]
             public float Z
             {
                 get { return mZ; }
-                set { mZ = value; OnElementChanged(); }
+                set { if(mZ!=value){mZ = value; OnElementChanged();} }
             }
             [ElementPriority(4)]
             public float W
             {
                 get { return mW; }
-                set { mW = value; OnElementChanged(); }
+                set { if(mW!=value){mW = value; OnElementChanged();} }
             }
 
             public string Value
             {
                 get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]", mX, mY, mZ, mW); }
             }
-            protected override void Parse(Stream s)
+            private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
                 mX = br.ReadSingle();
@@ -1012,7 +1304,7 @@ namespace s3piwrappers
                 mW = br.ReadSingle();
             }
 
-            public override void UnParse(Stream s)
+            public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
                 bw.Write(mX);
@@ -1020,8 +1312,23 @@ namespace s3piwrappers
                 bw.Write(mZ);
                 bw.Write(mW);
             }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ClipEndSection(requestedApiVersion, handler, this);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion,GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
         }
-                public ClipResource(int apiVersion, Stream s)
+        public ClipResource(int apiVersion, Stream s)
             : base(apiVersion, s)
         {
             mS3Clip = new byte[0];
@@ -1037,9 +1344,9 @@ namespace s3piwrappers
             base.stream.Position = 0L;
             Parse(s);
         }
-        
 
-                private UInt32 mUnknown01;
+
+        private UInt32 mUnknown01;
         private UInt32 mUnknown02;
         private byte[] mS3Clip;
         //private S3Clip mAnimation;
@@ -1047,9 +1354,9 @@ namespace s3piwrappers
         private string mActorName;
         private EventTable mEventSectionTable;
         private ClipEndSection mEndSection;
-        
 
-                public string Value
+
+        public string Value
         {
             get
             {
@@ -1074,13 +1381,13 @@ namespace s3piwrappers
         public uint Unknown01
         {
             get { return mUnknown01; }
-            set { mUnknown01 = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mUnknown01!=value){mUnknown01 = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(2)]
         public uint Unknown02
         {
             get { return mUnknown02; }
-            set { mUnknown02 = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mUnknown02!=value){mUnknown02 = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(3)]
         public BinaryReader S3Clip
@@ -1115,27 +1422,27 @@ namespace s3piwrappers
         public IKTargetTable IKTargetInfo
         {
             get { return mIKTargetInfo; }
-            set { mIKTargetInfo = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mIKTargetInfo!=value){mIKTargetInfo = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(5)]
         public string ActorName
         {
             get { return mActorName; }
-            set { mActorName = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mActorName!=value){mActorName = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(6)]
         public EventTable EventSection
         {
             get { return mEventSectionTable; }
-            set { mEventSectionTable = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mEventSectionTable!=value){mEventSectionTable = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(7)]
         public ClipEndSection EndSection
         {
             get { return mEndSection; }
-            set { mEndSection = value; OnResourceChanged(this, new EventArgs()); }
+            set { if(mEndSection!=value){mEndSection = value; OnResourceChanged(this, new EventArgs());} }
         }
-        
+
 
         private void Parse(Stream s)
         {
@@ -1144,8 +1451,7 @@ namespace s3piwrappers
             //header
             if (br.ReadUInt32() != 0x6B20C4F3) throw new
                 InvalidDataException("Not a valid CLIP resource: Expected CLIP ID(0x6B20C4F3)");
-            uint offset;
-            offset = br.ReadUInt32();
+            uint offset = br.ReadUInt32();
             long linkedClipOffset = offset > 0 ? s.Position + offset - 4 : 0;
             long clipSize = br.ReadUInt32();
             offset = br.ReadUInt32();
@@ -1177,49 +1483,38 @@ namespace s3piwrappers
                     throw new InvalidDataException("Expected 0x00");
             }
 
-            if (checking && s.Position != clipOffset)
-                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", clipOffset, s.Position));
-
+            s.Seek(clipOffset, SeekOrigin.Begin);
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
-            while ((s.Position % 4) != 0)
-                if (br.ReadByte() != 0x7E && checking)
-                    throw new InvalidDataException("Expected padding char 0x7E");
+            
 
             if (ikOffset > 0)
             {
-                if (checking && s.Position != ikOffset)
-                    throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", ikOffset, s.Position));
+                s.Seek(ikOffset, SeekOrigin.Begin);
                 mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
-                while ((s.Position % 4) != 0)
-                    if (br.ReadByte() != 0x7E && checking)
-                        throw new InvalidDataException("Expected padding char 0x7E");
             }
             else
             {
                 mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
             }
-            if (checking && s.Position != actorOffset)
-                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", actorOffset, s.Position));
+            s.Seek(actorOffset, SeekOrigin.Begin);
             mActorName = ReadZString(br);
-            while ((s.Position % 4) != 0)
-                if (br.ReadByte() != 0x7E && checking)
-                    throw new InvalidDataException("Expected padding char 0x7E");
 
-            if (checking && s.Position != eventOffset)
-                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", eventOffset, s.Position));
+
+            s.Seek(eventOffset, SeekOrigin.Begin);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged, s);
-            while ((s.Position % 4) != 0)
-                if (br.ReadByte() != 0x7E && checking)
-                    throw new InvalidDataException("Expected padding char 0x7E");
 
-            if (checking && s.Position != endOffset)
-                throw new InvalidDataException(String.Format("Bad offset: Expected 0x{0:X8} but got 0x{1:X8}.", endOffset, s.Position));
+            s.Seek(-16, SeekOrigin.End);
             mEndSection = new ClipEndSection(0, this.OnResourceChanged, s);
 
             if (checking && s.Position != s.Length)
                 throw new InvalidDataException("Unexpected end of data.");
 
+        }
+        private static void WritePadding(Stream s)
+        {
+            var bw = new BinaryWriter(s);
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7E); //padding to next dword
         }
         protected override Stream UnParse()
         {
@@ -1239,21 +1534,21 @@ namespace s3piwrappers
             clipSize = mS3Clip.Length;
             clipOffset = s.Position;
             bw.Write(mS3Clip);
-            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+            WritePadding(s);
 
             if (hasIkData)
             {
                 ikOffset = s.Position;
                 mIKTargetInfo.UnParse(s);
-                while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+                WritePadding(s);
             }
             actorOffset = s.Position;
-            WriteZString(bw,mActorName);
-            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+            WriteZString(bw, mActorName);
+            WritePadding(s);
 
             eventOffset = s.Position;
             mEventSectionTable.UnParse(s);
-            while ((s.Position % 4) != 0) bw.Write((byte)0x7e); //padding to next dword
+            WritePadding(s);
 
             endOffset = s.Position;
             mEndSection.UnParse(s);
@@ -1276,7 +1571,7 @@ namespace s3piwrappers
 
         public static string ReadZString(BinaryReader br)
         {
-            return ReadZString(br,0);
+            return ReadZString(br, 0);
         }
         public static string ReadZString(BinaryReader br, int padLength)
         {
@@ -1296,7 +1591,7 @@ namespace s3piwrappers
         }
         public static void WriteZString(BinaryWriter bw, String s)
         {
-            WriteZString(bw,s, 0x00, 0);
+            WriteZString(bw, s, 0x00, 0);
         }
         public static void WriteZString(BinaryWriter bw, String s, byte paddingChar, int padLength)
         {

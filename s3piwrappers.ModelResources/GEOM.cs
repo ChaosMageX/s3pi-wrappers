@@ -36,7 +36,7 @@ namespace s3piwrappers
 
             public IndexList(EventHandler handler) : base(handler) { }
             public IndexList(EventHandler handler, Stream s) : base(handler, s) { }
-            public IndexList(EventHandler handler, IList<uint> ilt) : base(handler, ilt) { }
+            public IndexList(EventHandler handler, IEnumerable<uint> ilt) : base(handler, ilt) { }
             protected override void Parse(Stream s)
             {
                 mFormat = new BinaryReader(s).ReadByte();
@@ -80,7 +80,8 @@ namespace s3piwrappers
         {
             public JointList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
             public JointList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
-            public JointList(EventHandler handler, IList<HandlerElement<UInt32>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
+            public JointList(EventHandler handler, IEnumerable<uint> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
+            public JointList(EventHandler handler, IEnumerable<HandlerElement<uint>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
             static UInt32 ReadElement(Stream s) { return new BinaryReader(s).ReadUInt32(); }
             static void WriteElement(Stream s, UInt32 element) { new BinaryWriter(s).Write(element); }
         }
@@ -89,7 +90,7 @@ namespace s3piwrappers
             private GEOM mRoot;
             public VertexList(EventHandler handler, GEOM root) : base(handler) { mRoot = root; }
             public VertexList(EventHandler handler, GEOM root, Stream s, int count) : this(handler, root) { Parse(s, count); }
-            public VertexList(EventHandler handler, GEOM root, IList<Vertex> ilt) : base(handler, ilt) { mRoot = root; }
+            public VertexList(EventHandler handler, GEOM root, IEnumerable<Vertex> ilt) : base(handler, ilt) { mRoot = root; }
             public override void Add()
             {
                 Add(new object[] { mRoot });
@@ -281,7 +282,7 @@ namespace s3piwrappers
         {
             public VertexElementFormatList(EventHandler handler) : base(handler) { }
             public VertexElementFormatList(EventHandler handler, Stream s) : base(handler, s) { }
-            public VertexElementFormatList(EventHandler handler, IList<VertexElementFormat> ilt) : base(handler, ilt) { }
+            public VertexElementFormatList(EventHandler handler, IEnumerable<VertexElementFormat> ilt) : base(handler, ilt) { }
             public override void Add()
             {
                 base.Add(new object[] { });

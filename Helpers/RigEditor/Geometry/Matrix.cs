@@ -116,6 +116,32 @@ namespace s3piwrappers.RigEditor.Geometry
             m.Scale(1 / Determinant());
             return m;
         }
+        public Matrix GetTranspose()
+        {
+            Matrix m;
+            m.M00 = M00;
+            m.M01 = M10;
+            m.M02 = M20;
+            m.M03 = M30;
+
+            m.M10 = M01;
+            m.M11 = M11;
+            m.M12 = M21;
+            m.M13 = M31;
+
+            m.M20 = M02;
+            m.M21 = M12;
+            m.M22 = M22;
+            m.M23 = M32;
+
+            m.M30 = M03;
+            m.M31 = M13;
+            m.M32 = M23;
+            m.M33 = M33;
+
+            return m;
+        }
+
         public double Determinant()
         {
             return M03 * M12 * M21 * M30 - M02 * M13 * M21 * M30 -
@@ -178,7 +204,7 @@ namespace s3piwrappers.RigEditor.Geometry
             Matrix r = new Matrix(rotation);
             Matrix s = CreateScaleMatrix(scale);
             Matrix t = CreateTranslateMatrix(translate);
-            return r * s * t;
+            return t * r * s;
         }
         public Vector3 RightVector
         {
