@@ -105,7 +105,6 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj">
       <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>

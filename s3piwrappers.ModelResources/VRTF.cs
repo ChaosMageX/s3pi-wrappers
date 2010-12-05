@@ -8,7 +8,7 @@ namespace s3piwrappers
 {
     public class VRTF : ARCOLBlock
     { 
-        public enum VertexElementUsage : byte
+        public enum ElementUsage : byte
         {
             Position,
             Normal,
@@ -18,7 +18,7 @@ namespace s3piwrappers
             Tangent,
             Colour
         }
-        public enum VertexElementFormat : byte
+        public enum ElementFormat : byte
         {
             Float1,
             Float2,
@@ -40,7 +40,7 @@ namespace s3piwrappers
 
 
         }
-        public class VertexElementLayoutList : AResource.DependentList<VertexElementLayout>
+        public class VertexElementLayoutList : AResource.DependentList<ElementLayout>
         {
             public VertexElementLayoutList(EventHandler handler)
                 : base(handler)
@@ -53,7 +53,7 @@ namespace s3piwrappers
                 Parse(s, count);
             }
 
-            public VertexElementLayoutList(EventHandler handler, IEnumerable<VertexElementLayout> ilt) : base(handler, ilt) {}
+            public VertexElementLayoutList(EventHandler handler, IEnumerable<ElementLayout> ilt) : base(handler, ilt) {}
 
             public override void Add()
             {
@@ -64,30 +64,30 @@ namespace s3piwrappers
             {
                 for (int i = 0; i < count; i++)
                 {
-                    ((IList<VertexElementLayout>)this).Add(CreateElement(s));
+                    ((IList<ElementLayout>)this).Add(CreateElement(s));
                 }
             }
-            protected override VertexElementLayout CreateElement(Stream s)
+            protected override ElementLayout CreateElement(Stream s)
             {
-                return new VertexElementLayout(0, handler, s);
+                return new ElementLayout(0, handler, s);
             }
 
-            protected override void WriteElement(Stream s, VertexElementLayout element)
+            protected override void WriteElement(Stream s, ElementLayout element)
             {
                 element.UnParse(s);
             }
         }
-        public class VertexElementLayout : AHandlerElement, IEquatable<VertexElementLayout>
+        public class ElementLayout : AHandlerElement, IEquatable<ElementLayout>
         {
-            private VertexElementUsage mUsage;
+            private ElementUsage mUsage;
             private byte mUsageIndex;
-            private VertexElementFormat mFormat;
+            private ElementFormat mFormat;
             private byte mOffset;
 
-            public VertexElementLayout(int APIversion, EventHandler handler): base(APIversion, handler){}
-            public VertexElementLayout(int APIversion, EventHandler handler, VertexElementLayout basis): this(APIversion, handler,basis.Format,basis.Offset,basis.Usage,basis.UsageIndex){}
-            public VertexElementLayout(int APIversion, EventHandler handler, Stream s): base(APIversion, handler){Parse(s);}
-            public VertexElementLayout(int APIversion, EventHandler handler, VertexElementFormat format, byte offset, VertexElementUsage usage, byte usageIndex) : base(APIversion, handler)
+            public ElementLayout(int APIversion, EventHandler handler): base(APIversion, handler){}
+            public ElementLayout(int APIversion, EventHandler handler, ElementLayout basis): this(APIversion, handler,basis.Format,basis.Offset,basis.Usage,basis.UsageIndex){}
+            public ElementLayout(int APIversion, EventHandler handler, Stream s): base(APIversion, handler){Parse(s);}
+            public ElementLayout(int APIversion, EventHandler handler, ElementFormat format, byte offset, ElementUsage usage, byte usageIndex) : base(APIversion, handler)
             {
                 mFormat = format;
                 mOffset = offset;
@@ -96,7 +96,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(1)]
-            public VertexElementUsage Usage
+            public ElementUsage Usage
             {
                 get { return mUsage; }
                 set { if(mUsage!=value){mUsage = value; OnElementChanged();} }
@@ -108,7 +108,7 @@ namespace s3piwrappers
                 set { if(mUsageIndex!=value){mUsageIndex = value; OnElementChanged();} }
             }
             [ElementPriority(3)]
-            public VertexElementFormat Format
+            public ElementFormat Format
             {
                 get { return mFormat; }
                 set { if(mFormat!=value){mFormat = value; OnElementChanged();} }
@@ -135,9 +135,9 @@ namespace s3piwrappers
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mUsage = (VertexElementUsage)br.ReadByte();
+                mUsage = (ElementUsage)br.ReadByte();
                 mUsageIndex = br.ReadByte();
-                mFormat = (VertexElementFormat)br.ReadByte();
+                mFormat = (ElementFormat)br.ReadByte();
                 mOffset = br.ReadByte();
             }
             public void UnParse(Stream s)
@@ -150,7 +150,7 @@ namespace s3piwrappers
             }
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new VertexElementLayout(0, handler, this);
+                return new ElementLayout(0, handler, this);
             }
 
             public override List<string> ContentFields
@@ -163,7 +163,7 @@ namespace s3piwrappers
                 get { return kRecommendedApiVersion; }
             }
 
-            public bool Equals(VertexElementLayout other)
+            public bool Equals(ElementLayout other)
             {
                 return base.Equals(other);
             }
@@ -226,7 +226,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Vertex Element Layouts:\n");
                     for (int i = 0; i < mLayouts.Count; i++)
                     {
-                        sb.AppendFormat("==VertexElementLayout[{0}]==\n{1}\n", i, mLayouts[i].Value);
+                        sb.AppendFormat("==ElementLayout[{0}]==\n{1}\n", i, mLayouts[i].Value);
                     }
                 }
                 return sb.ToString();

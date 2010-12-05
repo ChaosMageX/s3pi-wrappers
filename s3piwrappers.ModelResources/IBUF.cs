@@ -32,21 +32,20 @@ namespace s3piwrappers
     public class IBUF : ARCOLBlock
     {
         [Flags]
-        public enum IndexBufferFlags : uint
+        public enum FormatFlags : uint
         {
             DifferencedIndices = 0x1,
             Uses32BitIndices = 0x2,
             IsDisplayList = 0x4
         }
-
         private UInt32 mVersion;
-        private IndexBufferFlags mFlags;
+        private FormatFlags mFlags;
         private UInt32 mDisplayListUsage;
         private Byte[] mBuffer;
         public IBUF(int apiVersion, EventHandler handler) : base(apiVersion, handler, null) { }
         public IBUF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
         public IBUF(int apiVersion, EventHandler handler, IBUF basis) : this(apiVersion, handler, basis.Version, basis.Flags, basis.DisplayListUsage, basis.Buffer) { }
-        public IBUF(int APIversion, EventHandler handler, uint version, IndexBufferFlags flags, uint displayListUsage, byte[] buffer)
+        public IBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, uint displayListUsage, byte[] buffer)
             : base(APIversion, handler, null)
         {
             mVersion = version;
@@ -58,7 +57,7 @@ namespace s3piwrappers
         [ElementPriority(1)]
         public UInt32 Version { get { return mVersion; } set { if (mVersion != value) { mVersion = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(2)]
-        public IndexBufferFlags Flags { get { return mFlags; } set { if (mFlags != value) { mFlags = value; OnRCOLChanged(this, new EventArgs()); } } }
+        public FormatFlags Flags { get { return mFlags; } set { if (mFlags != value) { mFlags = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(3)]
         public UInt32 DisplayListUsage { get { return mDisplayListUsage; } set { if (mDisplayListUsage != value) { mDisplayListUsage = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(4)]
@@ -90,7 +89,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mFlags = (IndexBufferFlags)br.ReadUInt32();
+            mFlags = (FormatFlags)br.ReadUInt32();
             mDisplayListUsage = br.ReadUInt32();
             mBuffer = br.ReadBytes((int)(s.Length - s.Position));
 
