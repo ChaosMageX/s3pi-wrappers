@@ -25,10 +25,10 @@ namespace s3piwrappers.ModelViewer
             DEFAULT_VRTF.Stride = 16;
             DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.Short4, 0,
                                                                   VRTF.ElementUsage.Position, 0));
-            DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.ColorUByte4, 0,
-                                                                  VRTF.ElementUsage.Normal, 0));
-            DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.Short2, 0,
-                                                                  VRTF.ElementUsage.UV, 0));
+            //DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.ColorUByte4, 0,
+            //                                                      VRTF.ElementUsage.Normal, 0));
+            //DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.Short2, 0,
+            //                                                      VRTF.ElementUsage.UV, 0));
         }
         static int IndexCountFromPrimitiveType(ModelPrimitiveType t)
         {
@@ -83,21 +83,28 @@ namespace s3piwrappers.ModelViewer
             
             for (int i = 0; i < mesh.VertexCount;i++)
             {
+                Vertex v = new Vertex();
                 byte[] data = new byte[vrtf.Stride];
                 s.Read(data, 0, (int)vrtf.Stride);
-                Vertex v = new Vertex();
-                float[] posPoints = new float[3];
-                float[] normPoints = new float[3];
-                float[] uvPoints = new float[ uv.Format == VRTF.ElementFormat.Float4?4:2];
-                if(position!=null)ReadVertexData(data, position, ref posPoints);
-                if(normal !=null)ReadVertexData(data, normal, ref normPoints);
-                if(uv!=null)ReadVertexData(data, uv, ref uvPoints);
-                verts[i] = new Vertex
+                if(position!=null)
                 {
-                    Position = posPoints,
-                    Normal = normPoints,
-                    UV =uvPoints
-                };
+                    float[] posPoints = new float[3];
+                    ReadVertexData(data, position, ref posPoints);
+                    v.Position = posPoints;
+                }
+                if(normal !=null)
+                {
+                    float[] normPoints = new float[3];
+                    ReadVertexData(data, normal, ref normPoints);
+                    v.Normal = normPoints;
+                }
+                if(uv!=null)
+                {
+                    float[] uvPoints = new float[uv.Format == VRTF.ElementFormat.Float4 ? 4 : 2];
+                    ReadVertexData(data, uv, ref uvPoints);
+                    v.UV = uvPoints;
+                }
+                verts[i] = v;
             }
             return verts;
         }

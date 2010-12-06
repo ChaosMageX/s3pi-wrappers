@@ -1,9 +1,16 @@
-﻿<Window x:Class="s3piwrappers.ModelViewer.MainWindow"
+﻿<Window 
+        x:Class="s3piwrappers.ModelViewer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:interactive3D="clr-namespace:_3DTools;assembly=3DTools" Title="Model Preview" Height="640" Width="480">
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"     
+        xmlns:local="clr-namespace:_3DTools;assembly=3DTools"    
+        Title="Model Preview" 
+        Height="640" 
+        Width="480"
+>
 
-    <Grid Background="Black">
-        <DockPanel 
+    <Grid>
+
+        <DockPanel  Background="#FF6F6F6F"
               Width="Auto" 
               VerticalAlignment="Stretch" 
               Height="Auto" 
@@ -13,19 +20,18 @@
               Grid.Row="0" 
               Margin="0,0,0,0" 
               Grid.RowSpan="1">
-            <interactive3D:TrackballDecorator>
-                <interactive3D:Interactive3DDecorator>
-
+            <local:TrackballDecorator>
+                <local:Interactive3DDecorator>
                     <Viewport3D Name="mainViewport" ClipToBounds="True">
                         <Viewport3D.Camera>
-                            <PerspectiveCamera Position="0,0.5,5" />
+                            <PerspectiveCamera x:Name="viewCamera" Position="0,0.5,5" />
 
                         </Viewport3D.Camera>
                         <ModelVisual3D x:Name="Lights">
                             <ModelVisual3D.Content>
                                 <Model3DGroup>
                                     <AmbientLight Color="Gray" />
-                                    <DirectionalLight  Color="White" Direction="0,-2,-5"  />
+                                    <DirectionalLight Color="White" Direction="0,-2,-5"  />
                                 </Model3DGroup>
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
@@ -36,8 +42,10 @@
                             </ModelVisual3D.Content>
                         </ModelVisual3D>
                     </Viewport3D>
-                </interactive3D:Interactive3DDecorator>
-            </interactive3D:TrackballDecorator>
+                </local:Interactive3DDecorator>
+            </local:TrackballDecorator>
+
+
         </DockPanel>
     </Grid>
 </Window>

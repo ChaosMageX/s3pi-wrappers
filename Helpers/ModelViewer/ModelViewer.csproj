@@ -37,9 +37,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3DTools">
+    <Reference Include="3DTools, Version=1.0.2614.20437, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\3DTools-1.01-bin\3DTools.dll</HintPath>
-      <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
@@ -55,6 +55,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -93,6 +94,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Helpers\MLODViewer.helper">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
