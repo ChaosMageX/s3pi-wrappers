@@ -12,11 +12,9 @@ using s3piwrappers;
 using _3DTools;
 namespace s3piwrappers.ModelViewer
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private const int GRID_SIZE =10;
         public MainWindow()
         {
             InitializeComponent();
@@ -28,89 +26,87 @@ namespace s3piwrappers.ModelViewer
         }
         void DrawAxes()
         {
-            int size = 5;
             ScreenSpaceLines3D x = new ScreenSpaceLines3D();
-            x.Points.Add(new Point3D(size, 0, 0));
-            x.Points.Add(new Point3D(-size, 0, 0));
+            x.Points.Add(new Point3D(GRID_SIZE, 0, 0));
+            x.Points.Add(new Point3D(-GRID_SIZE, 0, 0));
             x.Color = Colors.Red;
             mainViewport.Children.Add(x);
 
 
             ScreenSpaceLines3D y = new ScreenSpaceLines3D();
-            y.Points.Add(new Point3D(0, size, 0));
-            y.Points.Add(new Point3D(0, -size, 0));
+            y.Points.Add(new Point3D(0, GRID_SIZE, 0));
+            y.Points.Add(new Point3D(0, -GRID_SIZE, 0));
             y.Color = Colors.Green;
             mainViewport.Children.Add(y);
 
 
             ScreenSpaceLines3D z = new ScreenSpaceLines3D();
-            z.Points.Add(new Point3D(0, 0, size));
-            z.Points.Add(new Point3D(0, 0, -size));
+            z.Points.Add(new Point3D(0, 0, GRID_SIZE));
+            z.Points.Add(new Point3D(0, 0, -GRID_SIZE));
             z.Color = Colors.Blue;
             mainViewport.Children.Add(z);
 
         }
         void DrawGrid()
         {
-            int max = 5;
             Color c = Colors.Gray;
-            for (float x = 1; x < max; x += 1f)
+            for (float x = 1; x < GRID_SIZE; x += 1f)
             {
-                for (float z = 1; z < max; z += 1f)
+                for (float z = 1; z < GRID_SIZE; z += 1f)
                 {
                     ScreenSpaceLines3D l = new ScreenSpaceLines3D();
-                    l.Points.Add(new Point3D(x, 0, max));
-                    l.Points.Add(new Point3D(x, 0, -max));
+                    l.Points.Add(new Point3D(x, 0, GRID_SIZE));
+                    l.Points.Add(new Point3D(x, 0, -GRID_SIZE));
                     l.Color = c;
                     mainViewport.Children.Add(l);
 
 
                     ScreenSpaceLines3D l2 = new ScreenSpaceLines3D();
-                    l2.Points.Add(new Point3D(max, 0, z));
-                    l2.Points.Add(new Point3D(-max, 0, z));
+                    l2.Points.Add(new Point3D(GRID_SIZE, 0, z));
+                    l2.Points.Add(new Point3D(-GRID_SIZE, 0, z));
                     l2.Color = c;
                     mainViewport.Children.Add(l2);
 
 
                     ScreenSpaceLines3D l3 = new ScreenSpaceLines3D();
-                    l3.Points.Add(new Point3D(-x, 0, max));
-                    l3.Points.Add(new Point3D(-x, 0, -max));
+                    l3.Points.Add(new Point3D(-x, 0, GRID_SIZE));
+                    l3.Points.Add(new Point3D(-x, 0, -GRID_SIZE));
                     l3.Color = c;
                     mainViewport.Children.Add(l3);
 
 
                     ScreenSpaceLines3D l4 = new ScreenSpaceLines3D();
-                    l4.Points.Add(new Point3D(max, 0, -z));
-                    l4.Points.Add(new Point3D(-max, 0, -z));
+                    l4.Points.Add(new Point3D(GRID_SIZE, 0, -z));
+                    l4.Points.Add(new Point3D(-GRID_SIZE, 0, -z));
                     l4.Color = c;
                     mainViewport.Children.Add(l4);
                 }
             }
             ScreenSpaceLines3D top = new ScreenSpaceLines3D();
             top.Color = c;
-            top.Points.Add(new Point3D(max, 0, max));
-            top.Points.Add(new Point3D(-max, 0, max));
+            top.Points.Add(new Point3D(GRID_SIZE, 0, GRID_SIZE));
+            top.Points.Add(new Point3D(-GRID_SIZE, 0, GRID_SIZE));
             mainViewport.Children.Add(top);
 
 
             ScreenSpaceLines3D left = new ScreenSpaceLines3D();
             left.Color = c;
-            left.Points.Add(new Point3D(-max, 0, -max));
-            left.Points.Add(new Point3D(-max, 0, max));
+            left.Points.Add(new Point3D(-GRID_SIZE, 0, -GRID_SIZE));
+            left.Points.Add(new Point3D(-GRID_SIZE, 0, GRID_SIZE));
             mainViewport.Children.Add(left);
 
 
             ScreenSpaceLines3D right = new ScreenSpaceLines3D();
             right.Color = c;
-            right.Points.Add(new Point3D(max, 0, max));
-            right.Points.Add(new Point3D(max, 0, -max));
+            right.Points.Add(new Point3D(GRID_SIZE, 0, GRID_SIZE));
+            right.Points.Add(new Point3D(GRID_SIZE, 0, -GRID_SIZE));
             mainViewport.Children.Add(right);
 
 
             ScreenSpaceLines3D bottom = new ScreenSpaceLines3D();
             bottom.Color = c;
-            bottom.Points.Add(new Point3D(-max, 0, -max));
-            bottom.Points.Add(new Point3D(max, 0, -max));
+            bottom.Points.Add(new Point3D(-GRID_SIZE, 0, -GRID_SIZE));
+            bottom.Points.Add(new Point3D(GRID_SIZE, 0, -GRID_SIZE));
             mainViewport.Children.Add(bottom);
 
         }
@@ -136,7 +132,7 @@ namespace s3piwrappers.ModelViewer
                     mesh.TriangleIndices.Add(indices[i]);
                 }
                 MaterialGroup mat = new MaterialGroup();
-                mat.Children.Add(new DiffuseMaterial(Brushes.DarkGray));
+                mat.Children.Add(new DiffuseMaterial(new SolidColorBrush(RandomColor())));
                 mat.Children.Add(new SpecularMaterial(Brushes.GhostWhite, 30d));
                 var model = new GeometryModel3D(mesh, mat);
 
@@ -144,6 +140,14 @@ namespace s3piwrappers.ModelViewer
                 //DrawWireframe(mesh);
 
             }
+        }
+        static Random sRng = new Random();
+        private static Color RandomColor()
+        {
+            float r = (float)sRng.NextDouble();
+            float g =(float)sRng.NextDouble();
+            float b = (float)sRng.NextDouble();
+            return Color.FromScRgb(1, r, g, b);
         }
         void DrawWireframe(MeshGeometry3D m)
         {

@@ -41,11 +41,11 @@ namespace s3piwrappers
         private UInt32 mVersion;
         private FormatFlags mFlags;
         private UInt32 mDisplayListUsage;
-        private Byte[] mBuffer;
+        private Int32[] mBuffer;
         public IBUF(int apiVersion, EventHandler handler) : base(apiVersion, handler, null) { }
         public IBUF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
         public IBUF(int apiVersion, EventHandler handler, IBUF basis) : this(apiVersion, handler, basis.Version, basis.Flags, basis.DisplayListUsage, basis.Buffer) { }
-        public IBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, uint displayListUsage, byte[] buffer)
+        public IBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, uint displayListUsage, Int32[] buffer)
             : base(APIversion, handler, null)
         {
             mVersion = version;
@@ -61,7 +61,7 @@ namespace s3piwrappers
         [ElementPriority(3)]
         public UInt32 DisplayListUsage { get { return mDisplayListUsage; } set { if (mDisplayListUsage != value) { mDisplayListUsage = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(4)]
-        public Byte[] Buffer { get { return mBuffer; } set { if (mBuffer != value) { mBuffer = value; OnRCOLChanged(this, new EventArgs()); } } }
+        public Int32[] Buffer { get { return mBuffer; } set { if (mBuffer != value) { mBuffer = value; OnRCOLChanged(this, new EventArgs()); } } }
 
         public string Value
         {
@@ -91,7 +91,21 @@ namespace s3piwrappers
             mVersion = br.ReadUInt32();
             mFlags = (FormatFlags)br.ReadUInt32();
             mDisplayListUsage = br.ReadUInt32();
-            mBuffer = br.ReadBytes((int)(s.Length - s.Position));
+
+            bool is32Bit = (mFlags & FormatFlags.Uses32BitIndices) != 0;
+            mBuffer = new Int32[(s.Length-s.Position) / (is32Bit ? 4 : 2)];
+            Int32 last = 0;
+            for (int i = 0; i < mBuffer.Length; i++)
+            {
+                Int32 cur = is32Bit ? br.ReadInt32() : br.ReadInt16();
+                if ((mFlags & FormatFlags.DifferencedIndices) != 0)
+                {
+                    cur += last;
+                }
+                mBuffer[i] = cur;
+                last = cur;
+            }
+
 
         }
 
@@ -99,12 +113,25 @@ namespace s3piwrappers
         {
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
-            if (mBuffer == null) mBuffer = new byte[0];
+            if (mBuffer == null) mBuffer = new Int32[0];
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write((UInt32)mFlags);
             bw.Write(mDisplayListUsage);
-            bw.Write(mBuffer);
+
+            bool is32Bit = (mFlags & FormatFlags.Uses32BitIndices) != 0;
+            bool isDifferenced = (mFlags & FormatFlags.DifferencedIndices) != 0;
+            Int32 last = 0;
+            for (int i = 0; i < mBuffer.Length; i++)
+            {
+                Int32 cur = mBuffer[i];
+                if (isDifferenced)
+                {
+                    cur -= last;
+                    last = mBuffer[i];
+                }
+                if (is32Bit) bw.Write(cur); else bw.Write((UInt16)cur);
+            }
             return s;
         }
 

@@ -27,7 +27,7 @@ namespace s3piwrappers.ModelViewer
                                                                   VRTF.ElementUsage.Position, 0));
             //DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.ColorUByte4, 0,
             //                                                      VRTF.ElementUsage.Normal, 0));
-            //DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.Short2, 0,
+            //DEFAULT_VRTF.Layouts.Add(new VRTF.ElementLayout(0, null, VRTF.ElementFormat.UShort4N, 0,
             //                                                      VRTF.ElementUsage.UV, 0));
         }
         static int IndexCountFromPrimitiveType(ModelPrimitiveType t)
@@ -43,25 +43,8 @@ namespace s3piwrappers.ModelViewer
         public static Int32[] GetIndices(MLOD.Mesh mesh, GenericRCOLResource rcol)
         {
             var ibuf = (IBUF)GetBlock(mesh.IndexBufferIndex, rcol);
-
-            var s = new MemoryStream(ibuf.Buffer);
-            var r = new BinaryReader(s);
-            bool is32Bit = (ibuf.Flags & IBUF.FormatFlags.Uses32BitIndices) != 0;
-            Int32[] indices = new Int32[s.Length / (is32Bit? 4:2)];
-            Int32 last = 0;
-            for (int i = 0; i < indices.Length; i++)
-            {
-                Int32 cur = is32Bit ? r.ReadInt32() : r.ReadInt16();
-                if ((ibuf.Flags & IBUF.FormatFlags.DifferencedIndices) != 0)
-                {
-                    cur += last;
-                }
-                indices[i] = cur;
-                last = cur;
-            }
-            
             Int32[] output = new int[mesh.PrimitiveCount * IndexCountFromPrimitiveType(mesh.PrimitiveType)];
-            Array.Copy(indices,(int)mesh.StartIndex,output,0,output.Length);
+            Array.Copy(ibuf.Buffer,(int)mesh.StartIndex,output,0,output.Length);
             return output;
         }
 
@@ -108,33 +91,9 @@ namespace s3piwrappers.ModelViewer
             }
             return verts;
         }
-        static int ElementSizeFromFormat(VRTF.ElementFormat f)
-        {
-            switch (f)
-            {
-                case VRTF.ElementFormat.Float1:
-                case VRTF.ElementFormat.UByte4:
-                case VRTF.ElementFormat.ColorUByte4:
-                case VRTF.ElementFormat.UByte4N:
-                case VRTF.ElementFormat.UShort2N:
-                case VRTF.ElementFormat.Short2:
-                    return 4;
-                case VRTF.ElementFormat.UShort4N:
-                case VRTF.ElementFormat.Float2:
-                case VRTF.ElementFormat.Short4:
-                case VRTF.ElementFormat.Short4N:
-                    return 8;
-                case VRTF.ElementFormat.Float3:
-                    return 12;
-                case VRTF.ElementFormat.Float4:
-                    return 16;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
         static void ReadVertexData(byte[] data, VRTF.ElementLayout layout, ref float[] output)
         {
-            byte[] element = new byte[ElementSizeFromFormat(layout.Format)];
+            byte[] element = new byte[VRTF.ElementSizeFromFormat(layout.Format)];
             Array.Copy(data, layout.Offset, element, 0, element.Length);
             float a, b, c, scalar;
             switch (layout.Format)

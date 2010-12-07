@@ -35,24 +35,22 @@ namespace s3piwrappers
     public class VBUF : ARCOLBlock
     {
         [Flags]
-        public enum VertexBufferFlags : uint
+        public enum FormatFlags : uint
         {
             Collapsed = 0x4,
             DifferencedVertices = 0x2,
             Dynamic = 0x1,
             None = 0x0
         }
-
-
-
+        
         private UInt32 mVersion = 0x00000101;
-        private VertexBufferFlags mFlags;
+        private FormatFlags mFlags;
         private UInt32 mSwizzleInfo;
         private Byte[] mBuffer;
         public VBUF(int apiVersion, EventHandler handler, VBUF basis): this(apiVersion, handler, basis.Version, basis.Flags, basis.SwizzleInfo, (Byte[])basis.Buffer.Clone()){}
         public VBUF(int apiVersion, EventHandler handler): base(apiVersion, handler, null){}
         public VBUF(int apiVersion, EventHandler handler, Stream s): base(apiVersion, handler, s){}
-        public VBUF(int APIversion, EventHandler handler, uint version, VertexBufferFlags flags, uint swizzleInfo, byte[] buffer) : this(APIversion, handler)
+        public VBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, uint swizzleInfo, byte[] buffer) : this(APIversion, handler)
         {
             mVersion = version;
             mFlags = flags;
@@ -63,7 +61,7 @@ namespace s3piwrappers
         [ElementPriority(1)]
         public UInt32 Version { get { return mVersion; } set { if(mVersion!=value){mVersion = value; OnRCOLChanged(this, new EventArgs());} } }
         [ElementPriority(2)]
-        public VertexBufferFlags Flags { get { return mFlags; } set { if(mFlags!=value){mFlags = value; OnRCOLChanged(this, new EventArgs());} } }
+        public FormatFlags Flags { get { return mFlags; } set { if(mFlags!=value){mFlags = value; OnRCOLChanged(this, new EventArgs());} } }
         [ElementPriority(3)]
         public UInt32 SwizzleInfo { get { return mSwizzleInfo; } set { if(mSwizzleInfo!=value){mSwizzleInfo = value; OnRCOLChanged(this, new EventArgs());} } }
         [ElementPriority(4)]
@@ -90,7 +88,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mFlags = (VertexBufferFlags)br.ReadUInt32();
+            mFlags = (FormatFlags)br.ReadUInt32();
             mSwizzleInfo = br.ReadUInt32();
             mBuffer = new Byte[s.Length - s.Position];
             s.Read(mBuffer, 0, mBuffer.Length);

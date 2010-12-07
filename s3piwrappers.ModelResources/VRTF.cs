@@ -40,6 +40,30 @@ namespace s3piwrappers
 
 
         }
+        public static int ElementSizeFromFormat(ElementFormat f)
+        {
+            switch (f)
+            {
+                case ElementFormat.Float1:
+                case ElementFormat.UByte4:
+                case ElementFormat.ColorUByte4:
+                case ElementFormat.UByte4N:
+                case ElementFormat.UShort2N:
+                case ElementFormat.Short2:
+                    return 4;
+                case ElementFormat.UShort4N:
+                case ElementFormat.Float2:
+                case ElementFormat.Short4:
+                case ElementFormat.Short4N:
+                    return 8;
+                case ElementFormat.Float3:
+                    return 12;
+                case ElementFormat.Float4:
+                    return 16;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
         public class VertexElementLayoutList : AResource.DependentList<ElementLayout>
         {
             public VertexElementLayoutList(EventHandler handler)
