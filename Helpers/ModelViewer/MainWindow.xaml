@@ -14,7 +14,6 @@
     <Grid Width="Auto" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition MinWidth="150" Width="150"></ColumnDefinition>
-            <ColumnDefinition Width="Auto"></ColumnDefinition>
             <ColumnDefinition MinWidth="320"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -28,16 +27,15 @@
                 <StackPanel Focusable="True">
                     <TextBlock>Meshes:</TextBlock>
                     <ListView
-                        x:Name="mMeshListView"                         
+                        x:Name="mMeshListView"                            
                         Background="DarkGray"
-                        SelectionChanged="mMeshListView_SelectionChanged">  
+                        SelectionChanged="mMeshListView_SelectionChanged" SelectionMode="Single">  
                     </ListView>
                     <TextBlock>States:</TextBlock>
                     <ListView 
                         x:Name="mStateListView" 
                         Background="DarkGray"
-                        SelectionChanged="mStateListView_SelectionChanged"
-                        >
+                        SelectionChanged="mStateListView_SelectionChanged" SelectionMode="Single">
                     </ListView>
                 </StackPanel>
 
@@ -45,15 +43,10 @@
             
         </Grid>
 
-        <GridSplitter  BorderThickness="1" Grid.Column="1" BorderBrush="DarkGray" 
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch" >
-
-        </GridSplitter>
         <DockPanel
             Background="#FF6F6F6F"
               
-              Grid.Column="2"
+              Grid.Column="1"
               VerticalAlignment="Stretch" 
               Height="Auto" 
               HorizontalAlignment="Stretch" 
