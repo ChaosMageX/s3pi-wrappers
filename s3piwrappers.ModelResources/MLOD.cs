@@ -35,6 +35,16 @@ namespace s3piwrappers
 
     public class MLOD : ARCOLBlock
     {
+        public static int IndexCountFromPrimitiveType(ModelPrimitiveType t)
+        {
+            switch (t)
+            {
+                case ModelPrimitiveType.TriangleList:
+                    return 3;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
         public class GeometryStateList : AResource.DependentList<GeometryState>
         {
             public GeometryStateList(EventHandler handler)
@@ -64,19 +74,19 @@ namespace s3piwrappers
         }
         public class GeometryState : AHandlerElement, IEquatable<GeometryState>
         {
-            private UInt32 mState;
-            private UInt32 mStartIndex;
-            private UInt32 mMinVertexIndex;
-            private UInt32 mVertexCount;
-            private UInt32 mPrimitiveCount;
+            private UInt32 mName;
+            private Int32 mStartIndex;
+            private Int32 mMinVertexIndex;
+            private Int32 mVertexCount;
+            private Int32 mPrimitiveCount;
 
             public GeometryState(int APIversion, EventHandler handler) : base(APIversion, handler) { }
-            public GeometryState(int APIversion, EventHandler handler, GeometryState basis) : this(APIversion, handler, basis.State, basis.StartIndex, basis.MinVertexIndex, basis.VertexCount, basis.PrimitiveCount) { }
+            public GeometryState(int APIversion, EventHandler handler, GeometryState basis) : this(APIversion, handler, basis.Name, basis.StartIndex, basis.MinVertexIndex, basis.VertexCount, basis.PrimitiveCount) { }
             public GeometryState(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
-            public GeometryState(int APIversion, EventHandler handler, uint state, uint startIndex, uint minVertexIndex, uint vertexCount, uint primitiveCount)
+            public GeometryState(int APIversion, EventHandler handler, uint name, int startIndex, int minVertexIndex, int vertexCount, int primitiveCount)
                 : base(APIversion, handler)
             {
-                mState = state;
+                mName = name;
                 mStartIndex = startIndex;
                 mMinVertexIndex = minVertexIndex;
                 mVertexCount = vertexCount;
@@ -84,31 +94,31 @@ namespace s3piwrappers
             }
 
             [ElementPriority(1)]
-            public UInt32 State
+            public UInt32 Name
             {
-                get { return mState; }
-                set { if (mState != value) { mState = value; OnElementChanged(); } }
+                get { return mName; }
+                set { if (mName != value) { mName = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
-            public UInt32 StartIndex
+            public Int32 StartIndex
             {
                 get { return mStartIndex; }
                 set { if (mStartIndex != value) { mStartIndex = value; OnElementChanged(); } }
             }
             [ElementPriority(3)]
-            public UInt32 MinVertexIndex
+            public Int32 MinVertexIndex
             {
                 get { return mMinVertexIndex; }
                 set { if (mMinVertexIndex != value) { mMinVertexIndex = value; OnElementChanged(); } }
             }
             [ElementPriority(4)]
-            public UInt32 VertexCount
+            public Int32 VertexCount
             {
                 get { return mVertexCount; }
                 set { if (mVertexCount != value) { mVertexCount = value; OnElementChanged(); } }
             }
             [ElementPriority(5)]
-            public UInt32 PrimitiveCount
+            public Int32 PrimitiveCount
             {
                 get { return mPrimitiveCount; }
                 set { if (mPrimitiveCount != value) { mPrimitiveCount = value; OnElementChanged(); } }
@@ -117,16 +127,16 @@ namespace s3piwrappers
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mState = br.ReadUInt32();
-                mStartIndex = br.ReadUInt32();
-                mMinVertexIndex = br.ReadUInt32();
-                mVertexCount = br.ReadUInt32();
-                mPrimitiveCount = br.ReadUInt32();
+                mName = br.ReadUInt32();
+                mStartIndex = br.ReadInt32();
+                mMinVertexIndex = br.ReadInt32();
+                mVertexCount = br.ReadInt32();
+                mPrimitiveCount = br.ReadInt32();
             }
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(mState);
+                bw.Write(mName);
                 bw.Write(mStartIndex);
                 bw.Write(mMinVertexIndex);
                 bw.Write(mVertexCount);
@@ -150,7 +160,7 @@ namespace s3piwrappers
 
             public bool Equals(GeometryState other)
             {
-                return mState.Equals(other.mState);
+                return mName.Equals(other.mName);
             }
 
             public string Value
@@ -158,7 +168,7 @@ namespace s3piwrappers
                 get
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("State: 0x{0:X8}\n", mState);
+                    sb.AppendFormat("Name: 0x{0:X8}\n", mName);
                     sb.AppendFormat("Start Index:\t{0}\n", mStartIndex);
                     sb.AppendFormat("Min Vertex Index:\t{0}\n", mMinVertexIndex);
                     sb.AppendFormat("Vertex Count:\t{0}\n", mVertexCount);
@@ -297,11 +307,11 @@ namespace s3piwrappers
             private ModelPrimitiveType mPrimitiveType;
             private MeshFlags mFlags;
             private UInt32 mStreamOffset;
-            private UInt32 mStartVertex;
-            private UInt32 mStartIndex;
-            private UInt32 mMinVertexIndex;
-            private UInt32 mVertexCount;
-            private UInt32 mPrimitiveCount;
+            private Int32 mStartVertex;
+            private Int32 mStartIndex;
+            private Int32 mMinVertexIndex;
+            private Int32 mVertexCount;
+            private Int32 mPrimitiveCount;
             private UInt32 mSkinControllerIndex;
             private UInt32 mScaleOffsetIndex;
             private JointReferenceList mJointReferences;
@@ -323,7 +333,7 @@ namespace s3piwrappers
             }
             public Mesh(int APIversion, EventHandler handler, Mesh basis) : this(APIversion, handler, basis.Bounds,basis.Flags,basis.GeometryStates,basis.IndexBufferIndex,basis.JointReferences,basis.MaterialIndex,basis.MinVertexIndex,basis.MirrorPlane,basis.Name,basis.mOwner,basis.ParentName,basis.PrimitiveCount,basis.PrimitiveType,basis.ScaleOffsetIndex,basis.SkinControllerIndex,basis.StartIndex,basis.StartVertex,basis.StreamOffset,basis.VertexBufferIndex,basis.VertexCount,basis.VertexFormatIndex) {  }
             public Mesh(int APIversion, EventHandler handler, MLOD owner, Stream s) : this(APIversion, handler, owner) { Parse(s); }
-            public Mesh(int APIversion, EventHandler handler, BoundingBox bounds, MeshFlags flags, GeometryStateList geometryStates, uint indexBufferIndex, JointReferenceList jointReferences, uint materialIndex, uint minVertexIndex, Vector4 mirrorPlane, uint name, MLOD owner, uint parentName, uint primitiveCount, ModelPrimitiveType primitiveType, uint scaleOffsetIndex, uint skinControllerIndex, uint startIndex, uint startVertex, uint streamOffset, uint vertexBufferIndex, uint vertexCount, uint vertexFormatIndex)
+            public Mesh(int APIversion, EventHandler handler, BoundingBox bounds, MeshFlags flags, GeometryStateList geometryStates, uint indexBufferIndex, JointReferenceList jointReferences, uint materialIndex, int minVertexIndex, Vector4 mirrorPlane, uint name, MLOD owner, uint parentName, int primitiveCount, ModelPrimitiveType primitiveType, uint scaleOffsetIndex, uint skinControllerIndex, int startIndex, int startVertex, uint streamOffset, uint vertexBufferIndex, int vertexCount, uint vertexFormatIndex)
                 : base(APIversion, handler)
             {
                 mBounds = bounds;
@@ -398,31 +408,31 @@ namespace s3piwrappers
                 set { if (mStreamOffset != value) { mStreamOffset = value; OnElementChanged(); } }
             }
             [ElementPriority(9)]
-            public UInt32 StartVertex
+            public Int32 StartVertex
             {
                 get { return mStartVertex; }
                 set { if (mStartVertex != value) { mStartVertex = value; OnElementChanged(); } }
             }
             [ElementPriority(10)]
-            public UInt32 StartIndex
+            public Int32 StartIndex
             {
                 get { return mStartIndex; }
                 set { if (mStartIndex != value) { mStartIndex = value; OnElementChanged(); } }
             }
             [ElementPriority(11)]
-            public UInt32 MinVertexIndex
+            public Int32 MinVertexIndex
             {
                 get { return mMinVertexIndex; }
                 set { if (mMinVertexIndex != value) { mMinVertexIndex = value; OnElementChanged(); } }
             }
             [ElementPriority(12)]
-            public UInt32 VertexCount
+            public Int32 VertexCount
             {
                 get { return mVertexCount; }
                 set { if (mVertexCount != value) { mVertexCount = value; OnElementChanged(); } }
             }
             [ElementPriority(13)]
-            public UInt32 PrimitiveCount
+            public Int32 PrimitiveCount
             {
                 get { return mPrimitiveCount; }
                 set { if (mPrimitiveCount != value) { mPrimitiveCount = value; OnElementChanged(); } }
@@ -470,6 +480,10 @@ namespace s3piwrappers
                 get { return mMirrorPlane; }
                 set { if (mMirrorPlane != value) { mMirrorPlane = value; OnElementChanged(); } }
             }
+            public bool IsShadowCaster
+            {
+                get { return (mFlags & MeshFlags.ShadowCaster) != 0; }
+            }
 
 
 
@@ -488,11 +502,11 @@ namespace s3piwrappers
                 mPrimitiveType = (ModelPrimitiveType)(val & 0x000000FF);
                 mFlags = (MeshFlags)(val >> 8);
                 mStreamOffset = br.ReadUInt32();
-                mStartVertex = br.ReadUInt32();
-                mStartIndex = br.ReadUInt32();
-                mMinVertexIndex = br.ReadUInt32();
-                mVertexCount = br.ReadUInt32();
-                mPrimitiveCount = br.ReadUInt32();
+                mStartVertex = br.ReadInt32();
+                mStartIndex = br.ReadInt32();
+                mMinVertexIndex = br.ReadInt32();
+                mVertexCount = br.ReadInt32();
+                mPrimitiveCount = br.ReadInt32();
                 mBounds = new BoundingBox(0, handler, s);
                 mSkinControllerIndex = br.ReadUInt32();
                 mJointReferences = new JointReferenceList(handler, s);
@@ -581,7 +595,7 @@ namespace s3piwrappers
                         sb.AppendFormat("Geometry States:\n");
                         for (int i = 0; i < mGeometryStates.Count; i++)
                         {
-                            sb.AppendFormat("=Geometry State[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
+                            sb.AppendFormat("=Geometry Name[{0}]=\n{1}\n", i, mGeometryStates[i].Value);
                         }
                     }
                     if (mOwner.Version >= 0x00000202)

@@ -8,6 +8,24 @@ namespace s3piwrappers
 {
     public class VRTF : ARCOLBlock
     { 
+        public static VRTF CreateDefaultForShadow()
+        {
+            VRTF v = new VRTF(0, null);
+            v.Stride = 8;
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
+                                                                  ElementUsage.Position, 0));
+            return v;
+        }
+        public static VRTF CreateDefault()
+        {
+            VRTF v = new VRTF(0, null);
+            v.Stride = 16;
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
+                                                                  ElementUsage.Position, 0));
+            v.Layouts.Add(new ElementLayout(8, null, ElementFormat.Short2, 0,
+                                                                  ElementUsage.UV, 0));
+            return v;
+        }
         public enum ElementUsage : byte
         {
             Position,
@@ -193,7 +211,7 @@ namespace s3piwrappers
             }
         }
         private UInt32 mVersion;
-        private UInt32 mStride;
+        private Int32 mStride;
         private bool mExtendedFormat;
         private VertexElementLayoutList mLayouts;
 
@@ -204,7 +222,7 @@ namespace s3piwrappers
         }
         public VRTF(int APIversion, EventHandler handler, VRTF basis): this(APIversion, handler,basis.Version,basis.Stride,new VertexElementLayoutList(handler,basis.Layouts), basis.ExtendedFormat){}
         public VRTF(int APIversion, EventHandler handler, Stream s): base(APIversion, handler, s){}
-        public VRTF(int APIversion, EventHandler handler, uint version, uint stride, VertexElementLayoutList layouts, bool extendedFormat) : base(APIversion, handler, null)
+        public VRTF(int APIversion, EventHandler handler, uint version, int stride, VertexElementLayoutList layouts, bool extendedFormat) : base(APIversion, handler, null)
         {
             mExtendedFormat = extendedFormat;
             mLayouts = layouts;
@@ -219,7 +237,7 @@ namespace s3piwrappers
             set { if(mVersion!=value){mVersion = value; OnRCOLChanged(this, new EventArgs());} }
         }
         [ElementPriority(2)]
-        public uint Stride
+        public int Stride
         {
             get { return mStride; }
             set { if(mStride!=value){mStride = value; OnRCOLChanged(this, new EventArgs());} }
@@ -267,7 +285,7 @@ namespace s3piwrappers
                 throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
-            mStride = br.ReadUInt32();
+            mStride = br.ReadInt32();
             int count = br.ReadInt32();
             mExtendedFormat = br.ReadUInt32() > 0 ? true : false;
             mLayouts = new VertexElementLayoutList(handler, s, count);

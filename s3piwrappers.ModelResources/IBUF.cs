@@ -31,6 +31,39 @@ namespace s3piwrappers
     }
     public class IBUF : ARCOLBlock
     {
+        public int AddIndices(Int32[] indices)
+        {
+            int starts = mBuffer.Length;
+            Int32[] newBuffer = new int[indices.Length+mBuffer.Length];
+            Array.Copy(mBuffer, 0, newBuffer, 0, mBuffer.Length);
+            Array.Copy(indices, 0, newBuffer, 0, indices.Length);
+            mBuffer = newBuffer;
+            return starts;
+        }
+        public Int32[] GetIndices(MLOD.Mesh mesh)
+        {
+            return GetIndices(mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount);
+        }
+        public Int32[] GetIndices(MLOD.Mesh mesh, int geoStateIndex)
+        {
+            MLOD.GeometryState geometryState = mesh.GeometryStates[geoStateIndex];
+            return GetIndices(mesh, geometryState);
+        }
+        public Int32[] GetIndices(MLOD.Mesh mesh, MLOD.GeometryState geometryState)
+        {
+            return GetIndices(mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount);
+        }
+        public Int32[] GetIndices(ModelPrimitiveType type, Int32 startIndex, Int32 count)
+        {
+            return GetIndices(MLOD.IndexCountFromPrimitiveType(type),startIndex,count);
+        }
+        public Int32[] GetIndices(int sizePerPrimitive, Int32 startIndex, Int32 count)
+        {
+            Int32[] output = new int[count * sizePerPrimitive];
+            Array.Copy(mBuffer, startIndex, output, 0, output.Length);
+            return output;
+        }
+
         [Flags]
         public enum FormatFlags : uint
         {

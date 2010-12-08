@@ -3,10 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
 using s3pi.Settings;
 namespace s3piwrappers
 {
+
+    public struct Vertex
+    {
+        public float[] Position;
+        public float[] Normal;
+        public float[][] UV;
+        public byte[] BlendIndices;
+        public float[] BlendWeights;
+        public float[] Tangents;
+        public float[] Color;
+
+    }
     public class VBUF2 : VBUF
     {
         public VBUF2(int apiVersion, EventHandler handler, VBUF basis)
@@ -120,5 +133,119 @@ namespace s3piwrappers
             get { return "VBUF"; }
         }
         static bool checking = Settings.Checking;
+
+        // TODO: does not handle all data yet
+        public Vertex[] GetVertices(VRTF vrtf, long offset, int count)
+        {
+            long streamOffset = offset;
+            Stream s = new MemoryStream(mBuffer);
+            s.Seek(streamOffset, SeekOrigin.Begin);
+
+            var position = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
+            var normal = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Normal);
+
+            var uv = vrtf.Layouts
+                .Where(x => x.Usage == VRTF.ElementUsage.UV)
+                .ToArray();
+            Vertex[] verts = new Vertex[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                Vertex v = new Vertex();
+                byte[] data = new byte[vrtf.Stride];
+                s.Read(data, 0, vrtf.Stride);
+                if (position != null)
+                {
+                    float[] posPoints = new float[3];
+                    ReadFloatData(data, position, ref posPoints);
+                    v.Position = posPoints;
+                }
+                if (normal != null)
+                {
+                    float[] normPoints = new float[3];
+                    ReadFloatData(data, normal, ref normPoints);
+                    v.Normal = normPoints;
+                }
+                v.UV = new float[uv.Length][];
+                for (int j = 0; j < uv.Length; j++)
+                {
+                    var u = uv[j];
+                    float[] uvPoints = new float[(u.Format == VRTF.ElementFormat.Float4 || u.Format == VRTF.ElementFormat.UShort4N) ? 4 : 2];
+                    ReadFloatData(data, u, ref uvPoints);
+                    v.UV[j] = uvPoints;
+                }
+                verts[i] = v;
+            }
+            return verts;
+        }
+        public static void ReadFloatData(byte[] data, VRTF.ElementLayout layout, ref float[] output)
+        {
+            byte[] element = new byte[VRTF.ElementSizeFromFormat(layout.Format)];
+            Array.Copy(data, layout.Offset, element, 0, element.Length);
+            float a, b, c, scalar;
+
+            switch (layout.Format)
+            {
+                case VRTF.ElementFormat.Float1:
+                    output[0] += BitConverter.ToSingle(element, 0);
+                    break;
+                case VRTF.ElementFormat.Float2:
+                    output[0] += BitConverter.ToSingle(element, 0);
+                    output[1] += BitConverter.ToSingle(element, 4);
+                    break;
+                case VRTF.ElementFormat.Float3:
+                    output[0] += BitConverter.ToSingle(element, 0);
+                    output[1] += BitConverter.ToSingle(element, 4);
+                    output[2] += BitConverter.ToSingle(element, 8);
+                    break;
+                case VRTF.ElementFormat.Float4:
+                    output[0] += BitConverter.ToSingle(element, 0);
+                    output[1] += BitConverter.ToSingle(element, 4);
+                    output[2] += BitConverter.ToSingle(element, 8);
+                    output[3] += BitConverter.ToSingle(element, 12);
+                    break;
+                case VRTF.ElementFormat.ColorUByte4:
+                    a = (SByte)element[0];
+                    b = (SByte)element[1];
+                    c = (SByte)element[2];
+                    scalar = element[3];
+                    if (scalar == 0) scalar = SByte.MaxValue;
+                    scalar = 1f / scalar;
+                    output[0] += scalar * (a < 0 ? a + 128 : a - 128);
+                    output[1] += scalar * (b < 0 ? b + 128 : b - 128);
+                    output[2] += scalar * (c < 0 ? c + 128 : c - 128);
+                    break;
+                case VRTF.ElementFormat.Short2:
+                    a = BitConverter.ToInt16(element, 0);
+                    b = BitConverter.ToInt16(element, 2);
+                    output[0] += a * (1f / short.MaxValue);
+                    output[1] += b * (1f / short.MaxValue);
+                    break;
+                case VRTF.ElementFormat.Short4:
+                    a = BitConverter.ToInt16(element, 0);
+                    b = BitConverter.ToInt16(element, 2);
+                    c = BitConverter.ToInt16(element, 4);
+                    scalar = BitConverter.ToUInt16(element, 6);
+                    if (scalar == 0) scalar = short.MaxValue;
+                    scalar = 1f / scalar;
+                    output[0] += a * scalar;
+                    output[1] += b * scalar;
+                    output[2] += c * scalar;
+                    break;
+                case VRTF.ElementFormat.UShort4N:
+                    a = BitConverter.ToInt16(element, 0);
+                    b = BitConverter.ToInt16(element, 2);
+                    c = BitConverter.ToInt16(element, 4);
+                    scalar = BitConverter.ToUInt16(element, 6);
+                    if (scalar == 0) scalar = 512;
+                    scalar = 1f / scalar;
+                    output[0] += a * scalar;
+                    output[1] += b * scalar;
+                    output[2] += c * scalar;
+                    break;
+            }
+        }
     }
 }
