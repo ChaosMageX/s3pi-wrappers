@@ -603,7 +603,11 @@ namespace s3piwrappers
             get
             {
                 var sb = new StringBuilder();
-                foreach (var e in mVisualEffectHandles) sb.AppendFormat("[0x{2:X8}](0x{0:X8}):{1}\r\n",FNV32.GetHash(e.EffectName),e.EffectName,e.Index);
+                for (int i = 0; i < mVisualEffectHandles.Count;i++ )
+                {
+                    var e = mVisualEffectHandles[i];
+                    sb.AppendFormat("[0x{2:X8}]:(0x{0:X8}):{1}\r\n", FNV32.GetHash(e.EffectName), e.EffectName, i);
+                }
                 return sb.ToString();
 
             }
