@@ -8,7 +8,7 @@ namespace s3piwrappers
 {
     public class VRTF : ARCOLBlock
     { 
-        public static VRTF CreateDefaultForShadow()
+        public static VRTF CreateDefaultForSunShadow()
         {
             VRTF v = new VRTF(0, null);
             v.Stride = 8;
@@ -16,7 +16,7 @@ namespace s3piwrappers
                                                                   ElementUsage.Position, 0));
             return v;
         }
-        public static VRTF CreateDefault()
+        public static VRTF CreateDefaultForDropShadow()
         {
             VRTF v = new VRTF(0, null);
             v.Stride = 16;
@@ -58,7 +58,31 @@ namespace s3piwrappers
 
 
         }
-        public static int ElementSizeFromFormat(ElementFormat f)
+        public static int FloatCountFromFormat(ElementFormat f)
+        {
+            switch (f)
+            {
+                case ElementFormat.Float1:
+                    return 1;
+                case ElementFormat.Float2:
+                case ElementFormat.UShort2N:
+                case ElementFormat.Short2:
+                    return 2;
+                case ElementFormat.Short4:
+                case ElementFormat.Short4N:
+                case ElementFormat.ColorUByte4:
+                case ElementFormat.UByte4N:
+                case ElementFormat.UShort4N:
+                case ElementFormat.Float3:
+                    return 3;
+                case ElementFormat.Float4:
+                    return 4;
+                default:
+                    throw new NotImplementedException();
+            }
+            
+        }
+        public static int ByteSizeFromFormat(ElementFormat f)
         {
             switch (f)
             {

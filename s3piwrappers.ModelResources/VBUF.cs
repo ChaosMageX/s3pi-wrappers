@@ -158,13 +158,13 @@ namespace s3piwrappers
                 s.Read(data, 0, vrtf.Stride);
                 if (position != null)
                 {
-                    float[] posPoints = new float[3];
+                    float[] posPoints = new float[VRTF.FloatCountFromFormat(position.Format)];
                     ReadFloatData(data, position, ref posPoints);
                     v.Position = posPoints;
                 }
                 if (normal != null)
                 {
-                    float[] normPoints = new float[3];
+                    float[] normPoints = new float[VRTF.FloatCountFromFormat(normal.Format)];
                     ReadFloatData(data, normal, ref normPoints);
                     v.Normal = normPoints;
                 }
@@ -172,7 +172,7 @@ namespace s3piwrappers
                 for (int j = 0; j < uv.Length; j++)
                 {
                     var u = uv[j];
-                    float[] uvPoints = new float[(u.Format == VRTF.ElementFormat.Float4 || u.Format == VRTF.ElementFormat.UShort4N) ? 4 : 2];
+                    float[] uvPoints = new float[VRTF.FloatCountFromFormat(u.Format)];
                     ReadFloatData(data, u, ref uvPoints);
                     v.UV[j] = uvPoints;
                 }
@@ -182,7 +182,7 @@ namespace s3piwrappers
         }
         public static void ReadFloatData(byte[] data, VRTF.ElementLayout layout, ref float[] output)
         {
-            byte[] element = new byte[VRTF.ElementSizeFromFormat(layout.Format)];
+            byte[] element = new byte[VRTF.ByteSizeFromFormat(layout.Format)];
             Array.Copy(data, layout.Offset, element, 0, element.Length);
             float a, b, c, scalar;
 
