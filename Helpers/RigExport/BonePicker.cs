@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using s3piwrappers;
 using System.IO;
-using s3pi.DemoPlugins;
+using s3pi.Helpers;
 using System.Globalization;
 using System.Threading;
 using s3piwrappers.Granny2;

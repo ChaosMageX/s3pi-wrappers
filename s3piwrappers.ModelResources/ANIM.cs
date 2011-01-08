@@ -74,7 +74,7 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public class TextureList : AResource.DependentList<Texture>
+        public class TextureList : DependentList<Texture>
         {
             public TextureList(EventHandler handler) : base(handler) { }
             public TextureList(EventHandler handler, IEnumerable<Texture> ilt) : base(handler, ilt) { }

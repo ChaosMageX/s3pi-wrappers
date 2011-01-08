@@ -4,7 +4,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers.Granny2
 {
-    public class BoneList : AResource.DependentList<Bone>
+    public class BoneList : DependentList<Bone>
     {
         public BoneList(EventHandler handler) : base(handler) { }
         public BoneList(EventHandler handler, IEnumerable<Bone> ilt) : base(handler, ilt) { }

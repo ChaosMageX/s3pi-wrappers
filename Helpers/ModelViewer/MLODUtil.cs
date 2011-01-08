@@ -38,7 +38,7 @@ namespace s3piwrappers.ModelViewer
 
             if (vrtf == null)
             {
-                vrtf = mesh.IsShadowCaster ? VRTF.CreateDefaultForShadow() : VRTF.CreateDefault();
+                vrtf = mesh.IsShadowCaster ? VRTF.CreateDefaultForSunShadow() : VRTF.CreateDefaultForDropShadow();
             }
             return vbuf.GetVertices(vrtf,offset,count);
         }

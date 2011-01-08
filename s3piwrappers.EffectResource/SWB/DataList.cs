@@ -6,7 +6,7 @@ using s3piwrappers.SWB.IO;
 
 namespace s3piwrappers.SWB
 {
-    public class DataList<TElement> : AResource.DependentList<TElement>
+    public class DataList<TElement> : DependentList<TElement>
         where TElement : DataElement, IEquatable<TElement>
     {
         public DataList(EventHandler handler) : base(handler) { }

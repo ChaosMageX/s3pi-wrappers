@@ -583,7 +583,7 @@ namespace s3piwrappers
             }
         }
 
-        public class LightList : AResource.DependentList<Light>
+        public class LightList : DependentList<Light>
         {
             public LightList(EventHandler handler, Stream s, int count) : base(handler) { Parse(s,count);}
             public LightList(EventHandler handler) : base(handler) { }
@@ -795,7 +795,7 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public class OccluderList : AResource.DependentList<Occluder>
+        public class OccluderList : DependentList<Occluder>
         {
             public OccluderList(EventHandler handler, Stream s, int count)
                 : base(handler)

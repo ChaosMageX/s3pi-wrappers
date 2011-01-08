@@ -81,7 +81,7 @@ namespace s3piwrappers
 
                 }
             }
-            return new AResource.TGIBlock(0, null, t, g, i);
+            return new TGIBlock(0, null, t, g, i);
         }
         private void WriteKey(BinaryWriter w, IResourceKey key)
         {

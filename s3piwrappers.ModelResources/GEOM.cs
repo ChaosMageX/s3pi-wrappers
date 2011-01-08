@@ -30,41 +30,40 @@ namespace s3piwrappers
             ARGB = 3,
             UInt32 = 4
         }
-        public class IndexList : AResource.DependentList<UInt32>
+        public class IndexList : SimpleList<UInt32>
         {
             private byte mFormat = 2;
 
             public IndexList(EventHandler handler) : base(handler) { }
-            public IndexList(EventHandler handler, Stream s) : base(handler, s) { }
+            public IndexList(EventHandler handler, Stream s) : base(handler, s, null, null) { }
             public IndexList(EventHandler handler, IEnumerable<uint> ilt) : base(handler, ilt) { }
+            public IndexList(EventHandler handler, IEnumerable<HandlerElement<uint>> ilt) : base(handler) { }
+
             protected override void Parse(Stream s)
             {
                 mFormat = new BinaryReader(s).ReadByte();
                 base.Parse(s);
             }
+
             public override void UnParse(Stream s)
             {
                 mFormat = (byte)(Count > 0 ? (this.Max() > ushort.MaxValue ? 4 : 2) : 2);
                 new BinaryWriter(s).Write(mFormat);
                 base.UnParse(s);
             }
-            public override void Add()
-            {
-                base.Add(new object[] { });
-            }
 
-            protected override UInt32 CreateElement(Stream s)
+            protected override HandlerElement<UInt32> CreateElement(Stream s)
             {
                 var br = new BinaryReader(s);
                 switch (mFormat)
                 {
-                    case 0x02: return br.ReadUInt16();
-                    case 0x04: return br.ReadUInt32();
+                    case 0x02: return new HandlerElement<UInt32>(0, elementHandler, br.ReadUInt16());
+                    case 0x04: return new HandlerElement<UInt32>(0, elementHandler, br.ReadUInt32());
                     default: throw new Exception("Unknown index format " + mFormat);
                 }
             }
 
-            protected override void WriteElement(Stream s, UInt32 element)
+            protected override void WriteElement(Stream s, HandlerElement<UInt32> element)
             {
                 var bw = new BinaryWriter(s);
                 switch (mFormat)
@@ -76,16 +75,7 @@ namespace s3piwrappers
             }
         }
 
-        public class JointList : SimpleList<UInt32>
-        {
-            public JointList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
-            public JointList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
-            public JointList(EventHandler handler, IEnumerable<uint> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
-            public JointList(EventHandler handler, IEnumerable<HandlerElement<uint>> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
-            static UInt32 ReadElement(Stream s) { return new BinaryReader(s).ReadUInt32(); }
-            static void WriteElement(Stream s, UInt32 element) { new BinaryWriter(s).Write(element); }
-        }
-        public class VertexList : AResource.DependentList<Vertex>
+        public class VertexList : DependentList<Vertex>
         {
             private GEOM mRoot;
             public VertexList(EventHandler handler, GEOM root) : base(handler) { mRoot = root; }
@@ -278,7 +268,7 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public class VertexElementFormatList : AResource.DependentList<VertexElementFormat>
+        public class VertexElementFormatList : DependentList<VertexElementFormat>
         {
             public VertexElementFormatList(EventHandler handler) : base(handler) { }
             public VertexElementFormatList(EventHandler handler, Stream s) : base(handler, s) { }
@@ -430,13 +420,13 @@ namespace s3piwrappers
         private VertexList mVertices;
         private IndexList mIndices;
         private UInt32 mSkinControllerIndex;
-        private JointList mJoints;
-        private AResource.TGIBlockList mReferences;
+        private UIntList mJoints;
+        private TGIBlockList mReferences;
 
         public GEOM(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }
-        public GEOM(int APIversion, EventHandler handler, GEOM basis) : this(APIversion, handler, new IndexList(handler, basis.mIndices), new JointList(handler, basis.mJoints), basis.Shader, basis.MaterialBlock, basis.mMergeGroup, new AResource.TGIBlockList(handler, basis.mReferences), basis.mSkinControllerIndex, basis.mSortOrder, basis.mVersion, new VertexDataFormat(0, handler, basis.mVertexFormat), new VertexList(handler, basis, basis.mVertices)) { }
+        public GEOM(int APIversion, EventHandler handler, GEOM basis) : this(APIversion, handler, new IndexList(handler, basis.mIndices), new UIntList(handler, basis.mJoints), basis.Shader, basis.MaterialBlock, basis.mMergeGroup, new TGIBlockList(handler, basis.mReferences), basis.mSkinControllerIndex, basis.mSortOrder, basis.mVersion, new VertexDataFormat(0, handler, basis.mVertexFormat), new VertexList(handler, basis, basis.mVertices)) { }
         public GEOM(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
-        public GEOM(int APIversion, EventHandler handler, IndexList indices, JointList joints, uint shader, byte[] material, uint mergeGroup, AResource.TGIBlockList references, uint skinControllerIndex, uint sortOrder, uint version, VertexDataFormat vertexFormat, VertexList vertices)
+        public GEOM(int APIversion, EventHandler handler, IndexList indices, UIntList joints, uint shader, byte[] material, uint mergeGroup, TGIBlockList references, uint skinControllerIndex, uint sortOrder, uint version, VertexDataFormat vertexFormat, VertexList vertices)
             : base(APIversion, handler, null)
         {
             mIndices = indices;
@@ -508,13 +498,13 @@ namespace s3piwrappers
             set { if (mSkinControllerIndex != value) { mSkinControllerIndex = value; OnRCOLChanged(this, new EventArgs()); } }
         }
         [ElementPriority(9)]
-        public JointList Joints
+        public UIntList Joints
         {
             get { return mJoints; }
             set { if (mJoints != value) { mJoints = value; OnRCOLChanged(this, new EventArgs()); } }
         }
         [ElementPriority(10)]
-        public AResource.TGIBlockList References
+        public TGIBlockList References
         {
             get { return mReferences; }
             set { if (mReferences != value) { mReferences = value; OnRCOLChanged(this, new EventArgs()); } }
@@ -577,8 +567,8 @@ namespace s3piwrappers
                 throw new InvalidDataException("Expected 0x01 at 0x" + (s.Position - 1).ToString("X8"));
             mIndices = new IndexList(handler, s);
             mSkinControllerIndex = br.ReadUInt32();
-            mJoints = new JointList(handler, s);
-            mReferences = new AResource.TGIBlockList(handler, s, tgiOffset, tgiSize, false);
+            mJoints = new UIntList(handler, s);
+            mReferences = new TGIBlockList(handler, s, tgiOffset, tgiSize, false);
         }
 
         public override Stream UnParse()
@@ -605,9 +595,9 @@ namespace s3piwrappers
             if (mIndices == null) mIndices = new IndexList(handler);
             mIndices.UnParse(s);
             bw.Write((uint)mSkinControllerIndex);
-            if (mJoints == null) mJoints = new JointList(handler);
+            if (mJoints == null) mJoints = new UIntList(handler);
             mJoints.UnParse(s);
-            if (mReferences == null) mReferences = new AResource.TGIBlockList(handler, false);
+            if (mReferences == null) mReferences = new TGIBlockList(handler, false);
             long tgiOffset = s.Position;
             mReferences.UnParse(s);
             long endOffset = s.Position;

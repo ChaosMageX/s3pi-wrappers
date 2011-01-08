@@ -39,17 +39,19 @@
             // lbName
             // 
             this.lbName.AutoSize = true;
-            this.lbName.Location = new System.Drawing.Point(6, 6);
+            this.lbName.Location = new System.Drawing.Point(9, 7);
+            this.lbName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lbName.Name = "lbName";
-            this.lbName.Size = new System.Drawing.Size(38, 13);
+            this.lbName.Size = new System.Drawing.Size(49, 17);
             this.lbName.TabIndex = 0;
             this.lbName.Text = "Name:";
             // 
             // tbName
             // 
-            this.tbName.Location = new System.Drawing.Point(50, 3);
+            this.tbName.Location = new System.Drawing.Point(65, 4);
+            this.tbName.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tbName.Name = "tbName";
-            this.tbName.Size = new System.Drawing.Size(340, 20);
+            this.tbName.Size = new System.Drawing.Size(286, 22);
             this.tbName.TabIndex = 1;
             this.tbName.TextChanged += new System.EventHandler(this.tbName_TextChanged);
             // 
@@ -60,9 +62,11 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.gbBones.Controls.Add(this.boneTreeView);
             this.gbBones.Controls.Add(this.grannyBoneControl);
-            this.gbBones.Location = new System.Drawing.Point(3, 30);
+            this.gbBones.Location = new System.Drawing.Point(4, 37);
+            this.gbBones.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.gbBones.Name = "gbBones";
-            this.gbBones.Size = new System.Drawing.Size(647, 367);
+            this.gbBones.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.gbBones.Size = new System.Drawing.Size(863, 452);
             this.gbBones.TabIndex = 2;
             this.gbBones.TabStop = false;
             this.gbBones.Text = "Bones";
@@ -74,9 +78,10 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.boneTreeView.BoneManager = null;
             this.boneTreeView.HideSelection = false;
-            this.boneTreeView.Location = new System.Drawing.Point(6, 18);
+            this.boneTreeView.Location = new System.Drawing.Point(8, 22);
+            this.boneTreeView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.boneTreeView.Name = "boneTreeView";
-            this.boneTreeView.Size = new System.Drawing.Size(255, 343);
+            this.boneTreeView.Size = new System.Drawing.Size(339, 421);
             this.boneTreeView.TabIndex = 1;
             this.boneTreeView.TabStop = false;
             this.boneTreeView.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.boneTreeView_AfterSelect);
@@ -85,9 +90,10 @@
             // 
             this.grannyBoneControl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.grannyBoneControl.Enabled = false;
-            this.grannyBoneControl.Location = new System.Drawing.Point(267, 18);
+            this.grannyBoneControl.Location = new System.Drawing.Point(356, 22);
+            this.grannyBoneControl.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.grannyBoneControl.Name = "grannyBoneControl";
-            this.grannyBoneControl.Size = new System.Drawing.Size(374, 189);
+            this.grannyBoneControl.Size = new System.Drawing.Size(499, 233);
             this.grannyBoneControl.TabIndex = 2;
             this.grannyBoneControl.Value = null;
             this.grannyBoneControl.Visible = false;
@@ -96,9 +102,10 @@
             // 
             this.llbMatrixInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.llbMatrixInfo.AutoSize = true;
-            this.llbMatrixInfo.Location = new System.Drawing.Point(571, 10);
+            this.llbMatrixInfo.Location = new System.Drawing.Point(761, 12);
+            this.llbMatrixInfo.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.llbMatrixInfo.Name = "llbMatrixInfo";
-            this.llbMatrixInfo.Size = new System.Drawing.Size(76, 13);
+            this.llbMatrixInfo.Size = new System.Drawing.Size(99, 17);
             this.llbMatrixInfo.TabIndex = 4;
             this.llbMatrixInfo.TabStop = true;
             this.llbMatrixInfo.Text = "Get Matrix Info";
@@ -106,14 +113,15 @@
             // 
             // GrannySkeletonControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.llbMatrixInfo);
             this.Controls.Add(this.gbBones);
             this.Controls.Add(this.tbName);
             this.Controls.Add(this.lbName);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "GrannySkeletonControl";
-            this.Size = new System.Drawing.Size(655, 400);
+            this.Size = new System.Drawing.Size(873, 492);
             this.gbBones.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -18,7 +18,7 @@ namespace s3piwrappers
         static GrannyData()
         {
             string dir = Path.GetDirectoryName(typeof(RigResource).Assembly.Location);
-            hasGranny2Dll = File.Exists(Path.Combine(dir, "granny2.dll"));
+            hasGranny2Dll = IntPtr.Size != 8 && File.Exists(Path.Combine(dir, "granny2.dll"));
         }
         private static bool hasGranny2Dll = false;
         protected const int kRecommendedApiVersion = 1;

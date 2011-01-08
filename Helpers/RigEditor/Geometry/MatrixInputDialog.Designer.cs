@@ -182,7 +182,7 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(263, 91);
+            this.btnOk.Location = new System.Drawing.Point(263, 94);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 15;
@@ -192,7 +192,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(182, 91);
+            this.btnCancel.Location = new System.Drawing.Point(182, 94);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 16;
@@ -203,7 +203,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(349, 126);
+            this.ClientSize = new System.Drawing.Size(342, 123);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lbZ);
@@ -218,6 +218,9 @@
             this.Controls.Add(this.dbM02);
             this.Controls.Add(this.dbM01);
             this.Controls.Add(this.dbM00);
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(350, 150);
+            this.MinimumSize = new System.Drawing.Size(350, 150);
             this.Name = "MatrixInputDialog";
             this.Text = "Matrix Input";
             this.ResumeLayout(false);

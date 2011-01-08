@@ -45,7 +45,7 @@ namespace s3piwrappers
                     throw new NotImplementedException();
             }
         }
-        public class GeometryStateList : AResource.DependentList<GeometryState>
+        public class GeometryStateList : DependentList<GeometryState>
         {
             public GeometryStateList(EventHandler handler)
                 : base(handler)
@@ -177,7 +177,7 @@ namespace s3piwrappers
                 }
             }
         }
-        public class JointReferenceList : AResource.DependentList<JointReference>
+        public class JointReferenceList : DependentList<JointReference>
         {
             public JointReferenceList(EventHandler handler)
                 : base(handler)
@@ -258,7 +258,7 @@ namespace s3piwrappers
                 return mName.Equals(other.mName);
             }
         }
-        public class MeshList : AResource.DependentList<Mesh>
+        public class MeshList : DependentList<Mesh>
         {
             private MLOD mOwner;
             public MeshList(EventHandler handler, MLOD owner)

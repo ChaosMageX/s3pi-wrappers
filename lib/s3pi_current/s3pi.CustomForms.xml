@@ -94,14 +94,14 @@
             A modal form for editing an AResource.DependentList&lt;AResource.TGIBlock&gt; object.
             </summary>
         </member>
-        <member name="M:System.Windows.Forms.TGIBlockListEditor.Show(s3pi.Interfaces.AResource.DependentList{s3pi.Interfaces.AResource.TGIBlock})">
+        <member name="M:System.Windows.Forms.TGIBlockListEditor.Show(s3pi.Interfaces.DependentList{s3pi.Interfaces.TGIBlock})">
             <summary>
             Displays a modal form allowing a list of TGIBlocks to be edited (created, updated, deleted).
             </summary>
             <param name="ltgi">an AResource.DependentList&lt;AResource.TGIBlock&gt; object.</param>
             <returns>the DialogResult</returns>
         </member>
-        <member name="M:System.Windows.Forms.TGIBlockListEditor.Show(System.Windows.Forms.IWin32Window,s3pi.Interfaces.AResource.DependentList{s3pi.Interfaces.AResource.TGIBlock})">
+        <member name="M:System.Windows.Forms.TGIBlockListEditor.Show(System.Windows.Forms.IWin32Window,s3pi.Interfaces.DependentList{s3pi.Interfaces.TGIBlock})">
             <summary>
             Displays a modal form allowing a list of TGIBlocks to be edited (created, updated, deleted).
             </summary>

@@ -35,7 +35,7 @@ namespace s3piwrappers.Resources
         }
 
         
-        public class PropertyList : AResource.DependentList<Property>
+        public class PropertyList : DependentList<Property>
         {
             public PropertyList(EventHandler handler) : base(handler) { }
             public PropertyList(EventHandler handler, Stream s) : base(handler, s) { }

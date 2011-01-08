@@ -23,7 +23,7 @@ namespace s3piwrappers
     public class ClipResource : AResource
     {
         public abstract class CountedOffsetItemList<T> : DependentList<T>
-            where T : IEquatable<T>
+            where T : AHandlerElement, IEquatable<T>
         {
             protected CountedOffsetItemList(EventHandler handler) : base(handler) { }
             protected CountedOffsetItemList(EventHandler handler, Stream s) : base(handler, s) { }

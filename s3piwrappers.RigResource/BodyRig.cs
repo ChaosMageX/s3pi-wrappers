@@ -25,7 +25,7 @@ namespace s3piwrappers
             }
         }
 
-        public class IkLinkList : AResource.DependentList<IkLink>
+        public class IkLinkList : DependentList<IkLink>
         {
             public IkLinkList(EventHandler handler) : base(handler) { }
             public IkLinkList(EventHandler handler, IEnumerable<IkLink> ilt) : base(handler, ilt) { }
@@ -87,7 +87,7 @@ namespace s3piwrappers
 
 
 
-        public class IkChainList : AResource.DependentList<IkChain>
+        public class IkChainList : DependentList<IkChain>
         {
             public IkChainList(EventHandler handler)
                 : base(handler)

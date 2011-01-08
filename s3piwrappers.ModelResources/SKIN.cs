@@ -10,7 +10,7 @@ namespace s3piwrappers
 {
     public class SKIN : ARCOLBlock
     {
-        public class BoneList : AResource.DependentList<Bone>
+        public class BoneList : DependentList<Bone>
         {
             public BoneList(EventHandler handler) : base(handler) { }
             public BoneList(EventHandler handler, IEnumerable<Bone> ilt) : base(handler, ilt) { }

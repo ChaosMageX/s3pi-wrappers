@@ -24,7 +24,7 @@ namespace s3piwrappers
     }
     public class MODL : ARCOLBlock
     {
-        public class BoundingBoxList : AResource.DependentList<BoundingBox>
+        public class BoundingBoxList : DependentList<BoundingBox>
         {
             public BoundingBoxList(EventHandler handler) : base(handler) { }
             public BoundingBoxList(EventHandler handler, Stream s) : base(handler, s) { }
@@ -42,7 +42,7 @@ namespace s3piwrappers
                 element.UnParse(s);
             }
         }
-        public class LODEntryList : AResource.DependentList<LODEntry>
+        public class LODEntryList : DependentList<LODEntry>
         {
             public LODEntryList(EventHandler handler)
                 : base(handler)

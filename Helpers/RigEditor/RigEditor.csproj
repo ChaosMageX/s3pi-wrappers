@@ -35,9 +35,6 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RigEditor, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <ExecutableExtension>.exe</ExecutableExtension>
-    </Reference>
     <Reference Include="s3pi.CustomForms">
       <HintPath>..\..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
       <Private>False</Private>
@@ -57,10 +54,8 @@
       <HintPath>..\..\lib\s3pi_current\System.Custom.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoneOps\BoneHierarchy.cs" />

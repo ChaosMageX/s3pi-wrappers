@@ -106,7 +106,7 @@ namespace s3piwrappers
                     throw new NotImplementedException();
             }
         }
-        public class VertexElementLayoutList : AResource.DependentList<ElementLayout>
+        public class VertexElementLayoutList : DependentList<ElementLayout>
         {
             public VertexElementLayoutList(EventHandler handler)
                 : base(handler)

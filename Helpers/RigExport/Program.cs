@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using s3pi.DemoPlugins;
+using s3pi.Helpers;
 
 namespace RigExport
 {

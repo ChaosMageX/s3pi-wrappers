@@ -89,13 +89,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Granny2Wrapper\Granny2Wrapper.csproj">
-      <Project>{18623B28-A39C-4165-9D6C-ACF362FEE03F}</Project>
-      <Name>Granny2Wrapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\RigResource\RigResource.csproj">
-      <Project>{96239738-405A-437E-903A-C51B9521912D}</Project>
-      <Name>RigResource</Name>
+    <ProjectReference Include="..\..\s3piwrappers.RigResource\s3piwrappers.RigResource.csproj">
+      <Project>{E0F1EFF6-9420-4448-8EB8-8F5CB0BF0D4B}</Project>
+      <Name>s3piwrappers.RigResource</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

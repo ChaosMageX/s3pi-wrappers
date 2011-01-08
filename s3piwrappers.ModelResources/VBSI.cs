@@ -75,7 +75,7 @@ namespace s3piwrappers
             }
             public string Value { get { return ToString(); } }
         }
-        public class SwizzleList : AResource.DependentList<SwizzleEntry>
+        public class SwizzleList : DependentList<SwizzleEntry>
         {
             public SwizzleList(EventHandler handler)
                 : base(handler)
@@ -112,7 +112,7 @@ namespace s3piwrappers
                 element.UnParse(s);
             }
         }
-        public class SegmentList : AResource.DependentList<SegmentInfo>
+        public class SegmentList : DependentList<SegmentInfo>
         {
             public SegmentList(EventHandler handler): base(handler){}
             public SegmentList(EventHandler handler, Stream s): base(handler, s){}
