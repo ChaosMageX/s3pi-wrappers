@@ -36,8 +36,8 @@
             // 
             this.btnCommit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCommit.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnCommit.Location = new System.Drawing.Point(932, 649);
-            this.btnCommit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCommit.Location = new System.Drawing.Point(936, 651);
+            this.btnCommit.Margin = new System.Windows.Forms.Padding(4);
             this.btnCommit.Name = "btnCommit";
             this.btnCommit.Size = new System.Drawing.Size(100, 28);
             this.btnCommit.TabIndex = 1;
@@ -49,8 +49,8 @@
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(824, 649);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCancel.Location = new System.Drawing.Point(824, 651);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(100, 28);
             this.btnCancel.TabIndex = 2;
@@ -63,10 +63,10 @@
             this.grannySkeletonControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.grannySkeletonControl1.Location = new System.Drawing.Point(7, 15);
-            this.grannySkeletonControl1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.grannySkeletonControl1.Location = new System.Drawing.Point(3, 0);
+            this.grannySkeletonControl1.Margin = new System.Windows.Forms.Padding(5);
             this.grannySkeletonControl1.Name = "grannySkeletonControl1";
-            this.grannySkeletonControl1.Size = new System.Drawing.Size(1025, 626);
+            this.grannySkeletonControl1.Size = new System.Drawing.Size(1041, 645);
             this.grannySkeletonControl1.TabIndex = 3;
             this.grannySkeletonControl1.Value = null;
             // 
@@ -78,7 +78,7 @@
             this.Controls.Add(this.grannySkeletonControl1);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnCommit);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(917, 411);
             this.Name = "MainForm";
             this.Text = "Rig Editor";

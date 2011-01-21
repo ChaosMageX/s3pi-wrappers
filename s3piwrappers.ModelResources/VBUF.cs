@@ -55,15 +55,16 @@ namespace s3piwrappers
             Dynamic = 0x1,
             None = 0x0
         }
-        
+
         private UInt32 mVersion = 0x00000101;
         private FormatFlags mFlags;
-        private UInt32 mSwizzleInfo;
+        private GenericRCOLResource.ChunkReference mSwizzleInfo;
         private Byte[] mBuffer;
-        public VBUF(int apiVersion, EventHandler handler, VBUF basis): this(apiVersion, handler, basis.Version, basis.Flags, basis.SwizzleInfo, (Byte[])basis.Buffer.Clone()){}
-        public VBUF(int apiVersion, EventHandler handler): base(apiVersion, handler, null){}
-        public VBUF(int apiVersion, EventHandler handler, Stream s): base(apiVersion, handler, s){}
-        public VBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, uint swizzleInfo, byte[] buffer) : this(APIversion, handler)
+        public VBUF(int apiVersion, EventHandler handler, VBUF basis) : this(apiVersion, handler, basis.Version, basis.Flags, basis.SwizzleInfo, (Byte[])basis.Buffer.Clone()) { }
+        public VBUF(int apiVersion, EventHandler handler) : base(apiVersion, handler, null) { }
+        public VBUF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+        public VBUF(int APIversion, EventHandler handler, uint version, FormatFlags flags, GenericRCOLResource.ChunkReference swizzleInfo, byte[] buffer)
+            : this(APIversion, handler)
         {
             mVersion = version;
             mFlags = flags;
@@ -72,23 +73,26 @@ namespace s3piwrappers
         }
 
         [ElementPriority(1)]
-        public UInt32 Version { get { return mVersion; } set { if(mVersion!=value){mVersion = value; OnRCOLChanged(this, new EventArgs());} } }
+        public UInt32 Version { get { return mVersion; } set { if (mVersion != value) { mVersion = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(2)]
-        public FormatFlags Flags { get { return mFlags; } set { if(mFlags!=value){mFlags = value; OnRCOLChanged(this, new EventArgs());} } }
+        public FormatFlags Flags { get { return mFlags; } set { if (mFlags != value) { mFlags = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(3)]
-        public UInt32 SwizzleInfo { get { return mSwizzleInfo; } set { if(mSwizzleInfo!=value){mSwizzleInfo = value; OnRCOLChanged(this, new EventArgs());} } }
+        public GenericRCOLResource.ChunkReference SwizzleInfo { get { return mSwizzleInfo; } set { if (mSwizzleInfo != value) { mSwizzleInfo = value; OnRCOLChanged(this, new EventArgs()); } } }
         [ElementPriority(4)]
-        public Byte[] Buffer { get { return mBuffer; } set { if(mBuffer!=value){mBuffer = value; OnRCOLChanged(this, new EventArgs());} } }
+        public Byte[] Buffer { get { return mBuffer; } set { if (mBuffer != value) { mBuffer = value; OnRCOLChanged(this, new EventArgs()); } } }
         public string Value
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Flags:\t{0}\n", this["Flags"]);
                 sb.AppendFormat("Swizzle Info:\t0x{0:X8}\n", mSwizzleInfo);
                 sb.AppendFormat("Buffer[{0}]\n", mBuffer.Length);
                 return sb.ToString();
+                /**/
             }
         }
 
@@ -102,7 +106,7 @@ namespace s3piwrappers
             }
             mVersion = br.ReadUInt32();
             mFlags = (FormatFlags)br.ReadUInt32();
-            mSwizzleInfo = br.ReadUInt32();
+            mSwizzleInfo = new GenericRCOLResource.ChunkReference(0, handler, s);
             mBuffer = new Byte[s.Length - s.Position];
             s.Read(mBuffer, 0, mBuffer.Length);
         }
@@ -114,10 +118,12 @@ namespace s3piwrappers
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write((UInt32)mFlags);
-            bw.Write(mSwizzleInfo);
+            if (mSwizzleInfo == null) mSwizzleInfo = new GenericRCOLResource.ChunkReference(0, handler, 0);
+            mSwizzleInfo.UnParse(s);
             if (mBuffer == null) mBuffer = new byte[0];
             bw.Write(mBuffer);
             return s;
+
         }
         public override AHandlerElement Clone(EventHandler handler)
         {
@@ -134,7 +140,6 @@ namespace s3piwrappers
         }
         static bool checking = Settings.Checking;
 
-        // TODO: does not handle all data yet
         public Vertex[] GetVertices(VRTF vrtf, long offset, int count)
         {
             long streamOffset = offset;
@@ -145,10 +150,18 @@ namespace s3piwrappers
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
             var normal = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Normal);
-
             var uv = vrtf.Layouts
                 .Where(x => x.Usage == VRTF.ElementUsage.UV)
                 .ToArray();
+            var blendIndices = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.BlendIndex);
+            var blendWeights = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.BlendWeight);
+            var tangents = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Tangent);
+            var color = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
+
             Vertex[] verts = new Vertex[count];
 
             for (int i = 0; i < count; i++)
@@ -176,74 +189,94 @@ namespace s3piwrappers
                     ReadFloatData(data, u, ref uvPoints);
                     v.UV[j] = uvPoints;
                 }
+                if (blendIndices != null)
+                {
+                    byte[] blendIPoints = new byte[VRTF.ByteSizeFromFormat(blendWeights.Format)];
+                    Array.Copy(data, blendIndices.Offset, blendIPoints, 0, blendIPoints.Length);
+                    v.BlendIndices = blendIPoints;
+                }
+                if (blendWeights != null)
+                {
+                    float[] blendWPoints = new float[VRTF.FloatCountFromFormat(blendWeights.Format)];
+                    ReadFloatData(data, blendWeights, ref blendWPoints);
+                    v.BlendWeights = blendWPoints;
+                }
+                if (tangents != null)
+                {
+                    float[] tangentPoints = new float[VRTF.FloatCountFromFormat(tangents.Format)];
+                    ReadFloatData(data, tangents, ref tangentPoints);
+                    v.Tangents = tangentPoints;
+                }
+                if (color != null)
+                {
+                    float[] colorPoints = new float[VRTF.FloatCountFromFormat(color.Format)];
+                    ReadFloatData(data, color, ref colorPoints);
+                    v.Color = colorPoints;
+                }
                 verts[i] = v;
             }
             return verts;
         }
+        //Currently not supported:
+        //UByte4N,
+        //Short2N, Short4N, UShort2N,
+        //Dec3N, UDec3N,
+        //Float16_2, Float16_4
         public static void ReadFloatData(byte[] data, VRTF.ElementLayout layout, ref float[] output)
         {
             byte[] element = new byte[VRTF.ByteSizeFromFormat(layout.Format)];
             Array.Copy(data, layout.Offset, element, 0, element.Length);
-            float a, b, c, scalar;
+            float scalar;
 
             switch (layout.Format)
             {
                 case VRTF.ElementFormat.Float1:
-                    output[0] += BitConverter.ToSingle(element, 0);
-                    break;
                 case VRTF.ElementFormat.Float2:
-                    output[0] += BitConverter.ToSingle(element, 0);
-                    output[1] += BitConverter.ToSingle(element, 4);
-                    break;
                 case VRTF.ElementFormat.Float3:
-                    output[0] += BitConverter.ToSingle(element, 0);
-                    output[1] += BitConverter.ToSingle(element, 4);
-                    output[2] += BitConverter.ToSingle(element, 8);
-                    break;
                 case VRTF.ElementFormat.Float4:
-                    output[0] += BitConverter.ToSingle(element, 0);
-                    output[1] += BitConverter.ToSingle(element, 4);
-                    output[2] += BitConverter.ToSingle(element, 8);
-                    output[3] += BitConverter.ToSingle(element, 12);
+                    for (int i = 0; i < output.Length; i++)
+                        output[i] += BitConverter.ToSingle(element, i * sizeof(float));
                     break;
                 case VRTF.ElementFormat.ColorUByte4:
+                    /* This doesn't match Wes Howe's result
                     a = (SByte)element[0];
                     b = (SByte)element[1];
                     c = (SByte)element[2];
                     scalar = element[3];
                     if (scalar == 0) scalar = SByte.MaxValue;
-                    scalar = 1f / scalar;
-                    output[0] += scalar * (a < 0 ? a + 128 : a - 128);
-                    output[1] += scalar * (b < 0 ? b + 128 : b - 128);
-                    output[2] += scalar * (c < 0 ? c + 128 : c - 128);
+                    output[0] += (a < 0 ? a + 128 : a - 128) / scalar;
+                    output[1] += (b < 0 ? b + 128 : b - 128) / scalar;
+                    output[2] += (c < 0 ? c + 128 : c - 128) / scalar;
+                    /**/
+                    scalar = Byte.MaxValue - element[3];
+                    if (layout.Usage != VRTF.ElementUsage.BlendWeight)
+                    {
+                        if (scalar == 0) scalar = 128;
+                        for (int i = 0; i < output.Length; i++)
+                            output[i] += (element[2 - i] - 128) / scalar;
+                    }
+                    else
+                    {
+                        if (scalar == 0) scalar = 256;
+                        for (int i = 0; i < output.Length; i++)
+                            output[i] += element[2 - i] / scalar;
+                    }
                     break;
                 case VRTF.ElementFormat.Short2:
-                    a = BitConverter.ToInt16(element, 0);
-                    b = BitConverter.ToInt16(element, 2);
-                    output[0] += a * (1f / short.MaxValue);
-                    output[1] += b * (1f / short.MaxValue);
+                    for (int i = 0; i < output.Length; i++)
+                        output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / (Single)short.MaxValue;
                     break;
                 case VRTF.ElementFormat.Short4:
-                    a = BitConverter.ToInt16(element, 0);
-                    b = BitConverter.ToInt16(element, 2);
-                    c = BitConverter.ToInt16(element, 4);
-                    scalar = BitConverter.ToUInt16(element, 6);
-                    if (scalar == 0) scalar = short.MaxValue;
-                    scalar = 1f / scalar;
-                    output[0] += a * scalar;
-                    output[1] += b * scalar;
-                    output[2] += c * scalar;
+                    scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
+                    if (scalar == 0) scalar = ushort.MaxValue;
+                    for (int i = 0; i < output.Length; i++)
+                        output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
                 case VRTF.ElementFormat.UShort4N:
-                    a = BitConverter.ToInt16(element, 0);
-                    b = BitConverter.ToInt16(element, 2);
-                    c = BitConverter.ToInt16(element, 4);
-                    scalar = BitConverter.ToUInt16(element, 6);
+                    scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
                     if (scalar == 0) scalar = 512;
-                    scalar = 1f / scalar;
-                    output[0] += a * scalar;
-                    output[1] += b * scalar;
-                    output[2] += c * scalar;
+                    for (int i = 0; i < output.Length; i++)
+                        output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
             }
         }

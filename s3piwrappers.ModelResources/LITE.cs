@@ -80,12 +80,15 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     var sb = new StringBuilder();
                     foreach (var f in ContentFields)
                     {
                         if (f != "Value") sb.AppendFormat("{0}: {1}\r\n", f, this[f]);
                     }
                     return sb.ToString();
+                    /**/
                 }
             }
             protected virtual void Parse(Stream s)
@@ -745,12 +748,15 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     var sb = new StringBuilder();
                     foreach (var f in ContentFields)
                     {
                         if (f != "Value") sb.AppendFormat("{0}: {1}\r\n", f, this[f]);
                     }
                     return sb.ToString();
+                    /**/
                 }
             }
             private void Parse(Stream s)
@@ -913,6 +919,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
                 if (mLights.Count > 0)
@@ -934,6 +942,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
         public override uint ResourceType

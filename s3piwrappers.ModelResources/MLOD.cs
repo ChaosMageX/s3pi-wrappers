@@ -5,6 +5,8 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using s3pi.Settings;
+using s3pi.GenericRCOLResource;
+
 namespace s3piwrappers
 {
     [Flags]
@@ -167,6 +169,8 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Name: 0x{0:X8}\n", mName);
                     sb.AppendFormat("Start Index:\t{0}\n", mStartIndex);
@@ -174,6 +178,7 @@ namespace s3piwrappers
                     sb.AppendFormat("Vertex Count:\t{0}\n", mVertexCount);
                     sb.AppendFormat("Primitive Count:\t{0}\n", mPrimitiveCount);
                     return sb.ToString();
+                    /**/
                 }
             }
         }
@@ -300,10 +305,10 @@ namespace s3piwrappers
         public class Mesh : AHandlerElement, IEquatable<Mesh>
         {
             private UInt32 mName;
-            private UInt32 mMaterialIndex;
-            private UInt32 mVertexFormatIndex;
-            private UInt32 mVertexBufferIndex;
-            private UInt32 mIndexBufferIndex;
+            private GenericRCOLResource.ChunkReference mMaterialIndex;
+            private GenericRCOLResource.ChunkReference mVertexFormatIndex;
+            private GenericRCOLResource.ChunkReference mVertexBufferIndex;
+            private GenericRCOLResource.ChunkReference mIndexBufferIndex;
             private ModelPrimitiveType mPrimitiveType;
             private MeshFlags mFlags;
             private UInt32 mStreamOffset;
@@ -312,8 +317,8 @@ namespace s3piwrappers
             private Int32 mMinVertexIndex;
             private Int32 mVertexCount;
             private Int32 mPrimitiveCount;
-            private UInt32 mSkinControllerIndex;
-            private UInt32 mScaleOffsetIndex;
+            private GenericRCOLResource.ChunkReference mSkinControllerIndex;
+            private GenericRCOLResource.ChunkReference mScaleOffsetIndex;
             private JointReferenceList mJointReferences;
             private BoundingBox mBounds;
             private GeometryStateList mGeometryStates;
@@ -330,18 +335,31 @@ namespace s3piwrappers
                 mJointReferences = new JointReferenceList(handler);
                 mGeometryStates = new GeometryStateList(handler);
                 mMirrorPlane = new Vector4(0, handler, 0, 0, 1, 0);
+                mIndexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
+                mMaterialIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
+                mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
+                mSkinControllerIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
+                mVertexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
+                mVertexFormatIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
             }
             public Mesh(int APIversion, EventHandler handler, Mesh basis) : this(APIversion, handler, basis.Bounds,basis.Flags,basis.GeometryStates,basis.IndexBufferIndex,basis.JointReferences,basis.MaterialIndex,basis.MinVertexIndex,basis.MirrorPlane,basis.Name,basis.mOwner,basis.ParentName,basis.PrimitiveCount,basis.PrimitiveType,basis.ScaleOffsetIndex,basis.SkinControllerIndex,basis.StartIndex,basis.StartVertex,basis.StreamOffset,basis.VertexBufferIndex,basis.VertexCount,basis.VertexFormatIndex) {  }
             public Mesh(int APIversion, EventHandler handler, MLOD owner, Stream s) : this(APIversion, handler, owner) { Parse(s); }
-            public Mesh(int APIversion, EventHandler handler, BoundingBox bounds, MeshFlags flags, GeometryStateList geometryStates, uint indexBufferIndex, JointReferenceList jointReferences, uint materialIndex, int minVertexIndex, Vector4 mirrorPlane, uint name, MLOD owner, uint parentName, int primitiveCount, ModelPrimitiveType primitiveType, uint scaleOffsetIndex, uint skinControllerIndex, int startIndex, int startVertex, uint streamOffset, uint vertexBufferIndex, int vertexCount, uint vertexFormatIndex)
+            public Mesh(int APIversion, EventHandler handler, BoundingBox bounds, MeshFlags flags, GeometryStateList geometryStates,
+                GenericRCOLResource.ChunkReference indexBufferIndex, JointReferenceList jointReferences,
+                GenericRCOLResource.ChunkReference materialIndex, int minVertexIndex, Vector4 mirrorPlane, uint name,
+                MLOD owner, uint parentName, int primitiveCount, ModelPrimitiveType primitiveType,
+                GenericRCOLResource.ChunkReference scaleOffsetIndex,
+                GenericRCOLResource.ChunkReference skinControllerIndex, int startIndex, int startVertex, uint streamOffset,
+                GenericRCOLResource.ChunkReference vertexBufferIndex, int vertexCount,
+                GenericRCOLResource.ChunkReference vertexFormatIndex)
                 : base(APIversion, handler)
             {
                 mBounds = bounds;
                 mFlags = flags;
                 mGeometryStates = geometryStates;
-                mIndexBufferIndex = indexBufferIndex;
+                mIndexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, indexBufferIndex);
                 mJointReferences = jointReferences;
-                mMaterialIndex = materialIndex;
+                mMaterialIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, materialIndex);
                 mMinVertexIndex = minVertexIndex;
                 mMirrorPlane = mirrorPlane;
                 mName = name;
@@ -349,14 +367,14 @@ namespace s3piwrappers
                 mParentName = parentName;
                 mPrimitiveCount = primitiveCount;
                 mPrimitiveType = primitiveType;
-                mScaleOffsetIndex = scaleOffsetIndex;
-                mSkinControllerIndex = skinControllerIndex;
+                mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, scaleOffsetIndex);
+                mSkinControllerIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, skinControllerIndex);
                 mStartIndex = startIndex;
                 mStartVertex = startVertex;
                 mStreamOffset = streamOffset;
-                mVertexBufferIndex = vertexBufferIndex;
+                mVertexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, vertexBufferIndex);
                 mVertexCount = vertexCount;
-                mVertexFormatIndex = vertexFormatIndex;
+                mVertexFormatIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, vertexFormatIndex);
             }
 
             [ElementPriority(1)]
@@ -366,28 +384,28 @@ namespace s3piwrappers
                 set { if (mName != value) { mName = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
-            public UInt32 MaterialIndex
+            public GenericRCOLResource.ChunkReference MaterialIndex
             {
                 get { return mMaterialIndex; }
-                set { if (mMaterialIndex != value) { mMaterialIndex = value; OnElementChanged(); } }
+                set { if (mMaterialIndex != value) { mMaterialIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(3)]
-            public UInt32 VertexFormatIndex
+            public GenericRCOLResource.ChunkReference VertexFormatIndex
             {
                 get { return mVertexFormatIndex; }
-                set { if (mVertexFormatIndex != value) { mVertexFormatIndex = value; OnElementChanged(); } }
+                set { if (mVertexFormatIndex != value) { mVertexFormatIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(4)]
-            public UInt32 VertexBufferIndex
+            public GenericRCOLResource.ChunkReference VertexBufferIndex
             {
                 get { return mVertexBufferIndex; }
-                set { if (mVertexBufferIndex != value) { mVertexBufferIndex = value; OnElementChanged(); } }
+                set { if (mVertexBufferIndex != value) { mVertexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(5)]
-            public UInt32 IndexBufferIndex
+            public GenericRCOLResource.ChunkReference IndexBufferIndex
             {
                 get { return mIndexBufferIndex; }
-                set { if (mIndexBufferIndex != value) { mIndexBufferIndex = value; OnElementChanged(); } }
+                set { if (mIndexBufferIndex != value) { mIndexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(6)]
             public ModelPrimitiveType PrimitiveType
@@ -444,17 +462,17 @@ namespace s3piwrappers
                 set { if (mBounds != value) { mBounds = value; OnElementChanged(); } }
             }
             [ElementPriority(15)]
-            public UInt32 SkinControllerIndex
+            public GenericRCOLResource.ChunkReference SkinControllerIndex
             {
                 get { return mSkinControllerIndex; }
-                set { if (mSkinControllerIndex != value) { mSkinControllerIndex = value; OnElementChanged(); } }
+                set { if (mSkinControllerIndex != value) { mSkinControllerIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
 
             [ElementPriority(16)]
-            public UInt32 ScaleOffsetIndex
+            public GenericRCOLResource.ChunkReference ScaleOffsetIndex
             {
                 get { return mScaleOffsetIndex; }
-                set { if (mScaleOffsetIndex != value) { mScaleOffsetIndex = value; OnElementChanged(); } }
+                set { if (mScaleOffsetIndex != value) { mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(17)]
             public JointReferenceList JointReferences
@@ -494,10 +512,10 @@ namespace s3piwrappers
                 long expectedSize = br.ReadUInt32();
                 long start = s.Position;
                 mName = br.ReadUInt32();
-                mMaterialIndex = br.ReadUInt32();
-                mVertexFormatIndex = br.ReadUInt32();
-                mVertexBufferIndex = br.ReadUInt32();
-                mIndexBufferIndex = br.ReadUInt32();
+                mMaterialIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
+                mVertexFormatIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
+                mVertexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
+                mIndexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
                 uint val = br.ReadUInt32();
                 mPrimitiveType = (ModelPrimitiveType)(val & 0x000000FF);
                 mFlags = (MeshFlags)(val >> 8);
@@ -508,9 +526,9 @@ namespace s3piwrappers
                 mVertexCount = br.ReadInt32();
                 mPrimitiveCount = br.ReadInt32();
                 mBounds = new BoundingBox(0, handler, s);
-                mSkinControllerIndex = br.ReadUInt32();
+                mSkinControllerIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
                 mJointReferences = new JointReferenceList(handler, s);
-                mScaleOffsetIndex = br.ReadUInt32();
+                mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
                 mGeometryStates = new GeometryStateList(handler, s);
                 if (mOwner.Version > 0x00000201)
                 {
@@ -530,10 +548,10 @@ namespace s3piwrappers
                 bw.Write(0);
                 long start = s.Position;
                 bw.Write(mName);
-                bw.Write(mMaterialIndex);
-                bw.Write(mVertexFormatIndex);
-                bw.Write(mVertexBufferIndex);
-                bw.Write(mIndexBufferIndex);
+                mMaterialIndex.UnParse(s);
+                mVertexFormatIndex.UnParse(s);
+                mVertexBufferIndex.UnParse(s);
+                mIndexBufferIndex.UnParse(s);
                 bw.Write((UInt32)mPrimitiveType | ((UInt32)mFlags << 8));
                 bw.Write(mStreamOffset);
                 bw.Write(mStartVertex);
@@ -542,9 +560,9 @@ namespace s3piwrappers
                 bw.Write(mVertexCount);
                 bw.Write(mPrimitiveCount);
                 mBounds.UnParse(s);
-                bw.Write(mSkinControllerIndex);
+                mSkinControllerIndex.UnParse(s);
                 mJointReferences.UnParse(s);
-                bw.Write(mScaleOffsetIndex);
+                mScaleOffsetIndex.UnParse(s);
                 mGeometryStates.UnParse(s);
                 if (mOwner.Version > 0x00000201)
                 {
@@ -564,6 +582,8 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Name: 0x{0:X8}\n", mName);
                     sb.AppendFormat("Material: 0x{0:X8}\n", mMaterialIndex);
@@ -604,6 +624,7 @@ namespace s3piwrappers
                         sb.AppendFormat("MirrorPlane: {0}\n", mMirrorPlane);
                     }
                     return sb.ToString();
+                    /**/
                 }
             }
 
@@ -667,6 +688,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 if (mMeshes.Count > 0)
@@ -678,6 +701,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
 

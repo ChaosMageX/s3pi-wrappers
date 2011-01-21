@@ -8,7 +8,7 @@ namespace s3piwrappers
     {
         public RigResourceHandler()
         {
-            Add(typeof(RigResource), new List<string>() { "0x8EAF13DE" });
+            if(IntPtr.Size ==4)Add(typeof(RigResource), new List<string>() { "0x8EAF13DE" });
         }
     }
 }

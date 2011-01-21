@@ -44,11 +44,14 @@ namespace s3piwrappers
             public string Value
             {
                 get 
-                { 
+                {
+                    return ValueBuilder;
+                    /*
                     StringBuilder s = new StringBuilder();
                     s.AppendFormat("{0}\n", mName);
                     s.AppendLine(mInverseBindPose.Value);
                     return s.ToString();
+                    /**/
                 }
             }
             [ElementPriority(1)]

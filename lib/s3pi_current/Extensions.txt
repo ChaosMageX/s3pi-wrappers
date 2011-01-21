@@ -84,6 +84,7 @@
 0x06B981ED  OBJS   .objs
 0x06CE4804  META   .worldmeta
 0x073FAA07  S3SA   .s3sa
+0x0A36F07A  CCFP   .fountain
 0x0C37A5B5  LOOK   .lookuptab
 0x11C258C0  CTRG   .bnry
 0x1A3201CD  _MOD   .override

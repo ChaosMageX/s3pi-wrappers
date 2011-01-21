@@ -192,12 +192,15 @@ namespace s3piwrappers
         public virtual string Value
         {
             get 
-            { 
+            {
+                return ValueBuilder;
+                /*
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
                 sb.AppendFormat("Framerate:\t{0}\r\n", mFramerate);
                 sb.AppendFormat("Textures[{0}]\r\n", mTextures.Count);
                 return sb.ToString();
+                /**/
             }
         }
         public override AHandlerElement Clone(EventHandler handler)

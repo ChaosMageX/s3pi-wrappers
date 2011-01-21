@@ -4,45 +4,37 @@
         <name>System.Custom</name>
     </assembly>
     <members>
-        <member name="T:System.Text.SevenBitString">
+        <member name="T:System.ArgumentLengthException">
             <summary>
-            Read and write a seven-bit encoded length-prefixed string in a given <see cref="T:System.Text.Encoding"/> from or to a <see cref="T:System.IO.Stream"/>.
+            Represents an error in the length of an argument to a method
             </summary>
         </member>
-        <member name="M:System.Text.SevenBitString.Read(System.IO.Stream,System.Text.Encoding)">
+        <member name="M:System.ArgumentLengthException.#ctor">
             <summary>
-            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
-            </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
-            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when reading.</param>
-            <returns>A <see cref="T:System.String"/> value.</returns>
-        </member>
-        <member name="M:System.Text.SevenBitString.Write(System.IO.Stream,System.Text.Encoding,System.String)">
-            <summary>
-            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
-            </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
-            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when writing.</param>
-            <param name="value">The <see cref="T:System.String"/> to write.</param>
-        </member>
-        <member name="T:System.Text.BigEndianUnicodeString">
-            <summary>
-            Read and write a seven-bit encoded length-prefixed string in <see cref="P:System.Text.Encoding.BigEndianUnicode"/> from or to a <see cref="T:System.IO.Stream"/>.
+            Initializes a new instance of the System.ArgumentLengthException class.
             </summary>
         </member>
-        <member name="M:System.Text.BigEndianUnicodeString.Read(System.IO.Stream)">
+        <member name="M:System.ArgumentLengthException.#ctor(System.String)">
             <summary>
-            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
+            Initializes a new instance of the System.ArgumentLengthException class with a specified error message.
             </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
-            <returns>A <see cref="T:System.String"/> value.</returns>
+            <param name="message">The message that describes the error.</param>
         </member>
-        <member name="M:System.Text.BigEndianUnicodeString.Write(System.IO.Stream,System.String)">
+        <member name="M:System.ArgumentLengthException.#ctor(System.String,System.Int32)">
             <summary>
-            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
+            Initializes a new instance of the System.ArgumentLengthException class with a predefined message based on
+            <paramref name="argument"/> and <paramref name="length"/>.
             </summary>
-            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
-            <param name="value">The <see cref="T:System.String"/> to write.</param>
+            <param name="argument">Name of the method argument in error</param>
+            <param name="length">Valid length of the argument</param>
+        </member>
+        <member name="M:System.ArgumentLengthException.#ctor(System.String,System.Object[])">
+            <summary>
+            Initializes a new instance of the System.ArgumentLengthException class with a formatted error message.
+            See <see cref="M:System.String.Format(System.String,System.Object[])"/>.
+            </summary>
+            <param name="format">format string</param>
+            <param name="formatparams">format string substitutions</param>
         </member>
         <member name="T:System.Security.Cryptography.FNVHash">
             <summary>
@@ -435,37 +427,45 @@
             Gets the size, in bits, of the computed hash code.
             </summary>
         </member>
-        <member name="T:System.ArgumentLengthException">
+        <member name="T:System.Text.SevenBitString">
             <summary>
-            Represents an error in the length of an argument to a method
+            Read and write a seven-bit encoded length-prefixed string in a given <see cref="T:System.Text.Encoding"/> from or to a <see cref="T:System.IO.Stream"/>.
             </summary>
         </member>
-        <member name="M:System.ArgumentLengthException.#ctor">
+        <member name="M:System.Text.SevenBitString.Read(System.IO.Stream,System.Text.Encoding)">
             <summary>
-            Initializes a new instance of the System.ArgumentLengthException class.
+            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
+            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when reading.</param>
+            <returns>A <see cref="T:System.String"/> value.</returns>
+        </member>
+        <member name="M:System.Text.SevenBitString.Write(System.IO.Stream,System.Text.Encoding,System.String)">
+            <summary>
+            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="T:System.Text.Encoding"/> <paramref name="enc"/>.
+            </summary>
+            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
+            <param name="enc"><see cref="T:System.Text.Encoding"/> to use when writing.</param>
+            <param name="value">The <see cref="T:System.String"/> to write.</param>
+        </member>
+        <member name="T:System.Text.BigEndianUnicodeString">
+            <summary>
+            Read and write a seven-bit encoded length-prefixed string in <see cref="P:System.Text.Encoding.BigEndianUnicode"/> from or to a <see cref="T:System.IO.Stream"/>.
             </summary>
         </member>
-        <member name="M:System.ArgumentLengthException.#ctor(System.String)">
+        <member name="M:System.Text.BigEndianUnicodeString.Read(System.IO.Stream)">
             <summary>
-            Initializes a new instance of the System.ArgumentLengthException class with a specified error message.
+            Read a string from <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
             </summary>
-            <param name="message">The message that describes the error.</param>
+            <param name="s"><see cref="T:System.IO.Stream"/> from which to read string.</param>
+            <returns>A <see cref="T:System.String"/> value.</returns>
         </member>
-        <member name="M:System.ArgumentLengthException.#ctor(System.String,System.Int32)">
+        <member name="M:System.Text.BigEndianUnicodeString.Write(System.IO.Stream,System.String)">
             <summary>
-            Initializes a new instance of the System.ArgumentLengthException class with a predefined message based on
-            <paramref name="argument"/> and <paramref name="length"/>.
+            Write a string to <see cref="T:System.IO.Stream"/> <paramref name="s"/> using <see cref="P:System.Text.Encoding.BigEndianUnicode"/>.
             </summary>
-            <param name="argument">Name of the method argument in error</param>
-            <param name="length">Valid length of the argument</param>
-        </member>
-        <member name="M:System.ArgumentLengthException.#ctor(System.String,System.Object[])">
-            <summary>
-            Initializes a new instance of the System.ArgumentLengthException class with a formatted error message.
-            See <see cref="M:System.String.Format(System.String,System.Object[])"/>.
-            </summary>
-            <param name="format">format string</param>
-            <param name="formatparams">format string substitutions</param>
+            <param name="s"><see cref="T:System.IO.Stream"/> to which to write string.</param>
+            <param name="value">The <see cref="T:System.String"/> to write.</param>
         </member>
     </members>
 </doc>

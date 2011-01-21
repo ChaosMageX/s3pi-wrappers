@@ -39,7 +39,7 @@ namespace s3piwrappers.RigEditor.Common
             // 
             this.tbInput.Location = new System.Drawing.Point(12, 12);
             this.tbInput.Name = "tbInput";
-            this.tbInput.Size = new System.Drawing.Size(275, 20);
+            this.tbInput.Size = new System.Drawing.Size(275, 22);
             this.tbInput.TabIndex = 0;
             this.tbInput.TextChanged += new System.EventHandler(this.tbInput_TextChanged);
             // 
@@ -67,10 +67,12 @@ namespace s3piwrappers.RigEditor.Common
             // 
             this.AcceptButton = this.btnOk;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(299, 72);
+            this.ClientSize = new System.Drawing.Size(292, 78);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.tbInput);
+            this.MaximumSize = new System.Drawing.Size(300, 110);
+            this.MinimumSize = new System.Drawing.Size(300, 110);
             this.Name = "InputStringDialog";
             this.ResumeLayout(false);
             this.PerformLayout();

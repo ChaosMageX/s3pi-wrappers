@@ -46,7 +46,7 @@ namespace s3piwrappers.RigEditor.Common
             // 
             this.tbFind.Location = new System.Drawing.Point(73, 12);
             this.tbFind.Name = "tbFind";
-            this.tbFind.Size = new System.Drawing.Size(214, 20);
+            this.tbFind.Size = new System.Drawing.Size(214, 22);
             this.tbFind.TabIndex = 0;
             this.tbFind.TextChanged += new System.EventHandler(this.tbFind_TextChanged);
             // 
@@ -54,7 +54,7 @@ namespace s3piwrappers.RigEditor.Common
             // 
             this.tbReplace.Location = new System.Drawing.Point(73, 39);
             this.tbReplace.Name = "tbReplace";
-            this.tbReplace.Size = new System.Drawing.Size(214, 20);
+            this.tbReplace.Size = new System.Drawing.Size(214, 22);
             this.tbReplace.TabIndex = 1;
             this.tbReplace.TextChanged += new System.EventHandler(this.tbReplace_TextChanged);
             // 
@@ -63,16 +63,16 @@ namespace s3piwrappers.RigEditor.Common
             this.lbFind.AutoSize = true;
             this.lbFind.Location = new System.Drawing.Point(33, 15);
             this.lbFind.Name = "lbFind";
-            this.lbFind.Size = new System.Drawing.Size(30, 13);
+            this.lbFind.Size = new System.Drawing.Size(39, 17);
             this.lbFind.TabIndex = 2;
             this.lbFind.Text = "Find:";
             // 
             // lbReplace
             // 
             this.lbReplace.AutoSize = true;
-            this.lbReplace.Location = new System.Drawing.Point(13, 42);
+            this.lbReplace.Location = new System.Drawing.Point(8, 42);
             this.lbReplace.Name = "lbReplace";
-            this.lbReplace.Size = new System.Drawing.Size(50, 13);
+            this.lbReplace.Size = new System.Drawing.Size(64, 17);
             this.lbReplace.TabIndex = 3;
             this.lbReplace.Text = "Replace:";
             // 
@@ -100,13 +100,15 @@ namespace s3piwrappers.RigEditor.Common
             // 
             this.AcceptButton = this.btnOk;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(299, 100);
+            this.ClientSize = new System.Drawing.Size(292, 103);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.lbReplace);
             this.Controls.Add(this.lbFind);
             this.Controls.Add(this.tbReplace);
             this.Controls.Add(this.tbFind);
+            this.MaximumSize = new System.Drawing.Size(300, 135);
+            this.MinimumSize = new System.Drawing.Size(300, 135);
             this.Name = "FindAndReplaceDialog";
             this.ResumeLayout(false);
             this.PerformLayout();

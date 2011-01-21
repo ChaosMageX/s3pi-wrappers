@@ -27,6 +27,10 @@ namespace s3piwrappers
             {
                 throw new NotSupportedException();
             }
+            public Bone this[UInt32 nameHash]
+            {
+                get { return this.FirstOrDefault(x=>x.NameHash.Equals(nameHash)); }
+            }
 
         }
         public class Bone : AHandlerElement, IEquatable<Bone>
@@ -52,10 +56,13 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Name:\t0x{0:X8}\r\n", mNameHash);
                     sb.AppendFormat("InverseBindPose:\r\n{0}", mInverseBindPose.Value);
                     return sb.ToString();
+                    /**/
                 }
             }
             [ElementPriority(1)]
@@ -123,6 +130,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 if (mBones.Count > 0)
@@ -134,6 +143,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
 

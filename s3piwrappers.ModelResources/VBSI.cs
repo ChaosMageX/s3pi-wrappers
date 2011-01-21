@@ -176,6 +176,8 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     var sb = new StringBuilder();
                     sb.AppendFormat("VertexSize:\t{0}\n", mVertexSize);
                     sb.AppendFormat("VertexCount:\t{0}\n", mVertexCount);
@@ -189,6 +191,7 @@ namespace s3piwrappers
                         }
                     }
                     return sb.ToString();
+                    /**/
                 }
             }
             private void Parse(Stream s)
@@ -248,6 +251,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 if (mSegments.Count > 0)
                 {
@@ -258,6 +263,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
 

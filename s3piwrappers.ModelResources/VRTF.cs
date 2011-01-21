@@ -190,12 +190,15 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Usage:\t{0}\n", mUsage);
                     sb.AppendFormat("Index:\t0x{0:X2}\n", mUsageIndex);
                     sb.AppendFormat("Format:\t{0}\n", mFormat);
                     sb.AppendFormat("Offset:\t0x{0:X2}\n", mOffset);
                     return sb.ToString();
+                    /**/
                 }
             }
             private void Parse(Stream s)
@@ -283,6 +286,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Stride:\t0x{0:X8}\n", mStride);
@@ -296,6 +301,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
 

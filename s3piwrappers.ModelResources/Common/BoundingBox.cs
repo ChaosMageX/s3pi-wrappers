@@ -12,7 +12,7 @@ namespace s3piwrappers
         private Vector3 mMax;
         public string Value
         {
-            get { return string.Format("Min:{0}\nMax:{1}", mMin, mMax); }
+            get { return string.Format("Min: {0}; Max:{1}", mMin, mMax); }
         }
         public BoundingBox(int APIversion, EventHandler handler): this(APIversion, handler,new Vector3(0,handler),new Vector3(0,handler)){}
         public BoundingBox(int APIversion, EventHandler handler, BoundingBox basis): this(APIversion, handler, new Vector3(0, handler, basis.Min), new Vector3(0, handler, basis.mMax)) { }

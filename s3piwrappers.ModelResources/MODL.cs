@@ -5,6 +5,8 @@ using s3pi.Interfaces;
 using System.IO;
 using System.Linq;
 using s3pi.Settings;
+using s3pi.GenericRCOLResource;
+
 namespace s3piwrappers
 {
     [Flags]
@@ -90,19 +92,19 @@ namespace s3piwrappers
 
         public class LODEntry : AHandlerElement, IEquatable<LODEntry>
         {
-            private UInt32 mModelLodIndex;
+            private GenericRCOLResource.ChunkReference mModelLodIndex;
             private LODInfoFlags mFlags;
             private LODId mId;
             private float mMinZValue;
             private float mMaxZValue;
 
-            public LODEntry(int APIversion, EventHandler handler) : this(APIversion, handler, 0, (LODInfoFlags)0, LODId.LowDetail, float.MinValue, float.MaxValue) { }
-            public LODEntry(int APIversion, EventHandler handler, LODEntry basis) : this(APIversion, handler, basis.ModelLodIndex, basis.Flags, basis.Id, basis.mModelLodIndex, basis.MaxZValue) { }
+            public LODEntry(int APIversion, EventHandler handler) : this(APIversion, handler, new GenericRCOLResource.ChunkReference(APIversion, handler, 0), (LODInfoFlags)0, LODId.LowDetail, float.MinValue, float.MaxValue) { }
+            public LODEntry(int APIversion, EventHandler handler, LODEntry basis) : this(APIversion, handler, basis.ModelLodIndex, basis.Flags, basis.Id, basis.MinZValue, basis.MaxZValue) { }
             public LODEntry(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
-            public LODEntry(int APIversion, EventHandler handler, uint modelLodIndex, LODInfoFlags flags, LODId id, float minZValue, float maxZValue)
+            public LODEntry(int APIversion, EventHandler handler, GenericRCOLResource.ChunkReference modelLodIndex, LODInfoFlags flags, LODId id, float minZValue, float maxZValue)
                 : base(APIversion, handler)
             {
-                mModelLodIndex = modelLodIndex;
+                mModelLodIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, modelLodIndex);
                 mFlags = flags;
                 mId = id;
                 mMinZValue = minZValue;
@@ -113,6 +115,8 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Index:\t0x{0:X8}\n", mModelLodIndex);
                     sb.AppendFormat("Flags:\t{0}\n", this["Flags"]);
@@ -121,13 +125,14 @@ namespace s3piwrappers
                     sb.AppendFormat("MaxZValue:\t{0}\n", mMaxZValue);
 
                     return sb.ToString();
+                    /**/
                 }
             }
             [ElementPriority(1)]
-            public UInt32 ModelLodIndex
+            public GenericRCOLResource.ChunkReference ModelLodIndex
             {
                 get { return mModelLodIndex; }
-                set { if (mModelLodIndex != value) { mModelLodIndex = value; OnElementChanged(); } }
+                set { if (mModelLodIndex != value) { mModelLodIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(2)]
             public LODInfoFlags Flags
@@ -158,7 +163,7 @@ namespace s3piwrappers
             {
 
                 BinaryReader br = new BinaryReader(s);
-                mModelLodIndex = br.ReadUInt32();
+                mModelLodIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
                 mFlags = (LODInfoFlags)br.ReadUInt32();
                 mId = (LODId)br.ReadUInt32();
                 mMinZValue = br.ReadSingle();
@@ -168,7 +173,7 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(mModelLodIndex);
+                mModelLodIndex.UnParse(s);
                 bw.Write((UInt32)mFlags);
                 bw.Write((UInt32)mId);
                 bw.Write(mMinZValue);
@@ -322,6 +327,8 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Bounds:\n{0}\n", mBounds.Value);
@@ -347,6 +354,7 @@ namespace s3piwrappers
                     }
                 }
                 return sb.ToString();
+                /**/
             }
         }
         public override uint ResourceType

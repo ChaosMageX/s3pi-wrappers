@@ -138,12 +138,15 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     foreach (var f in ContentFields)
                     {
                         sb.AppendFormat("{0}:\t{1}\n", f, this[f]);
                     }
                     return sb.ToString();
+                    /**/
                 }
             }
             [ElementPriority(1)]
@@ -297,9 +300,12 @@ namespace s3piwrappers
             {
                 get
                 {
+                    return ValueBuilder;
+                    /*
                     StringBuilder sb = new StringBuilder();
                     foreach (var ef in mElements) sb.AppendFormat("{0}\n", ef.Value);
                     return sb.ToString();
+                    /**/
                 }
             }
             [ElementPriority(1)]
@@ -368,7 +374,7 @@ namespace s3piwrappers
                 get { return mSize; }
                 set { if (mSize != value) { mSize = value; OnElementChanged(); } }
             }
-            public string Value { get { return String.Format("{0}:{1}({2:X2})", Usage, Type, Size); } }
+            public string Value { get { return String.Format("{0}:{1} ({2:X2})", Usage, Type, Size); } }
             protected void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);

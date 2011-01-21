@@ -100,12 +100,15 @@ namespace s3piwrappers
         {
             get
             {
+                return ValueBuilder;
+                /*
                 StringBuilder sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
                 sb.AppendFormat("Flags:\t{0}\n", this["Flags"]);
                 sb.AppendFormat("DisplayListUsage:\t0x{0:X8}\n", mDisplayListUsage);
                 sb.AppendFormat("Buffer[{0}]\n", mBuffer.Length);
                 return sb.ToString();
+                /**/
             }
         }
         public override AHandlerElement Clone(EventHandler handler)
