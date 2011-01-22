@@ -140,6 +140,14 @@ namespace s3piwrappers
         }
         static bool checking = Settings.Checking;
 
+        public Vertex[] GetVertices(MLOD.Mesh mesh, VRTF vrtf)
+        {
+            return GetVertices(vrtf, mesh.StreamOffset, mesh.VertexCount);
+        }
+        public Vertex[] GetVertices(MLOD.Mesh mesh, VRTF vrtf, MLOD.GeometryState geo)
+        {
+            return GetVertices(vrtf, mesh.StreamOffset + (geo.MinVertexIndex * vrtf.Stride), geo.VertexCount);
+        }
         public Vertex[] GetVertices(VRTF vrtf, long offset, int count)
         {
             long streamOffset = offset;
@@ -238,16 +246,6 @@ namespace s3piwrappers
                         output[i] += BitConverter.ToSingle(element, i * sizeof(float));
                     break;
                 case VRTF.ElementFormat.ColorUByte4:
-                    /* This doesn't match Wes Howe's result
-                    a = (SByte)element[0];
-                    b = (SByte)element[1];
-                    c = (SByte)element[2];
-                    scalar = element[3];
-                    if (scalar == 0) scalar = SByte.MaxValue;
-                    output[0] += (a < 0 ? a + 128 : a - 128) / scalar;
-                    output[1] += (b < 0 ? b + 128 : b - 128) / scalar;
-                    output[2] += (c < 0 ? c + 128 : c - 128) / scalar;
-                    /**/
                     scalar = Byte.MaxValue - element[3];
                     if (layout.Usage != VRTF.ElementUsage.BlendWeight)
                     {

@@ -79,7 +79,6 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Grid3D.cs" />
-    <Compile Include="MLODUtil.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

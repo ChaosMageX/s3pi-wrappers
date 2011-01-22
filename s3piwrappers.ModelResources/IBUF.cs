@@ -44,14 +44,15 @@ namespace s3piwrappers
         {
             return GetIndices(mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount);
         }
-        public Int32[] GetIndices(MLOD.Mesh mesh, int geoStateIndex)
+        public Int32[] GetIndices(MLOD.Mesh mesh,VRTF vrtf, int geoStateIndex)
         {
             MLOD.GeometryState geometryState = mesh.GeometryStates[geoStateIndex];
-            return GetIndices(mesh, geometryState);
+            return GetIndices(mesh,vrtf, geometryState);
         }
-        public Int32[] GetIndices(MLOD.Mesh mesh, MLOD.GeometryState geometryState)
-        {
-            return GetIndices(mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount);
+        public Int32[] GetIndices(MLOD.Mesh mesh,VRTF vrtf, MLOD.GeometryState geometryState)
+        {            
+            return GetIndices(mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount)
+                .Select(x=>x-geometryState.MinVertexIndex).ToArray();
         }
         public Int32[] GetIndices(ModelPrimitiveType type, Int32 startIndex, Int32 count)
         {

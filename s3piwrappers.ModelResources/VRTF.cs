@@ -7,7 +7,11 @@ using System.Collections.Generic;
 namespace s3piwrappers
 {
     public class VRTF : ARCOLBlock
-    { 
+    {
+        public static VRTF CreateDefaultForMesh(MLOD.Mesh mesh)
+        {
+            return mesh.IsShadowCaster ? CreateDefaultForSunShadow() : CreateDefaultForDropShadow();
+        }
         public static VRTF CreateDefaultForSunShadow()
         {
             VRTF v = new VRTF(0, null);

@@ -77,15 +77,18 @@ namespace s3piwrappers.ModelViewer
             {
                 foreach (var m in mlod.Meshes)
                 {
+                    var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
+                    var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
+                    var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex)?? VRTF.CreateDefaultForMesh(m);
                     
-                    var model = DrawModel(MLODUtil.GetVertices(m, rcol), MLODUtil.GetIndices(m, rcol),mNonSelectedMaterial);
+                    var model = DrawModel(vbuf.GetVertices(m, vrtf), ibuf.GetIndices(m),mNonSelectedMaterial);
 
                     var sceneMesh = new SceneMesh(m, model);
                     SceneGeostate[] sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
                     for (int i = 0; i < sceneGeostates.Length; i++)
                     {
-                        var state = DrawModel(MLODUtil.GetVertices(m, m.GeometryStates[i], rcol),
-                                                   MLODUtil.GetIndices(m, m.GeometryStates[i], rcol), mHiddenMaterial);
+                        var state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i]),
+                                                   ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
                         mGroupMeshes.Children.Add(state);
                         sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
                     }
