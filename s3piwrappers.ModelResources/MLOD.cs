@@ -182,87 +182,6 @@ namespace s3piwrappers
                 }
             }
         }
-        public class JointReferenceList : DependentList<JointReference>
-        {
-            public JointReferenceList(EventHandler handler)
-                : base(handler)
-            {
-            }
-
-            public JointReferenceList(EventHandler handler, Stream s)
-                : base(handler, s)
-            {
-            }
-
-            public override void Add()
-            {
-                Add(new object[] { });
-            }
-
-            protected override JointReference CreateElement(Stream s)
-            {
-                return new JointReference(0, handler, s);
-            }
-
-            protected override void WriteElement(Stream s, JointReference element)
-            {
-                element.UnParse(s);
-            }
-        }
-        public class JointReference : AHandlerElement, IEquatable<JointReference>
-        {
-            public JointReference(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
-            {
-            }
-            public JointReference(int APIversion, EventHandler handler, JointReference basis)
-                : base(APIversion, handler)
-            {
-                mName = basis.mName;
-            }
-            public JointReference(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
-            {
-                Parse(s);
-            }
-            public String Value { get { return String.Format("0x{0:X8}", mName); } }
-            private UInt32 mName;
-            [ElementPriority(0)]
-            public uint Name
-            {
-                get { return mName; }
-                set { if (mName != value) { mName = value; OnElementChanged(); } }
-            }
-
-            private void Parse(Stream s)
-            {
-                mName = new BinaryReader(s).ReadUInt32();
-            }
-            public void UnParse(Stream s)
-            {
-                new BinaryWriter(s).Write(mName);
-            }
-
-            public override AHandlerElement Clone(EventHandler handler)
-            {
-                return new JointReference(0, handler, this);
-            }
-
-            public override List<string> ContentFields
-            {
-                get { return GetContentFields(base.requestedApiVersion, GetType()); }
-            }
-
-            public override int RecommendedApiVersion
-            {
-                get { return kRecommendedApiVersion; }
-            }
-
-            public bool Equals(JointReference other)
-            {
-                return mName.Equals(other.mName);
-            }
-        }
         public class MeshList : DependentList<Mesh>
         {
             private MLOD mOwner;
@@ -319,20 +238,19 @@ namespace s3piwrappers
             private Int32 mPrimitiveCount;
             private GenericRCOLResource.ChunkReference mSkinControllerIndex;
             private GenericRCOLResource.ChunkReference mScaleOffsetIndex;
-            private JointReferenceList mJointReferences;
+            private UIntList mJointReferences;
             private BoundingBox mBounds;
             private GeometryStateList mGeometryStates;
             private UInt32 mParentName;
             private Vector4 mMirrorPlane;
             private MLOD mOwner;
 
-
             public Mesh(int APIversion, EventHandler handler, MLOD owner)
                 : base(APIversion, handler)
             {
                 mOwner = owner;
                 mBounds = new BoundingBox(0, handler);
-                mJointReferences = new JointReferenceList(handler);
+                mJointReferences = new UIntList(handler);
                 mGeometryStates = new GeometryStateList(handler);
                 mMirrorPlane = new Vector4(0, handler, 0, 0, 1, 0);
                 mIndexBufferIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, 0);
@@ -345,7 +263,7 @@ namespace s3piwrappers
             public Mesh(int APIversion, EventHandler handler, Mesh basis) : this(APIversion, handler, basis.Bounds,basis.Flags,basis.GeometryStates,basis.IndexBufferIndex,basis.JointReferences,basis.MaterialIndex,basis.MinVertexIndex,basis.MirrorPlane,basis.Name,basis.mOwner,basis.ParentName,basis.PrimitiveCount,basis.PrimitiveType,basis.ScaleOffsetIndex,basis.SkinControllerIndex,basis.StartIndex,basis.StartVertex,basis.StreamOffset,basis.VertexBufferIndex,basis.VertexCount,basis.VertexFormatIndex) {  }
             public Mesh(int APIversion, EventHandler handler, MLOD owner, Stream s) : this(APIversion, handler, owner) { Parse(s); }
             public Mesh(int APIversion, EventHandler handler, BoundingBox bounds, MeshFlags flags, GeometryStateList geometryStates,
-                GenericRCOLResource.ChunkReference indexBufferIndex, JointReferenceList jointReferences,
+                GenericRCOLResource.ChunkReference indexBufferIndex, UIntList jointReferences,
                 GenericRCOLResource.ChunkReference materialIndex, int minVertexIndex, Vector4 mirrorPlane, uint name,
                 MLOD owner, uint parentName, int primitiveCount, ModelPrimitiveType primitiveType,
                 GenericRCOLResource.ChunkReference scaleOffsetIndex,
@@ -475,7 +393,7 @@ namespace s3piwrappers
                 set { if (mScaleOffsetIndex != value) { mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, value); OnElementChanged(); } }
             }
             [ElementPriority(17)]
-            public JointReferenceList JointReferences
+            public UIntList JointReferences
             {
                 get { return mJointReferences; }
                 set { if (mJointReferences != value) { mJointReferences = value; OnElementChanged(); } }
@@ -527,7 +445,7 @@ namespace s3piwrappers
                 mPrimitiveCount = br.ReadInt32();
                 mBounds = new BoundingBox(0, handler, s);
                 mSkinControllerIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
-                mJointReferences = new JointReferenceList(handler, s);
+                mJointReferences = new UIntList(handler, s);
                 mScaleOffsetIndex = new GenericRCOLResource.ChunkReference(requestedApiVersion, handler, s);
                 mGeometryStates = new GeometryStateList(handler, s);
                 if (mOwner.Version > 0x00000201)

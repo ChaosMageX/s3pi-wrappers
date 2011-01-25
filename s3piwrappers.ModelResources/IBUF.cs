@@ -50,7 +50,7 @@ namespace s3piwrappers
             return GetIndices(mesh,vrtf, geometryState);
         }
         public Int32[] GetIndices(MLOD.Mesh mesh,VRTF vrtf, MLOD.GeometryState geometryState)
-        {            
+        {
             return GetIndices(mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount)
                 .Select(x=>x-geometryState.MinVertexIndex).ToArray();
         }
@@ -123,7 +123,7 @@ namespace s3piwrappers
             string tag = FOURCC(br.ReadUInt32());
             if (checking && tag != Tag)
             {
-                throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
+                throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{2:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
             mFlags = (FormatFlags)br.ReadUInt32();

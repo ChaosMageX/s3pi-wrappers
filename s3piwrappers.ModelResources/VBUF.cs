@@ -278,5 +278,94 @@ namespace s3piwrappers
                     break;
             }
         }
+        public void SetVertices(VRTF vrtf, Vertex[] vertices)
+        {
+            MemoryStream s = new MemoryStream();
+
+            var position = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
+            var normal = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Normal);
+            var uv = vrtf.Layouts
+                .Where(x => x.Usage == VRTF.ElementUsage.UV)
+                .ToArray();
+            var blendIndices = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.BlendIndex);
+            var blendWeights = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.BlendWeight);
+            var tangents = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Tangent);
+            var color = vrtf.Layouts
+                .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
+
+            byte[] output = new byte[vrtf.Stride];
+            foreach (var v in vertices)
+            {
+                if (v.Position != null) WriteFloatData(v.Position, position, output);
+                if (v.Normal != null) WriteFloatData(v.Normal, normal, output);
+                for (int u = 0; u < uv.Length; u++) if (v.UV[u] != null) WriteFloatData(v.UV[u], uv[u], output);
+                if (v.BlendIndices != null) Array.Copy(v.BlendIndices, 0, output, blendIndices.Offset, VRTF.ByteSizeFromFormat(blendIndices.Format));
+                if (v.BlendWeights != null) WriteFloatData(v.BlendWeights, blendWeights, output);
+                if (v.Tangents != null) WriteFloatData(v.Tangents, tangents, output);
+                if (v.Color != null) WriteFloatData(v.Color, color, output);
+                s.Write(output, 0, output.Length);
+            }
+
+            s.Flush();
+
+            mBuffer = s.ToArray();
+
+            s.Close();
+        }
+        void WriteFloatData(float[] input, VRTF.ElementLayout layout, byte[] output)
+        {
+            ulong scalar;
+
+            switch (layout.Format)
+            {
+                case VRTF.ElementFormat.Float1:
+                case VRTF.ElementFormat.Float2:
+                case VRTF.ElementFormat.Float3:
+                case VRTF.ElementFormat.Float4:
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes(input[i]), 0, output, layout.Offset + i * sizeof(float), sizeof(float));
+                    break;
+                case VRTF.ElementFormat.ColorUByte4:
+                    scalar = GetScalar(input, (ulong)(layout.Usage != VRTF.ElementUsage.BlendWeight ? 128 : 256));
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((byte)((input[2 - i] * scalar) + (layout.Usage != VRTF.ElementUsage.BlendWeight ? 128 : 0))), 0, output, layout.Offset + i, 1);
+                    Array.Copy(BitConverter.GetBytes((byte)scalar), 0, output, layout.Offset + 3, 1);
+                    break;
+                case VRTF.ElementFormat.Short2:
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((short)(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    break;
+                case VRTF.ElementFormat.Short4:
+                    scalar = GetScalar(input, ushort.MaxValue);
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
+                    break;
+                case VRTF.ElementFormat.UShort4N:
+                    scalar = GetScalar(input, 512);
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
+                    break;
+            }
+        }
+        //Find the highest value for the scalar
+        ulong GetScalar(float[] input, ulong MaxValue)
+        {
+            for (ulong scalar = MaxValue - 1; scalar > 0; scalar--)
+            {
+                foreach (var f in input)
+                    if (f * scalar >= MaxValue) goto nextScalar;
+                return scalar;
+            nextScalar:
+                continue;
+            }
+            return MaxValue;
+        }
     }
 }
