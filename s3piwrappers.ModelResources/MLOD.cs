@@ -59,6 +59,11 @@ namespace s3piwrappers
             {
             }
 
+            public GeometryStateList(EventHandler handler, IEnumerable<GeometryState> basis)
+                : base(handler, basis)
+            {
+            }
+
             public override void Add()
             {
                 Add(new object[] { });

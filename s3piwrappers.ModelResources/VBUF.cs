@@ -195,11 +195,11 @@ namespace s3piwrappers
                     var u = uv[j];
                     float[] uvPoints = new float[VRTF.FloatCountFromFormat(u.Format)];
                     ReadFloatData(data, u, ref uvPoints);
-                    v.UV[j] = uvPoints;
+                    v.UV[j] = uvPoints;                  
                 }
                 if (blendIndices != null)
                 {
-                    byte[] blendIPoints = new byte[VRTF.ByteSizeFromFormat(blendWeights.Format)];
+                    byte[] blendIPoints = new byte[VRTF.ByteSizeFromFormat(blendIndices.Format)];
                     Array.Copy(data, blendIndices.Offset, blendIPoints, 0, blendIPoints.Length);
                     v.BlendIndices = blendIPoints;
                 }
@@ -266,7 +266,7 @@ namespace s3piwrappers
                     break;
                 case VRTF.ElementFormat.Short4:
                     scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
-                    if (scalar == 0) scalar = ushort.MaxValue;
+                    if (scalar == 0) scalar = short.MaxValue;
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
@@ -278,10 +278,54 @@ namespace s3piwrappers
                     break;
             }
         }
-        public void SetVertices(VRTF vrtf, Vertex[] vertices)
+        public void SetVertices(MLOD mlod, int meshIndex, VRTF vrtf, Vertex[] vertices)
         {
-            MemoryStream s = new MemoryStream();
+            MLOD.Mesh mesh = mlod.Meshes[meshIndex];
+            SetVertices(mlod, mesh.StreamOffset, mesh.StreamOffset + (mesh.VertexCount * vrtf.Stride), vrtf, vertices);
+            mesh.VertexCount = vertices.Length;
+        }
+        public void SetVertices(MLOD mlod, MLOD.Mesh mesh, int geoIndex, VRTF vrtf, Vertex[] vertices)
+        {
+            MLOD.GeometryState geo = mesh.GeometryStates[geoIndex];
 
+            long beforeLength = mesh.StreamOffset + (geo.MinVertexIndex * vrtf.Stride);
+            SetVertices(mlod, beforeLength, beforeLength + (geo.VertexCount * vrtf.Stride), vrtf, vertices);
+
+            int offset = vertices.Length - geo.VertexCount;
+            geo.VertexCount = vertices.Length;
+            for (int i = geoIndex + 1; i < mesh.GeometryStates.Count; i++)
+                mesh.GeometryStates[i].MinVertexIndex += offset;
+        }
+        void SetVertices(MLOD mlod, long beforeLength, long afterPos, VRTF vrtf, Vertex[] vertices)
+        {
+            byte[] before = new byte[beforeLength];
+            Array.Copy(mBuffer, before, before.Length);
+
+            byte[] after = new byte[mBuffer.Length - afterPos];
+            Array.Copy(mBuffer, afterPos, after, 0, after.Length);
+
+            int offset = 0;
+            using (MemoryStream mg = new MemoryStream())
+            {
+                SetVertices(mg, vrtf, vertices);
+                offset = (int)(beforeLength + mg.Length - afterPos);
+
+                mBuffer = new byte[before.Length + mg.Length + after.Length];
+
+                Array.Copy(before, mBuffer, before.Length);
+                Array.Copy(mg.ToArray(), 0, mBuffer, before.Length, mg.Length);
+                Array.Copy(after, 0, mBuffer, before.Length + mg.Length, after.Length);
+
+                mg.Close();
+            }
+
+            if (offset != 0)
+                foreach (var m in mlod.Meshes)
+                    if (m.StreamOffset > beforeLength)
+                        m.StreamOffset = (uint)(m.StreamOffset + offset);
+        }
+        void SetVertices(MemoryStream s, VRTF vrtf, Vertex[] vertices)
+        {
             var position = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
             var normal = vrtf.Layouts
@@ -312,10 +356,6 @@ namespace s3piwrappers
             }
 
             s.Flush();
-
-            mBuffer = s.ToArray();
-
-            s.Close();
         }
         void WriteFloatData(float[] input, VRTF.ElementLayout layout, byte[] output)
         {

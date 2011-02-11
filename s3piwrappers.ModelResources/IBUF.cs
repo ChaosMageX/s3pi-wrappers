@@ -65,6 +65,50 @@ namespace s3piwrappers
             return output;
         }
 
+        public void SetIndices(MLOD mlod, MLOD.Mesh mesh, Int32[] indices)
+        {
+            SetIndices(mlod, mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount, indices);
+            mesh.PrimitiveCount = indices.Length / MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+        }
+        public void SetIndices(MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, Int32[] indices)
+        {
+            MLOD.GeometryState geometryState = mesh.GeometryStates[geoStateIndex];
+            SetIndices(mlod, mesh, geometryState, indices);
+        }
+        public void SetIndices(MLOD mlod, MLOD.Mesh mesh, MLOD.GeometryState geometryState, Int32[] indices)
+        {
+            SetIndices(mlod, mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount, indices.Select(x => x + geometryState.MinVertexIndex).ToArray());
+            geometryState.PrimitiveCount = indices.Length / MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
+        }
+        void SetIndices(MLOD mlod, ModelPrimitiveType type, Int32 startIndex, Int32 primCount, Int32[] indices)
+        {
+            SetIndices(mlod, startIndex, startIndex + primCount * MLOD.IndexCountFromPrimitiveType(type), indices);
+        }
+        void SetIndices(MLOD mlod, Int32 beforeLength, Int32 afterPos, Int32[] indices)
+        {
+            Int32[] before = new Int32[beforeLength];
+            Array.Copy(mBuffer, 0, before, 0, before.Length);
+
+            Int32[] after = new Int32[mBuffer.Length - afterPos];
+            Array.Copy(mBuffer, afterPos, after, 0, after.Length);
+
+            mBuffer = new Int32[before.Length + indices.Length + after.Length];
+            Array.Copy(before, 0, mBuffer, 0, before.Length);
+            Array.Copy(indices, 0, mBuffer, before.Length, indices.Length);
+            Array.Copy(after, 0, mBuffer, before.Length + indices.Length, after.Length);
+
+            int offset = beforeLength + indices.Length - afterPos;
+            if (offset != 0)
+                foreach (var m in mlod.Meshes)
+                if (m.StartIndex > before.Length)
+                {
+                    m.StartIndex += offset;
+                    foreach (var g in m.GeometryStates)
+                        if (g.StartIndex > before.Length)
+                            g.StartIndex += offset;
+                }
+        }
+
         [Flags]
         public enum FormatFlags : uint
         {
