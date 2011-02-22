@@ -1,0 +1,485 @@
+﻿<Window x:Class="s3piwrappers.RigEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:RigEditor="clr-namespace:s3piwrappers.RigEditor" xmlns:ComponentModel="clr-namespace:System.ComponentModel;assembly=System" Title="Rig Editor"
+        Height="600"
+        Width="800"
+        MinWidth="640"
+        MinHeight="480">
+    <Window.Resources>
+        <System:String x:Key="DecimalFormatter">0.000000</System:String>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="MinWidth"
+                    Value="120" />
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border BorderBrush="Red"
+                                BorderThickness="1">
+                            <AdornedElementPlaceholder>
+                                
+                            </AdornedElementPlaceholder>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError"
+                         Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={RelativeSource Self},
+                Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>            
+        </Style>
+        <Style TargetType="TreeViewItem">
+            <Setter Property="IsExpanded"
+                    Value="True" />
+        </Style>
+        <HierarchicalDataTemplate x:Key="BoneHierarchyTemplate"
+                                  DataType="{x:Type RigEditor:BoneViewModel}"
+                                  ItemsSource="{Binding Path=Children}">
+            <TextBlock Text="{Binding BoneName}">
+                <TextBlock.ContextMenu>
+                    <ContextMenu>
+                            <MenuItem Header="Add"
+                                      Command="RigEditor:BoneOps.AddCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Clone"
+                                      Command="RigEditor:BoneOps.CloneCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Clone Hierarchy"
+                                      Command="RigEditor:BoneOps.CloneHierarchyCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Remove"
+                                      Command="RigEditor:BoneOps.DeleteCommand"
+                                      CommandParameter="{Binding}"
+                                      CommandTarget="{Binding}" />
+                            <MenuItem Header="Remove Hierarchy"
+                                      Command="RigEditor:BoneOps.DeleteHierarchyCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Set Parent"
+                                      Command="RigEditor:BoneOps.SetParentCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Unparent"
+                                      Command="RigEditor:BoneOps.UnparentCommand"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Replace in Names"
+                                      Command="{Binding Path=FindReplaceCommand}"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Prefix Hierarchy"
+                                      Command="{Binding Path=PrefixCommand}"
+                                      CommandParameter="{Binding}" />
+                            <MenuItem Header="Suffix Hierarchy"
+                                      Command="{Binding Path=SuffixCommand}"
+                                      CommandParameter="{Binding}" />
+                        </ContextMenu>
+                </TextBlock.ContextMenu></TextBlock>
+        </HierarchicalDataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"
+                           MinHeight="80"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="3"
+                       Text="Skeleton Name:" />
+            <TextBox Grid.Row="0"
+                     Grid.Column="1"
+                     Margin="3"
+                     HorizontalAlignment="Stretch"
+                     Text="{Binding SkeletonName}" />
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Margin="3"
+                       Text="File Name:" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Margin="3"
+                     HorizontalAlignment="Stretch"
+                     Text="{Binding Filename}"></TextBox>
+            <Button Grid.Row="2"
+                    Grid.Column="1"
+                    Content="Matrix Info"
+                    Margin="8"
+                    Padding="5"
+                    Width="Auto"
+                    HorizontalAlignment="Right"
+                    Command="{Binding GetMatrixInfoCommand}" 
+                    CommandParameter="{Binding}"/>
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"
+                                  MinWidth="200"></ColumnDefinition>
+                <ColumnDefinition Width="3" />
+                <ColumnDefinition Width="*"
+                                  MinWidth="300"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <DockPanel Grid.Column="0"
+                       LastChildFill="True">
+                <TreeView HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          ItemsSource="{Binding Path=Children}"
+                          x:Name="mBoneTreeView"
+                          ItemTemplate="{StaticResource ResourceKey=BoneHierarchyTemplate}"
+                          SelectedItemChanged="BoneTreeView_SelectedItemChanged">
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add"
+                                      Command="{Binding Path=AddBoneCommand}"
+                                      CommandParameter="{Binding}" />
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+                </TreeView>
+            </DockPanel>
+            <GridSplitter Grid.Column="1"
+                          Height="Auto"
+                          Width="Auto"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch" />
+            <ScrollViewer Grid.Column="2"
+                          DataContext="{Binding ElementName=mBoneTreeView, Path=SelectedItem}">
+                <StackPanel x:Name="mBonePanel" Visibility="Hidden">
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Grid.Row="0"
+                                   Margin="3"
+                                   Text="Bone Name:" />
+                        <TextBox Grid.Column="1"
+                                 Grid.Row="0"
+                                 Margin="3"
+                                 x:Name="boneName"
+                                 Text="{Binding BoneName}" />
+                        <TextBox Grid.Column="2"
+                                 Grid.Row="0"
+                                 Margin="3"
+                                 IsReadOnly="True"
+                                 x:Name="boneHash"
+                                 Text="{Binding HashedName}" />
+                    </Grid>
+                    <Expander Header="Position"
+                              IsExpanded="True">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Margin="3"
+                                           Text="Enabled" />
+                                <CheckBox Grid.Column="1"
+                                          x:Name="posEnabled"
+                                          Margin="3"
+                                          HorizontalAlignment="Right"
+                                          IsChecked="{Binding PositionEnabled}" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Margin="3"
+                                           Text="X:" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="posX">
+                                    <TextBox.Text>
+                                        <Binding  Path="PositionX"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}"
+                                                  >
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Margin="3"
+                                           Text="Y:" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="posY">
+                                    <TextBox.Text>
+                                        <Binding  Path="PositionY"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Margin="3"
+                                           Text="Z:" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="posZ">
+                                    <TextBox.Text>
+                                        <Binding  Path="PositionZ"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header="Rotation"
+                              IsExpanded="True">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Text="Enabled"
+                                           Margin="3" />
+                                <CheckBox Grid.Column="1"
+                                          x:Name="rotEnabled"
+                                          HorizontalAlignment="Right"
+                                          Margin="3"
+                                          IsChecked="{Binding RotationEnabled}" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           Margin="3"
+                                           HorizontalAlignment="Right"
+                                           Text="X:" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="rotX">
+                                    <TextBox.Text>
+                                        <Binding  Path="RotationX"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Margin="3"
+                                           HorizontalAlignment="Right"
+                                           Text="Y:" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="rotY">
+                                    <TextBox.Text>
+                                        <Binding  Path="RotationY"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="2"
+                                           Grid.Column="0"
+                                           Margin="3"
+                                           HorizontalAlignment="Right"
+                                           Text="Z:" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="rotZ">
+                                    <TextBox.Text>
+                                        <Binding  Path="RotationZ"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+                            <Button HorizontalAlignment="Right"
+                                    Content="Matrix Input"
+                                    Margin="8"
+                                    Padding="5"
+                                    Command="RigEditor:BoneOps.RotationMatrixInputCommand"
+                                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=ScrollViewer}, Path=DataContext}" />
+                        </StackPanel>
+                    </Expander>
+                    <Expander Header="Scale"
+                              IsExpanded="True">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Margin="3"
+                                           Text="Enabled" />
+                                <CheckBox Grid.Column="1"
+                                          x:Name="sclEnabled"
+                                          Margin="3"
+                                          HorizontalAlignment="Right"
+                                          IsChecked="{Binding ScaleEnabled}" />
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           Grid.Column="0"
+                                           Margin="3"
+                                           HorizontalAlignment="Right"
+                                           Text="X:" />
+                                <TextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="sclX">
+                                    <TextBox.Text>
+                                        <Binding  Path="ScaleX"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="1"
+                                           Grid.Column="0"
+                                           Margin="3"
+                                           HorizontalAlignment="Right"
+                                           Text="Y:" />
+                                <TextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="sclY">
+                                    <TextBox.Text>
+                                        <Binding  Path="ScaleY"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock Grid.Row="2"
+                                           Margin="3"
+                                           Grid.Column="0"
+                                           HorizontalAlignment="Right"
+                                           Text="Z:" />
+                                <TextBox Grid.Row="2"
+                                         Grid.Column="1"
+                                         Margin="3"
+                                         x:Name="sclZ">
+                                    <TextBox.Text>
+                                        <Binding  Path="ScaleZ"
+                                                  UpdateSourceTrigger="PropertyChanged"
+                                                  StringFormat="{StaticResource DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <RigEditor:DecimalValidationRule />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+                        </StackPanel>
+                    </Expander>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+        <Grid Grid.Row="2"
+              Height="Auto"
+              HorizontalAlignment="Right">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    x:Name="BtnCancel"
+                    Margin="3"
+                    Padding="5"
+                    Content="Cancel"
+                    Command="{Binding Path=CancelCommand}"
+                    CommandParameter="{Binding}"/>
+            <Button Grid.Column="1"
+                    x:Name="BtnCommit"
+                    Margin="3"
+                    Padding="5"
+                    Content="Commit"
+                    Command="{Binding Path=CommitCommand}"
+                    CommandParameter="{Binding}"/>
+        </Grid>
+    </Grid>
+</Window>

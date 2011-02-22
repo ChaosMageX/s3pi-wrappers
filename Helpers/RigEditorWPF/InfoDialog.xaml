@@ -1,0 +1,29 @@
+﻿<Window x:Class="s3piwrappers.RigEditor.InfoDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="InfoDialog"
+        Height="640"
+        Width="480">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0">
+            <TextBox 
+                     Text="{Binding Path=Info, RelativeSource={RelativeSource AncestorType=Window}}"
+                     IsReadOnly="True"
+                     VerticalAlignment="Stretch"
+                     HorizontalAlignment="Stretch"
+                     Margin="8" />
+        </ScrollViewer>
+        <Button Grid.Row="1"
+                    Content="Ok"
+                    Width="50"
+                    Height="30"
+                    Margin="8"
+                    IsDefault="True"
+                    Click="Button_Click"
+                    HorizontalAlignment="Right"></Button>
+        </Grid>
+</Window>

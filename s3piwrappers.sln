@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{9F9C64E9-B8A3-4933-9C3B-78560F6A206E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigEditor", "Helpers\RigEditor\RigEditor.csproj", "{7F22563C-FBE0-496C-8DEF-E3812491935B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.AnimationResources", "s3piwrappers.AnimationResources\s3piwrappers.AnimationResources.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.ModelResources", "s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj", "{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}"
@@ -19,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.EffectResource
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModelViewer", "Helpers\ModelViewer\ModelViewer.csproj", "{D31E7FC7-E51D-40E4-B2FB-49DE645291E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigEditor", "Helpers\RigEditorWPF\RigEditor.csproj", "{B10B8B7C-7B45-4045-946D-C4601E7B93A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,17 +29,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|x86.ActiveCfg = Debug|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Debug|x86.Build.0 = Debug|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|Any CPU.ActiveCfg = Release|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|Any CPU.Build.0 = Release|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|Mixed Platforms.Build.0 = Release|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|x86.ActiveCfg = Release|x86
-		{7F22563C-FBE0-496C-8DEF-E3812491935B}.Release|x86.Build.0 = Release|x86
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -110,12 +99,22 @@ Global
 		{D31E7FC7-E51D-40E4-B2FB-49DE645291E5}.Release|Mixed Platforms.Build.0 = Release|x86
 		{D31E7FC7-E51D-40E4-B2FB-49DE645291E5}.Release|x86.ActiveCfg = Release|x86
 		{D31E7FC7-E51D-40E4-B2FB-49DE645291E5}.Release|x86.Build.0 = Release|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Debug|x86.ActiveCfg = Debug|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Debug|x86.Build.0 = Debug|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Release|Any CPU.ActiveCfg = Release|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Release|Mixed Platforms.Build.0 = Release|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Release|x86.ActiveCfg = Release|x86
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7F22563C-FBE0-496C-8DEF-E3812491935B} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
 		{D31E7FC7-E51D-40E4-B2FB-49DE645291E5} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
+		{B10B8B7C-7B45-4045-946D-C4601E7B93A6} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
 	EndGlobalSection
 EndGlobal

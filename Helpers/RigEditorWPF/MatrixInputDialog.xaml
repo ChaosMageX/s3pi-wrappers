@@ -1,0 +1,199 @@
+﻿<Window x:Class="s3piwrappers.RigEditor.MatrixInputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:RigEditor="clr-namespace:s3piwrappers.RigEditor" xmlns:System="clr-namespace:System;assembly=mscorlib" Title=""
+        Height="230"
+        Width="340"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <System:String x:Key="DecimalFormatter">0.000000</System:String>        
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Row="0"
+                   Grid.Column="0"
+                   Margin="8"
+                   Text="X:" />
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   Margin="8"
+                   Text="Y:" />
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   Margin="8"
+                   Text="Z:" />
+        <TextBox Grid.Row="0"
+                 Grid.Column="1"
+                 Margin="8"
+                 x:Name="m00">
+            <TextBox.Text>
+                <Binding Path="M00" StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>            
+        </TextBox>
+        <TextBox Grid.Row="0"
+                 Grid.Column="2"
+                 Margin="8"
+                 x:Name="m01">
+            <TextBox.Text>
+                <Binding Path="M01"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="0"
+                 Grid.Column="3"
+                 Margin="8"
+                 x:Name="m02">
+            <TextBox.Text>
+                <Binding Path="M02"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="1"
+                 Grid.Column="1"
+                 Margin="8"
+                 x:Name="m10">
+            <TextBox.Text>
+                <Binding Path="M10"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="1"
+                 Grid.Column="2"
+                 Margin="8"
+                 x:Name="m11">
+            <TextBox.Text>
+                <Binding Path="M11"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="1"
+                 Grid.Column="3"
+                 Margin="8"
+                 x:Name="m12">            
+            <TextBox.Text>
+                <Binding Path="M12"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="2"
+                 Grid.Column="1"
+                 Margin="8"
+                 x:Name="m20">
+            <TextBox.Text>
+                <Binding Path="M20"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="2"
+                 Grid.Column="2"
+                 Margin="8"
+                 x:Name="m21">
+            <TextBox.Text>
+                <Binding Path="M21"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <TextBox Grid.Row="2"
+                 Grid.Column="3"
+                 Margin="8"
+                 x:Name="m22">
+            <TextBox.Text>
+                <Binding Path="M22"
+                         StringFormat="{StaticResource DecimalFormatter}">
+                    <Binding.ValidationRules>
+                        <RigEditor:DecimalValidationRule />
+                    </Binding.ValidationRules>
+                    
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+        <Button Grid.Row="3"
+                Grid.Column="3"
+                IsDefault="True"
+                Content="Ok"
+                Width="50"
+                Height="30"
+                Margin="8"
+                HorizontalAlignment="Right"
+                Click="Button_Click"
+                >
+            
+            <Button.Style>
+                <Style TargetType="{x:Type Button}">
+                    <Setter Property="IsEnabled"
+                            Value="false" />
+                    <Style.Triggers>
+                        <!-- Require the controls to be valid in order to press OK -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <Condition Binding="{Binding ElementName=m00, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m01, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m02, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m10, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m11, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m12, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m20, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m21, Path=(Validation.HasError)}"
+                                           Value="false" />
+                                <Condition Binding="{Binding ElementName=m22, Path=(Validation.HasError)}"
+                                           Value="false" />
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="IsEnabled"
+                                    Value="true" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+    </Grid>
+</Window>
