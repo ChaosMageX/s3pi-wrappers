@@ -19,6 +19,7 @@ namespace s3piwrappers.RigEditor
     public partial class StringInputDialog : Window
     {
         public String Value { get; set; }
+        public ICommand AcceptInputCommand { get; private set; }
 
         public StringInputDialog(String title):this()
         {
@@ -26,16 +27,19 @@ namespace s3piwrappers.RigEditor
         }
         public StringInputDialog()
         {
+            AcceptInputCommand = new UserCommand<StringInputDialog>(CanExecuteAcceptInput, ExecuteAcceptInput);
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private static bool CanExecuteAcceptInput(StringInputDialog x)
         {
-            if (!String.IsNullOrEmpty(Value))
-            {
-                DialogResult = true;
-                this.Close();
-            }
+            return x != null && !String.IsNullOrEmpty(x.Value);
+        }
+
+        private static void ExecuteAcceptInput(StringInputDialog dialog)
+        {
+            dialog.DialogResult = true;
+            dialog.Close();
         }
 
     }

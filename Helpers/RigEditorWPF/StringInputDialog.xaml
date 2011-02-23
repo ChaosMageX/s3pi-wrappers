@@ -5,7 +5,8 @@
         Title="StringInputDialog"
         Height="110"
         Width="300"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        FocusManager.FocusedElement="{Binding ElementName=ValueInput}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
@@ -17,13 +18,13 @@
         <TextBox Grid.Row="0"
                  Grid.Column="0"
                  Margin="5"
-                 HorizontalAlignment="Stretch">
+                 HorizontalAlignment="Stretch"
+                 Name="ValueInput">
             <TextBox.Text>
                 <Binding Path="Value"
-                         RelativeSource="{RelativeSource AncestorType=Window}">
-                    <Binding.ValidationRules>
-                        <RigEditor:RequiredFieldValidationRule />
-                    </Binding.ValidationRules>
+                         RelativeSource="{RelativeSource AncestorType=Window}"
+                         UpdateSourceTrigger="PropertyChanged"                         
+                         BindsDirectlyToSource="True">
                 </Binding>
             </TextBox.Text>
         </TextBox>
@@ -36,6 +37,9 @@
                 Height="30"
                 Content="Ok"
                 IsDefault="True"
-                Click="Button_Click"></Button>
+                Command="{Binding Path=AcceptInputCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}">
+            
+        </Button>
     </Grid>
 </Window>

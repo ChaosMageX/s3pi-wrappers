@@ -38,7 +38,7 @@
                  Margin="8"
                  x:Name="m00">
             <TextBox.Text>
-                <Binding Path="M00" StringFormat="{StaticResource DecimalFormatter}">
+                <Binding Path="M00" BindsDirectlyToSource="True" UpdateSourceTrigger="PropertyChanged" StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
                     </Binding.ValidationRules>
@@ -51,6 +51,8 @@
                  x:Name="m01">
             <TextBox.Text>
                 <Binding Path="M01"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -64,6 +66,8 @@
                  x:Name="m02">
             <TextBox.Text>
                 <Binding Path="M02"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -77,6 +81,8 @@
                  x:Name="m10">
             <TextBox.Text>
                 <Binding Path="M10"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -90,6 +96,8 @@
                  x:Name="m11">
             <TextBox.Text>
                 <Binding Path="M11"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -103,6 +111,8 @@
                  x:Name="m12">            
             <TextBox.Text>
                 <Binding Path="M12"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -116,6 +126,8 @@
                  x:Name="m20">
             <TextBox.Text>
                 <Binding Path="M20"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -129,6 +141,8 @@
                  x:Name="m21">
             <TextBox.Text>
                 <Binding Path="M21"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -142,6 +156,8 @@
                  x:Name="m22">
             <TextBox.Text>
                 <Binding Path="M22"
+                         BindsDirectlyToSource="True"
+                         UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
                         <RigEditor:DecimalValidationRule />
@@ -166,7 +182,6 @@
                     <Setter Property="IsEnabled"
                             Value="false" />
                     <Style.Triggers>
-                        <!-- Require the controls to be valid in order to press OK -->
                         <MultiDataTrigger>
                             <MultiDataTrigger.Conditions>
                                 <Condition Binding="{Binding ElementName=m00, Path=(Validation.HasError)}"

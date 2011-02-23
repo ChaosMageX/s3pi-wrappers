@@ -17,22 +17,26 @@ namespace s3piwrappers.RigEditor
     {
         public String Find { get; set; }
         public String Replace { get; set; }
-
+        public ICommand AcceptInputCommand { get; private set; }
         public FindReplaceDialog(String title):this()
         {
             Title = title;
         }
         public FindReplaceDialog()
         {
+            AcceptInputCommand = new UserCommand<FindReplaceDialog>(CanExecuteAcceptInput, ExecuteAcceptInput);
             InitializeComponent();
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+        private static bool CanExecuteAcceptInput(FindReplaceDialog x)
         {
-            if (!String.IsNullOrEmpty(Find))
-            {
-                DialogResult = true;
-                this.Close();
-            }
+            return x != null && !String.IsNullOrEmpty(x.Find);
+        }
+
+        private static void ExecuteAcceptInput(FindReplaceDialog dialog)
+        {
+            dialog.DialogResult = true;
+            dialog.Close();
         }
 
     }

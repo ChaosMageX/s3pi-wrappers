@@ -66,13 +66,13 @@
                                       Command="RigEditor:BoneOps.UnparentCommand"
                                       CommandParameter="{Binding}" />
                             <MenuItem Header="Replace in Names"
-                                      Command="{Binding Path=FindReplaceCommand}"
+                                      Command="RigEditor:BoneOps.FindReplaceCommand"
                                       CommandParameter="{Binding}" />
                             <MenuItem Header="Prefix Hierarchy"
-                                      Command="{Binding Path=PrefixCommand}"
+                                      Command="RigEditor:BoneOps.PrefixCommand"
                                       CommandParameter="{Binding}" />
                             <MenuItem Header="Suffix Hierarchy"
-                                      Command="{Binding Path=SuffixCommand}"
+                                      Command="RigEditor:BoneOps.SuffixCommand"
                                       CommandParameter="{Binding}" />
                         </ContextMenu>
                 </TextBlock.ContextMenu></TextBlock>

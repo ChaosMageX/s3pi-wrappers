@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -54,13 +55,11 @@
     <Compile Include="AbstractViewModel.cs" />
     <Compile Include="App.cs" />
     <Compile Include="BoneManager.cs" />
-    <Compile Include="BoneNameComparer.cs" />
     <Compile Include="BoneOps.cs" />
     <Compile Include="BoneSelectDialog.xaml.cs">
       <DependentUpon>BoneSelectDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="BoneViewModel.cs" />
-    <Compile Include="DecimalConverter.cs" />
     <Compile Include="InfoDialog.xaml.cs">
       <DependentUpon>InfoDialog.xaml</DependentUpon>
     </Compile>
