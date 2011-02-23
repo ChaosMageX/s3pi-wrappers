@@ -37,7 +37,6 @@ namespace s3piwrappers
             public IndexList(EventHandler handler) : base(handler) { }
             public IndexList(EventHandler handler, Stream s) : base(handler, s, null, null) { }
             public IndexList(EventHandler handler, IEnumerable<uint> ilt) : base(handler, ilt) { }
-            public IndexList(EventHandler handler, IEnumerable<HandlerElement<uint>> ilt) : base(handler) { }
 
             protected override void Parse(Stream s)
             {
@@ -47,7 +46,7 @@ namespace s3piwrappers
 
             public override void UnParse(Stream s)
             {
-                mFormat = (byte)(Count > 0 ? (this.Max() > ushort.MaxValue ? 4 : 2) : 2);
+                mFormat = (byte)(Count > 0 ? (((IEnumerable<UInt32>)this).Max() > ushort.MaxValue ? 4 : 2) : 2);
                 new BinaryWriter(s).Write(mFormat);
                 base.UnParse(s);
             }
