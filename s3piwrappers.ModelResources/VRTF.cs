@@ -6,15 +6,27 @@ using System.Linq;
 using System.Collections.Generic;
 namespace s3piwrappers
 {
+    
     public class VRTF : ARCOLBlock
     {
+        public class Default : VRTF
+        {
+            public Default(int APIversion, EventHandler handler)
+                : base(APIversion, handler)
+            {
+            }
+            public override bool IsDefault()
+            {
+                return true;
+            }
+        }
         public static VRTF CreateDefaultForMesh(MLOD.Mesh mesh)
         {
             return mesh.IsShadowCaster ? CreateDefaultForSunShadow() : CreateDefaultForDropShadow();
         }
         public static VRTF CreateDefaultForSunShadow()
         {
-            VRTF v = new VRTF(0, null);
+            VRTF v = new Default(0, null);
             v.Stride = 8;
             v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
                                                                   ElementUsage.Position, 0));
@@ -22,7 +34,7 @@ namespace s3piwrappers
         }
         public static VRTF CreateDefaultForDropShadow()
         {
-            VRTF v = new VRTF(0, null);
+            VRTF v = new Default(0, null);
             v.Stride = VRTF.ByteSizeFromFormat(ElementFormat.UShort4N) + VRTF.ByteSizeFromFormat(ElementFormat.Short4);
             v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
                                                                   ElementUsage.Position, 0));
@@ -164,7 +176,6 @@ namespace s3piwrappers
                 mUsage = usage;
                 mUsageIndex = usageIndex;
             }
-
             [ElementPriority(1)]
             public ElementUsage Usage
             {
@@ -259,6 +270,11 @@ namespace s3piwrappers
             mLayouts = layouts;
             mStride = stride;
             mVersion = version;
+        }
+
+        public virtual bool IsDefault ()
+        {
+            return false;
         }
 
         [ElementPriority(1)]
