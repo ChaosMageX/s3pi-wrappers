@@ -74,9 +74,9 @@ namespace s3piwrappers
 
 
         }
-        public static int FloatCountFromFormat(ElementFormat f)
+        public static int FloatCountFromFormat(VRTF.ElementFormat format)
         {
-            switch (f)
+            switch (format)
             {
                 case ElementFormat.Float1:
                     return 1;
@@ -86,11 +86,11 @@ namespace s3piwrappers
                     return 2;
                 case ElementFormat.Short4:
                 case ElementFormat.Short4N:
-                case ElementFormat.ColorUByte4:
                 case ElementFormat.UByte4N:
                 case ElementFormat.UShort4N:
                 case ElementFormat.Float3:
                     return 3;
+                case ElementFormat.ColorUByte4:
                 case ElementFormat.Float4:
                     return 4;
                 default:
@@ -332,7 +332,7 @@ namespace s3piwrappers
             string tag = FOURCC(br.ReadUInt32());
             if (checking && tag != Tag)
             {
-                throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{1:X8}", tag, Tag, s.Position));
+                throw new InvalidDataException(string.Format("Invalid Tag read: '{0}'; expected: '{1}'; at 0x{2:X8}", tag, Tag, s.Position));
             }
             mVersion = br.ReadUInt32();
             mStride = br.ReadInt32();

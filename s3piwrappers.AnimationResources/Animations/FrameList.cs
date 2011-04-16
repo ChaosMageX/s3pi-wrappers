@@ -6,7 +6,7 @@ using s3pi.Settings;
 
 namespace s3piwrappers
 {
-    public class FrameList : AResource.DependentList<Frame>
+    public class FrameList : DependentList<Frame>
     {
         private CurveType mType;
         public FrameList(EventHandler handler, CurveType type)

@@ -33,6 +33,7 @@
             this.btnSelAll = new System.Windows.Forms.Button();
             this.btnSelNone = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.cbHashBones = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // clbBones
@@ -44,13 +45,13 @@
             this.clbBones.FormattingEnabled = true;
             this.clbBones.Location = new System.Drawing.Point(12, 12);
             this.clbBones.Name = "clbBones";
-            this.clbBones.Size = new System.Drawing.Size(234, 409);
+            this.clbBones.Size = new System.Drawing.Size(434, 409);
             this.clbBones.TabIndex = 0;
             // 
             // btnOk
             // 
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOk.Location = new System.Drawing.Point(171, 424);
+            this.btnOk.Location = new System.Drawing.Point(371, 450);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 1;
@@ -61,7 +62,7 @@
             // btnSelAll
             // 
             this.btnSelAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btnSelAll.Location = new System.Drawing.Point(12, 424);
+            this.btnSelAll.Location = new System.Drawing.Point(158, 450);
             this.btnSelAll.Name = "btnSelAll";
             this.btnSelAll.Size = new System.Drawing.Size(75, 23);
             this.btnSelAll.TabIndex = 2;
@@ -72,7 +73,7 @@
             // btnSelNone
             // 
             this.btnSelNone.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.btnSelNone.Location = new System.Drawing.Point(90, 424);
+            this.btnSelNone.Location = new System.Drawing.Point(265, 450);
             this.btnSelNone.Name = "btnSelNone";
             this.btnSelNone.Size = new System.Drawing.Size(75, 23);
             this.btnSelNone.TabIndex = 3;
@@ -85,11 +86,23 @@
             this.saveFileDialog1.DefaultExt = "txt";
             this.saveFileDialog1.Title = "Save";
             // 
+            // cbHashBones
+            // 
+            this.cbHashBones.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbHashBones.AutoSize = true;
+            this.cbHashBones.Location = new System.Drawing.Point(12, 452);
+            this.cbHashBones.Name = "cbHashBones";
+            this.cbHashBones.Size = new System.Drawing.Size(115, 17);
+            this.cbHashBones.TabIndex = 4;
+            this.cbHashBones.Text = "Hash Bone Names";
+            this.cbHashBones.UseVisualStyleBackColor = true;
+            // 
             // BonePicker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(258, 450);
+            this.ClientSize = new System.Drawing.Size(458, 476);
+            this.Controls.Add(this.cbHashBones);
             this.Controls.Add(this.btnSelNone);
             this.Controls.Add(this.btnSelAll);
             this.Controls.Add(this.btnOk);
@@ -99,6 +112,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Select Bones";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -109,5 +123,6 @@
         private System.Windows.Forms.Button btnSelAll;
         private System.Windows.Forms.Button btnSelNone;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.CheckBox cbHashBones;
     }
 }

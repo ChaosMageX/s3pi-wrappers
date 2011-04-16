@@ -22,10 +22,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -37,8 +38,8 @@
       <HintPath>..\..\lib\s3pi_current\s3pi.CustomForms.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="s3pi.DemoPlugins">
-      <HintPath>..\..\lib\s3pi_current\s3pi.DemoPlugins.dll</HintPath>
+    <Reference Include="s3pi.Helpers">
+      <HintPath>..\..\lib\s3pi_current\s3pi.Helpers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.Interfaces">
@@ -61,6 +62,10 @@
     <Compile Include="BonePicker.Designer.cs">
       <DependentUpon>BonePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="Geometry\EulerAngle.cs" />
+    <Compile Include="Geometry\Matrix.cs" />
+    <Compile Include="Geometry\Quaternion.cs" />
+    <Compile Include="Geometry\Vector3.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BonePicker.resx">

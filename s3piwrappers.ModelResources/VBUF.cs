@@ -47,6 +47,13 @@ namespace s3piwrappers
     }
     public class VBUF : ARCOLBlock
     {
+        static IDictionary<int,int> kColorUByte4Map = new Dictionary<int, int>
+        {
+            {0, 2},
+            {1, 1},
+            {2, 0},
+            {3, 3}
+        };
         [Flags]
         public enum FormatFlags : uint
         {
@@ -303,18 +310,19 @@ namespace s3piwrappers
                         output[i] += BitConverter.ToSingle(element, i * sizeof(float));
                     break;
                 case VRTF.ElementFormat.ColorUByte4:
-                    scalar = Byte.MaxValue - element[3];
-                    if (layout.Usage != VRTF.ElementUsage.BlendWeight)
+                    switch(layout.Usage)
                     {
-                        if (scalar == 0) scalar = 128;
-                        for (int i = 0; i < output.Length; i++)
-                            output[i] += (element[2 - i] - 128) / scalar;
-                    }
-                    else
-                    {
-                        if (scalar == 0) scalar = 256;
-                        for (int i = 0; i < output.Length; i++)
-                            output[i] += element[2 - i] / scalar;
+                        case VRTF.ElementUsage.Colour:
+                        case VRTF.ElementUsage.BlendWeight:
+                            
+                            for (int i = 0; i < output.Length; i++)
+                                output[i] += (float)element[kColorUByte4Map[i]] / byte.MaxValue;
+                            break;
+                        case VRTF.ElementUsage.Tangent:
+                        case VRTF.ElementUsage.Normal:
+                            for (int i = 0; i < output.Length; i++)
+                                output[i] += (element[kColorUByte4Map[i]] / 127f)-1f;
+                            break;
                     }
                     break;
                 case VRTF.ElementFormat.Short2:
@@ -428,10 +436,19 @@ namespace s3piwrappers
                         Array.Copy(BitConverter.GetBytes(input[i]), 0, output, layout.Offset + i * sizeof(float), sizeof(float));
                     break;
                 case VRTF.ElementFormat.ColorUByte4:
-                    scalar = GetScalar(input, (ulong)(layout.Usage != VRTF.ElementUsage.BlendWeight ? 128 : 256));
-                    for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((byte)((input[2 - i] * scalar) + (layout.Usage != VRTF.ElementUsage.BlendWeight ? 128 : 0))), 0, output, layout.Offset + i, 1);
-                    Array.Copy(BitConverter.GetBytes((byte)scalar), 0, output, layout.Offset + 3, 1);
+                    switch (layout.Usage)
+                    {
+                        case VRTF.ElementUsage.Colour:
+                        case VRTF.ElementUsage.BlendWeight:
+                            for (int i = 0; i < input.Length; i++)
+                                Array.Copy(BitConverter.GetBytes((byte)(input[i] * byte.MaxValue)), 0, output, layout.Offset + kColorUByte4Map[i], 1);
+                            break;
+                        case VRTF.ElementUsage.Tangent:
+                        case VRTF.ElementUsage.Normal:
+                            for (int i = 0; i < input.Length; i++)
+                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f)*127.5f)), 0, output, layout.Offset + kColorUByte4Map[i], 1);
+                            break;
+                    }
                     break;
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)

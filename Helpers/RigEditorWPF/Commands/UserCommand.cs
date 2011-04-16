@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.Commands
 {
     class UserCommand<T> : ICommand
     {

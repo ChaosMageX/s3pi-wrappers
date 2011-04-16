@@ -4,12 +4,11 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers
 {
-    public class TrackList : AResource.DependentList<Track>
+    public class TrackList : DependentList<Track>
     {
         public TrackList(EventHandler handler) : base(handler) {}
         public TrackList(EventHandler handler, IList<Track> ilt) : base(handler, ilt) {}
         public TrackList(EventHandler handler, long size) : base(handler, size) {}
-        public TrackList(EventHandler handler, long size, IList<Track> ilt) : base(handler, size, ilt) {}
 
 
         public override void Add()

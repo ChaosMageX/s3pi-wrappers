@@ -14,6 +14,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -52,21 +53,27 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AbstractViewModel.cs" />
+    <Compile Include="Converters\DebuggingConverter.cs" />
+    <Compile Include="ViewModels\AbstractViewModel.cs" />
     <Compile Include="App.cs" />
-    <Compile Include="BoneManager.cs" />
-    <Compile Include="BoneOps.cs" />
+    <Compile Include="Bones\BoneManager.cs" />
+    <Compile Include="Commands\BoneOps.cs" />
     <Compile Include="BoneSelectDialog.xaml.cs">
       <DependentUpon>BoneSelectDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="BoneViewModel.cs" />
+    <Compile Include="ViewModels\BoneViewModel.cs" />
+    <Compile Include="ViewModels\BoneExportViewModel.cs" />
+    <Compile Include="ViewModels\SkeletonExportViewModel.cs" />
     <Compile Include="InfoDialog.xaml.cs">
       <DependentUpon>InfoDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="MatrixInputDialog.xaml.cs">
       <DependentUpon>MatrixInputDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserCommand.cs" />
+    <Compile Include="SkeletonExportDialog.xaml.cs">
+      <DependentUpon>SkeletonExportDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Commands\UserCommand.cs" />
     <Compile Include="StringInputDialog.xaml.cs">
       <DependentUpon>StringInputDialog.xaml</DependentUpon>
     </Compile>
@@ -86,14 +93,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="BoneActionEventArgs.cs" />
-    <Compile Include="BoneActionEventHandler.cs" />
+    <Compile Include="Bones\BoneActionEventArgs.cs" />
+    <Compile Include="Bones\BoneActionEventHandler.cs" />
     <Compile Include="FindReplaceDialog.xaml.cs">
       <DependentUpon>FindReplaceDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RequiredFieldValidationRule.cs" />
-    <Compile Include="RigViewModel.cs" />
-    <Compile Include="DecimalValidationRule.cs" />
+    <Compile Include="Validation\RequiredFieldValidationRule.cs" />
+    <Compile Include="ViewModels\RigEditorViewModel.cs" />
+    <Compile Include="Validation\DecimalValidationRule.cs" />
     <Compile Include="Geometry\EulerAngle.cs" />
     <Compile Include="Geometry\Matrix.cs" />
     <Compile Include="Geometry\Quaternion.cs" />
@@ -103,6 +110,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="MatrixInputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SkeletonExportDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -129,6 +140,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Helpers\RigEditor.helper">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

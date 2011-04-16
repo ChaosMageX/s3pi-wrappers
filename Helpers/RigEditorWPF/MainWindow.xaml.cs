@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using s3piwrappers.RigEditor.ViewModels;
 
 namespace s3piwrappers.RigEditor
 {
@@ -7,9 +8,9 @@ namespace s3piwrappers.RigEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow(RigViewModel viewModel):this()
+        public MainWindow(RigEditorViewModel editorViewModel):this()
         {
-            DataContext = viewModel;
+            DataContext = editorViewModel;
         }
         public MainWindow()
         {

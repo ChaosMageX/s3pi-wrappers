@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.ViewModels
 {
     public abstract class AbstractViewModel : INotifyPropertyChanged, IDisposable
     {

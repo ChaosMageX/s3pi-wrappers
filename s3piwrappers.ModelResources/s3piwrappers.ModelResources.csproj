@@ -62,10 +62,6 @@
     <Compile Include="GeometryResourceHandler.cs" />
     <Compile Include="IBUF.cs" />
     <Compile Include="Common\Matrix43.cs" />
-    <Compile Include="LightResource.cs" />
-    <Compile Include="LITE.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="MLOD.cs" />
     <Compile Include="MODL.cs" />
     <Compile Include="ObjectGeometryResource.cs" />

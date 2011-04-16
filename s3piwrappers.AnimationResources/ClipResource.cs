@@ -338,8 +338,6 @@ namespace s3piwrappers
                 get { return ToString(); }
             }
         }
-
-
         public class EventTable : AHandlerElement
         {
             private UInt32 mVersion;
@@ -923,7 +921,6 @@ namespace s3piwrappers
                 return new ScriptEvent(requestedApiVersion, handler, this);
             }
         }
-
         [ConstructorParameters(new object[] { ClipEventType.Effect })]
         public class EffectEvent : Event
         {
@@ -1108,7 +1105,6 @@ namespace s3piwrappers
                 return new VisibilityEvent(requestedApiVersion, handler, this);
             }
         }
-
         [ConstructorParameters(new object[] { ClipEventType.DestroyProp })]
         public class DestroyPropEvent : Event
         {
@@ -1171,7 +1167,6 @@ namespace s3piwrappers
                 return new DestroyPropEvent(requestedApiVersion, handler, this);
             }
         }
-
         [ConstructorParameters(new object[] { ClipEventType.StopEffect })]
         public class StopEffectEvent : Event
         {
@@ -1246,7 +1241,6 @@ namespace s3piwrappers
                 return new StopEffectEvent(requestedApiVersion, handler, this);
             }
         }
-
         public class ClipEndSection : AHandlerElement
         {
             private Single mX;
@@ -1349,7 +1343,7 @@ namespace s3piwrappers
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
         private byte[] mS3Clip;
-        //private S3Clip mAnimation;
+        //private Clip mWrappedClipData;
         private IKTargetTable mIKTargetInfo;
         private string mActorName;
         private EventTable mEventSectionTable;
@@ -1443,7 +1437,12 @@ namespace s3piwrappers
             set { if(mEndSection!=value){mEndSection = value; OnResourceChanged(this, new EventArgs());} }
         }
 
-
+        //[ElementPriority(7)]
+        //public Clip ReadonlyClipData
+        //{
+        //    get { return mWrappedClipData; }
+        //    set { mWrappedClipData = value; }
+        //}
         private void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
@@ -1486,6 +1485,7 @@ namespace s3piwrappers
             s.Seek(clipOffset, SeekOrigin.Begin);
             mS3Clip = new byte[(int)clipSize];
             mS3Clip = br.ReadBytes((int)clipSize);
+            //ReadonlyClipData = new Clip(0,this.OnResourceChanged,new MemoryStream(mS3Clip));
             
 
             if (ikOffset > 0)
@@ -1615,6 +1615,8 @@ namespace s3piwrappers
         {
             get { return kRecommendedApiVersion; }
         }
+
+
         static bool checking = Settings.Checking;
         const int kRecommendedApiVersion = 1;
 

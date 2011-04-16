@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.Validation
 {
     class DecimalValidationRule :ValidationRule
     {
@@ -16,7 +16,7 @@ namespace s3piwrappers.RigEditor
                     parameter = Double.Parse((String)value);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return new ValidationResult(false, "*");
             }

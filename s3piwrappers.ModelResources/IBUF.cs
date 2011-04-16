@@ -195,12 +195,21 @@ namespace s3piwrappers
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
             if (mBuffer == null) mBuffer = new Int32[0];
+            bool is32Bit = mBuffer.Length > UInt16.MaxValue;
+            if (is32Bit)
+            {
+                mFlags |= FormatFlags.Uses32BitIndices;
+            }
+            else
+            {
+                mFlags &= (FormatFlags)UInt32.MaxValue ^ FormatFlags.Uses32BitIndices;
+            }
+
             bw.Write((UInt32)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write((UInt32)mFlags);
             bw.Write(mDisplayListUsage);
-
-            bool is32Bit = (mFlags & FormatFlags.Uses32BitIndices) != 0;
+            
             bool isDifferenced = (mFlags & FormatFlags.DifferencedIndices) != 0;
             Int32 last = 0;
             for (int i = 0; i < mBuffer.Length; i++)

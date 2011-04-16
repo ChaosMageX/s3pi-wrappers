@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows.Input;
 using s3piwrappers.Granny2;
+using s3piwrappers.RigEditor.Bones;
 using s3piwrappers.RigEditor.Geometry;
+using s3piwrappers.RigEditor.ViewModels;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.Commands
 {
     public class BoneOps
     {

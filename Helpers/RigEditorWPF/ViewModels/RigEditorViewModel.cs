@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Input;
+using s3pi.Interfaces;
 using s3piwrappers.Granny2;
 using System.Collections.ObjectModel;
 using System.Linq;
+using s3piwrappers.RigEditor.Bones;
+using s3piwrappers.RigEditor.Commands;
 using s3piwrappers.RigEditor.Geometry;
 using System.Windows;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.ViewModels
 {
-    public class RigViewModel : AbstractViewModel, IHaveBones
+    public class RigEditorViewModel : AbstractViewModel, IHaveBones
     {
         private readonly WrappedGrannyData mGrannyData;
         private IList<BoneViewModel> mChildren;
@@ -35,7 +37,8 @@ namespace s3piwrappers.RigEditor
         public ICommand GetMatrixInfoCommand { get; private set; }
         public ICommand CommitCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
-        public RigViewModel(RigResource rig)
+        public ICommand ExportRigCommand { get; private set; }
+        public RigEditorViewModel(RigResource rig)
         {
             rig.ResourceChanged += new EventHandler(OnResourceChanged);
             mIsSaving = false;
@@ -53,11 +56,13 @@ namespace s3piwrappers.RigEditor
             mManager.BoneAdded += new BoneActionEventHandler(OnBoneAdded);
             mManager.BoneRemoved += new BoneActionEventHandler(OnBoneRemoved);
             mManager.BoneParentChanged += new BoneActionEventHandler(OnBoneParentChanged);
-            AddBoneCommand = new UserCommand<RigViewModel>(x => true, y => y.Manager.AddBone(new Bone(0, null), null));
-            GetMatrixInfoCommand = new UserCommand<RigViewModel>(x => true, ExecuteMatrixInfo);
-            CommitCommand = new UserCommand<RigViewModel>(x => x!=null&& x.HasChanged, y => { mIsSaving = true; Application.Current.Shutdown(); });
-            CancelCommand = new UserCommand<RigViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
-
+            AddBoneCommand = new UserCommand<RigEditorViewModel>(x => true, y => y.Manager.AddBone(new Bone(0, null), null));
+            GetMatrixInfoCommand = new UserCommand<RigEditorViewModel>(x => true, ExecuteMatrixInfo);
+            ExportRigCommand = new UserCommand<RigEditorViewModel>(x => x != null, ExecuteRigExportDialog);
+            CommitCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = true; Application.Current.Shutdown(); });
+            CancelCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
+            IResourceKey key = new TGIBlock(0,null);
+            key.ResourceType = 0x00000000;
         }
 
         private void OnResourceChanged(object sender, EventArgs e)
@@ -69,8 +74,12 @@ namespace s3piwrappers.RigEditor
             get { return mHasChanged; }
             set { mHasChanged = value; OnPropertyChanged("HasChanged"); }
         }
-
-        static void ExecuteMatrixInfo(RigViewModel param)
+        static void ExecuteRigExportDialog(RigEditorViewModel param)
+        {
+            var dialog = new SkeletonExportDialog(param.Manager);
+            dialog.ShowDialog();
+        }
+        static void ExecuteMatrixInfo(RigEditorViewModel param)
         {
             var sb = new StringBuilder();
             foreach (var b in param.Manager.Bones)

@@ -107,7 +107,5 @@ namespace s3piwrappers
         {
             get { return "TkMk"; }
         }
-        private static bool checking = Settings.Checking;
-        private const int kRecommendedApiVersion = 1;
     }
 }

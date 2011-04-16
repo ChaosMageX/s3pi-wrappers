@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Windows.Input;
 using s3piwrappers.Granny2;
+using s3piwrappers.RigEditor.Bones;
 using s3piwrappers.RigEditor.Geometry;
 
-namespace s3piwrappers.RigEditor
+namespace s3piwrappers.RigEditor.ViewModels
 {
     public interface IHaveBones
     {

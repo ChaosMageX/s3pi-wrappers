@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using s3pi.GenericRCOLResource;
+using s3pi.Interfaces;
 
 namespace s3piwrappers.ModelViewer
 {
@@ -27,7 +28,7 @@ namespace s3piwrappers.ModelViewer
             public GeometryModel3D Model { get; set; }
             public override string ToString()
             {
-                return State!=null?"0x" + State.Name.ToString("X8"):"None";
+                return State != null ? "0x" + State.Name.ToString("X8") : "None";
             }
         }
         class SceneMesh
@@ -43,7 +44,7 @@ namespace s3piwrappers.ModelViewer
             public SceneGeostate[] States { get; set; }
             public override string ToString()
             {
-                return "0x"+ Mesh.Name.ToString("X8");
+                return "0x" + Mesh.Name.ToString("X8");
             }
         }
 
@@ -56,13 +57,13 @@ namespace s3piwrappers.ModelViewer
         public MainWindow()
         {
             InitializeComponent();
-            mSceneMeshes= new List<SceneMesh>();
+            mSceneMeshes = new List<SceneMesh>();
             mHiddenMaterial = new DiffuseMaterial();
             mNonSelectedMaterial.Children.Add(new DiffuseMaterial(Brushes.LightGray));
-            mNonSelectedMaterial.Children.Add(new SpecularMaterial(Brushes.GhostWhite,20d));
+            mNonSelectedMaterial.Children.Add(new SpecularMaterial(Brushes.GhostWhite, 20d));
             mSelectedMaterial.Children.Add(new DiffuseMaterial(Brushes.Red));
             mSelectedMaterial.Children.Add(new SpecularMaterial(Brushes.GhostWhite, 40d));
-            mXrayMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.4f,1f,0f,0f)));
+            mXrayMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.4f, 1f, 0f, 0f)));
         }
         public MainWindow(Stream s)
             : this()
@@ -79,15 +80,16 @@ namespace s3piwrappers.ModelViewer
                 {
                     var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
                     var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
-                    var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex)?? VRTF.CreateDefaultForMesh(m);
-                    
-                    var model = DrawModel(vbuf.GetVertices(m, vrtf), ibuf.GetIndices(m),mNonSelectedMaterial);
+                    var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
+                    var material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
+                    var uvscale = GetUvScale(rcol, material);
+                    var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
 
                     var sceneMesh = new SceneMesh(m, model);
                     SceneGeostate[] sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
                     for (int i = 0; i < sceneGeostates.Length; i++)
                     {
-                        var state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i]),
+                        var state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
                                                    ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
                         mGroupMeshes.Children.Add(state);
                         sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
@@ -97,10 +99,57 @@ namespace s3piwrappers.ModelViewer
                     mSceneMeshes.Add(sceneMesh);
                 }
             }
-            foreach(var s in mSceneMeshes)
+            foreach (var s in mSceneMeshes)
             {
                 mMeshListView.Items.Add(s);
             }
+        }
+        static float GetUvScale(GenericRCOLResource rcol, IRCOLBlock material)
+        {
+            float s = 1 / short.MaxValue;
+            if (material == null) return s;
+            if (material is MATD)
+            {
+                GetUvScale(material as MATD, ref s);
+            }
+            else if (material is MTST)
+            {
+                MTST mtst = material as MTST;
+                foreach (var entry in mtst.Entries)
+                {
+                    //skip materials that don't exist in this rcol
+                    if (entry.Index.RefType == GenericRCOLResource.ReferenceType.Private ||
+                        entry.Index.RefType == GenericRCOLResource.ReferenceType.Public)
+                    {
+                        material = GenericRCOLResource.ChunkReference.GetBlock(rcol, entry.Index);
+                        if (material is MATD)
+                        {
+                            if (GetUvScale(material as MATD, ref s)) break;
+                        }
+                        else
+                            s = GetUvScale(rcol, material);
+                    }
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Material must be of type MATD or MTST", "material");
+            }
+
+            return s;
+
+        }
+        static bool GetUvScale(MATD matd, ref float uvscale)
+        {
+            var param =
+                (matd.Mtnf != null ? matd.Mtnf.SData : matd.Mtrl.SData).FirstOrDefault(
+                    x => x.Field == MATD.FieldType.UVScales) as MATD.ElementFloat3;
+            if (param != null)
+            {
+                uvscale = param.Data0;
+                return true;
+            }
+            return false;
         }
         static GeometryModel3D DrawModel(Vertex[] verts, Int32[] indices, Material material)
         {
@@ -124,17 +173,17 @@ namespace s3piwrappers.ModelViewer
         private void mMeshListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mStateListView.Items.Clear();
-            foreach(var item in e.RemovedItems)
+            foreach (var item in e.RemovedItems)
             {
                 var m = (SceneMesh)item;
                 m.Model.Material = mNonSelectedMaterial;
             }
-            if(e.AddedItems.Count >0)
+            if (e.AddedItems.Count > 0)
             {
                 var m = (SceneMesh)e.AddedItems[0];
                 m.Model.Material = mSelectedMaterial;
                 mStateListView.Items.Add(new SceneGeostate(m, null, null));
-                foreach(var s in m.States)
+                foreach (var s in m.States)
                 {
                     mStateListView.Items.Add(s);
                 }
@@ -144,29 +193,31 @@ namespace s3piwrappers.ModelViewer
         }
         private void mStateListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.RemovedItems.Count >0)
+            if (e.RemovedItems.Count > 0)
             {
                 var s = (SceneGeostate)e.RemovedItems[0];
-                if(s.State == null)
+                if (s.State == null)
                 {
                     s.Owner.Model.Material = mHiddenMaterial;
-                } else
+                }
+                else
                 {
                     s.Model.Material = mHiddenMaterial;
                 }
-                
+
             }
-            if(e.AddedItems.Count >0)
+            if (e.AddedItems.Count > 0)
             {
                 var s = (SceneGeostate)e.AddedItems[0];
-                if(s.State == null)
+                if (s.State == null)
                 {
                     s.Owner.Model.Material = mSelectedMaterial;
-                } else
+                }
+                else
                 {
                     s.Model.Material = mSelectedMaterial;
                 }
-                
+
             }
         }
 

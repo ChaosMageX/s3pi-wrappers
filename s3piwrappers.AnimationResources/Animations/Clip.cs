@@ -13,7 +13,7 @@ namespace s3piwrappers
     /// <summary>
     /// Animation frame data
     /// </summary>
-    public class Clip : DependentElement
+    public class Clip : AHandlerElement
     {
 
         #region Fields
@@ -74,7 +74,7 @@ namespace s3piwrappers
             mTracks = new TrackList(handler);
         }
         public Clip(int apiVersion, EventHandler handler, Stream s)
-            : base(apiVersion, handler, s)
+            : base(apiVersion, handler)
         {
             s.Position = 0L;
             Parse(s);
@@ -82,7 +82,7 @@ namespace s3piwrappers
         #endregion
 
         #region I/O
-        protected override void Parse(Stream s)
+        protected void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
             if (FOURCC(br.ReadUInt64()) != "_pilC3S_")
@@ -119,10 +119,10 @@ namespace s3piwrappers
 
             if (Settings.Checking && s.Position != animNameOffset)
                 throw new InvalidDataException("Bad Name Offset");
-            mAnimName = br.ReadZString();
+            mAnimName = ClipResource.ReadZString(br);
             if (Settings.Checking && s.Position != srcNameOffset)
                 throw new InvalidDataException("Bad SourceName Offset");
-            mSrcName = br.ReadZString();
+            mSrcName = ClipResource.ReadZString(br);
 
             if (Settings.Checking && s.Position != frameDataOffset)
                 throw new InvalidDataException("Bad Indexed Floats Offset");
@@ -151,7 +151,7 @@ namespace s3piwrappers
                 throw new InvalidDataException("Unexpected End of Clip.");
 
         }
-        public override void UnParse(Stream s)
+        public void UnParse(Stream s)
         {
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(FOURCC("_S3Clip_"));
@@ -165,5 +165,20 @@ namespace s3piwrappers
         }
         #endregion
         const int kRecommendedApiVersion = 1;
+
+        public override AHandlerElement Clone(EventHandler handler)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override List<string> ContentFields
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override int RecommendedApiVersion
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 }

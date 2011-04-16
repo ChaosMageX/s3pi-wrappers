@@ -81,33 +81,12 @@ namespace s3piwrappers
         protected virtual void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
         {
             mFrames = new FrameList(handler,mType,s,info,indexedFloats);
-            var vals = SelectFloats();
-            var a = vals.Select(x => Math.Abs(x));
-            var min = a.Min();
-            var max = a.Max();
-            var rng = max - min;
-            var med = rng/2f;
-            var scl = med + min;
         }
         public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
         {
             mFrames.UnParse(s, info, indexedFloats);
         }
-        protected virtual float CalculateBase(IEnumerable<float> src)
-        {
-            return src.Select(x => Math.Abs(x)).Average();
-        }
-        protected virtual float CalculateOffset(IEnumerable<float> src)
-        {
-            return 0f;
-        }
 
-        protected virtual IEnumerable<float> SelectFloats()
-        {
-            var floats = new List<float>();
-            foreach(var f in mFrames)floats.AddRange(f.GetFloatValues());
-            return floats;
-        }
 
         public bool Equals(Curve other)
         {
@@ -156,6 +135,25 @@ namespace s3piwrappers
                 }
                 return sb.ToString();
             }
+        }
+
+        /*        
+         * Not used
+         */
+        protected virtual float CalculateBase(IEnumerable<float> src)
+        {
+            return src.Select(x => Math.Abs(x)).Average();
+        }
+        protected virtual float CalculateOffset(IEnumerable<float> src)
+        {
+            return 0f;
+        }
+
+        protected virtual IEnumerable<float> SelectFloats()
+        {
+            var floats = new List<float>();
+            foreach (var f in mFrames) floats.AddRange(f.GetFloatValues());
+            return floats;
         }
     }
 }

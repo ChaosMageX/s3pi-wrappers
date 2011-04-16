@@ -1,5 +1,5 @@
 ResourceType: 0x8EAF13DE
-Label: Export Rig
+Label: Export rigfile.txt
 Command: RigExport
 Arguments: "{}"
 Desc: Exports skeletal data from RIG resource

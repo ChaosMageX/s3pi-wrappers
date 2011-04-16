@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Linq;
 using System.Text;
+using s3piwrappers.RigEditor.ViewModels;
 
 namespace s3piwrappers.RigEditor
 {
@@ -20,7 +21,7 @@ namespace s3piwrappers.RigEditor
             }
             var app = new Application();
             var rig = new RigResource(0, new MemoryStream(buffer));
-            var viewModel = new RigViewModel(rig);
+            var viewModel = new RigEditorViewModel(rig);
 
             var win = new MainWindow(viewModel);
             app.Run(win);

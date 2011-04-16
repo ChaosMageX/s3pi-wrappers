@@ -1,7 +1,7 @@
 ﻿<Window x:Class="s3piwrappers.RigEditor.MatrixInputDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:RigEditor="clr-namespace:s3piwrappers.RigEditor" xmlns:System="clr-namespace:System;assembly=mscorlib" Title=""
+        xmlns:RigEditor="clr-namespace:s3piwrappers.RigEditor" xmlns:System="clr-namespace:System;assembly=mscorlib" xmlns:Validation="clr-namespace:s3piwrappers.RigEditor.Validation" Title=""
         Height="230"
         Width="340"
         ResizeMode="NoResize">
@@ -40,7 +40,7 @@
             <TextBox.Text>
                 <Binding Path="M00" BindsDirectlyToSource="True" UpdateSourceTrigger="PropertyChanged" StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>            
@@ -55,7 +55,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -70,7 +70,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -85,7 +85,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -100,7 +100,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -115,7 +115,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -130,7 +130,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -145,7 +145,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                 </Binding>
             </TextBox.Text>
@@ -160,7 +160,7 @@
                          UpdateSourceTrigger="PropertyChanged"
                          StringFormat="{StaticResource DecimalFormatter}">
                     <Binding.ValidationRules>
-                        <RigEditor:DecimalValidationRule />
+                        <Validation:DecimalValidationRule />
                     </Binding.ValidationRules>
                     
                 </Binding>
