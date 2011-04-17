@@ -47,7 +47,8 @@ namespace s3piwrappers
     }
     public class VBUF : ARCOLBlock
     {
-        static IDictionary<int,int> kColorUByte4Map = new Dictionary<int, int>
+        static IDictionary<int, int> kColorUByte4Map =
+        new Dictionary<int, int>
         {
             {0, 2},
             {1, 1},
@@ -310,18 +311,20 @@ namespace s3piwrappers
                         output[i] += BitConverter.ToSingle(element, i * sizeof(float));
                     break;
                 case VRTF.ElementFormat.ColorUByte4:
-                    switch(layout.Usage)
+                    switch (layout.Usage)
                     {
                         case VRTF.ElementUsage.Colour:
+                            for (int i = 0; i < output.Length; i++)
+                                output[i] += (float)element[i] / byte.MaxValue;
+                            break;
                         case VRTF.ElementUsage.BlendWeight:
-                            
                             for (int i = 0; i < output.Length; i++)
                                 output[i] += (float)element[kColorUByte4Map[i]] / byte.MaxValue;
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
                             for (int i = 0; i < output.Length; i++)
-                                output[i] += (element[kColorUByte4Map[i]] / 127f)-1f;
+                                output[i] += (element[i] / 127.5f) - 1f;
                             break;
                     }
                     break;
@@ -337,7 +340,7 @@ namespace s3piwrappers
                     break;
                 case VRTF.ElementFormat.UShort4N:
                     scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
-                    if (scalar == 0) scalar = 512;
+                    if (scalar == 0) scalar = 511;
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
@@ -439,29 +442,35 @@ namespace s3piwrappers
                     switch (layout.Usage)
                     {
                         case VRTF.ElementUsage.Colour:
-                        case VRTF.ElementUsage.BlendWeight:
                             for (int i = 0; i < input.Length; i++)
-                                Array.Copy(BitConverter.GetBytes((byte)(input[i] * byte.MaxValue)), 0, output, layout.Offset + kColorUByte4Map[i], 1);
+                                Array.Copy(BitConverter.GetBytes((byte)(input[i] * byte.MaxValue)), 0, output, layout.Offset + i, 1);
+                            break;
+                        case VRTF.ElementUsage.BlendWeight:
+                            var sum = input.Sum();
+                            scalar = sum < 0.01 ? byte.MaxValue : (ulong)(byte.MaxValue / sum);
+                            for (int i = 0; i < input.Length; i++)
+                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor(input[i] * scalar)), 0, output, layout.Offset + kColorUByte4Map[i], 1);
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
                             for (int i = 0; i < input.Length; i++)
-                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f)*127.5f)), 0, output, layout.Offset + kColorUByte4Map[i], 1);
+                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f) * 127.5f)), 0, output, layout.Offset + i, 1);
                             break;
                     }
                     break;
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.Short4:
-                    scalar = GetScalar(input, (ulong)short.MaxValue);
+                    double max = Math.Ceiling(input.Max(x => Math.Abs(x)));
+                    scalar = max == 0 ? (ulong)short.MaxValue : (ulong)Math.Floor(short.MaxValue / max);
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.UShort4N:
-                    scalar = GetScalar(input, 512);
+                    scalar = 511;
                     for (int i = 0; i < input.Length; i++)
                         Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
@@ -469,17 +478,17 @@ namespace s3piwrappers
             }
         }
         //Find the highest value for the scalar
-        private static ulong GetScalar(IEnumerable<float> input, ulong MaxValue)
-        {
-            for (ulong scalar = MaxValue - 1; scalar > 0; scalar >>= 1)
-            {
-                foreach (var f in input)
-                    if (Math.Abs(f * scalar) >= MaxValue) goto nextScalar;
-                return scalar;
-            nextScalar:
-                continue;
-            }
-            return MaxValue;
-        }
+        //private static ulong GetScalar(IEnumerable<float> input, ulong MaxValue)
+        //{
+            //for (ulong scalar = MaxValue - 1; scalar > 0; scalar >>= 1)
+            //{
+            //    foreach (var f in input)
+            //        if (Math.Abs(f * scalar) >= MaxValue) goto nextScalar;
+            //    return scalar;
+            //nextScalar:
+            //    continue;
+            //}
+            //return MaxValue;
+        //}
     }
 }
