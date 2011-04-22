@@ -53,10 +53,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Clip.cs" />
+    <Compile Include="Curve.cs" />
+    <Compile Include="CurveDataFlags.cs" />
+    <Compile Include="CurveDataFormat.cs" />
+    <Compile Include="CurveDataInfo.cs" />
+    <Compile Include="CurveDataType.cs" />
+    <Compile Include="CurveList.cs" />
+    <Compile Include="CurveType.cs" />
+    <Compile Include="Frame.cs" />
+    <Compile Include="FrameList.cs" />
+    <Compile Include="OrientationCurve.cs" />
+    <Compile Include="Float4Frame.cs" />
+    <Compile Include="PackedFloat.cs" />
+    <Compile Include="PositionCurve.cs" />
+    <Compile Include="Float3Frame.cs" />
+    <Compile Include="Track.cs" />
+    <Compile Include="TrackList.cs" />
     <Compile Include="ClipResource.cs" />
     <Compile Include="ClipResourceHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TkMk.cs" />
+    <Compile Include="TrackMask.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\s3piwrappers.RigResource\s3piwrappers.RigResource.csproj">
@@ -64,6 +81,7 @@
       <Name>s3piwrappers.RigResource</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

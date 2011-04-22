@@ -323,8 +323,8 @@ namespace s3piwrappers
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
-                            for (int i = 0; i < output.Length; i++)
-                                output[i] += (element[i] / 127.5f) - 1f;
+                            for (int i = 0; i < output.Length-1; i++)
+                                output[i] += (element[2-i] / 127.5f) - 1f;
                             break;
                     }
                     break;
@@ -453,8 +453,8 @@ namespace s3piwrappers
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
-                            for (int i = 0; i < input.Length; i++)
-                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f) * 127.5f)), 0, output, layout.Offset + i, 1);
+                            for (int i = 0; i < input.Length-1; i++)
+                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f) * 127.5f)), 0, output, layout.Offset + 2-i, 1);
                             break;
                     }
                     break;
