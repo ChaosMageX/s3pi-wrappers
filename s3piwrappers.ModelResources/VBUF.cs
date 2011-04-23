@@ -340,7 +340,7 @@ namespace s3piwrappers
                     break;
                 case VRTF.ElementFormat.UShort4N:
                     scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
-                    if (scalar == 0) scalar = 511;
+                    if (scalar == 0) scalar = 512;
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
@@ -470,7 +470,7 @@ namespace s3piwrappers
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.UShort4N:
-                    scalar = 511;
+                    scalar = 512;
                     for (int i = 0; i < input.Length; i++)
                         Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));

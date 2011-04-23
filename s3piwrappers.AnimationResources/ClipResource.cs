@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using s3pi.Interfaces;
 using s3pi.Settings;
 
 namespace s3piwrappers
 {
-    public enum ClipEventType
-    {
-        Parent = 0x0001,
-        UnParent = 0x0002,
-        Sound = 0x0003,
-        Script = 0x0004,
-        Effect = 0x0005,
-        Visibility = 0x0006,
-        DestroyProp = 0x0009,
-        StopEffect = 0x000A
-    }
-
     public class ClipResource : AResource
     {
         private const int kRecommendedApiVersion = 1;
@@ -27,13 +16,12 @@ namespace s3piwrappers
         private ClipEndSection mEndSection;
         private EventTable mEventSectionTable;
         private IKTargetTable mIKTargetInfo;
-        private byte[] mS3Clip;
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
 
         public ClipResource(int apiVersion, Stream s) : base(apiVersion, s)
         {
-            mS3Clip = new byte[0];
+            mS3Clip = new Clip(0,this.OnResourceChanged);
             mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged);
             mEndSection = new ClipEndSection(0, this.OnResourceChanged);
@@ -53,20 +41,6 @@ namespace s3piwrappers
             get
             {
                 return ValueBuilder;
-                //StringBuilder sb = new StringBuilder();
-                //sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                //sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                //if (mIKTargetInfo.IKChains.Count > 0)
-                //{
-                //    sb.AppendFormat("IK Target Info Table:\n{0}", mIKTargetInfo.Value);
-                //}
-                //sb.AppendFormat("Actor:\t{0}\n", mActorName);
-                //if (mEventSectionTable.Events.Count > 0)
-                //{
-                //    sb.AppendFormat("Event Table:\n{0}", mEventSectionTable.Value);
-                //}
-                //sb.AppendFormat("End Section:\n{0}\n", mEndSection.Value);
-                //return sb.ToString();
             }
         }
 
@@ -97,37 +71,7 @@ namespace s3piwrappers
                 }
             }
         }
-
-        [ElementPriority(3)]
-        public BinaryReader S3Clip
-        {
-            get
-            {
-                MemoryStream s = new MemoryStream(mS3Clip);
-                s.Position = 0L;
-                return new BinaryReader(s);
-            }
-            set
-            {
-                if (value.BaseStream.CanSeek)
-                {
-                    value.BaseStream.Position = 0L;
-                    mS3Clip = value.ReadBytes((int) value.BaseStream.Length);
-                }
-                else
-                {
-                    MemoryStream s = new MemoryStream();
-                    byte[] buffer = new byte[0x100000];
-                    for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
-                    {
-                        s.Write(buffer, 0, i);
-                    }
-                    mS3Clip = new BinaryReader(s).ReadBytes((int) s.Length);
-                }
-                OnResourceChanged(this, new EventArgs());
-            }
-        }
-
+        
         [ElementPriority(4)]
         public IKTargetTable IKTargetInfo
         {
@@ -184,8 +128,10 @@ namespace s3piwrappers
             }
         }
 
-        [ElementPriority(7)]
-        public Clip ReadonlyClipData { get; set; }
+        private Clip mS3Clip;
+
+        [ElementPriority(3)]
+        public Clip S3Clip { get { return mS3Clip; } set { mS3Clip = value; } }
 
         public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
@@ -229,9 +175,9 @@ namespace s3piwrappers
             }
 
             s.Seek(clipOffset, SeekOrigin.Begin);
-            mS3Clip = new byte[(int) clipSize];
-            mS3Clip = br.ReadBytes((int) clipSize);
-            ReadonlyClipData = new Clip(0, this.OnResourceChanged, new MemoryStream(mS3Clip));
+            byte[] clipBytes = new byte[(int) clipSize];
+            clipBytes = br.ReadBytes((int) clipSize);
+            mS3Clip = new Clip(0, this.OnResourceChanged, new MemoryStream(clipBytes));
 
 
             if (ikOffset > 0)
@@ -279,7 +225,7 @@ namespace s3piwrappers
             s.Seek(52, SeekOrigin.Current);
 
             var clipStream = new MemoryStream();
-            ReadonlyClipData.UnParse(clipStream);
+            mS3Clip.UnParse(clipStream);
             clipStream.Position = 0L;
             var clipData = clipStream.ToArray();
 
@@ -751,6 +697,18 @@ namespace s3piwrappers
         }
 
         #endregion
+
+        public enum ClipEventType
+        {
+            Parent = 0x0001,
+            UnParent = 0x0002,
+            Sound = 0x0003,
+            Script = 0x0004,
+            Effect = 0x0005,
+            Visibility = 0x0006,
+            DestroyProp = 0x0009,
+            StopEffect = 0x000A
+        }
 
         #region Nested type: Event
 
@@ -1847,5 +1805,882 @@ namespace s3piwrappers
         }
 
         #endregion
+
+        public class Clip : AHandlerElement
+        {
+            
+            #region Fields
+
+            private String mAnimName;
+            private Single mFrameDuration;
+            private UInt16 mMaxFrameCount;
+            private String mSrcName;
+            private TrackList mTracks;
+            private UInt32 mUnknown01;
+            private UInt16 mUnknown02;
+            private UInt32 mVersion;
+
+            #endregion
+
+            #region ContentFields
+
+            [ElementPriority(1)]
+            public UInt32 Version
+            {
+                get { return mVersion; }
+                set
+                {
+                    mVersion = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(2)]
+            public UInt32 Unknown01
+            {
+                get { return mUnknown01; }
+                set
+                {
+                    mUnknown01 = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(3)]
+            public Single FrameDuration
+            {
+                get { return mFrameDuration; }
+                set
+                {
+                    mFrameDuration = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(4)]
+            public UInt16 MaxFrameCount
+            {
+                get { return mMaxFrameCount; }
+                set
+                {
+                    mMaxFrameCount = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(5)]
+            public UInt16 Unknown02
+            {
+                get { return mUnknown02; }
+                set
+                {
+                    mUnknown02 = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(6)]
+            public String AnimName
+            {
+                get { return mAnimName; }
+                set
+                {
+                    mAnimName = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(7)]
+            public String SrcName
+            {
+                get { return mSrcName; }
+                set
+                {
+                    mSrcName = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(8)]
+            public TrackList Tracks
+            {
+                get { return mTracks; }
+                set
+                {
+                    mTracks = value;
+                    OnElementChanged();
+                }
+            }
+
+            public string Value { get { return ValueBuilder; } }
+
+            #endregion
+
+            #region Constructors
+
+            public Clip(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mTracks = new TrackList(handler); }
+
+            public Clip(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
+            {
+                s.Position = 0L;
+                Parse(s);
+            }
+
+            #endregion
+
+            #region I/O
+
+            protected void Parse(Stream s)
+            {
+                BinaryReader br = new BinaryReader(s);
+                var foo = FOURCC(br.ReadUInt64());
+                if (foo != "_pilC3S_")
+                    throw new Exception("Bad clip header: Expected \"_S3Clip_\"");
+                mVersion = br.ReadUInt32();
+                mUnknown01 = br.ReadUInt32();
+                mFrameDuration = br.ReadSingle();
+                mMaxFrameCount = br.ReadUInt16();
+                mUnknown02 = br.ReadUInt16();
+
+                uint curveCount = br.ReadUInt32();
+                uint indexedFloatCount = br.ReadUInt32();
+                uint curveDataOffset = br.ReadUInt32();
+                uint frameDataOffset = br.ReadUInt32();
+                uint animNameOffset = br.ReadUInt32();
+                uint srcNameOffset = br.ReadUInt32();
+
+                if (Settings.Checking && s.Position != curveDataOffset)
+                    throw new InvalidDataException("Bad Curve Data Offset");
+
+                List<CurveDataInfo> curveDataInfos = new List<CurveDataInfo>();
+                for (int i = 0; i < curveCount; i++)
+                {
+                    CurveDataInfo p = new CurveDataInfo();
+                    p.FrameDataOffset = br.ReadUInt32();
+                    p.TrackKey = br.ReadUInt32();
+                    p.Offset = br.ReadSingle();
+                    p.Scale = br.ReadSingle();
+                    p.FrameCount = br.ReadUInt16();
+                    p.Flags = new CurveDataFlags(br.ReadByte());
+                    p.Type = (CurveType)br.ReadByte();
+                    curveDataInfos.Add(p);
+                }
+
+                if (Settings.Checking && s.Position != animNameOffset)
+                    throw new InvalidDataException("Bad Name Offset");
+                mAnimName = ClipResource.ReadZString(br);
+                if (Settings.Checking && s.Position != srcNameOffset)
+                    throw new InvalidDataException("Bad SourceName Offset");
+                mSrcName = ClipResource.ReadZString(br);
+
+                if (Settings.Checking && s.Position != frameDataOffset)
+                    throw new InvalidDataException("Bad Indexed Floats Offset");
+                List<float> indexedFloats = new List<float>();
+                for (int i = 0; i < indexedFloatCount; i++)
+                {
+                    indexedFloats.Add(br.ReadSingle());
+                }
+
+                Dictionary<uint, List<Curve>> trackMap = new Dictionary<uint, List<Curve>>();
+                for (int i = 0; i < curveDataInfos.Count; i++)
+                {
+                    CurveDataInfo curveDataInfo = curveDataInfos[i];
+                    if (Settings.Checking && s.Position != curveDataInfo.FrameDataOffset)
+                        throw new InvalidDataException("Bad FrameData offset.");
+                    Curve curve = (Curve)Activator.CreateInstance(Curve.GetCurveType(curveDataInfo.Type), new object[] { 0, handler, curveDataInfo.Type, s, curveDataInfo, indexedFloats });
+                    if (!trackMap.ContainsKey(curveDataInfo.TrackKey)) trackMap[curveDataInfo.TrackKey] = new List<Curve>();
+                    trackMap[curveDataInfo.TrackKey].Add(curve);
+                }
+
+                List<Track> tracks = new List<Track>();
+                foreach (var k in trackMap.Keys)
+                {
+                    tracks.Add(new Track(0, handler, k, trackMap[k]));
+                }
+                mTracks = new TrackList(handler, tracks);
+
+                if (Settings.Checking && s.Position != s.Length)
+                    throw new InvalidDataException("Unexpected End of Clip.");
+            }
+
+            public void UnParse(Stream s)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(Encoding.ASCII.GetBytes("_pilC3S_"));
+                bw.Write(mVersion);
+                bw.Write(mUnknown01);
+                bw.Write(mFrameDuration);
+                bw.Write(mMaxFrameCount);
+                bw.Write(Unknown02);
+
+                List<float> indexedFloats = new List<float>();
+                List<CurveDataInfo> curveDataInfos = new List<CurveDataInfo>();
+
+
+                UInt32 curveCount = 0;
+                byte[] frameData;
+                using (var frameStream = new MemoryStream())
+                {
+                    foreach (var track in Tracks)
+                    {
+                        foreach (var curve in track.Curves)
+                        {
+                            curveCount++;
+                            Single scale = 1f;
+                            Single offset = 0f;
+
+                            var values = curve.SelectFloats();
+                            if (values.Any())
+                            {
+                                float min = values.Min();
+                                float max = values.Max();
+                                offset = (min + max) / 2f;
+                                scale = (min - max) / 2f;
+                            }
+                            //not sure what really determines whether to index or not
+                            Boolean isIndexed = curve.Frames.Count == 0 ? true : curve.Type == CurveType.Position ? IsIndexed(curve.Frames.Cast<Float3Frame>()) : false;
+                            var flags = new CurveDataFlags();
+                            flags.Format = isIndexed ? CurveDataFormat.Indexed : CurveDataFormat.Packed;
+                            flags.Type = Curve.GetDataType(curve.Type);
+                            flags.Static = curve.Frames.Count == 0;
+                            var curveDataInfo = new CurveDataInfo { Offset = offset, Flags = flags, FrameCount = curve.Frames.Count, FrameDataOffset = (UInt32)frameStream.Position, Scale = scale, TrackKey = track.TrackKey, Type = curve.Type };
+                            curve.UnParse(frameStream, curveDataInfo, indexedFloats);
+                            curveDataInfos.Add(curveDataInfo);
+                        }
+                    }
+                    frameData = frameStream.ToArray();
+                }
+
+                bw.Write(curveCount);
+                bw.Write(indexedFloats.Count);
+                long offsets = s.Position;
+                uint curveDataOffset = 0;
+                uint frameDataOffset = 0;
+                uint animNameOffset = 0;
+                uint srcNameOffset = 0;
+                s.Seek(4 * sizeof(UInt32), SeekOrigin.Current);
+
+
+                curveDataOffset = (uint)s.Position;
+                uint frameOffset = (uint)(curveDataOffset + (20 * curveDataInfos.Count) + mAnimName.Length + mSrcName.Length + 2 + (sizeof(Single) * indexedFloats.Count));
+                foreach (var curveDataInfo in curveDataInfos)
+                {
+                    bw.Write((curveDataInfo.FrameDataOffset + frameOffset));
+                    bw.Write(curveDataInfo.TrackKey);
+                    bw.Write(curveDataInfo.Offset);
+                    bw.Write(curveDataInfo.Scale);
+                    bw.Write((UInt16)curveDataInfo.FrameCount);
+                    bw.Write(curveDataInfo.Flags.Raw);
+                    bw.Write((Byte)curveDataInfo.Type);
+                }
+
+                animNameOffset = (uint)s.Position;
+                ClipResource.WriteZString(bw, AnimName);
+                srcNameOffset = (uint)s.Position;
+                ClipResource.WriteZString(bw, SrcName);
+
+                frameDataOffset = (uint)s.Position;
+                foreach (var f in indexedFloats) bw.Write(f);
+                bw.Write(frameData);
+                s.Seek(offsets, SeekOrigin.Begin);
+                bw.Write(curveDataOffset);
+                bw.Write(frameDataOffset);
+                bw.Write(animNameOffset);
+                bw.Write(srcNameOffset);
+                s.Position = s.Length;
+            }
+
+            #endregion
+
+            private const int kRecommendedApiVersion = 1;
+            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
+
+            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+
+            private static Boolean IsIndexed(IEnumerable<Float3Frame> source)
+            {
+                if (source.Count() < 5) return false;
+                var x = source.Select(frame => frame.Data[0]).Distinct();
+                var y = source.Select(frame => frame.Data[0]).Distinct();
+                var z = source.Select(frame => frame.Data[0]).Distinct();
+
+                return x.Count() == 1 && x.First() == 0 || y.Count() == 1 && y.First() == 0 || z.Count() == 1 && z.First() == 0;
+            }
+
+            public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
+        }
+        public class Track : AHandlerElement,
+                             IEquatable<Track>
+        {
+            private CurveList mCurves;
+            private UInt32 mTrackKey;
+            public Track(int APIversion, EventHandler handler) : base(APIversion, handler) { mCurves = new CurveList(handler); }
+
+            public Track(int APIversion, EventHandler handler, Track basis) : this(APIversion, handler, basis.mTrackKey, basis.Curves) { }
+
+            public Track(int APIversion, EventHandler handler, UInt32 trackKey, IEnumerable<Curve> curves)
+                : this(APIversion, handler)
+            {
+                mTrackKey = trackKey;
+                mCurves = new CurveList(handler, curves);
+            }
+
+            [ElementPriority(1)]
+            public uint TrackKey
+            {
+                get { return mTrackKey; }
+                set
+                {
+                    if (mTrackKey != value)
+                    {
+                        mTrackKey = value;
+                        OnElementChanged();
+                    }
+                }
+            }
+
+            [ElementPriority(2)]
+            public CurveList Curves
+            {
+                get { return mCurves; }
+                set
+                {
+                    mCurves = value;
+                    OnElementChanged();
+                }
+            }
+            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override int RecommendedApiVersion { get { return 1; } }
+            public string Value { get { return ValueBuilder; } }
+            #region IEquatable<Track> Members
+            public bool Equals(Track other) { return mTrackKey.Equals(other.mTrackKey); }
+            #endregion
+            public override AHandlerElement Clone(EventHandler handler) { return new Track(0, handler, this); }
+        }
+        public class TrackList : DependentList<Track>
+        {
+            public TrackList(EventHandler handler) : base(handler) { }
+            public TrackList(EventHandler handler, IEnumerable<Track> ilt) : base(handler, ilt) { }
+            public TrackList(EventHandler handler, long size) : base(handler, size) { }
+
+
+            public override void Add() { base.Add(new object[] { }); }
+
+            protected override Track CreateElement(Stream s) { throw new NotSupportedException(); }
+
+            protected override void WriteElement(Stream s, Track element) { throw new NotSupportedException(); }
+        }
+        public abstract class Curve : AHandlerElement,
+                                  IEquatable<Curve>
+        {
+            protected FrameList mFrames;
+            protected CurveType mType;
+
+            protected Curve(int apiVersion, EventHandler handler, CurveType type)
+                : base(apiVersion, handler)
+            {
+                mType = type;
+                mFrames = new FrameList(handler, Curve.GetDataType(type));
+            }
+
+            protected Curve(int apiVersion, EventHandler handler, Curve basis) : this(apiVersion, handler, basis.mType) { mFrames = new FrameList(handler, Curve.GetDataType(mType), basis.Frames); }
+
+            public Curve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler, type) { Parse(s, info, indexedFloats); }
+
+            [ElementPriority(2)]
+            public CurveType Type { get { return mType; } }
+
+            [ElementPriority(3)]
+            public FrameList Frames
+            {
+                get { return mFrames; }
+                set
+                {
+                    if (mFrames != value)
+                    {
+                        mFrames = value;
+                        OnElementChanged();
+                    }
+                }
+            }
+
+            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
+
+            public override int RecommendedApiVersion { get { return 1; } }
+            public virtual string Value { get { return ValueBuilder; } }
+
+            #region IEquatable<Curve> Members
+
+            public bool Equals(Curve other) { return base.Equals(other); }
+
+            #endregion
+            public static Int32 GetBitsPerFloat(CurveDataType curveType)
+            {
+                switch (curveType)
+                {
+                    case CurveDataType.Float3:
+                        return 10;
+                    case CurveDataType.Float4:
+                        return 12;
+                    default: throw new NotSupportedException();
+                }
+            }
+            public static Int32 GetFloatCount(CurveDataType curveType)
+            {
+                switch (curveType)
+                {
+                    case CurveDataType.Float3:
+                        return 3;
+                    case CurveDataType.Float4:
+                        return 4;
+                    default: throw new NotSupportedException();
+                }
+            }
+            public static Int32 GetPackedCount(CurveDataType curveType)
+            {
+                switch (curveType)
+                {
+                    case CurveDataType.Float3:
+                        return 1;
+                    case CurveDataType.Float4:
+                        return 4;
+                    default: throw new NotSupportedException();
+                }
+            }
+            public static Type GetCurveType(CurveType t)
+            {
+                switch (t)
+                {
+                    case CurveType.Position:
+                        return typeof(PositionCurve);
+                    case CurveType.Orientation:
+                        return typeof(OrientationCurve);
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            public static CurveDataType GetDataType(CurveType t)
+            {
+                switch (t)
+                {
+                    case CurveType.Position:
+                        return CurveDataType.Float3;
+                    case CurveType.Orientation:
+                        return CurveDataType.Float4;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            protected virtual void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats) { mFrames = new FrameList(handler, Curve.GetDataType(mType), s, info, indexedFloats); }
+            public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats) { mFrames.UnParse(s, info, indexedFloats); }
+            public override AHandlerElement Clone(EventHandler handler) { return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this }); }
+
+            public virtual IEnumerable<float> SelectFloats()
+            {
+                var floats = new List<float>();
+                foreach (var f in mFrames) floats.AddRange(f.GetFloatValues());
+                return floats;
+            }
+        }
+        [ConstructorParameters(new object[] { CurveType.Position })]
+        public class PositionCurve : Curve
+        {
+            public PositionCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type) { }
+            public PositionCurve(int apiVersion, EventHandler handler, PositionCurve basis) : base(apiVersion, handler, basis) { }
+            public PositionCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats) { }
+        }
+        [ConstructorParameters(new object[] { CurveType.Orientation })]
+        public class OrientationCurve : Curve
+        {
+            public OrientationCurve(int apiVersion, EventHandler handler, OrientationCurve basis) : base(apiVersion, handler, basis) { }
+            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type) { }
+            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats) { }
+        }
+        public class CurveList : DependentList<Curve>
+        {
+            public CurveList(EventHandler handler, IEnumerable<Curve> ilt) : base(handler, ilt) { }
+
+            public CurveList(EventHandler handler) : base(handler) { }
+
+            protected override Type GetElementType(params object[] fields)
+            {
+                if (fields.Length == 1 )
+                {
+                    if( typeof(CurveType).IsAssignableFrom(fields[0].GetType())) return Curve.GetCurveType((CurveType) fields[0]);
+                    if (typeof(Curve).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
+                    
+                }
+                return base.GetElementType(fields);
+            }
+
+            #region Unused
+            public override void Add() { throw new NotSupportedException(); }
+            protected override Curve CreateElement(Stream s)
+            {
+                throw new NotSupportedException();
+            }
+
+            protected override void WriteElement(Stream s, Curve element)
+            {
+                throw new NotSupportedException();
+            }
+            #endregion
+        }
+        public abstract class Frame : AHandlerElement,
+                                  IEquatable<Frame>
+        {
+            protected float[] mData;
+            protected UInt16 mFlags;
+            protected UInt16 mFrameIndex;
+
+            protected Frame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mData = new float[Curve.GetFloatCount(DataType)]; }
+
+            protected Frame(int apiVersion, EventHandler handler, Frame basis)
+                : base(apiVersion, handler)
+            {
+                mData = basis.mData;
+                mFrameIndex = basis.mFrameIndex;
+                mFlags = basis.mFlags;
+            }
+
+            public Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler) { Parse(s, info, indexedFloats); }
+            public abstract CurveDataType DataType { get; }
+            protected abstract UInt64 ReadPacked(Stream stream);
+            protected abstract void WritePacked(Stream stream, UInt64 packed);
+
+
+            [ElementPriority(1)]
+            public ushort FrameIndex
+            {
+                get { return mFrameIndex; }
+                set
+                {
+                    if (mFrameIndex != value)
+                    {
+                        mFrameIndex = value;
+                        OnElementChanged();
+                    }
+                }
+            }
+
+            [ElementPriority(2)]
+            public UInt16 Flags
+            {
+                get { return mFlags; }
+                set
+                {
+                    if (mFlags != value)
+                    {
+                        mFlags = value;
+                        OnElementChanged();
+                    }
+                }
+            }
+
+            [ElementPriority(3)]
+            public float[] Data { get { return mData; } set { mData = value; } }
+
+            public string Value { get { return ValueBuilder; } }
+
+            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
+
+            public override int RecommendedApiVersion { get { return 1; } }
+
+            #region IEquatable<Frame> Members
+
+            public bool Equals(Frame other)
+            {
+                var a = GetFloatValues();
+                var b = other.GetFloatValues();
+                if (a.Count() != b.Count()) return false;
+                return !(from af in a from bf in b where af != bf select af).Any();
+            }
+
+            #endregion
+            public static Type GetFrameType(CurveDataType dataType)
+            {
+                switch(dataType)
+                {
+                    case CurveDataType.Float3:
+                        return typeof (Float3Frame);
+                    case CurveDataType.Float4:
+                        return typeof (Float4Frame);
+                    default:throw new NotSupportedException();
+                }
+            }
+            
+
+            public void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
+            {
+                BinaryReader br = new BinaryReader(s);
+                mFrameIndex = br.ReadUInt16();
+                var flags = br.ReadUInt16();
+                mFlags = (UInt16)(flags >> 4);
+
+                switch (info.Flags.Format)
+                {
+                    case CurveDataFormat.Indexed:
+
+                        for (int floatsRead = 0; floatsRead < Curve.GetFloatCount(DataType); floatsRead++)
+                        {
+                            var val = indexedFloats[br.ReadUInt16()];
+                            if ((flags & 1 << floatsRead) != 0 ? true : false) val *= -1;
+                            mData[floatsRead] = Unpack(val, info.Offset, info.Scale);
+
+                        }
+                        break;
+                    case CurveDataFormat.Packed:
+                        for (int packedRead = 0; packedRead < Curve.GetPackedCount(DataType); packedRead++)
+                        {
+                            ulong packed = ReadPacked(s);
+                            for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType) / Curve.GetPackedCount(DataType); packedIndex++)
+                            {
+                                int floatIndex = packedIndex + packedRead;
+                                int bitsPerFloat = Curve.GetBitsPerFloat(DataType);
+                                ulong maxPackedVal = (ulong)(Math.Pow(2, bitsPerFloat) - 1);
+                                ulong mask = (maxPackedVal << (packedIndex * bitsPerFloat));
+                                float val = ((packed & mask) >> (packedIndex * bitsPerFloat)) / (float)maxPackedVal;
+                                if ((flags & 1 << floatIndex) != 0 ? true : false) val *= -1;
+                                mData[floatIndex] = Unpack(val, info.Offset, info.Scale);
+                            }
+                        }
+                        break;
+                }
+
+            }
+            public static float Unpack(float packed, float offset, float scale)
+            {
+                return (packed * scale) + offset;
+            }
+            public static float Pack(float unpacked, float offset, float scale)
+            {
+                return (unpacked - offset) / scale;
+            }
+            public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
+            {
+                BinaryWriter bw = new BinaryWriter(s);
+                bw.Write(mFrameIndex);
+                var flags = mFlags << 4;
+                UInt16[] indices = null;
+                ulong[] packedVals = null;
+                switch (info.Flags.Format)
+                {
+                    case CurveDataFormat.Indexed:
+                        indices = new ushort[Curve.GetFloatCount(DataType)];
+                        for (int i = 0; i < Curve.GetFloatCount(DataType); i++)
+                        {
+                            float packedIndex = Pack(mData[i], info.Offset, info.Scale);
+                            if (packedIndex < 0) flags |= (1 << i);
+                            packedIndex = Math.Abs(packedIndex);
+                            if (!indexedFloats.Contains(packedIndex)) indexedFloats.Add(packedIndex);
+                            indices[i] = (UInt16)indexedFloats.IndexOf(packedIndex);
+                        }
+                        break;
+                    case CurveDataFormat.Packed:
+                        packedVals = new ulong[Curve.GetPackedCount(DataType)];
+                        for (int packedWritten = 0; packedWritten < packedVals.Length; packedWritten++)
+                        {
+                            ulong packed = 0;
+                            for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType) / packedVals.Length; packedIndex++)
+                            {
+                                int floatIndex = packedWritten + packedIndex;
+                                double maxPackedVal = Math.Pow(2, Curve.GetBitsPerFloat(DataType)) - 1;
+                                float val = (mData[floatIndex] - info.Offset) / info.Scale;
+                                if (val < 0) flags |= (1 << floatIndex);
+                                val = Math.Abs(val);
+                                packed |= (ulong)Math.Floor(val * maxPackedVal) << (packedIndex * Curve.GetBitsPerFloat(DataType));
+
+                            }
+                            packedVals[packedWritten] = packed;
+                        }
+                        break;
+                }
+                bw.Write((UInt16)flags);
+                switch (info.Flags.Format)
+                {
+                    case CurveDataFormat.Indexed:
+                        for (int i = 0; i < indices.Length; i++)
+                            bw.Write(indices[i]);
+                        break;
+                    case CurveDataFormat.Packed:
+                        for (int i = 0; i < packedVals.Length; i++)
+                            WritePacked(s, packedVals[i]);
+                        break;
+                }
+            }
+
+            public virtual IEnumerable<float> GetFloatValues() { return mData; }
+            public override AHandlerElement Clone(EventHandler handler) { return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this }); }
+        }
+        [ConstructorParameters(new object[] { CurveDataType.Float3 })]
+        public class Float3Frame : Frame,
+                                   IEquatable<Float3Frame>
+        {
+            public Float3Frame(int apiVersion, EventHandler handler, Float3Frame basis) : base(apiVersion, handler, basis) { }
+            public Float3Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler) { }
+
+            public Float3Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats) { }
+            public override CurveDataType DataType
+            {
+                get { return CurveDataType.Float3; }
+            }
+            protected override ulong ReadPacked(Stream stream) { return new BinaryReader(stream).ReadUInt32(); }
+            protected override void WritePacked(Stream stream, ulong packed) { new BinaryWriter(stream).Write((UInt32)packed); }
+
+            #region IEquatable<Float3Frame> Members
+
+            public bool Equals(Float3Frame other) { return base.Equals(other); }
+
+            #endregion
+        }
+        [ConstructorParameters(new object[] { CurveDataType.Float4 })]
+        public class Float4Frame : Frame,
+                                   IEquatable<Float4Frame>
+        {
+            public Float4Frame(int apiVersion, EventHandler handler, Float4Frame basis) : base(apiVersion, handler, basis) { }
+            public Float4Frame(int apiVersion, EventHandler handler,CurveDataType type) : base(apiVersion, handler) { }
+
+            public Float4Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats) { }
+
+            public override CurveDataType DataType
+            {
+                get { return CurveDataType.Float4; }
+            }
+            protected override ulong ReadPacked(Stream stream) { return new BinaryReader(stream).ReadUInt16(); }
+            protected override void WritePacked(Stream stream, ulong packed) { new BinaryWriter(stream).Write((UInt16)packed); }
+
+            #region IEquatable<Float4Frame> Members
+
+            public bool Equals(Float4Frame other) { return base.Equals(other); }
+
+            #endregion
+        }
+        public class FrameList : DependentList<Frame>
+        {
+            private readonly CurveDataType mDataType;
+
+            public FrameList(EventHandler handler, CurveDataType type) : base(handler) { mDataType = type; }
+
+            public FrameList(EventHandler handler, CurveDataType type, IEnumerable<Frame> ilt) : base(handler, ilt) { mDataType = type; }
+
+            public FrameList(EventHandler handler, CurveDataType type, Stream s, CurveDataInfo info, IList<float> floats)
+                : base(handler)
+            {
+                mDataType = type;
+                Parse(s, info, floats);
+            }
+
+            public CurveDataType DataType { get { return mDataType; } }
+
+            private void Parse(Stream s, CurveDataInfo info, IList<float> floats)
+            {
+                for (int i = 0; i < info.FrameCount; i++)
+                {
+                    ((IList<Frame>)this).Add(CreateElement(s, info, floats));
+                }
+            }
+
+            public void UnParse(Stream s, CurveDataInfo info, IList<float> floats)
+            {
+                info.FrameDataOffset = (uint)s.Position;
+                info.FrameCount = Count;
+                for (int i = 0; i < Count; i++)
+                {
+                    this[i].UnParse(s, info, floats);
+                }
+            }
+            protected override Type GetElementType(params object[] fields)
+            {
+                if (fields.Length > 0)
+                {
+                    if (typeof (Frame).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
+                    if (typeof (CurveDataType).IsAssignableFrom(fields[0].GetType())) return Frame.GetFrameType(mDataType);
+                }
+                return base.GetElementType(fields);
+            }
+            public override void Add() { Add(new object[] {  mDataType }); }
+
+            protected virtual Frame CreateElement(Stream s, CurveDataInfo info, IList<float> floats)
+            {
+                var ctor = Frame.GetFrameType(mDataType)
+                    .GetConstructor(new[] {typeof (int), typeof (EventHandler), typeof (Stream), typeof (CurveDataInfo), typeof (IList<float>)});
+                return (Frame)ctor.Invoke(new object[]{0, handler, s, info, floats});
+            }
+
+            protected virtual void WriteElement(Stream s, CurveDataInfo info, IList<float> floats, Frame element) { element.UnParse(s, info, floats); }
+
+            #region Unused
+
+            protected override Frame CreateElement(Stream s) { throw new NotSupportedException(); }
+
+            protected override void WriteElement(Stream s, Frame element) { throw new NotSupportedException(); }
+
+            #endregion
+        }
+        public struct CurveDataFlags
+        {
+            private Byte mRaw;
+            public CurveDataFlags(byte raw) { mRaw = raw; }
+
+
+            public CurveDataType Type
+            {
+                get { return (CurveDataType)((mRaw & 0x07) >> 0); }
+                set
+                {
+                    mRaw &= 0x1F;
+                    mRaw |= (byte)((byte)value << 0);
+                }
+            }
+
+            public Boolean Static
+            {
+                get { return ((mRaw & 0x08) >> 3) == 1 ? true : false; }
+                set
+                {
+                    mRaw &= 0xF7;
+                    mRaw |= (byte)((value ? 1 : 0) << 3);
+                }
+            }
+
+            public CurveDataFormat Format
+            {
+                get { return (CurveDataFormat)((mRaw & 0xF0) >> 4); }
+                set
+                {
+                    mRaw &= 0x0F;
+                    mRaw |= (byte)(((byte)value) << 4);
+                }
+            }
+
+            public Byte Raw { get { return mRaw; } set { mRaw = value; } }
+        }
+        public enum CurveDataFormat : byte
+        {
+            Indexed = 0x00,
+            Packed = 0x01
+        }
+        public class CurveDataInfo
+        {
+            public CurveDataFlags Flags;
+            public Int32 FrameCount;
+            public UInt32 FrameDataOffset;
+            public Single Offset;
+            public Single Scale;
+            public UInt32 TrackKey;
+            public CurveType Type;
+        }
+        public enum CurveDataType : byte
+        {
+            Float1 = 0x01,
+            Float3 = 0x02,
+            Float4 = 0x04
+        }
+        public enum CurveType
+        {
+            Position = 0x01,
+            Orientation = 0x02
+        }
     }
 }

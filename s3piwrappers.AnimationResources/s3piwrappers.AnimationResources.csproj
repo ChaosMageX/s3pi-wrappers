@@ -53,23 +53,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Clip.cs" />
-    <Compile Include="Curve.cs" />
-    <Compile Include="CurveDataFlags.cs" />
-    <Compile Include="CurveDataFormat.cs" />
-    <Compile Include="CurveDataInfo.cs" />
-    <Compile Include="CurveDataType.cs" />
-    <Compile Include="CurveList.cs" />
-    <Compile Include="CurveType.cs" />
-    <Compile Include="Frame.cs" />
-    <Compile Include="FrameList.cs" />
-    <Compile Include="OrientationCurve.cs" />
-    <Compile Include="Float4Frame.cs" />
-    <Compile Include="PackedFloat.cs" />
-    <Compile Include="PositionCurve.cs" />
-    <Compile Include="Float3Frame.cs" />
-    <Compile Include="Track.cs" />
-    <Compile Include="TrackList.cs" />
     <Compile Include="ClipResource.cs" />
     <Compile Include="ClipResourceHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
