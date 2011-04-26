@@ -36,13 +36,7 @@ namespace s3piwrappers
         }
 
 
-        public string Value
-        {
-            get
-            {
-                return ValueBuilder;
-            }
-        }
+        public string Value { get { return ValueBuilder; } }
 
         [ElementPriority(1)]
         public uint Unknown01
@@ -386,7 +380,7 @@ namespace s3piwrappers
                 }
             }
 
-            public string Value { get { return String.Format("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]", mX, mY, mZ, mW); } }
+            public string Value { get { return ValueBuilder; } }
             public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
@@ -414,13 +408,13 @@ namespace s3piwrappers
 
         #endregion
 
-        #region Nested type: CountedOffsetItemList
+        #region Nested type: CountedOffsetDependentList
 
-        public abstract class CountedOffsetItemList<T> : DependentList<T> where T : AHandlerElement, IEquatable<T>
+        public abstract class CountedOffsetDependentList<T> : DependentList<T> where T : AHandlerElement, IEquatable<T>
         {
-            protected CountedOffsetItemList(EventHandler handler) : base(handler) { }
-            protected CountedOffsetItemList(EventHandler handler, Stream s) : base(handler, s) { }
-            protected CountedOffsetItemList(EventHandler handler, IEnumerable<T> ilt) : base(handler, ilt) { }
+            protected CountedOffsetDependentList(EventHandler handler) : base(handler) { }
+            protected CountedOffsetDependentList(EventHandler handler, Stream s) : base(handler, s) { }
+            protected CountedOffsetDependentList(EventHandler handler, IEnumerable<T> ilt) : base(handler, ilt) { }
 
             protected override void Parse(Stream s)
             {
@@ -489,17 +483,7 @@ namespace s3piwrappers
             public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis) : base(apiVersion, handler, basis) { mPropNameHash = basis.PropNameHash; }
 
             public DestroyPropEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint propNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mPropNameHash = propNameHash; }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Prop:\t0x{0:X8}\n", mPropNameHash);
-                    return sb.ToString();
-                }
-            }
-
+            
             [ElementPriority(8)]
             public uint PropNameHash
             {
@@ -567,21 +551,6 @@ namespace s3piwrappers
                 mActorNameHash = actorNameHash;
                 mSlotNameHash = slotNameHash;
                 mUnknown03 = unknown03;
-            }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                    sb.AppendFormat("Unknown02:\t0x{0:X8}\n", mUnknown02);
-                    sb.AppendFormat("Effect:\t0x{0:X8}\n", mEffectNameHash);
-                    sb.AppendFormat("Actor:\t0x{0:X8}\n", mActorNameHash);
-                    sb.AppendFormat("Slot:\t0x{0:X8}\n", mSlotNameHash);
-                    sb.AppendFormat("Unknown03:\t0x{0:X8}\n", mUnknown03);
-                    return sb.ToString();
-                }
             }
 
             [ElementPriority(8)]
@@ -750,15 +719,16 @@ namespace s3piwrappers
             {
                 get
                 {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Type:\t{0}\n", mType);
-                    sb.AppendFormat("Id:\t0x{0:X4}\n", mId);
-                    sb.AppendFormat("Timecode:\t{0,8:0.00000}\n", mTimecode);
-                    sb.AppendFormat("Float01:\t{0,8:0.00000}\n", mFloat01);
-                    sb.AppendFormat("Float02:\t{0,8:0.00000}\n", mFloat02);
-                    sb.AppendFormat("Unknown:\t0x{0:X8}\n", mInt01);
-                    sb.AppendFormat("Event Name:\t{0}\n", mEventName);
-                    return sb.ToString();
+                    return ValueBuilder;
+                    //StringBuilder sb = new StringBuilder();
+                    //sb.AppendFormat("Type:\t{0}\n", mType);
+                    //sb.AppendFormat("Id:\t0x{0:X4}\n", mId);
+                    //sb.AppendFormat("Timecode:\t{0,8:0.00000}\n", mTimecode);
+                    //sb.AppendFormat("Float01:\t{0,8:0.00000}\n", mFloat01);
+                    //sb.AppendFormat("Float02:\t{0,8:0.00000}\n", mFloat02);
+                    //sb.AppendFormat("Unknown:\t0x{0:X8}\n", mInt01);
+                    //sb.AppendFormat("Event Name:\t{0}\n", mEventName);
+                    //return sb.ToString();
                 }
             }
 
@@ -1082,20 +1052,7 @@ namespace s3piwrappers
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
-            public string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("Version:\t0x{0:X8}\n", mVersion);
-                    sb.AppendFormat("Events:\n");
-                    for (int i = 0; i < mEvents.Count; i++)
-                    {
-                        sb.AppendFormat("==Event[{0}]==\n{1}\n", i, mEvents[i].Value);
-                    }
-                    return sb.ToString();
-                }
-            }
+            public string Value { get { return ValueBuilder; } }
 
             private void Parse(Stream s)
             {
@@ -1153,18 +1110,7 @@ namespace s3piwrappers
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
-            public string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mIkTargets.Count; i++)
-                    {
-                        sb.AppendFormat("Target[{0:00}]{1}\n", i, mIkTargets[i].Value);
-                    }
-                    return sb.ToString();
-                }
-            }
+            public string Value { get { return ValueBuilder; } }
 
             #region IEquatable<IKChainEntry> Members
 
@@ -1194,7 +1140,7 @@ namespace s3piwrappers
 
         #region Nested type: IKChainList
 
-        public class IKChainList : CountedOffsetItemList<IKChainEntry>
+        public class IKChainList : CountedOffsetDependentList<IKChainEntry>
         {
             public IKChainList(EventHandler handler) : base(handler) { }
 
@@ -1274,7 +1220,7 @@ namespace s3piwrappers
             public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
-            public string Value { get { return ToString(); } }
+            public string Value { get { return ValueBuilder; } }
 
             #region IEquatable<IKTarget> Members
 
@@ -1307,7 +1253,7 @@ namespace s3piwrappers
 
         #region Nested type: IKTargetList
 
-        public class IKTargetList : CountedOffsetItemList<IKTarget>
+        public class IKTargetList : CountedOffsetDependentList<IKTarget>
         {
             public IKTargetList(EventHandler handler) : base(handler) { }
 
@@ -1353,19 +1299,7 @@ namespace s3piwrappers
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
-            public string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mIkChains.Count; i++)
-                    {
-                        sb.AppendFormat("==IK Chain[{0}]==\n{1}", i, mIkChains[i].Value);
-                    }
-                    return sb.ToString();
-                }
-            }
-
+            public string Value { get { return ValueBuilder; } }
             private void Parse(Stream s) { mIkChains = new IKChainList(handler, s); }
             public void UnParse(Stream s) { mIkChains.UnParse(s); }
 
@@ -1406,24 +1340,6 @@ namespace s3piwrappers
                 mSlotNameHash = slotNameHash;
                 mUnknown01 = unknown01;
                 mTransform = transform;
-            }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Actor:\t0x{0:X8}\n", mActorNameHash);
-                    sb.AppendFormat("Object:\t0x{0:X8}\n", mObjectNameHash);
-                    sb.AppendFormat("Slot:\t0x{0:X8}\n", mSlotNameHash);
-                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                    sb.AppendFormat("Transform:\n");
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n", mTransform[0], mTransform[1], mTransform[2], mTransform[3]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n", mTransform[4], mTransform[5], mTransform[6], mTransform[7]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n", mTransform[8], mTransform[9], mTransform[10], mTransform[11]);
-                    sb.AppendFormat("[{0,8:0.00000},{1,8:0.00000},{2,8:0.00000},{3,8:0.00000}]\n", mTransform[12], mTransform[13], mTransform[14], mTransform[15]);
-                    return sb.ToString();
-                }
             }
 
             [ElementPriority(8)]
@@ -1561,17 +1477,7 @@ namespace s3piwrappers
             public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis) : base(apiVersion, handler, basis) { mSoundName = basis.SoundName; }
 
             public SoundEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string soundName, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mSoundName = soundName; }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Sound Name:\t{0}\n", mSoundName);
-                    return sb.ToString();
-                }
-            }
-
+            
             [ElementPriority(8)]
             public string SoundName
             {
@@ -1627,17 +1533,6 @@ namespace s3piwrappers
             {
                 mEffectNameHash = effectNameHash;
                 mUnknown01 = unknown01;
-            }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Effect:\t0x{0:X8}\n", mEffectNameHash);
-                    sb.AppendFormat("Unknown01:\t0x{0:X8}\n", mUnknown01);
-                    return sb.ToString();
-                }
             }
 
             [ElementPriority(8)]
@@ -1704,17 +1599,7 @@ namespace s3piwrappers
             public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis) : base(apiVersion, handler, basis) { mObjectNameHash = basis.ObjectNameHash; }
 
             public UnparentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint objectNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mObjectNameHash = objectNameHash; }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Object:\t0x{0:X8}\n", mObjectNameHash);
-                    return sb.ToString();
-                }
-            }
-
+            
             [ElementPriority(8)]
             public uint ObjectNameHash
             {
@@ -1762,16 +1647,6 @@ namespace s3piwrappers
             public VisibilityEvent(int apiVersion, EventHandler handler, VisibilityEvent basis) : base(apiVersion, handler, basis) { mVisibility = basis.Visibility; }
 
             public VisibilityEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, float visibility, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mVisibility = visibility; }
-
-            public override string Value
-            {
-                get
-                {
-                    StringBuilder sb = new StringBuilder(base.Value);
-                    sb.AppendFormat("Visibility:\t{0,8:0.00000}\n", mVisibility);
-                    return sb.ToString();
-                }
-            }
 
             [ElementPriority(8)]
             public float Visibility
@@ -2208,7 +2083,7 @@ namespace s3piwrappers
             public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
 
             public override int RecommendedApiVersion { get { return 1; } }
-            public virtual string Value { get { return ValueBuilder; } }
+            public string Value { get { return ValueBuilder; } }
 
             #region IEquatable<Curve> Members
 

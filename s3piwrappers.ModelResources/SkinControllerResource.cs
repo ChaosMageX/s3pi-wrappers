@@ -106,11 +106,12 @@ namespace s3piwrappers
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                sb.AppendFormat("\nBones:\n");
-                for (int i = 0; i < mBones.Count; i++) sb.AppendFormat("==Bone[{0}]==\n{1}\n", i, mBones[i].Value);
-                return sb.ToString();
+                return ValueBuilder;
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                //sb.AppendFormat("\nBones:\n");
+                //for (int i = 0; i < mBones.Count; i++) sb.AppendFormat("==Bone[{0}]==\n{1}\n", i, mBones[i].Value);
+                //return sb.ToString();
             }
         }
         [ElementPriority(1)]
@@ -149,7 +150,7 @@ namespace s3piwrappers
             MemoryStream s = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(s);
             bw.Write(mVersion);
-            if(mBones!=null)mBones=new BoneList(OnResourceChanged);
+            if(mBones==null)mBones=new BoneList(OnResourceChanged);
             bw.Write(mBones.Count);
             foreach (var entry in mBones) SevenBitString.Write(s, Encoding.BigEndianUnicode, entry.Name);
             bw.Write(mBones.Count);
