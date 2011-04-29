@@ -103,7 +103,15 @@ namespace s3piwrappers
                 /**/
             }
         }
-
+        protected override List<string> ValueBuilderFields
+        {
+            get
+            {
+                var fields = base.ValueBuilderFields;
+                fields.Remove("Buffer");
+                return fields;
+            }
+        }
         protected override void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);

@@ -31,7 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="s3pi.GenericRCOLResource">
+    <Reference Include="s3pi.GenericRCOLResource, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
       <Private>False</Private>
     </Reference>

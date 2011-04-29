@@ -156,6 +156,15 @@ namespace s3piwrappers
                 /**/
             }
         }
+        protected override List<string> ValueBuilderFields
+        {
+            get
+            {
+                var fields = base.ValueBuilderFields;
+                fields.Remove("Buffer");
+                return fields;
+            }
+        }
         public override AHandlerElement Clone(EventHandler handler)
         {
             return new IBUF(0, handler, this);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using s3pi.Interfaces;
 using System.IO;
-using System.Linq;
 using s3pi.Settings;
 using s3pi.GenericRCOLResource;
 
@@ -60,7 +59,6 @@ namespace s3piwrappers
 
             private void Parse(Stream s, int count)
             {
-                BinaryReader br = new BinaryReader(s);
                 for (uint i = 0; i < count; i++)
                 {
                     ((IList<LODEntry>)this).Add(CreateElement(s));
@@ -68,7 +66,6 @@ namespace s3piwrappers
             }
             public override void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
                 foreach (var element in this)
                 {
                     WriteElement(s, element);
