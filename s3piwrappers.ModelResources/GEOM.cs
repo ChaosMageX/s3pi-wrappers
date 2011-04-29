@@ -715,6 +715,18 @@ namespace s3piwrappers
                 return f;
             }
         }
+        public override List<string> ContentFields
+        {
+            get
+            {
+                var f = base.ContentFields;
+                if(mShader == 0)
+                {
+                    f.Remove("MaterialBlock");
+                }
+                return f;
+            }
+        }
 
         protected override void Parse(Stream s)
         {
@@ -726,7 +738,7 @@ namespace s3piwrappers
             long tgiOffset = br.ReadUInt32() + s.Position;
             long tgiSize = br.ReadUInt32();
             mShader = (MATD.ShaderType)br.ReadUInt32();
-            mMaterialBlock = mShader == 0 ? new MATD.MTNF(0,handler) :new MATD.MTNF(0,handler,new MemoryStream(br.ReadBytes(br.ReadInt32())));
+            mMaterialBlock = mShader == 0 ? new MATD.MTNF(0,handler){SData = new MATD.ShaderDataList(handler)} :new MATD.MTNF(0,handler,new MemoryStream(br.ReadBytes(br.ReadInt32())));
             mMergeGroup = br.ReadUInt32();
             mSortOrder = br.ReadUInt32();
             int vertexCount = br.ReadInt32();
