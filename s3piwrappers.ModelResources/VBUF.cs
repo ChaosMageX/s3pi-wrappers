@@ -284,16 +284,16 @@ namespace s3piwrappers
                     break;
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.Short4:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)0), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.UShort4N:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)0), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
             }
@@ -331,8 +331,8 @@ namespace s3piwrappers
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
-                            for (int i = 0; i < output.Length-1; i++)
-                                output[i] += (element[2-i] / 127.5f) - 1f;
+                            for (int i = 0; i < output.Length - 1; i++)
+                                output[i] += (element[2 - i] / 127.5f) - 1f;
                             break;
                     }
                     break;
@@ -354,25 +354,27 @@ namespace s3piwrappers
                     break;
             }
         }
-        public void SetVertices(MLOD mlod, int meshIndex, VRTF vrtf, Vertex[] vertices, float uvscale)
+        public float SetVertices(MLOD mlod, int meshIndex, VRTF vrtf, Vertex[] vertices)
         {
             MLOD.Mesh mesh = mlod.Meshes[meshIndex];
-            SetVertices(mlod, mesh.StreamOffset, mesh.StreamOffset + (mesh.VertexCount * vrtf.Stride), vrtf, vertices, uvscale);
+            float uvScale = SetVertices(mlod, mesh.StreamOffset, mesh.StreamOffset + (mesh.VertexCount * vrtf.Stride), vrtf, vertices);
             mesh.VertexCount = vertices.Length;
+            return uvScale;
         }
-        public void SetVertices(MLOD mlod, MLOD.Mesh mesh, int geoIndex, VRTF vrtf, Vertex[] vertices, float uvscale)
+        
+        public float SetVertices(MLOD mlod, MLOD.Mesh mesh, int geoIndex, VRTF vrtf, Vertex[] vertices)
         {
             MLOD.GeometryState geo = mesh.GeometryStates[geoIndex];
-
             long beforeLength = mesh.StreamOffset + (geo.MinVertexIndex * vrtf.Stride);
-            SetVertices(mlod, beforeLength, beforeLength + (geo.VertexCount * vrtf.Stride), vrtf, vertices, uvscale);
+            var uvscale = SetVertices(mlod, beforeLength, beforeLength + (geo.VertexCount * vrtf.Stride), vrtf, vertices);
 
             int offset = vertices.Length - geo.VertexCount;
             geo.VertexCount = vertices.Length;
             for (int i = geoIndex + 1; i < mesh.GeometryStates.Count; i++)
                 mesh.GeometryStates[i].MinVertexIndex += offset;
+            return uvscale;
         }
-        void SetVertices(MLOD mlod, long beforeLength, long afterPos, VRTF vrtf, IEnumerable<Vertex> vertices, float uvscale)
+        private float SetVertices(MLOD mlod, long beforeLength, long afterPos, VRTF vrtf, IEnumerable<Vertex> vertices)
         {
             byte[] before = new byte[beforeLength];
             Array.Copy(mBuffer, before, before.Length);
@@ -381,9 +383,10 @@ namespace s3piwrappers
             Array.Copy(mBuffer, afterPos, after, 0, after.Length);
 
             int offset = 0;
+            float scale = 0;
             using (MemoryStream mg = new MemoryStream())
             {
-                SetVertices(mg, vrtf, vertices, uvscale);
+                scale = SetVertices(mg, vrtf, vertices);
                 offset = (int)(beforeLength + mg.Length - afterPos);
 
                 mBuffer = new byte[before.Length + mg.Length + after.Length];
@@ -399,8 +402,9 @@ namespace s3piwrappers
                 foreach (var m in mlod.Meshes)
                     if (m.StreamOffset > beforeLength)
                         m.StreamOffset = (uint)(m.StreamOffset + offset);
+            return scale;
         }
-        private static void SetVertices(MemoryStream s, VRTF vrtf, IEnumerable<Vertex> vertices, float uvscale)
+        private static float SetVertices(MemoryStream s, VRTF vrtf, IEnumerable<Vertex> vertices)
         {
             var position = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
@@ -418,6 +422,7 @@ namespace s3piwrappers
             var color = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
 
+            var uvscale = CalculateUVScales(vertices);
             byte[] output = new byte[vrtf.Stride];
             foreach (var v in vertices)
             {
@@ -430,8 +435,14 @@ namespace s3piwrappers
                 if (v.Color != null) WriteFloatData(v.Color, color, output);
                 s.Write(output, 0, output.Length);
             }
-
             s.Flush();
+            return uvscale;
+        }
+        public static float CalculateUVScales(IEnumerable<Vertex> vertices)
+        {
+            float maxUv = 0f;
+            foreach (var vert in vertices) foreach (var uvc in vert.UV) foreach (var val in uvc) { var abs = Math.Abs(val); if (abs > maxUv)maxUv = abs; }
+            return 1f / (short.MaxValue / maxUv);
         }
         private static void WriteFloatData(float[] input, VRTF.ElementLayout layout, byte[] output)
         {
@@ -461,26 +472,26 @@ namespace s3piwrappers
                             break;
                         case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
-                            for (int i = 0; i < input.Length-1; i++)
-                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f) * 127.5f)), 0, output, layout.Offset + 2-i, 1);
+                            for (int i = 0; i < input.Length - 1; i++)
+                                Array.Copy(BitConverter.GetBytes((byte)Math.Floor((input[i] + 1f) * 127.5f)), 0, output, layout.Offset + 2 - i, 1);
                             break;
                     }
                     break;
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.Short4:
                     double max = Math.Ceiling(input.Max(x => Math.Abs(x)));
                     scalar = max == 0 ? (ulong)short.MaxValue : (ulong)Math.Floor(short.MaxValue / max);
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.UShort4N:
                     scalar = 512;
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
             }
@@ -488,15 +499,15 @@ namespace s3piwrappers
         //Find the highest value for the scalar
         //private static ulong GetScalar(IEnumerable<float> input, ulong MaxValue)
         //{
-            //for (ulong scalar = MaxValue - 1; scalar > 0; scalar >>= 1)
-            //{
-            //    foreach (var f in input)
-            //        if (Math.Abs(f * scalar) >= MaxValue) goto nextScalar;
-            //    return scalar;
-            //nextScalar:
-            //    continue;
-            //}
-            //return MaxValue;
+        //for (ulong scalar = MaxValue - 1; scalar > 0; scalar >>= 1)
+        //{
+        //    foreach (var f in input)
+        //        if (Math.Abs(f * scalar) >= MaxValue) goto nextScalar;
+        //    return scalar;
+        //nextScalar:
+        //    continue;
+        //}
+        //return MaxValue;
         //}
     }
 }
