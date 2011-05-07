@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigEditor", "Helpers\RigEdi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RigExport", "Helpers\RigExport\RigExport.csproj", "{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimatedTextureEditor", "Helpers\AnimatedTextureEditor\AnimatedTextureEditor.csproj", "{3F5C5091-AB67-43C2-9955-D490BF87B4E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +123,16 @@ Global
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|Mixed Platforms.Build.0 = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.ActiveCfg = Release|x86
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6}.Release|x86.Build.0 = Release|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Debug|x86.ActiveCfg = Debug|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Debug|x86.Build.0 = Debug|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Release|Any CPU.ActiveCfg = Release|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Release|Mixed Platforms.Build.0 = Release|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Release|x86.ActiveCfg = Release|x86
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -129,5 +141,6 @@ Global
 		{D31E7FC7-E51D-40E4-B2FB-49DE645291E5} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
 		{B10B8B7C-7B45-4045-946D-C4601E7B93A6} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
 		{00206AF2-A25E-4A17-BBA4-4F44EE7BF1A6} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
+		{3F5C5091-AB67-43C2-9955-D490BF87B4E4} = {9F9C64E9-B8A3-4933-9C3B-78560F6A206E}
 	EndGlobalSection
 EndGlobal

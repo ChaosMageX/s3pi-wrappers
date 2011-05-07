@@ -10,17 +10,23 @@ namespace s3piwrappers
 {
     public class ANIM : ARCOLBlock
     {
-        public class Texture : AHandlerElement, IEquatable<Texture>, IResource
+        public class TextureFrameComparer : IComparer<TextureFrame>
         {
-            public Texture(int APIversion, EventHandler handler) : this(APIversion, handler,new byte[0]){}
-            public Texture(int APIversion, EventHandler handler, Texture basis) : this(APIversion, handler, basis.mData) { }
-            public Texture(int APIversion, EventHandler handler, Byte[] data)
+            public int Compare(TextureFrame x, TextureFrame y) { return x.Ordinal.CompareTo(y.Ordinal); }
+        }
+        public class TextureFrame : AHandlerElement, IEquatable<TextureFrame>, IResource
+        {
+            public TextureFrame(int APIversion, EventHandler handler) : this(APIversion, handler,new byte[0],0){}
+            public TextureFrame(int APIversion, EventHandler handler, TextureFrame basis) : this(APIversion, handler, basis.mData,basis.Ordinal) { }
+            public TextureFrame(int APIversion, EventHandler handler, Byte[] data,Int32 ordinal)
                 : base(APIversion, handler)
             {
                 mData = data;
+                mOrdinal = ordinal;
             }
 
             private Byte[] mData;
+            private Int32 mOrdinal;
 
             [ElementPriority(1)]
             public virtual BinaryReader DDSTexture
@@ -37,15 +43,24 @@ namespace s3piwrappers
                     OnElementChanged();
                 }
             }
-
+            public Int32 Ordinal
+            {
+                get { return mOrdinal; }
+                set { if(mOrdinal!=value){mOrdinal = value; OnElementChanged();} }
+            }
+            public Byte[] Data
+            {
+                get { return mData; }
+                set { if (mData != value) { mData = value; OnElementChanged(); } }
+            }
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new Texture(0, handler, this);
+                return new TextureFrame(0, handler, this);
             }
 
             public override List<string> ContentFields
             {
-                get { return new List<string>() { "DDSTexture" }; }
+                get { return GetContentFields(0,GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -69,15 +84,15 @@ namespace s3piwrappers
                 get { return new MemoryStream(mData); }
             }
 
-            public bool Equals(Texture other)
+            public bool Equals(TextureFrame other)
             {
                 return base.Equals(other);
             }
         }
-        public class TextureList : DependentList<Texture>
+        public class TextureList : DependentList<TextureFrame>
         {
             public TextureList(EventHandler handler) : base(handler) { }
-            public TextureList(EventHandler handler, IEnumerable<Texture> ilt) : base(handler, ilt) { }
+            public TextureList(EventHandler handler, IEnumerable<TextureFrame> ilt) : base(handler, ilt) { }
             public TextureList(EventHandler handler, Stream s) : base(handler, s) { }
             protected override void Parse(Stream s)
             {
@@ -94,11 +109,14 @@ namespace s3piwrappers
                     var len = (++j < offsets.Length ? offsets[j] : (uint)s.Length) - s.Position;
                     var buffer = new byte[len];
                     s.Read(buffer, 0, buffer.Length);
-                    ((IList<Texture>)this).Add(new Texture(0, elementHandler, buffer));
+                    ((IList<TextureFrame>)this).Add(new TextureFrame(0, elementHandler, buffer,j));
                 }
+
+                this.Sort(new TextureFrameComparer());
             }
             public override void UnParse(Stream s)
             {
+                this.Sort(new TextureFrameComparer());
                 var bw = new BinaryWriter(s);
                 bw.Write(Count);
                 var start = s.Position;
@@ -108,7 +126,6 @@ namespace s3piwrappers
                 {
                     offsets[i] = (uint)s.Position;
                     bw.Write(this[i].AsBytes);
-
                 }
                 var end = s.Position;
                 s.Seek(start, SeekOrigin.Begin);
@@ -117,15 +134,15 @@ namespace s3piwrappers
             }
             public override void Add()
             {
-                base.Add(new object[] { });
+                base.Add(new object[] {new byte[0],Count+1 });
             }
 
-            protected override Texture CreateElement(Stream s)
+            protected override TextureFrame CreateElement(Stream s)
             {
                 throw new NotImplementedException();
             }
 
-            protected override void WriteElement(Stream s, Texture element)
+            protected override void WriteElement(Stream s, TextureFrame element)
             {
                 throw new NotImplementedException();
             }
@@ -136,7 +153,7 @@ namespace s3piwrappers
         public ANIM(int APIversion, EventHandler handler, ANIM basis) : this(APIversion, handler, basis.mVersion, basis.mFramerate, basis.mTextures) { }
         public ANIM(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }
         public ANIM(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
-        public ANIM(int APIversion, EventHandler handler, uint version, float framerate, IList<Texture> textures)
+        public ANIM(int APIversion, EventHandler handler, uint version, float framerate, IList<TextureFrame> textures)
             : this(APIversion, handler)
         {
             mVersion = version;

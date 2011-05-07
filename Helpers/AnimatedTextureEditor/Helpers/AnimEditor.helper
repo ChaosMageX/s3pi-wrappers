@@ -1,0 +1,5 @@
+﻿ResourceType: 0x63A33EA7
+Label: Animated Texture Editor
+Command: AnimatedTextureEditor.exe
+Arguments: "{}"
+Desc: Edits animated texture files

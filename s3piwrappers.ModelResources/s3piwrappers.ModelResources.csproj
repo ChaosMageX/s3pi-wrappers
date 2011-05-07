@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.CASPartResource">
+      <HintPath>..\lib\s3pi_current\s3pi.CASPartResource.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="s3pi.GenericRCOLResource, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
@@ -54,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ANIM.cs" />
+    <Compile Include="BGEO.cs" />
     <Compile Include="Common\Colour3f.cs" />
     <Compile Include="Common\BoundingBox.cs" />
     <Compile Include="Common\Vector2.cs" />
