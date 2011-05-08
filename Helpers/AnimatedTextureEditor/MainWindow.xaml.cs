@@ -1,8 +1,7 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
-using s3piwrappers.ViewModels;
+using s3piwrappers.AnimatedTextureEditor.ViewModels;
 
-namespace s3piwrappers
+namespace s3piwrappers.AnimatedTextureEditor
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

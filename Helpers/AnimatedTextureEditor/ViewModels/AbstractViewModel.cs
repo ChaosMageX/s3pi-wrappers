@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace s3piwrappers.ViewModels
+namespace s3piwrappers.AnimatedTextureEditor.ViewModels
 {
     public abstract class AbstractViewModel : INotifyPropertyChanged, IDisposable
     {

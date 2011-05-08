@@ -8,7 +8,7 @@
     <ProjectGuid>{3F5C5091-AB67-43C2-9955-D490BF87B4E4}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>s3piwrappers</RootNamespace>
+    <RootNamespace>s3piwrappers.AnimatedTextureEditor</RootNamespace>
     <AssemblyName>AnimatedTextureEditor</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

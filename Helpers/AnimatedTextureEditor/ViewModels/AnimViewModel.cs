@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -11,10 +10,10 @@ using System.Windows.Media.Imaging;
 using DdsFileTypePlugin;
 using Microsoft.Win32;
 using s3pi.GenericRCOLResource;
-using s3piwrappers.Commands;
 using System.Windows;
+using s3piwrappers.AnimatedTextureEditor.Commands;
 
-namespace s3piwrappers.ViewModels
+namespace s3piwrappers.AnimatedTextureEditor.ViewModels
 {
     class AnimViewModel : AbstractViewModel
     {

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using System.Linq;
-using System.Text;
 using s3pi.GenericRCOLResource;
-using s3piwrappers.ViewModels;
+using s3piwrappers.AnimatedTextureEditor.ViewModels;
 
-namespace s3piwrappers
+namespace s3piwrappers.AnimatedTextureEditor
 {
     class App
     {
@@ -21,15 +18,13 @@ namespace s3piwrappers
                 s.Read(buffer, 0, buffer.Length);
             }
             var app = new Application();
-            var rig = new GenericRCOLResource(0, new MemoryStream(buffer));
-            var viewModel = new AnimViewModel(rig);
-
+            var resource = new GenericRCOLResource(0, new MemoryStream(buffer));
+            var viewModel = new AnimViewModel(resource);
             var win = new MainWindow(viewModel);
             app.Run(win);
-
             if (viewModel.IsSaving)
             {
-                byte[] output =rig.AsBytes;
+                byte[] output =resource.AsBytes;
                 using (var s = File.Create(args[0]))
                 {
                     s.Write(output, 0, output.Length);

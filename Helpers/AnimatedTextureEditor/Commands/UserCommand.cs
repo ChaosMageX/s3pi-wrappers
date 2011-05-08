@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace s3piwrappers.Commands
+namespace s3piwrappers.AnimatedTextureEditor.Commands
 {
     class UserCommand<T> : ICommand
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 
-namespace s3piwrappers.Validation
+namespace s3piwrappers.AnimatedTextureEditor.Validation
 {
     class DecimalValidationRule :ValidationRule
     {

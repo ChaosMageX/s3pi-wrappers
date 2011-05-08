@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 
-namespace s3piwrappers.Converters
+namespace s3piwrappers.AnimatedTextureEditor.Converters
 {
     public class HexConverter : IValueConverter
     {
