@@ -10,24 +10,17 @@ namespace s3piwrappers
 {
     public class ANIM : ARCOLBlock
     {
-        public class TextureFrameComparer : IComparer<TextureFrame>
-        {
-            public int Compare(TextureFrame x, TextureFrame y) { return x.Ordinal.CompareTo(y.Ordinal); }
-        }
         public class TextureFrame : AHandlerElement, IEquatable<TextureFrame>, IResource
         {
-            public TextureFrame(int APIversion, EventHandler handler) : this(APIversion, handler,new byte[0],0){}
-            public TextureFrame(int APIversion, EventHandler handler, TextureFrame basis) : this(APIversion, handler, basis.mData,basis.Ordinal) { }
-            public TextureFrame(int APIversion, EventHandler handler, Byte[] data,Int32 ordinal)
+            public TextureFrame(int APIversion, EventHandler handler) : this(APIversion, handler,new byte[0]){}
+            public TextureFrame(int APIversion, EventHandler handler, TextureFrame basis) : this(APIversion, handler, basis.mData) { }
+            public TextureFrame(int APIversion, EventHandler handler, Byte[] data)
                 : base(APIversion, handler)
             {
                 mData = data;
-                mOrdinal = ordinal;
             }
 
             private Byte[] mData;
-            private Int32 mOrdinal;
-
             [ElementPriority(1)]
             public virtual BinaryReader DDSTexture
             {
@@ -42,11 +35,6 @@ namespace s3piwrappers
                     value.BaseStream.Read(mData, 0, (int)value.BaseStream.Length);
                     OnElementChanged();
                 }
-            }
-            public Int32 Ordinal
-            {
-                get { return mOrdinal; }
-                set { if(mOrdinal!=value){mOrdinal = value; OnElementChanged();} }
             }
             public Byte[] Data
             {
@@ -88,6 +76,7 @@ namespace s3piwrappers
             {
                 return base.Equals(other);
             }
+            public string Value { get { return String.Format("DDS[0x{0:X8}]",mData.Length); } }
         }
         public class TextureList : DependentList<TextureFrame>
         {
@@ -109,14 +98,11 @@ namespace s3piwrappers
                     var len = (++j < offsets.Length ? offsets[j] : (uint)s.Length) - s.Position;
                     var buffer = new byte[len];
                     s.Read(buffer, 0, buffer.Length);
-                    ((IList<TextureFrame>)this).Add(new TextureFrame(0, elementHandler, buffer,j));
+                    ((IList<TextureFrame>)this).Add(new TextureFrame(0, elementHandler, buffer));
                 }
-
-                this.Sort(new TextureFrameComparer());
             }
             public override void UnParse(Stream s)
             {
-                this.Sort(new TextureFrameComparer());
                 var bw = new BinaryWriter(s);
                 bw.Write(Count);
                 var start = s.Position;
@@ -134,7 +120,7 @@ namespace s3piwrappers
             }
             public override void Add()
             {
-                base.Add(new object[] {new byte[0],Count+1 });
+                base.Add(new object[] {new byte[0] });
             }
 
             protected override TextureFrame CreateElement(Stream s)
@@ -150,7 +136,7 @@ namespace s3piwrappers
         private const int kRecommendedApiVersion = 1;
         private static bool checking = Settings.Checking;
 
-        public ANIM(int APIversion, EventHandler handler, ANIM basis) : this(APIversion, handler, basis.mVersion, basis.mFramerate, basis.mTextures) { }
+        public ANIM(int APIversion, EventHandler handler, ANIM basis) : this(APIversion, handler, basis.mVersion, basis.mFramerate, basis.mFrames) { }
         public ANIM(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }
         public ANIM(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
         public ANIM(int APIversion, EventHandler handler, uint version, float framerate, IList<TextureFrame> textures)
@@ -158,11 +144,11 @@ namespace s3piwrappers
         {
             mVersion = version;
             mFramerate = framerate;
-            mTextures = new TextureList(handler, textures);
+            mFrames = new TextureList(handler, textures);
         }
         private UInt32 mVersion;
         private Single mFramerate;
-        private TextureList mTextures;
+        private TextureList mFrames;
 
         [ElementPriority(1)]
         public uint Version
@@ -177,10 +163,10 @@ namespace s3piwrappers
             set { if(mFramerate!=value){mFramerate = value; OnRCOLChanged(this, new EventArgs());} }
         }
         [ElementPriority(3)]
-        public TextureList Textures
+        public TextureList Frames
         {
-            get { return mTextures; }
-            set { if(mTextures!=value){mTextures = value; OnRCOLChanged(this, new EventArgs());} }
+            get { return mFrames; }
+            set { if(mFrames!=value){mFrames = value; OnRCOLChanged(this, new EventArgs());} }
         }
 
         protected override void Parse(Stream s)
@@ -190,11 +176,8 @@ namespace s3piwrappers
             if (checking && !tag.Equals(Tag)) throw new InvalidDataException("Bad tag: expected " + Tag + ", but got " + tag);
             mVersion = br.ReadUInt32();
             mFramerate = br.ReadSingle();
-            mTextures = new TextureList(handler, s);
-
+            mFrames = new TextureList(handler, s);
         }
-
-
         public override Stream UnParse()
         {
             var s = new MemoryStream();
@@ -202,8 +185,8 @@ namespace s3piwrappers
             bw.Write((uint)FOURCC(Tag));
             bw.Write(mVersion);
             bw.Write(mFramerate);
-            if (mTextures == null) mTextures = new TextureList(handler);
-            mTextures.UnParse(s);
+            if (mFrames == null) mFrames = new TextureList(handler);
+            mFrames.UnParse(s);
             return s;
         }
         public virtual string Value
@@ -215,7 +198,7 @@ namespace s3piwrappers
                 var sb = new StringBuilder();
                 sb.AppendFormat("Version:\t0x{0:X8}\r\n", mVersion);
                 sb.AppendFormat("Framerate:\t{0}\r\n", mFramerate);
-                sb.AppendFormat("Textures[{0}]\r\n", mTextures.Count);
+                sb.AppendFormat("Frames[{0}]\r\n", mFrames.Count);
                 return sb.ToString();
                 /**/
             }
