@@ -48,11 +48,6 @@ namespace s3piwrappers.AnimatedTextureEditor.ViewModels
                     return null;
                 }
             }
-            public Int32 Ordinal
-            {
-                get { return mFrame.Ordinal; }
-                set { mFrame.Ordinal = value; }
-            }
             public Byte[] Data
             {
                 get { return mFrame.Data; }
@@ -85,16 +80,9 @@ namespace s3piwrappers.AnimatedTextureEditor.ViewModels
         public void SyncFrames()
         {
             var prev = CurrentFrameIndex;
-            mANIM.Textures.Sort(new ANIM.TextureFrameComparer());
             mFrames = new ObservableCollection<FrameViewModel>();
-            int i = 0;
-            foreach (var f in mANIM.Textures)
-            {
-                f.Ordinal = ++i;
-                mFrames.Add(new FrameViewModel(this, f));
-            }
+            foreach(var f in mANIM.Frames)mFrames.Add(new FrameViewModel(this,f));
             if (mFrames.Count > 0 && prev == -1) prev = 0;
-
             OnPropertyChanged("Frames");
             CurrentFrameIndex = prev;
         }
@@ -137,33 +125,35 @@ namespace s3piwrappers.AnimatedTextureEditor.ViewModels
 
         private static void RemoveFrame(AnimViewModel view)
         {
-            view.mANIM.Textures.Remove(view.GetSelectedFrame().Frame);
+            view.mANIM.Frames.Remove(view.GetSelectedFrame().Frame);
             view.SyncFrames();
         }
         private static void AddFrame(AnimViewModel view)
         {
-            view.mANIM.Textures.Add();
+            view.mANIM.Frames.Add();
             view.SyncFrames();
         }
         private static void ShiftFrameUp(AnimViewModel view)
         {
-            var cur = view.Frames[view.CurrentFrameIndex];
-            var prev = view.Frames[view.CurrentFrameIndex - 1];
-            cur.Ordinal -= 1;
-            prev.Ordinal += 1;
+            var frames = view.mANIM.Frames;
+            var frame = view.GetSelectedFrame().Frame;
+            var index = frames.IndexOf(frame);
+            var previous = frames[index - 1];
+            frames[index - 1] = frame;
+            frames[index] = previous;
             view.SyncFrames();
             view.CurrentFrameIndex -= 1;
-            view.OnPropertyChanged("Frames");
         }
         private static void ShiftFrameDown(AnimViewModel view)
         {
-            var cur = view.Frames[view.CurrentFrameIndex];
-            var next = view.Frames[view.CurrentFrameIndex + 1];
-            cur.Ordinal += 1;
-            next.Ordinal -= 1;
+            var frames = view.mANIM.Frames;
+            var frame = view.GetSelectedFrame().Frame;
+            var index = frames.IndexOf(frame);
+            var next = frames[index + 1];
+            frames[index + 1] = frame;
+            frames[index] = next;
             view.SyncFrames();
             view.CurrentFrameIndex += 1;
-            view.OnPropertyChanged("Frames");
         }
         private static void ImportDds(AnimViewModel parent)
         {
