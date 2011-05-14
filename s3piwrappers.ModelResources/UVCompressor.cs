@@ -8,7 +8,7 @@ namespace s3piwrappers
     public static class UVCompressor
     {
         private const int kMaxUVChannels = 3;
-        
+
         public static float[] GetMaxUVs(IEnumerable<Vertex> vertices)
         {
             var maxuvs = new float[kMaxUVChannels];
@@ -37,7 +37,7 @@ namespace s3piwrappers
         }
         public static float[] GetUVScales(VRTF vrtf, IEnumerable<Vertex> vertices)
         {
-            return GetUVScales(vrtf,GetMaxUVs(vertices));
+            return GetUVScales(vrtf, GetMaxUVs(vertices));
         }
         public static float[] GetUVScales(VRTF vrtf, float[] maxuvs)
         {
@@ -48,10 +48,8 @@ namespace s3piwrappers
             {
                 var layout = uvchannels[i];
                 var maxval = GetMaxPackedUVFromElementFormat(layout.Format);
-                if (maxval != null)
-                {
-                    uvscales[i] = maxuvs[i] / (float)maxval;
-                }
+                if (maxval == null) continue;
+                uvscales[i] = maxuvs[i] / (float)maxval;
             }
             return uvscales;
         }
