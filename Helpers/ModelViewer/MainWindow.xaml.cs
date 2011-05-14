@@ -82,7 +82,7 @@ namespace s3piwrappers.ModelViewer
                     var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
                     var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
                     var material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
-                    var uvscale = GetUvScale(rcol, material);
+                    var uvscale = GetUvScales(rcol, material);
                     var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
 
                     var sceneMesh = new SceneMesh(m, model);
@@ -104,13 +104,13 @@ namespace s3piwrappers.ModelViewer
                 mMeshListView.Items.Add(s);
             }
         }
-        static float GetUvScale(GenericRCOLResource rcol, IRCOLBlock material)
+        static float[] GetUvScales(GenericRCOLResource rcol, IRCOLBlock material)
         {
-            float s = 1 / short.MaxValue;
-            if (material == null) return s;
+            float[] scales = null;
+            if (material == null) return scales;
             if (material is MATD)
             {
-                GetUvScale(material as MATD, ref s);
+                GetUvScales(material as MATD, ref scales);
             }
             else if (material is MTST)
             {
@@ -124,10 +124,10 @@ namespace s3piwrappers.ModelViewer
                         material = GenericRCOLResource.ChunkReference.GetBlock(rcol, entry.Index);
                         if (material is MATD)
                         {
-                            if (GetUvScale(material as MATD, ref s)) break;
+                            if (GetUvScales(material as MATD, ref scales)) break;
                         }
                         else
-                            s = GetUvScale(rcol, material);
+                            scales = GetUvScales(rcol, material);
                     }
                 }
             }
@@ -136,17 +136,17 @@ namespace s3piwrappers.ModelViewer
                 throw new ArgumentException("Material must be of type MATD or MTST", "material");
             }
 
-            return s;
+            return scales;
 
         }
-        static bool GetUvScale(MATD matd, ref float uvscale)
+        static bool GetUvScales(MATD matd, ref float[] uvscale)
         {
             var param =
                 (matd.Mtnf != null ? matd.Mtnf.SData : matd.Mtrl.SData).FirstOrDefault(
                     x => x.Field == MATD.FieldType.UVScales) as MATD.ElementFloat3;
             if (param != null)
             {
-                uvscale = param.Data0;
+                uvscale = new []{param.Data0,param.Data1,param.Data2};
                 return true;
             }
             return false;
@@ -167,8 +167,6 @@ namespace s3piwrappers.ModelViewer
             }
             return new GeometryModel3D(mesh, material);
         }
-
-        static Random sRng = new Random();
 
         private void mMeshListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

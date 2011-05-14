@@ -769,9 +769,7 @@ namespace s3piwrappers
             bw.Write((UInt32)mShader);
             if (mShader != 0x00000000)
             {
-                var mtnfStream = new MemoryStream();
-                mMaterialBlock.UnParse(mtnfStream);
-                var mtnfBytes = mtnfStream.ToArray();
+                var mtnfBytes = mMaterialBlock.AsBytes;
                 bw.Write(mtnfBytes.Length);
                 bw.Write(mtnfBytes);
             }

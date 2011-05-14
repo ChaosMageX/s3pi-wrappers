@@ -19,9 +19,10 @@ namespace s3piwrappers
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
 
-        public ClipResource(int apiVersion, Stream s) : base(apiVersion, s)
+        public ClipResource(int apiVersion, Stream s)
+            : base(apiVersion, s)
         {
-            mS3Clip = new Clip(0,this.OnResourceChanged);
+            mS3Clip = new Clip(0, this.OnResourceChanged);
             mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged);
             mEndSection = new ClipEndSection(0, this.OnResourceChanged);
@@ -34,7 +35,6 @@ namespace s3piwrappers
             base.stream.Position = 0L;
             Parse(s);
         }
-
 
         public string Value { get { return ValueBuilder; } }
 
@@ -65,7 +65,7 @@ namespace s3piwrappers
                 }
             }
         }
-        
+
         [ElementPriority(4)]
         public IKTargetTable IKTargetInfo
         {
@@ -169,8 +169,8 @@ namespace s3piwrappers
             }
 
             s.Seek(clipOffset, SeekOrigin.Begin);
-            byte[] clipBytes = new byte[(int) clipSize];
-            clipBytes = br.ReadBytes((int) clipSize);
+            byte[] clipBytes = new byte[(int)clipSize];
+            clipBytes = br.ReadBytes((int)clipSize);
             mS3Clip = new Clip(0, this.OnResourceChanged, new MemoryStream(clipBytes));
 
 
@@ -200,7 +200,7 @@ namespace s3piwrappers
         private static void WritePadding(Stream s)
         {
             var bw = new BinaryWriter(s);
-            while ((s.Position%4) != 0) bw.Write((byte) 0x7E); //padding to next dword
+            while ((s.Position % 4) != 0) bw.Write((byte)0x7E); //padding to next dword
         }
 
         protected override Stream UnParse()
@@ -248,15 +248,15 @@ namespace s3piwrappers
 
             //write header last
             s.Seek(mainOffsetList, SeekOrigin.Begin);
-            bw.Write((uint) (0));
-            bw.Write((uint) clipSize);
-            bw.Write((uint) (clipOffset - s.Position));
-            bw.Write((uint) (hasIkData ? ikOffset - s.Position : 0));
-            bw.Write((uint) (actorOffset - s.Position));
-            bw.Write((uint) (eventOffset - s.Position));
+            bw.Write((uint)(0));
+            bw.Write((uint)clipSize);
+            bw.Write((uint)(clipOffset - s.Position));
+            bw.Write((uint)(hasIkData ? ikOffset - s.Position : 0));
+            bw.Write((uint)(actorOffset - s.Position));
+            bw.Write((uint)(eventOffset - s.Position));
             bw.Write(mUnknown01);
             bw.Write(mUnknown02);
-            bw.Write((uint) (endOffset - s.Position));
+            bw.Write((uint)(endOffset - s.Position));
             bw.Write(new byte[16]);
             s.Position = s.Length;
             return s;
@@ -270,7 +270,7 @@ namespace s3piwrappers
             byte b = br.ReadByte();
             while (b != 0)
             {
-                s += Encoding.ASCII.GetString(new byte[1] {b});
+                s += Encoding.ASCII.GetString(new byte[1] { b });
                 b = br.ReadByte();
             }
             if (padLength != 0)
@@ -290,7 +290,7 @@ namespace s3piwrappers
                 bw.Write(Encoding.ASCII.GetBytes(s));
             }
 
-            bw.Write((byte) 0x00);
+            bw.Write((byte)0x00);
             if (padLength > 0)
             {
                 int count = padLength - 1;
@@ -316,7 +316,8 @@ namespace s3piwrappers
 
             public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : this(apiVersion, handler, basis.X, basis.Y, basis.Z, basis.W) { }
 
-            public ClipEndSection(int APIversion, EventHandler handler, float x, float y, float z, float w) : base(APIversion, handler)
+            public ClipEndSection(int APIversion, EventHandler handler, float x, float y, float z, float w)
+                : base(APIversion, handler)
             {
                 mX = x;
                 mY = y;
@@ -432,7 +433,7 @@ namespace s3piwrappers
                 {
                     if (s.Position != offsets[i])
                         throw new InvalidDataException(String.Format("Bad Offset: Expected 0x{0:X8}, but got 0x{1:X8}.", offsets[i], s.Position));
-                    ((IList<T>) this).Add(CreateElement(s));
+                    ((IList<T>)this).Add(CreateElement(s));
                 }
             }
 
@@ -448,7 +449,7 @@ namespace s3piwrappers
                 }
                 for (int i = 0; i < base.Count; i++)
                 {
-                    offsets[i] = (uint) (s.Position - startOffset);
+                    offsets[i] = (uint)(s.Position - startOffset);
                     WriteElement(s, this[i]);
                 }
                 long endOffset = s.Position;
@@ -460,7 +461,7 @@ namespace s3piwrappers
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
 
-            public override void Add() { base.Add(new object[] {}); }
+            public override void Add() { base.Add(new object[] { }); }
 
             protected abstract override T CreateElement(Stream s);
 
@@ -471,7 +472,7 @@ namespace s3piwrappers
 
         #region Nested type: DestroyPropEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.DestroyProp})]
+        [ConstructorParameters(new object[] { ClipEventType.DestroyProp })]
         public class DestroyPropEvent : Event
         {
             private UInt32 mPropNameHash;
@@ -483,7 +484,7 @@ namespace s3piwrappers
             public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis) : base(apiVersion, handler, basis) { mPropNameHash = basis.PropNameHash; }
 
             public DestroyPropEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint propNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mPropNameHash = propNameHash; }
-            
+
             [ElementPriority(8)]
             public uint PropNameHash
             {
@@ -519,7 +520,7 @@ namespace s3piwrappers
 
         #region Nested type: EffectEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.Effect})]
+        [ConstructorParameters(new object[] { ClipEventType.Effect })]
         public class EffectEvent : Event
         {
             private UInt32 mActorNameHash;
@@ -533,7 +534,8 @@ namespace s3piwrappers
 
             public EffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
 
-            public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis) : base(apiVersion, handler, basis)
+            public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis)
+                : base(apiVersion, handler, basis)
             {
                 mUnknown01 = basis.Unknown01;
                 mUnknown02 = basis.Unknown02;
@@ -543,7 +545,8 @@ namespace s3piwrappers
                 mUnknown03 = basis.Unknown03;
             }
 
-            public EffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint unknown01, uint unknown02, uint effectNameHash, uint actorNameHash, uint slotNameHash, uint unknown03, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public EffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint unknown01, uint unknown02, uint effectNameHash, uint actorNameHash, uint slotNameHash, uint unknown03, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mUnknown01 = unknown01;
                 mUnknown02 = unknown02;
@@ -695,7 +698,8 @@ namespace s3piwrappers
 
             protected Event(int apiVersion, EventHandler handler, ClipEventType type) : this(apiVersion, handler, type, 0xC1E4, 0, 0f, -1f, -1f, 0, "") { }
 
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : this(apiVersion, handler, type)
+            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
+                : this(apiVersion, handler, type)
             {
                 mType = type;
                 Parse(s);
@@ -703,7 +707,8 @@ namespace s3piwrappers
 
             protected Event(int apiVersion, EventHandler handler, Event basis) : this(apiVersion, handler, basis.Type, basis.Short01, basis.Id, basis.Timecode, basis.Float01, basis.Float02, basis.Int01, basis.EventName) { }
 
-            protected Event(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName) : base(APIversion, handler)
+            protected Event(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName)
+                : base(APIversion, handler)
             {
                 mType = type;
                 mShort01 = short01;
@@ -881,7 +886,7 @@ namespace s3piwrappers
                 mInt01 = br.ReadUInt32();
                 uint strlen = br.ReadUInt32();
                 mEventName = ReadZString(br);
-                while ((s.Position%4) != 0) br.ReadByte(); //padding to next DWORD
+                while ((s.Position % 4) != 0) br.ReadByte(); //padding to next DWORD
             }
 
             public virtual void UnParse(Stream s)
@@ -895,7 +900,7 @@ namespace s3piwrappers
                 bw.Write(mInt01);
                 bw.Write(mEventName.Length);
                 WriteZString(bw, mEventName);
-                while ((s.Position%4) != 0) bw.Write((byte) 0x00); //padding to next DWORD
+                while ((s.Position % 4) != 0) bw.Write((byte)0x00); //padding to next DWORD
             }
 
             public override string ToString() { return mType.ToString(); }
@@ -922,7 +927,7 @@ namespace s3piwrappers
                     throw new Exception(String.Format("Expected startOffset of 4 at =CE= section, but got 0x{0:X8}", startOffset));
                 for (uint i = 0; i < count; i++)
                 {
-                    ((IList<Event>) this).Add(CreateElement(s));
+                    ((IList<Event>)this).Add(CreateElement(s));
                 }
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
@@ -940,7 +945,7 @@ namespace s3piwrappers
                     WriteElement(s, this[i]);
                 }
                 long endPos = s.Position;
-                uint size = (uint) (endPos - startPos);
+                uint size = (uint)(endPos - startPos);
                 s.Seek(offsetPos, SeekOrigin.Begin);
                 bw.Write(size);
                 s.Seek(endPos, SeekOrigin.Begin);
@@ -948,13 +953,13 @@ namespace s3piwrappers
 
             protected override Event CreateElement(Stream s)
             {
-                ClipEventType type = (ClipEventType) new BinaryReader(s).ReadUInt16();
+                ClipEventType type = (ClipEventType)new BinaryReader(s).ReadUInt16();
                 return Event.CreateInstance(0, handler, type, s);
             }
 
             protected override void WriteElement(Stream s, Event element)
             {
-                new BinaryWriter(s).Write((ushort) element.Type);
+                new BinaryWriter(s).Write((ushort)element.Type);
                 element.UnParse(s);
             }
 
@@ -962,31 +967,31 @@ namespace s3piwrappers
             {
                 if (fields != null && fields.Length > 0)
                 {
-                    if (typeof (Event).IsAssignableFrom(fields[0].GetType()))
+                    if (typeof(Event).IsAssignableFrom(fields[0].GetType()))
                     {
                         return fields[0].GetType();
                     }
-                    if (typeof (ClipEventType).IsAssignableFrom(fields[0].GetType()))
+                    if (typeof(ClipEventType).IsAssignableFrom(fields[0].GetType()))
                     {
-                        ClipEventType type = (ClipEventType) fields[0];
+                        ClipEventType type = (ClipEventType)fields[0];
                         switch (type)
                         {
                             case ClipEventType.Parent:
-                                return typeof (ParentEvent);
+                                return typeof(ParentEvent);
                             case ClipEventType.DestroyProp:
-                                return typeof (DestroyPropEvent);
+                                return typeof(DestroyPropEvent);
                             case ClipEventType.Effect:
-                                return typeof (EffectEvent);
+                                return typeof(EffectEvent);
                             case ClipEventType.Sound:
-                                return typeof (SoundEvent);
+                                return typeof(SoundEvent);
                             case ClipEventType.Script:
-                                return typeof (ScriptEvent);
+                                return typeof(ScriptEvent);
                             case ClipEventType.Visibility:
-                                return typeof (VisibilityEvent);
+                                return typeof(VisibilityEvent);
                             case ClipEventType.StopEffect:
-                                return typeof (StopEffectEvent);
+                                return typeof(StopEffectEvent);
                             case ClipEventType.UnParent:
-                                return typeof (UnparentEvent);
+                                return typeof(UnparentEvent);
                             default:
                                 throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
                         }
@@ -1013,7 +1018,8 @@ namespace s3piwrappers
 
             public EventTable(int apiVersion, EventHandler handler, EventTable basis) : this(apiVersion, handler, basis.Version, basis.Events) { }
 
-            public EventTable(int APIversion, EventHandler handler, uint version, EventList events) : base(APIversion, handler)
+            public EventTable(int APIversion, EventHandler handler, uint version, EventList events)
+                : base(APIversion, handler)
             {
                 mVersion = version;
                 mEvents = events;
@@ -1129,7 +1135,7 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(new byte[] {0x7E, 0x7E, 0x7E, 0x7E}); //7E7E7E7E padding
+                bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
                 mIkTargets.UnParse(s);
             }
 
@@ -1168,7 +1174,8 @@ namespace s3piwrappers
 
             public IKTarget(int apiVersion, EventHandler handler, IKTarget basis) : this(apiVersion, handler, basis.Index, basis.TargetNamespace, basis.TargetName) { }
 
-            public IKTarget(int APIversion, EventHandler handler, uint index, string targetNamespace, string targetName) : base(APIversion, handler)
+            public IKTarget(int APIversion, EventHandler handler, uint index, string targetNamespace, string targetName)
+                : base(APIversion, handler)
             {
                 mIndex = index;
                 mTargetNamespace = targetNamespace;
@@ -1310,7 +1317,7 @@ namespace s3piwrappers
 
         #region Nested type: ParentEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.Parent})]
+        [ConstructorParameters(new object[] { ClipEventType.Parent })]
         public class ParentEvent : Event
         {
             private UInt32 mActorNameHash;
@@ -1323,7 +1330,8 @@ namespace s3piwrappers
 
             public ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
 
-            public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis) : base(apiVersion, handler, basis)
+            public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
+                : base(apiVersion, handler, basis)
             {
                 mActorNameHash = basis.ActorNameHash;
                 mObjectNameHash = basis.ObjectNameHash;
@@ -1333,7 +1341,8 @@ namespace s3piwrappers
             }
 
 
-            public ParentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName, uint actorNameHash, uint objectNameHash, uint slotNameHash, uint unknown01, float[] transform) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public ParentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName, uint actorNameHash, uint objectNameHash, uint slotNameHash, uint unknown01, float[] transform)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mActorNameHash = actorNameHash;
                 mObjectNameHash = objectNameHash;
@@ -1445,7 +1454,7 @@ namespace s3piwrappers
 
         #region Nested type: ScriptEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.Script})]
+        [ConstructorParameters(new object[] { ClipEventType.Script })]
         public class ScriptEvent : Event
         {
             public ScriptEvent(int apiVersion, EventHandler handler, ScriptEvent basis) : base(apiVersion, handler, basis) { }
@@ -1465,7 +1474,7 @@ namespace s3piwrappers
 
         #region Nested type: SoundEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.Sound})]
+        [ConstructorParameters(new object[] { ClipEventType.Sound })]
         public class SoundEvent : Event
         {
             private String mSoundName;
@@ -1477,7 +1486,7 @@ namespace s3piwrappers
             public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis) : base(apiVersion, handler, basis) { mSoundName = basis.SoundName; }
 
             public SoundEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string soundName, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mSoundName = soundName; }
-            
+
             [ElementPriority(8)]
             public string SoundName
             {
@@ -1513,7 +1522,7 @@ namespace s3piwrappers
 
         #region Nested type: StopEffectEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.StopEffect})]
+        [ConstructorParameters(new object[] { ClipEventType.StopEffect })]
         public class StopEffectEvent : Event
         {
             private UInt32 mEffectNameHash;
@@ -1523,13 +1532,15 @@ namespace s3piwrappers
 
             public StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
 
-            public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis) : base(apiVersion, handler, basis)
+            public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis)
+                : base(apiVersion, handler, basis)
             {
                 mEffectNameHash = basis.EffectNameHash;
                 mUnknown01 = basis.Unknown01;
             }
 
-            public StopEffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint effectNameHash, uint unknown01, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public StopEffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint effectNameHash, uint unknown01, string eventName)
+                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mEffectNameHash = effectNameHash;
                 mUnknown01 = unknown01;
@@ -1587,7 +1598,7 @@ namespace s3piwrappers
 
         #region Nested type: UnparentEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.UnParent})]
+        [ConstructorParameters(new object[] { ClipEventType.UnParent })]
         public class UnparentEvent : Event
         {
             private UInt32 mObjectNameHash;
@@ -1599,7 +1610,7 @@ namespace s3piwrappers
             public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis) : base(apiVersion, handler, basis) { mObjectNameHash = basis.ObjectNameHash; }
 
             public UnparentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint objectNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mObjectNameHash = objectNameHash; }
-            
+
             [ElementPriority(8)]
             public uint ObjectNameHash
             {
@@ -1635,7 +1646,7 @@ namespace s3piwrappers
 
         #region Nested type: VisibilityEvent
 
-        [ConstructorParameters(new object[] {ClipEventType.Visibility})]
+        [ConstructorParameters(new object[] { ClipEventType.Visibility })]
         public class VisibilityEvent : Event
         {
             private Single mVisibility;
@@ -1683,7 +1694,7 @@ namespace s3piwrappers
 
         public class Clip : AHandlerElement
         {
-            
+
             #region Fields
 
             private String mAnimName;
@@ -1786,7 +1797,7 @@ namespace s3piwrappers
                     OnElementChanged();
                 }
             }
-
+            
             public string Value { get { return ValueBuilder; } }
 
             #endregion
@@ -2079,7 +2090,15 @@ namespace s3piwrappers
                     }
                 }
             }
-
+            protected override List<string> ValueBuilderFields
+            {
+                get
+                {
+                    var f = base.ValueBuilderFields;
+                    f.Remove("Frames");
+                    return f;
+                }
+            }
             public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
 
             public override int RecommendedApiVersion { get { return 1; } }
@@ -2180,11 +2199,11 @@ namespace s3piwrappers
 
             protected override Type GetElementType(params object[] fields)
             {
-                if (fields.Length == 1 )
+                if (fields.Length == 1)
                 {
-                    if( typeof(CurveType).IsAssignableFrom(fields[0].GetType())) return Curve.GetCurveType((CurveType) fields[0]);
+                    if (typeof(CurveType).IsAssignableFrom(fields[0].GetType())) return Curve.GetCurveType((CurveType)fields[0]);
                     if (typeof(Curve).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
-                    
+
                 }
                 return base.GetElementType(fields);
             }
@@ -2275,16 +2294,16 @@ namespace s3piwrappers
             #endregion
             public static Type GetFrameType(CurveDataType dataType)
             {
-                switch(dataType)
+                switch (dataType)
                 {
                     case CurveDataType.Float3:
-                        return typeof (Float3Frame);
+                        return typeof(Float3Frame);
                     case CurveDataType.Float4:
-                        return typeof (Float4Frame);
-                    default:throw new NotSupportedException();
+                        return typeof(Float4Frame);
+                    default: throw new NotSupportedException();
                 }
             }
-            
+
 
             public void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
             {
@@ -2414,7 +2433,7 @@ namespace s3piwrappers
                                    IEquatable<Float4Frame>
         {
             public Float4Frame(int apiVersion, EventHandler handler, Float4Frame basis) : base(apiVersion, handler, basis) { }
-            public Float4Frame(int apiVersion, EventHandler handler,CurveDataType type) : base(apiVersion, handler) { }
+            public Float4Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler) { }
 
             public Float4Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats) { }
 
@@ -2469,18 +2488,18 @@ namespace s3piwrappers
             {
                 if (fields.Length > 0)
                 {
-                    if (typeof (Frame).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
-                    if (typeof (CurveDataType).IsAssignableFrom(fields[0].GetType())) return Frame.GetFrameType(mDataType);
+                    if (typeof(Frame).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
+                    if (typeof(CurveDataType).IsAssignableFrom(fields[0].GetType())) return Frame.GetFrameType(mDataType);
                 }
                 return base.GetElementType(fields);
             }
-            public override void Add() { Add(new object[] {  mDataType }); }
+            public override void Add() { Add(new object[] { mDataType }); }
 
             protected virtual Frame CreateElement(Stream s, CurveDataInfo info, IList<float> floats)
             {
                 var ctor = Frame.GetFrameType(mDataType)
-                    .GetConstructor(new[] {typeof (int), typeof (EventHandler), typeof (Stream), typeof (CurveDataInfo), typeof (IList<float>)});
-                return (Frame)ctor.Invoke(new object[]{0, handler, s, info, floats});
+                    .GetConstructor(new[] { typeof(int), typeof(EventHandler), typeof(Stream), typeof(CurveDataInfo), typeof(IList<float>) });
+                return (Frame)ctor.Invoke(new object[] { 0, handler, s, info, floats });
             }
 
             protected virtual void WriteElement(Stream s, CurveDataInfo info, IList<float> floats, Frame element) { element.UnParse(s, info, floats); }

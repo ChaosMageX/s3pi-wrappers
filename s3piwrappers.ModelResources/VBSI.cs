@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
 using System.Text;
 using System.Collections.Generic;
@@ -18,26 +19,15 @@ namespace s3piwrappers
     {
         public class SwizzleEntry : AHandlerElement, IEquatable<SwizzleEntry>
         {
-            public SwizzleEntry(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
-            {
-
-            }
-            public SwizzleEntry(int apiVersion, EventHandler handler, SwizzleEntry basis)
-                : base(apiVersion, handler)
-            {
-                mCommand = basis.mCommand;
-            }
-            public SwizzleEntry(int apiVersion, EventHandler handler, Stream s)
-                : base(apiVersion, handler)
-            {
-                Parse(s);
-            }
+            public SwizzleEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public SwizzleEntry(int apiVersion, EventHandler handler, SwizzleCmd command) : base(apiVersion, handler) { mCommand = command; }
+            public SwizzleEntry(int apiVersion, EventHandler handler, SwizzleEntry basis) : this(apiVersion, handler, basis.Command) { }
+            public SwizzleEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
             [ElementPriority(1)]
             public SwizzleCmd Command
             {
                 get { return mCommand; }
-                set { if(mCommand!=value){mCommand = value; OnElementChanged();} }
+                set { if (mCommand != value) { if(mCommand!=value){mCommand = value; OnElementChanged();} } }
             }
 
             public override AHandlerElement Clone(EventHandler handler)
@@ -101,7 +91,7 @@ namespace s3piwrappers
             {
                 base.Add(new object[] { });
             }
-            protected override void WriteCount(Stream s, int count){}
+            protected override void WriteCount(Stream s, int count) { }
             protected override SwizzleEntry CreateElement(Stream s)
             {
                 return new SwizzleEntry(0, handler, s);
@@ -114,8 +104,8 @@ namespace s3piwrappers
         }
         public class SegmentList : DependentList<SegmentInfo>
         {
-            public SegmentList(EventHandler handler): base(handler){}
-            public SegmentList(EventHandler handler, Stream s): base(handler, s){}
+            public SegmentList(EventHandler handler) : base(handler) { }
+            public SegmentList(EventHandler handler, Stream s) : base(handler, s) { }
             public SegmentList(EventHandler handler, IEnumerable<SegmentInfo> ilt) : base(handler, ilt) { }
             public override void Add()
             {
@@ -132,44 +122,96 @@ namespace s3piwrappers
         }
         public class SegmentInfo : AHandlerElement, IEquatable<SegmentInfo>
         {
-            private uint mVertexSize;
-            private uint mVertexCount;
-            private uint mByteOffset;
+            private Int32 mVertexSize;
+            private Int32 mVertexCount;
+            private UInt32 mByteOffset;
             private SwizzleList mSwizzles;
 
-            public SegmentInfo(int APIversion, EventHandler handler): this(APIversion, handler,0,0,0,new SwizzleList(handler)){}
-            public SegmentInfo(int APIversion, EventHandler handler, SegmentInfo basis): this(APIversion, handler,basis.VertexSize,basis.VertexCount,basis.ByteOffset,new SwizzleList(handler,basis.Swizzles)) {}
-            public SegmentInfo(int APIversion, EventHandler handler, Stream s): base(APIversion, handler){Parse(s);}
-            public SegmentInfo(int APIversion, EventHandler handler, uint vertexSize, uint vertexCount, uint byteOffset, SwizzleList swizzles) : base(APIversion, handler)
+            public SegmentInfo(int APIversion, EventHandler handler) : this(APIversion, handler, 0, 0, 0, new SwizzleList(handler)) { }
+            public SegmentInfo(int APIversion, EventHandler handler, SegmentInfo basis) : this(APIversion, handler, basis.VertexSize, basis.VertexCount, basis.ByteOffset, new SwizzleList(handler, basis.Swizzles)) { }
+            public SegmentInfo(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
+            public SegmentInfo(int APIversion, EventHandler handler, Int32 vertexSize, Int32 vertexCount, UInt32 byteOffset, SwizzleList swizzles)
+                : base(APIversion, handler)
             {
                 mVertexSize = vertexSize;
                 mVertexCount = vertexCount;
                 mByteOffset = byteOffset;
                 mSwizzles = swizzles;
             }
+            public static SegmentInfo FromMesh(MLOD.Mesh mesh,VRTF vrtf)
+            {
+                var segment = new SegmentInfo(0, null);
+                segment.VertexSize = vrtf.Stride;
+                segment.VertexCount = mesh.VertexCount;
+                segment.ByteOffset = mesh.StreamOffset;
+                
+                foreach(var layout in vrtf.Layouts)
+                {
+                    switch(layout.Format)
+                    {
+                        case VRTF.ElementFormat.Float1:
+                        case VRTF.ElementFormat.UByte4:
+                        case VRTF.ElementFormat.UByte4N:
+                        case VRTF.ElementFormat.ColorUByte4:
+                        case VRTF.ElementFormat.Dec3N:
+                        case VRTF.ElementFormat.UDec3N:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            break;
+                        case VRTF.ElementFormat.Float2:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            break;
+                        case VRTF.ElementFormat.Float3:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            break;
+                        case VRTF.ElementFormat.Float4:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle32));
+                            break;
+                        case VRTF.ElementFormat.Short2:
+                        case VRTF.ElementFormat.Short2N:
+                        case VRTF.ElementFormat.UShort2N:
+                        case VRTF.ElementFormat.Float16_2:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle16x2));
+                            break;
+                        case VRTF.ElementFormat.Short4:
+                        case VRTF.ElementFormat.Short4N:
+                        case VRTF.ElementFormat.UShort4N:
+                        case VRTF.ElementFormat.Float16_4:
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle16x2));
+                            segment.Swizzles.Add(new SwizzleEntry(0, null, SwizzleCmd.Swizzle16x2));
+                            break;
+                    }
+                }
+                return segment;
+            }
             [ElementPriority(1)]
-            public uint VertexSize
+            public Int32 VertexSize
             {
                 get { return mVertexSize; }
-                set { if (mVertexSize != value) { mVertexSize = value; OnElementChanged();} }
+                set { if (mVertexSize != value) { mVertexSize = value; OnElementChanged(); } }
             }
             [ElementPriority(2)]
-            public uint VertexCount
+            public Int32 VertexCount
             {
                 get { return mVertexCount; }
-                set { if(mVertexCount!=value){mVertexCount = value; OnElementChanged();} }
+                set { if (mVertexCount != value) { mVertexCount = value; OnElementChanged(); } }
             }
             [ElementPriority(3)]
-            public uint ByteOffset
+            public UInt32 ByteOffset
             {
                 get { return mByteOffset; }
-                set { if(mByteOffset!=value){mByteOffset = value; OnElementChanged();} }
+                set { if (mByteOffset != value) { mByteOffset = value; OnElementChanged(); } }
             }
             [ElementPriority(4)]
             public SwizzleList Swizzles
             {
                 get { return mSwizzles; }
-                set { if(mSwizzles!=value){mSwizzles = value; OnElementChanged();} }
+                set { if (mSwizzles != value) { mSwizzles = value; OnElementChanged(); } }
             }
 
             public string Value
@@ -197,8 +239,8 @@ namespace s3piwrappers
             private void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mVertexSize = br.ReadUInt32();
-                mVertexCount = br.ReadUInt32();
+                mVertexSize = br.ReadInt32();
+                mVertexCount = br.ReadInt32();
                 mByteOffset = br.ReadUInt32();
                 mSwizzles = new SwizzleList(handler, s, (int)mVertexSize / 4);
             }
@@ -232,10 +274,11 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        public VBSI(int APIversion, EventHandler handler): base(APIversion, handler, null){}
-        public VBSI(int APIversion, EventHandler handler, VBSI basis): this(APIversion, handler, new SegmentList(handler,basis.Segments)){}
-        public VBSI(int APIversion, EventHandler handler, Stream s): base(APIversion, handler, s){}
-        public VBSI(int APIversion, EventHandler handler, SegmentList segments) : base(APIversion, handler, null)
+        public VBSI(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }
+        public VBSI(int APIversion, EventHandler handler, VBSI basis) : this(APIversion, handler, new SegmentList(handler, basis.Segments)) { }
+        public VBSI(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
+        public VBSI(int APIversion, EventHandler handler, SegmentList segments)
+            : base(APIversion, handler, null)
         {
             mSegments = segments;
         }
@@ -244,7 +287,7 @@ namespace s3piwrappers
         public SegmentList Segments
         {
             get { return mSegments; }
-            set { if(mSegments!=value){mSegments = value; OnRCOLChanged(this, new EventArgs());} }
+            set { if (mSegments != value) { mSegments = value; OnRCOLChanged(this, new EventArgs()); } }
         }
 
         public string Value
@@ -266,6 +309,16 @@ namespace s3piwrappers
                 /**/
             }
         }
+        public static VBSI FromMLOD(MLOD mlod, GenericRCOLResource container)
+        {
+            var vbsi = new VBSI(0, null);
+            foreach (var mesh in mlod.Meshes)
+            {
+                var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(container, mesh.VertexFormatIndex);
+                vbsi.Segments.Add(SegmentInfo.FromMesh(mesh,vrtf));
+            }
+            return vbsi;
+        }
 
         private SegmentList mSegments;
         protected override void Parse(Stream s)
@@ -278,9 +331,7 @@ namespace s3piwrappers
             MemoryStream s = new MemoryStream();
             mSegments.UnParse(s);
             return s;
-
         }
-
         public override AHandlerElement Clone(EventHandler handler)
         {
             return new VBSI(0, handler, this);
