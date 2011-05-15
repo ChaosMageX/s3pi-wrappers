@@ -187,7 +187,7 @@ namespace s3piwrappers
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
 
             Vertex[] verts = new Vertex[count];
-
+            if (uvscales == null) uvscales = new float[3];
             for (int i = 0; i < count; i++)
             {
                 Vertex v = new Vertex();
@@ -210,7 +210,7 @@ namespace s3piwrappers
                 {
                     var u = uv[j];
                     float[] uvPoints = new float[VRTF.FloatCountFromFormat(u.Format)];
-                    ReadUVData(data, u, ref uvPoints, uvscales!=null?uvscales[j]:0f);
+                    ReadUVData(data, u, ref uvPoints, uvscales[j]);
                     v.UV[j] = uvPoints;
                 }
                 if (blendIndices != null)
@@ -252,6 +252,10 @@ namespace s3piwrappers
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) * uvscale;
                     break;
+                case VRTF.ElementFormat.Short4:
+                    for (int i = 0; i < output.Length; i++)
+                        output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / (float)short.MaxValue;
+                    break;
                 default:
                     ReadFloatData(data,layout,ref output);
                     break;
@@ -265,6 +269,11 @@ namespace s3piwrappers
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)
                         Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    break;
+
+                case VRTF.ElementFormat.Short4:
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((short)Math.Floor(input[i] *(float)short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     break;
                 default:
                     WriteFloatData(input,layout,output);
@@ -397,7 +406,7 @@ namespace s3piwrappers
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Tangent);
             var color = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
-
+            if(uvscales == null)uvscales = new float[3];
             byte[] output = new byte[vrtf.Stride];
             foreach (var v in vertices)
             {
