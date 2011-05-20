@@ -210,7 +210,8 @@ namespace s3piwrappers
                 {
                     var u = uv[j];
                     float[] uvPoints = new float[VRTF.FloatCountFromFormat(u.Format)];
-                    ReadUVData(data, u, ref uvPoints, uvscales[j]);
+                    var scale = j < uvscales.Length ? uvscales[j] : 0f;
+                    ReadUVData(data, u, ref uvPoints, scale);
                     v.UV[j] = uvPoints;
                 }
                 if (blendIndices != null)
@@ -412,7 +413,11 @@ namespace s3piwrappers
             {
                 if (v.Position != null) WriteFloatData(v.Position, position, output);
                 if (v.Normal != null) WriteFloatData(v.Normal, normal, output);
-                for (int u = 0; u < uv.Length; u++) if (v.UV[u] != null) WriteUVData(v.UV[u], uv[u], output, uvscales[u]);
+                for (int u = 0; u < uv.Length; u++) if (v.UV[u] != null)
+                {
+                    var scale = u < uvscales.Length ? uvscales[u] : 0f;
+                    WriteUVData(v.UV[u], uv[u], output, scale);
+                }
                 if (v.BlendIndices != null) Array.Copy(v.BlendIndices, 0, output, blendIndices.Offset, VRTF.ByteSizeFromFormat(blendIndices.Format));
                 if (v.BlendWeights != null) WriteFloatData(v.BlendWeights, blendWeights, output);
                 if (v.Tangents != null) WriteFloatData(v.Tangents, tangents, output);

@@ -14,7 +14,7 @@ namespace s3piwrappers
             var maxuvs = new float[kMaxUVChannels];
             foreach (var vertex in vertices)
             {
-                for (int i = 0; i < vertex.UV.Length; i++)
+                for (int i = 0; i < Math.Min(vertex.UV.Length, kMaxUVChannels); i++)
                 {
                     foreach (var value in vertex.UV[i])
                     {
@@ -29,7 +29,7 @@ namespace s3piwrappers
         {
             var uvchannels = vrtf.Layouts.Where(x => x.Usage == VRTF.ElementUsage.UV).OrderBy(x => x.UsageIndex).ToArray();
             var maxUvs = new float[kMaxUVChannels];
-            for (int i = 0; i < uvchannels.Length; i++)
+            for (int i = 0; i < Math.Min(uvchannels.Length, kMaxUVChannels); i++)
             {
                 maxUvs[i] = 1f;
             }
@@ -44,7 +44,7 @@ namespace s3piwrappers
             var uvchannels = vrtf.Layouts.Where(x => x.Usage == VRTF.ElementUsage.UV).OrderBy(x => x.UsageIndex).ToArray();
             if (!uvchannels.Any(channel => GetMaxPackedUVFromElementFormat(channel.Format) != null)) return null;
             var uvscales = new float[kMaxUVChannels];
-            for (int i = 0; i < uvchannels.Length; i++)
+            for (int i = 0; i < Math.Min(uvchannels.Length,kMaxUVChannels); i++)
             {
                 var layout = uvchannels[i];
                 var maxval = GetMaxPackedUVFromElementFormat(layout.Format);

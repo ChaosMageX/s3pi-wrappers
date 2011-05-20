@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 
-namespace LightResource
+namespace s3piwrappers.Common
 {
     [DataGridExpandable(true)]
     public class Colour3f : AHandlerElement

@@ -40,6 +40,7 @@
   <ItemGroup>
     <Reference Include="DDSPanel">
       <HintPath>..\..\lib\s3pi_current\DDSPanel.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
@@ -111,9 +112,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj">
-      <Project>{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}</Project>
-      <Name>s3piwrappers.ModelResources</Name>
+    <ProjectReference Include="..\..\s3piwrappers.TextureResources\s3piwrappers.TextureResources.csproj">
+      <Project>{817BF199-5A9C-4A0C-9320-67B263FEF444}</Project>
+      <Name>s3piwrappers.TextureResources</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
