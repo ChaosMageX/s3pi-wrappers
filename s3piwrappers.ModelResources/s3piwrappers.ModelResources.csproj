@@ -56,7 +56,6 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\Colour3f.cs" />
     <Compile Include="Common\BoundingBox.cs" />
     <Compile Include="Common\Vector2.cs" />
     <Compile Include="Common\Vector4.cs" />

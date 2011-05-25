@@ -72,6 +72,7 @@ namespace RigExport
                         if (clbBones.GetItemChecked(i))
                         {
                             var bone = (Bone) clbBones.Items[i];
+                            bool flip = bone.ParentIndex == -1;
                             sb.AppendFormat("\"{0}\" \"{1}\" {2} {3} {4} {5}\r\n", cbHashBones.Checked? String.Format("0x{0:X8}",FNV32.GetHash(bone.Name)): bone.Name,
                                             bone.ParentIndex == -1
                                                 ? "unparented"
@@ -79,7 +80,7 @@ namespace RigExport
                                             bone.LocalTransform.Position.X,
                                             bone.LocalTransform.Position.Y,
                                             bone.LocalTransform.Position.Z,
-                                            ToEuler(bone.LocalTransform.Orientation));
+                                            ToEuler(bone.LocalTransform.Orientation,flip));
                         }
                     }
                     using (var s = new StreamWriter(File.Create(saveFileDialog1.FileName))) s.Write(sb.ToString());
@@ -107,10 +108,14 @@ namespace RigExport
                 clbBones.SetItemChecked(i, false);
             }
         }
-        public static string ToEuler(Quad q)
+        public static string ToEuler(Quad q,bool flip)
         {
             var matrix = new Matrix(new Quaternion(q.X,q.Y,q.Z,q.W));
             var euler = new EulerAngle(matrix);
+            if (flip)
+            {
+                euler = new EulerAngle(0,0,Math.PI/2);
+            }
             return String.Format("{0} {1} {2}",euler.Roll, euler.Yaw, euler.Pitch);
 
             
