@@ -14,7 +14,6 @@ namespace s3piwrappers.AnimatedTextureEditor.Converters
         {
             var str = value.ToString().Replace("0x","");
             if (string.IsNullOrEmpty(str)) str = "0";
-
             return System.Convert.ToUInt32(str, 16);
         }
     }

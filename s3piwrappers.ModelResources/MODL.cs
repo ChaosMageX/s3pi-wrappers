@@ -194,7 +194,27 @@ namespace s3piwrappers
 
             public bool Equals(LODEntry other)
             {
-                return base.Equals(other);
+                return
+                    mModelLodIndex.Equals(other.mModelLodIndex)
+                    && mFlags.Equals(other.mFlags)
+                    && mId.Equals(other.mId)
+                    && mMinZValue.Equals(other.mMinZValue)
+                    && mMaxZValue.Equals(other.mMaxZValue)
+                    ;
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as LODEntry != null ? this.Equals(obj as LODEntry) : false;
+            }
+            public override int GetHashCode()
+            {
+                return
+                    mModelLodIndex.GetHashCode()
+                    ^ mFlags.GetHashCode()
+                    ^ mId.GetHashCode()
+                    ^ mMinZValue.GetHashCode()
+                    ^ mMaxZValue.GetHashCode()
+                    ;
             }
         }
 

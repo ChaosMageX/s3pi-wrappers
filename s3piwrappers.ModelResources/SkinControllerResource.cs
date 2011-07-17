@@ -87,6 +87,16 @@ namespace s3piwrappers
             {
                 return mName.Equals(other.mName);
             }
+
+            public override bool Equals(object obj)
+            {
+                return obj as Bone != null ? this.Equals(obj as Bone) : false;
+            }
+            public override int GetHashCode()
+            {
+                return mName.GetHashCode()
+                    ^ mInverseBindPose.GetHashCode();
+            }
         }
         private UInt32 mVersion;
         private BoneList mBones;

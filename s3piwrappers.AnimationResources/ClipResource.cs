@@ -18,11 +18,12 @@ namespace s3piwrappers
         private IKTargetTable mIKTargetInfo;
         private UInt32 mUnknown01;
         private UInt32 mUnknown02;
+        private Byte[] mS3Clip;
 
         public ClipResource(int apiVersion, Stream s)
             : base(apiVersion, s)
         {
-            mS3Clip = new Clip(0, this.OnResourceChanged);
+            mS3Clip = new Byte[0];
             mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
             mEventSectionTable = new EventTable(0, this.OnResourceChanged);
             mEndSection = new ClipEndSection(0, this.OnResourceChanged);
@@ -35,7 +36,15 @@ namespace s3piwrappers
             base.stream.Position = 0L;
             Parse(s);
         }
-
+        protected override List<string> ValueBuilderFields
+        {
+            get 
+            { 
+                var fields = base.ValueBuilderFields;
+                fields.Remove("S3Clip");
+                return fields; 
+            }
+        }
         public string Value { get { return ValueBuilder; } }
 
         [ElementPriority(1)]
@@ -122,10 +131,9 @@ namespace s3piwrappers
             }
         }
 
-        private Clip mS3Clip;
 
         [ElementPriority(3)]
-        public Clip S3Clip { get { return mS3Clip; } set { mS3Clip = value; } }
+        public Byte[] S3Clip { get { return mS3Clip; } set { mS3Clip = value; OnResourceChanged(this, new EventArgs()); } }
 
         public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
@@ -170,8 +178,8 @@ namespace s3piwrappers
 
             s.Seek(clipOffset, SeekOrigin.Begin);
             byte[] clipBytes = new byte[(int)clipSize];
-            clipBytes = br.ReadBytes((int)clipSize);
-            mS3Clip = new Clip(0, this.OnResourceChanged, new MemoryStream(clipBytes));
+            mS3Clip = br.ReadBytes((int)clipSize);
+            //mS3Clip = new Clip(0, this.OnResourceChanged, new MemoryStream(clipBytes));
 
 
             if (ikOffset > 0)
@@ -218,14 +226,14 @@ namespace s3piwrappers
             bool hasIkData = mIKTargetInfo.IKChains.Count > 0;
             s.Seek(52, SeekOrigin.Current);
 
-            var clipStream = new MemoryStream();
-            mS3Clip.UnParse(clipStream);
-            clipStream.Position = 0L;
-            var clipData = clipStream.ToArray();
+            //var clipStream = new MemoryStream();
+            //mS3Clip.UnParse(clipStream);
+            //clipStream.Position = 0L;
+            //var clipData = clipStream.ToArray();
 
-            clipSize = clipData.Length;
+            clipSize = mS3Clip.Length;
             clipOffset = s.Position;
-            bw.Write(clipData);
+            bw.Write(mS3Clip);
 
             WritePadding(s);
 

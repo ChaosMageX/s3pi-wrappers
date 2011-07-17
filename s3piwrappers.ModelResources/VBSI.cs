@@ -57,7 +57,15 @@ namespace s3piwrappers
 
             public bool Equals(SwizzleEntry other)
             {
-                return base.Equals(other);
+                return mCommand.Equals(other.mCommand);
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as SwizzleEntry != null ? this.Equals(obj as SwizzleEntry) : false;
+            }
+            public override int GetHashCode()
+            {
+                return mCommand.GetHashCode();
             }
             public override string ToString()
             {
@@ -271,7 +279,25 @@ namespace s3piwrappers
 
             public bool Equals(SegmentInfo other)
             {
-                return base.Equals(other);
+                return
+                    mVertexSize.Equals(other.mVertexSize)
+                    && mVertexCount.Equals(other.mVertexCount)
+                    && mByteOffset.Equals(other.mByteOffset)
+                    && mSwizzles.Equals(other.mSwizzles)
+                    ;
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as SegmentInfo != null ? this.Equals(obj as SegmentInfo) : false;
+            }
+            public override int GetHashCode()
+            {
+                return
+                    mVertexSize.GetHashCode()
+                    ^ mVertexCount.GetHashCode()
+                    ^ mByteOffset.GetHashCode()
+                    ^ mSwizzles.GetHashCode()
+                    ;
             }
         }
         public VBSI(int APIversion, EventHandler handler) : base(APIversion, handler, null) { }

@@ -167,7 +167,27 @@ namespace s3piwrappers
 
             public bool Equals(GeometryState other)
             {
-                return mName.Equals(other.mName);
+                return
+                    mName.Equals(other.mName)
+                    && mStartIndex.Equals(other.mStartIndex)
+                    && mMinVertexIndex.Equals(other.mMinVertexIndex)
+                    && mVertexCount.Equals(other.mVertexCount)
+                    && mPrimitiveCount.Equals(other.mPrimitiveCount)
+                    ;
+           }
+            public override bool Equals(object obj)
+            {
+                return obj as GeometryState != null ? this.Equals(obj as GeometryState) : false;
+            }
+            public override int GetHashCode()
+            {
+                return
+                    mName.GetHashCode()
+                    ^ mStartIndex.GetHashCode()
+                    ^ mMinVertexIndex.GetHashCode()
+                    ^ mVertexCount.GetHashCode()
+                    ^ mPrimitiveCount.GetHashCode()
+                    ;
             }
 
             public string Value
@@ -578,7 +598,57 @@ namespace s3piwrappers
 
             public bool Equals(Mesh other)
             {
-                return base.Equals(other);
+                return mName.Equals(other.mName)
+                    && mMaterialIndex.Equals(other.mMaterialIndex)
+                    && mVertexFormatIndex.Equals(other.mVertexFormatIndex)
+                    && mVertexBufferIndex.Equals(other.mVertexBufferIndex)
+                    && mIndexBufferIndex.Equals(other.mIndexBufferIndex)
+                    && mPrimitiveType.Equals(other.mPrimitiveType)
+                    && mFlags.Equals(other.mFlags)
+                    && mStreamOffset.Equals(other.mStreamOffset)
+                    && mStartVertex.Equals(other.mStartVertex)
+                    && mStartIndex.Equals(other.mStartIndex)
+                    && mMinVertexIndex.Equals(other.mMinVertexIndex)
+                    && mVertexCount.Equals(other.mVertexCount)
+                    && mPrimitiveCount.Equals(other.mPrimitiveCount)
+                    && mSkinControllerIndex.Equals(other.mSkinControllerIndex)
+                    && mScaleOffsetIndex.Equals(other.mScaleOffsetIndex)
+                    && mJointReferences.Equals(other.mJointReferences)
+                    && mBounds.Equals(other.mBounds)
+                    && mGeometryStates.Equals(other.mGeometryStates)
+                    && mParentName.Equals(other.mParentName)
+                    && mMirrorPlane.Equals(other.mMirrorPlane)
+                    && mOwner.Equals(other.mOwner)
+                    ;
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as Mesh != null ? this.Equals(obj as Mesh) : false;
+            }
+            public override int GetHashCode()
+            {
+                return mName.GetHashCode()
+                    ^ mMaterialIndex.GetHashCode()
+                    ^ mVertexFormatIndex.GetHashCode()
+                    ^ mVertexBufferIndex.GetHashCode()
+                    ^ mIndexBufferIndex.GetHashCode()
+                    ^ mPrimitiveType.GetHashCode()
+                    ^ mFlags.GetHashCode()
+                    ^ mStreamOffset.GetHashCode()
+                    ^ mStartVertex.GetHashCode()
+                    ^ mStartIndex.GetHashCode()
+                    ^ mMinVertexIndex.GetHashCode()
+                    ^ mVertexCount.GetHashCode()
+                    ^ mPrimitiveCount.GetHashCode()
+                    ^ mSkinControllerIndex.GetHashCode()
+                    ^ mScaleOffsetIndex.GetHashCode()
+                    ^ mJointReferences.GetHashCode()
+                    ^ mBounds.GetHashCode()
+                    ^ mGeometryStates.GetHashCode()
+                    ^ mParentName.GetHashCode()
+                    ^ mMirrorPlane.GetHashCode()
+                    ^ mOwner.GetHashCode()
+                    ;
             }
         }
 

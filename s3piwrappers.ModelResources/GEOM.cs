@@ -384,7 +384,38 @@ namespace s3piwrappers
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
-            public bool Equals(Vertex other) { return base.Equals(other); }
+            public bool Equals(Vertex other)
+            {
+                return
+                    mRoot.Equals(other.mRoot)
+                    && mPosition.Equals(other.mPosition)
+                    && mNormal.Equals(other.mNormal)
+                    && mUV.Equals(other.mUV)
+                    && mAssignments.Equals(other.mAssignments)
+                    && mWeights.Equals(other.mWeights)
+                    && mTangent.Equals(other.mTangent)
+                    && mColour.Equals(other.mColour)
+                    && mVertexId.Equals(other.mVertexId);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj as Vertex != null ? this.Equals(obj as Vertex) : false;
+            }
+
+            public override int GetHashCode()
+            {
+                return
+                    mRoot.GetHashCode()
+                    ^ mPosition.GetHashCode()
+                    ^ mNormal.GetHashCode()
+                    ^ mUV.GetHashCode()
+                    ^ mAssignments.GetHashCode()
+                    ^ mWeights.GetHashCode()
+                    ^ mTangent.GetHashCode()
+                    ^ mColour.GetHashCode()
+                    ^ mVertexId.GetHashCode();
+            }
         }
 
         public class VertexElementFormatList : DependentList<VertexElementFormat>
@@ -509,7 +540,26 @@ namespace s3piwrappers
 
             public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
 
-            public bool Equals(VertexElementFormat other) { return mUsage.Equals(other.Usage); }
+            public bool Equals(VertexElementFormat other)
+            {
+                return
+                    mUsage.Equals(other.mUsage)
+                    && mType.Equals(other.mType)
+                    && mSize.Equals(other.mSize)
+                    ;
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as VertexElementFormat != null ? this.Equals(obj as VertexElementFormat) : false;
+            }
+            public override int GetHashCode()
+            {
+                return
+                    mUsage.GetHashCode()
+                    ^ mType.GetHashCode()
+                    ^ mSize.GetHashCode()
+                ;
+            }
 
             public int CompareTo(VertexElementFormat other) { return mUsage.CompareTo(other.Usage); }
         }

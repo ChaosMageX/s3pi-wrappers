@@ -85,7 +85,12 @@
                     <Binding  Path="Version"
                               UpdateSourceTrigger="PropertyChanged"
                               BindsDirectlyToSource="true"
-                              Converter="{StaticResource HexConverter}"></Binding>
+                              Converter="{StaticResource HexConverter}">
+                        <Binding.ValidationRules>
+                            <Validation:HexadecimalValidationRule />
+                        </Binding.ValidationRules>
+                        
+                    </Binding>
                 </TextBox.Text>
             </TextBox>
             <TextBlock Grid.Column="2"

@@ -44,19 +44,20 @@ namespace s3piwrappers
         {
             return GetIndices(mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount);
         }
-        public Int32[] GetIndices(MLOD.Mesh mesh,VRTF vrtf, int geoStateIndex)
+
+        public Int32[] GetIndices(MLOD.Mesh mesh, VRTF vrtf, int geoStateIndex)
         {
-            MLOD.GeometryState geometryState = mesh.GeometryStates[geoStateIndex];
-            return GetIndices(mesh,vrtf, geometryState);
+            return GetIndices(mesh, vrtf, mesh.GeometryStates[geoStateIndex]);
         }
-        public Int32[] GetIndices(MLOD.Mesh mesh,VRTF vrtf, MLOD.GeometryState geometryState)
+        public Int32[] GetIndices(MLOD.Mesh mesh, VRTF vrtf, MLOD.GeometryState geometryState)
         {
             return GetIndices(mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount)
-                .Select(x=>x-geometryState.MinVertexIndex).ToArray();
+                .Select(x => x - geometryState.MinVertexIndex).ToArray();
         }
+
         public Int32[] GetIndices(ModelPrimitiveType type, Int32 startIndex, Int32 count)
         {
-            return GetIndices(MLOD.IndexCountFromPrimitiveType(type),startIndex,count);
+            return GetIndices(MLOD.IndexCountFromPrimitiveType(type), startIndex, count);
         }
         public Int32[] GetIndices(int sizePerPrimitive, Int32 startIndex, Int32 count)
         {
@@ -67,9 +68,10 @@ namespace s3piwrappers
 
         public void SetIndices(MLOD mlod, MLOD.Mesh mesh, Int32[] indices)
         {
-            SetIndices(mlod, mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount, indices);
+            SetIndices(mlod, mesh.IndexBufferIndex, mesh.PrimitiveType, mesh.StartIndex, mesh.PrimitiveCount, indices);
             mesh.PrimitiveCount = indices.Length / MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
         }
+
         public void SetIndices(MLOD mlod, MLOD.Mesh mesh, int geoStateIndex, Int32[] indices)
         {
             MLOD.GeometryState geometryState = mesh.GeometryStates[geoStateIndex];
@@ -77,14 +79,15 @@ namespace s3piwrappers
         }
         public void SetIndices(MLOD mlod, MLOD.Mesh mesh, MLOD.GeometryState geometryState, Int32[] indices)
         {
-            SetIndices(mlod, mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount, indices.Select(x => x + geometryState.MinVertexIndex).ToArray());
+            SetIndices(mlod, mesh.IndexBufferIndex, mesh.PrimitiveType, geometryState.StartIndex, geometryState.PrimitiveCount,
+                indices.Select(x => x + geometryState.MinVertexIndex).ToArray());
             geometryState.PrimitiveCount = indices.Length / MLOD.IndexCountFromPrimitiveType(mesh.PrimitiveType);
         }
-        void SetIndices(MLOD mlod, ModelPrimitiveType type, Int32 startIndex, Int32 primCount, Int32[] indices)
+        void SetIndices(MLOD mlod, s3pi.GenericRCOLResource.GenericRCOLResource.ChunkReference myIBI, ModelPrimitiveType type, Int32 startIndex, Int32 primCount, Int32[] indices)
         {
-            SetIndices(mlod, startIndex, startIndex + primCount * MLOD.IndexCountFromPrimitiveType(type), indices);
+            SetIndices(mlod, myIBI, startIndex, startIndex + primCount * MLOD.IndexCountFromPrimitiveType(type), indices);
         }
-        void SetIndices(MLOD mlod, Int32 beforeLength, Int32 afterPos, Int32[] indices)
+        void SetIndices(MLOD mlod, s3pi.GenericRCOLResource.GenericRCOLResource.ChunkReference myIBI, Int32 beforeLength, Int32 afterPos, Int32[] indices)
         {
             Int32[] before = new Int32[beforeLength];
             Array.Copy(mBuffer, 0, before, 0, before.Length);
@@ -99,14 +102,14 @@ namespace s3piwrappers
 
             int offset = beforeLength + indices.Length - afterPos;
             if (offset != 0)
-                foreach (var m in mlod.Meshes)
-                if (m.StartIndex > before.Length)
-                {
-                    m.StartIndex += offset;
-                    foreach (var g in m.GeometryStates)
-                        if (g.StartIndex > before.Length)
-                            g.StartIndex += offset;
-                }
+                foreach (var m in mlod.Meshes.FindAll(m => m.IndexBufferIndex.Equals(myIBI)))
+                    if (m.StartIndex > beforeLength)
+                    {
+                        m.StartIndex += offset;
+                        foreach (var g in m.GeometryStates)
+                            if (g.StartIndex > beforeLength)
+                                g.StartIndex += offset;
+                    }
         }
 
         [Flags]

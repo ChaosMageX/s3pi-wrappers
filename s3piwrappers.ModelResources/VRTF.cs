@@ -205,7 +205,11 @@ namespace s3piwrappers
             {
                 get
                 {
-                    return ValueBuilder;
+                    return String.Format(
+                        //"Usage: 0x{0:X2} ({1,-11})[{2}]; Format: 0x{3:X2} ({4,-11}); Offset: 0x{5:X2}",
+                        "{1,11} (0x{0:X2})[{2}]; {4,-11} (0x{3:X2}); Offset: 0x{5:X2}",
+                        (int)Usage, Usage + "", mUsageIndex, (int)Format, Format, mOffset);
+                    //return ValueBuilder;
                     /*
                     StringBuilder sb = new StringBuilder();
                     sb.AppendFormat("Usage:\t{0}\n", mUsage);
@@ -249,7 +253,25 @@ namespace s3piwrappers
 
             public bool Equals(ElementLayout other)
             {
-                return base.Equals(other);
+                return
+                    mUsage.Equals(other.mUsage)
+                    && mUsageIndex.Equals(other.mUsageIndex)
+                    && mFormat.Equals(other.mFormat)
+                    && mOffset.Equals(other.mOffset)
+                    ;
+            }
+            public override bool Equals(object obj)
+            {
+                return obj as ElementLayout != null ? this.Equals(obj as ElementLayout) : false;
+            }
+            public override int GetHashCode()
+            {
+                return
+                    mUsage.GetHashCode()
+                    ^ mUsageIndex.GetHashCode()
+                    ^ mFormat.GetHashCode()
+                    ^ mOffset.GetHashCode()
+                    ;
             }
         }
         private UInt32 mVersion;
