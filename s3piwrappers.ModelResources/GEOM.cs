@@ -610,7 +610,8 @@ namespace s3piwrappers
             }
         }
 
-        [ElementPriority(2)]
+        [ElementPriority(2)]       
+
         public MATD.ShaderType Shader
         {
             get { return mShader; }

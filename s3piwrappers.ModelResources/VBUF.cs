@@ -156,6 +156,41 @@ namespace s3piwrappers
         }
         static bool checking = Settings.Checking;
 
+        public BoundingBox GetBoundingBox(MLOD.Mesh mesh, VRTF vrtf)
+        {
+            BoundingBox bbox = null;
+
+            GetBoundingBox(GetVertices(mesh, vrtf, null), ref bbox);
+            foreach (var geos in mesh.GeometryStates)
+                GetBoundingBox(GetVertices(mesh, vrtf, geos, null), ref bbox);
+
+            return bbox ?? new BoundingBox(0, null);
+        }
+        private void GetBoundingBox(IEnumerable<Vertex> vertices, ref BoundingBox bbox)
+        {
+            foreach (float[] fs in vertices.Select(x => x.Position))
+            {
+                if (fs.Length != 3)
+                {
+                    System.Diagnostics.Debug.WriteLine(string.Format("{0} floats in vertex position", fs.Length));
+                    continue;
+                }
+                if (bbox == null)
+                {
+                    bbox = new BoundingBox(0, null, new s3pi.Interfaces.Vertex(0, null, fs[0], fs[1], fs[2]), new s3pi.Interfaces.Vertex(0, null, fs[0], fs[1], fs[2]));
+                }
+                else
+                {
+                    if (bbox.Min.X > fs[0]) bbox.Min.X = fs[0];
+                    if (bbox.Min.Y > fs[1]) bbox.Min.Y = fs[1];
+                    if (bbox.Min.Z > fs[2]) bbox.Min.Z = fs[2];
+                    if (bbox.Max.X < fs[0]) bbox.Max.X = fs[0];
+                    if (bbox.Max.Y < fs[1]) bbox.Max.Y = fs[1];
+                    if (bbox.Max.Z < fs[2]) bbox.Max.Z = fs[2];
+                }
+            }
+        }
+
         public Vertex[] GetVertices(MLOD.Mesh mesh, VRTF vrtf, float[] uvscales)
         {
             return GetVertices(vrtf, mesh.StreamOffset, mesh.VertexCount, uvscales);
@@ -211,8 +246,7 @@ namespace s3piwrappers
                 {
                     var u = uv[j];
                     float[] uvPoints = new float[VRTF.FloatCountFromFormat(u.Format)];
-                    var scale = j < uvscales.Length ? uvscales[j] : 0f;
-                    ReadUVData(data, u, ref uvPoints, scale);
+                    ReadUVData(data, u, ref uvPoints, uvscales);
                     v.UV[j] = uvPoints;
                 }
                 if (blendIndices != null)
@@ -243,7 +277,7 @@ namespace s3piwrappers
             }
             return verts;
         }
-        public static void ReadUVData(byte[] data, VRTF.ElementLayout layout, ref float[] output, float uvscale)
+        public static void ReadUVData(byte[] data, VRTF.ElementLayout layout, ref float[] output, float[] uvscales)
         {
             byte[] element = new byte[VRTF.ByteSizeFromFormat(layout.Format)];
             Array.Copy(data, layout.Offset, element, 0, element.Length);
@@ -252,14 +286,17 @@ namespace s3piwrappers
             {
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < output.Length; i++)
-                        output[i] += (float)BitConverter.ToInt16(element, i * sizeof(short)) * uvscale;
+                    {
+                        var scale = i < uvscales.Length && uvscales[i] != 0 ? uvscales[i] : uvscales[0];
+                        output[i] += (float)BitConverter.ToInt16(element, i * sizeof(short)) * scale;
+                    }
                     break;
                 case VRTF.ElementFormat.Short4:
                     for (int i = 0; i < output.Length; i++)
                         output[i] += (float)BitConverter.ToInt16(element, i * sizeof(short)) / short.MaxValue;
                     break;
                 default:
-                    ReadFloatData(data,layout,ref output);
+                    ReadFloatData(data, layout, ref output);
                     break;
             }
         }
@@ -288,33 +325,53 @@ namespace s3piwrappers
                     {
                         case VRTF.ElementUsage.Colour:
                             for (int i = 0; i < output.Length; i++)
-                                output[i] += (float)element[i] / byte.MaxValue;
+                                output[i] += element[i] / (float)byte.MaxValue;
                             break;
                         case VRTF.ElementUsage.BlendWeight:
                             for (int i = 0; i < output.Length; i++)
-                                output[i] += (float)element[kColorUByte4Map[i]] / byte.MaxValue;
+                                output[i] += element[kColorUByte4Map[i]] / (float)byte.MaxValue;
                             break;
-                        case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
+                        case VRTF.ElementUsage.Tangent:
                             for (int i = 0; i < output.Length - 1; i++)
-                                output[i] += element[2 - i] == 127 || element[2 - i] == 128 ? 0f
-                                    : element[2 - i] / 127.5f - 1f;
+                                output[i] += element[2 - i] == 0 ? -1 : (((element[2 - i] + 1) / 128f) - 1);
+                            //--
+                            // Wes: (signed char) bytes[0]=vert[2+vrtfp.offset[j]];
+                            //      (float)       norms[0]=(float)bytes[0];
+                            //                    norms[0]=(norms[0]<(float)0.0)?(norms[0]+(float)128.0):(norms[0]-(float)128.0);
+                            //???
+                            //--
+                            // input: 255 > 128 > 127 > 0
+                            // map step1: +2 > 0
+                            // map step2: +1 > -1
+                            //for (int i = 0; i < output.Length - 1; i++)
+                            //    output[i] += (element[2 - i] / 127.5f) - 1f;
+
+                            switch (element[3])
+                            {
+                                case 0: output[output.Length - 1] = -1f; break; // -1 determinant
+                                case 127: output[output.Length - 1] = 0f; break; // There is no determinant
+                                case 255: output[output.Length - 1] = +1f; break; // +1 determinant
+                                default: System.Diagnostics.Debug.WriteLine(String.Format("Unexpected handedness {0}.", element[3])); break;
+                            }
                             break;
                     }
                     break;
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < output.Length; i++)
-                        output[i] += (float)BitConverter.ToInt16(element, i * sizeof(short)) / short.MaxValue;
+                        output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / (float)short.MaxValue;
                     break;
                 case VRTF.ElementFormat.Short4:
                     scalar = BitConverter.ToUInt16(element, 3 * sizeof(short));
                     if (scalar == 0) scalar = short.MaxValue;
+                    //scalar++;
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
                 case VRTF.ElementFormat.UShort4N:
                     scalar = BitConverter.ToUInt16(element, 3 * sizeof(ushort));
-                    if (scalar == 0) scalar = 512;
+                    if (scalar == 0) scalar = 511;
+                    //scalar++;
                     for (int i = 0; i < output.Length; i++)
                         output[i] += BitConverter.ToInt16(element, i * sizeof(short)) / scalar;
                     break;
@@ -371,7 +428,7 @@ namespace s3piwrappers
             byte[] before = new byte[beforeLength];
             Array.Copy(mBuffer, before, before.Length);
 
-            long afterPos = beforeLength + (count * vrtf.Stride);
+            long afterPos = Math.Min(mBuffer.Length, beforeLength + (count * vrtf.Stride));
             byte[] after = new byte[mBuffer.Length - afterPos];
             Array.Copy(mBuffer, afterPos, after, 0, after.Length);
 
@@ -401,8 +458,29 @@ namespace s3piwrappers
                     }
         }
 
-        private static void SetVertices(MemoryStream s, VRTF vrtf, IEnumerable<Vertex> vertices,float[] uvscales)
+        static float positionMin;
+        static float positionMax;
+        private static void PositionMinMax(VRTF vrtf, IEnumerable<Vertex> vertices)
         {
+            positionMin = 0f;
+            positionMax = 0f;
+            var layout = vrtf.Layouts.FirstOrDefault(x => x.Format == VRTF.ElementFormat.UShort4N && x.Usage == VRTF.ElementUsage.Position);
+            if (layout == null) return;
+
+            List<float> positionFloats = new List<float>();
+            foreach (float[] fs in vertices.Select(x => x.Position))
+                if (fs != null)
+                    positionFloats.AddRange(fs);
+
+            positionMin = positionFloats.Count > 0 ? positionFloats.Min(x => Math.Abs(x)) : 0;
+            positionMax = positionFloats.Count > 0 ? positionFloats.Max(x => Math.Abs(x)) : 0;
+        }
+        static float[] defaultUVScales = new float[] { 1f / 32767f, 1f / 32767f, 1f / 32767f, };
+        private static void SetVertices(MemoryStream s, VRTF vrtf, IEnumerable<Vertex> vertices, float[] uvscales)
+        {
+            PositionMinMax(vrtf, vertices);
+
+            byte[] output = new byte[vrtf.Stride];
             var position = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Position);
             var normal = vrtf.Layouts
@@ -418,17 +496,13 @@ namespace s3piwrappers
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Tangent);
             var color = vrtf.Layouts
                 .FirstOrDefault(x => x.Usage == VRTF.ElementUsage.Colour);
-            if(uvscales == null)uvscales = new float[3];
-            byte[] output = new byte[vrtf.Stride];
+            if (uvscales == null) uvscales = defaultUVScales;
             foreach (var v in vertices)
             {
-                if (v.Position != null) WriteFloatData(v.Position, position, output);
+                if (v.Position != null) WritePositionData(v.Position, position, output, positionMax);
                 if (v.Normal != null) WriteFloatData(v.Normal, normal, output);
-                for (int u = 0; u < uv.Length; u++) if (v.UV[u] != null)
-                {
-                    var scale = u < uvscales.Length ? uvscales[u] : 0f;
-                    WriteUVData(v.UV[u], uv[u], output, scale);
-                }
+                for (int u = 0; u < uv.Length; u++)
+                    if (v.UV[u] != null) WriteUVData(v.UV[u], uv[u], output, uvscales);
                 if (v.BlendIndices != null) Array.Copy(v.BlendIndices, 0, output, blendIndices.Offset, VRTF.ByteSizeFromFormat(blendIndices.Format));
                 if (v.BlendWeights != null) WriteFloatData(v.BlendWeights, blendWeights, output);
                 if (v.Tangents != null) WriteFloatData(v.Tangents, tangents, output);
@@ -437,14 +511,37 @@ namespace s3piwrappers
             }
             s.Flush();
         }
-        private static void WriteUVData(float[] input, VRTF.ElementLayout layout, byte[] output, float uvscale)
+        private static void WritePositionData(float[] input, VRTF.ElementLayout layout, byte[] output, float max)
+        {
+            switch (layout.Format)
+            {
+                case VRTF.ElementFormat.UShort4N:
+                    //scalar = (max >= 1) ? 511 : (ulong)short.MaxValue;
+                    //-- could try "max < 1.0 / 512.0"?
+                    //ulong scalar = (ulong)(max < 1 ? short.MaxValue : 511);
+                    //scalar++;
+                    //2011-08-30 changed to fixed 512 as LoveseatDanishModern had problems
+                    ulong scalar = 512;
+                    for (int i = 0; i < input.Length; i++)
+                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    Array.Copy(BitConverter.GetBytes((short)(scalar == 512 ? 0 : scalar - 1)), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
+                    break;
+                default:
+                    WriteFloatData(input, layout, output);
+                    break;
+            }
+        }
+        private static void WriteUVData(float[] input, VRTF.ElementLayout layout, byte[] output, float[] uvscales)
         {
 
             switch (layout.Format)
             {
                 case VRTF.ElementFormat.Short2:
                     for (int i = 0; i < input.Length; i++)
-                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] / uvscale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    {
+                        var scale = i < uvscales.Length && uvscales[i] != 0 ? uvscales[i] : uvscales[0];
+                        Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] / scale)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
+                    }
                     break;
 
                 case VRTF.ElementFormat.Short4:
@@ -459,6 +556,7 @@ namespace s3piwrappers
         private static void WriteFloatData(float[] input, VRTF.ElementLayout layout, byte[] output)
         {
             ulong scalar;
+            double max;
 
             switch (layout.Format)
             {
@@ -480,10 +578,28 @@ namespace s3piwrappers
                             for (int i = 0; i < input.Length; i++)
                                 output[layout.Offset + kColorUByte4Map[i]] = (byte)Math.Round(input[i] * byte.MaxValue);
                             break;
-                        case VRTF.ElementUsage.Tangent:
                         case VRTF.ElementUsage.Normal:
+                        case VRTF.ElementUsage.Tangent:
+                            // -0.98828125 == (((0.5 + 1) / 128f) - 1)
                             for (int i = 0; i < input.Length - 1; i++)
-                                output[layout.Offset + 2 - i] = (byte)Math.Round(input[i] == 0 ? 128 : ((input[i] + 1f) * 127.5f));
+                                output[layout.Offset + 2 - i] = (byte)(input[i] < -0.98828125 ? 0 : (Math.Round((input[i] + 1) * 128) - 1));
+                            //--
+                            // Wes: (signed char) bytes[0]=vert[2+vrtfp.offset[j]];
+                            //      (float)       norms[0]=(float)bytes[0];
+                            //                    norms[0]=(norms[0]<(float)0.0)?(norms[0]+(float)128.0):(norms[0]-(float)128.0);
+                            //??
+                            //--
+                            // input: +1 > 0 > -1
+                            // map step1: +2 > +1 > 0
+                            // map step2: 255 > 127.5 > 0
+                            //for (int i = 0; i < input.Length - 1; i++)
+                            //    output[layout.Offset + 2 - i] = (byte)Math.Round((input[i] + 1) * 127.5);
+
+                            if (input[input.Length - 1] == -1) output[layout.Offset + 3] = 0;
+                            else if (input[input.Length - 1] == 0) output[layout.Offset + 3] = 127;
+                            else if (input[input.Length - 1] == 1) output[layout.Offset + 3] = 255;
+                            else
+                                System.Diagnostics.Debug.WriteLine(String.Format("Unexpected handedness {0}.", input[input.Length - 1]));
                             break;
                     }
                     break;
@@ -492,32 +608,22 @@ namespace s3piwrappers
                         Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * short.MaxValue)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.Short4:
-                    double max = Math.Ceiling(input.Max(x => Math.Abs(x)));
-                    scalar = max == 0 ? (ulong)short.MaxValue : (ulong)(short.MaxValue / max);
+                    max = Math.Ceiling(input.Max(x => Math.Abs(x)));
+                    scalar = (ulong)(max < 1 ? short.MaxValue : short.MaxValue / max);
+                    //scalar++;
                     for (int i = 0; i < input.Length; i++)
                         Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
-                    Array.Copy(BitConverter.GetBytes((ushort)scalar), 0, output, layout.Offset + 3 * sizeof(ushort), sizeof(ushort));
+                    Array.Copy(BitConverter.GetBytes((short)(scalar /*- 1/**/)), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
                 case VRTF.ElementFormat.UShort4N:
-                    scalar = 512;
+                    max = Math.Ceiling(input.Max(x => Math.Abs(x)));
+                    scalar = (ulong)(max < 1.0 ? short.MaxValue : 512);
+                    //scalar++;
                     for (int i = 0; i < input.Length; i++)
                         Array.Copy(BitConverter.GetBytes((short)Math.Round(input[i] * scalar)), 0, output, layout.Offset + i * sizeof(short), sizeof(short));
-                    Array.Copy(BitConverter.GetBytes((short)scalar), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
+                    Array.Copy(BitConverter.GetBytes((short)(scalar == 512 ? 0 : scalar /*- 1/**/)), 0, output, layout.Offset + 3 * sizeof(short), sizeof(short));
                     break;
             }
         }
-        //Find the highest value for the scalar
-        //private static ulong GetScalar(IEnumerable<float> input, ulong MaxValue)
-        //{
-        //for (ulong scalar = MaxValue - 1; scalar > 0; scalar >>= 1)
-        //{
-        //    foreach (var f in input)
-        //        if (Math.Abs(f * scalar) >= MaxValue) goto nextScalar;
-        //    return scalar;
-        //nextScalar:
-        //    continue;
-        //}
-        //return MaxValue;
-        //}
     }
 }

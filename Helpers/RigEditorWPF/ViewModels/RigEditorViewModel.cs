@@ -58,7 +58,6 @@ namespace s3piwrappers.RigEditor.ViewModels
             mManager.BoneParentChanged += new BoneActionEventHandler(OnBoneParentChanged);
             AddBoneCommand = new UserCommand<RigEditorViewModel>(x => true, y => y.Manager.AddBone(new Bone(0, null), null));
             GetMatrixInfoCommand = new UserCommand<RigEditorViewModel>(x => true, ExecuteMatrixInfo);
-            ExportRigCommand = new UserCommand<RigEditorViewModel>(x => x != null, ExecuteRigExportDialog);
             CommitCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = true; Application.Current.Shutdown(); });
             CancelCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
             IResourceKey key = new TGIBlock(0,null);
@@ -73,11 +72,6 @@ namespace s3piwrappers.RigEditor.ViewModels
         {
             get { return mHasChanged; }
             set { mHasChanged = value; OnPropertyChanged("HasChanged"); }
-        }
-        static void ExecuteRigExportDialog(RigEditorViewModel param)
-        {
-            var dialog = new SkeletonExportDialog(param.Manager);
-            dialog.ShowDialog();
         }
         static void ExecuteMatrixInfo(RigEditorViewModel param)
         {

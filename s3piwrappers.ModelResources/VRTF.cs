@@ -27,19 +27,18 @@ namespace s3piwrappers
         public static VRTF CreateDefaultForSunShadow()
         {
             VRTF v = new Default(0, null);
-            v.Stride = 8;
-            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
-                                                                  ElementUsage.Position, 0));
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.Short4, 0, ElementUsage.Position, 0));
+            v.Stride = v.Layouts.Select(x => VRTF.ByteSizeFromFormat(x.Format)).Sum();
             return v;
         }
         public static VRTF CreateDefaultForDropShadow()
         {
             VRTF v = new Default(0, null);
-            v.Stride = VRTF.ByteSizeFromFormat(ElementFormat.UShort4N) + VRTF.ByteSizeFromFormat(ElementFormat.Short4);
-            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0,
-                                                                  ElementUsage.Position, 0));
-            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.Short4, (byte)VRTF.ByteSizeFromFormat(ElementFormat.UShort4N),
-                                                                  ElementUsage.UV, 0));
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.UShort4N, 0, ElementUsage.Position, 0));
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.Short2, (byte)v.Layouts.Select(x => VRTF.ByteSizeFromFormat(x.Format)).Sum(), ElementUsage.UV, 0));
+            v.Layouts.Add(new ElementLayout(0, null, ElementFormat.Short2, (byte)v.Layouts.Select(x => VRTF.ByteSizeFromFormat(x.Format)).Sum(), ElementUsage.UV, 1));
+            //v.Layouts.Add(new ElementLayout(0, null, ElementFormat.ColorUByte4, (byte)v.Layouts.Select(x => VRTF.ByteSizeFromFormat(x.Format)).Sum(), ElementUsage.Normal, 0));
+            v.Stride = v.Layouts.Select(x => VRTF.ByteSizeFromFormat(x.Format)).Sum();
             return v;
         }
         public enum ElementUsage : byte

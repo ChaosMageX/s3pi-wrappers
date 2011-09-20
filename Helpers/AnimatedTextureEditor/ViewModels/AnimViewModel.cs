@@ -7,11 +7,11 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DdsFileTypePlugin;
 using Microsoft.Win32;
 using s3pi.GenericRCOLResource;
 using System.Windows;
 using s3piwrappers.AnimatedTextureEditor.Commands;
+using System.Drawing;
 
 namespace s3piwrappers.AnimatedTextureEditor.ViewModels
 {
@@ -34,9 +34,9 @@ namespace s3piwrappers.AnimatedTextureEditor.ViewModels
                     var s = new MemoryStream(mFrame.AsBytes);
                     if (s.Length > 0)
                     {
-                        var dds = new DdsFile();
-                        dds.Load(s);
-                        var img = dds.Image();
+                        var dds = new DdsFile();                        
+                        dds.Load(s,true);
+                        var img = dds.Image;
                         var ms = new MemoryStream();
                         img.Save(ms, ImageFormat.Png);
                         var bmp = new BitmapImage();
