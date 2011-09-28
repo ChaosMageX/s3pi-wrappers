@@ -43,6 +43,7 @@ namespace s3piwrappers
                     case 0x0c: return typeof(FastParticleEffectSection);
                     case 0x0D: return typeof(DistributeEffectSection);
                     case 0x0E: return typeof(RibbonEffectSection);
+                    case 0x0F: return typeof(SpriteEffectSection);
                     default: throw new NotSupportedException("Effect Section type 0x" + id.ToString("X4") + " is not supported.");
                 }
             }
@@ -303,8 +304,13 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x000E, 0x0001 })]
-        public class RibbonEffectSection : EffectSection<DefaultEffect>
+
+
+        /*
+         * Contribution from ChaosMageX
+         */
+        [ConstructorParameters(new object[] { 0x000E, 0x0002 })]
+        public class RibbonEffectSection : EffectSection<RibbonEffect>
         {
             public RibbonEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
                 : base(apiVersion, handler, type, version, s) { }
@@ -315,6 +321,26 @@ namespace s3piwrappers
             }
 
             public RibbonEffectSection(int apiVersion, EventHandler handler, ushort type, ushort version)
+                : base(apiVersion, handler, type, version)
+            {
+            }
+        }
+
+        /*
+         * Contribution from ChaosMageX
+         */
+        [ConstructorParameters(new object[] { 0x000F, 0x0002 })]
+        public class SpriteEffectSection : EffectSection<SpriteEffect>
+        {
+            public SpriteEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
+                : base(apiVersion, handler, type, version, s) { }
+
+            public SpriteEffectSection(int apiVersion, EventHandler handler, SpriteEffectSection basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public SpriteEffectSection(int apiVersion, EventHandler handler, ushort type, ushort version)
                 : base(apiVersion, handler, type, version)
             {
             }

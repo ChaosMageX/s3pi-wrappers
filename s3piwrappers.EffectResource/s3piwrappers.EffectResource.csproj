@@ -97,7 +97,12 @@
     <Compile Include="VisualEffects\VisualEffect.cs" />
     <Compile Include="VisualEffects\VisualEffectHandle.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Effects\RibbonEffect.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\SpriteEffect.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
