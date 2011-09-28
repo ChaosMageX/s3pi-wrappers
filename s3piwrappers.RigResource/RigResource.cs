@@ -21,6 +21,7 @@ namespace s3piwrappers
         }
         private RigType mType;
         private AbstractRig mRig;
+        private EAxoidRig mEaRig;
 
         [ElementPriority(1)]
         public RigType Type
@@ -40,25 +41,47 @@ namespace s3piwrappers
         public AbstractRig Rig
         {
             get { return mRig; }
-            set { if(mRig!=value){mRig = value; OnResourceChanged(this, new EventArgs());} }
+            set { if (mRig != value) { mRig = value; OnResourceChanged(this, new EventArgs()); } }
+        }
+        [ElementPriority(3)]
+        public EAxoidRig EaRig
+        {
+            get { return mEaRig; }
+            set { if (mEaRig != value) { mEaRig = value; OnResourceChanged(this, new EventArgs()); } }
         }
         private void Parse(Stream s)
         {
             BinaryReader br = new BinaryReader(s);
             UInt32 type = br.ReadUInt32();
-            mType = type == 0x8EAF13DE ? RigType.Body : RigType.Object;
-            mRig = AbstractRig.CreateRig(mType, 0, new EventHandler(OnResourceChanged), s);
+            if (type < 0x0100)
+            {
+                mType = (RigType)(-1);
+                mEaRig = new EAxoidRig(0, new EventHandler(OnResourceChanged), s);
+            }
+            else
+            {
+                mType = type == 0x8EAF13DE ? RigType.Body : RigType.Object;
+                mRig = AbstractRig.CreateRig(mType, 0, new EventHandler(OnResourceChanged), s);
+            }
         }
         protected override Stream UnParse()
         {
             MemoryStream s = new MemoryStream();
-            if (mRig == null) mRig = AbstractRig.CreateRig(mType, 0, new EventHandler(OnResourceChanged));
-            if (mType == RigType.Body)
+            if (mType == (RigType)(-1))
             {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(0x8EAF13DE);
+                if (mEaRig == null) mEaRig = new EAxoidRig(0, new EventHandler(OnResourceChanged));
+                mEaRig.UnParse(s);
             }
-            mRig.UnParse(s);
+            else
+            {
+                if (mRig == null) mRig = AbstractRig.CreateRig(mType, 0, new EventHandler(OnResourceChanged));
+                if (mType == RigType.Body)
+                {
+                    BinaryWriter bw = new BinaryWriter(s);
+                    bw.Write(0x8EAF13DE);
+                }
+                mRig.UnParse(s);
+            }
             return s;
         }
         public override int RecommendedApiVersion
@@ -67,11 +90,30 @@ namespace s3piwrappers
         }
         public override List<string> ContentFields
         {
-            get { return GetContentFields(base.requestedApiVersion, GetType()); }
+            get
+            { 
+                List<string> results = GetContentFields(base.requestedApiVersion, GetType());
+                if (mType == (RigType)(-1))
+                {
+                    results.Remove("Type");
+                    results.Remove("Rig");
+                }
+                else
+                {
+                    results.Remove("EaRig");
+                }
+                return results;
+            }
         }
         public string Value
         {
-            get { return string.Format("==={0} Rig===\n{1}\n",mType, mRig.Value); }
+            get
+            {
+                if (mType == (RigType)(-1))
+                    return string.Format("===EAxoid Rig===\n{0}\n", mEaRig.Value);
+                else
+                    return string.Format("==={0} Rig===\n{1}\n",mType, mRig.Value); 
+            }
         }
 
         private const int kRecommendedApiVersion = 1;

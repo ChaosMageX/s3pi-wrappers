@@ -3,7 +3,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers.Granny2
 {
-    public class Quad : GrannyElement
+    public class Quad : GrannyElement, IEquatable<Quad>
     {
         private float mX;
         private float mY;
@@ -72,6 +72,11 @@ namespace s3piwrappers.Granny2
         public override string Value
         {
             get { return ToString(); }
+        }
+
+        public bool Equals(Quad other)
+        {
+            return this.mX == other.mX && this.mY == other.mY && this.mZ == other.mZ && this.mW == other.mW;
         }
     }
 }

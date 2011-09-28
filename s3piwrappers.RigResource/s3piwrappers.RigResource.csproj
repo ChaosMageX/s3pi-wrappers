@@ -79,6 +79,7 @@
     <Compile Include="Granny2\TransformFlags.cs" />
     <Compile Include="Granny2\Triple.cs" />
     <Compile Include="GrannyData.cs" />
+    <Compile Include="EAxoidRig.cs" />
     <Compile Include="ObjectRig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawGrannyData.cs" />

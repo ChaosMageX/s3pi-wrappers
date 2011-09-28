@@ -3,7 +3,7 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers.Granny2
 {
-    public class Triple : GrannyElement
+    public class Triple : GrannyElement, IEquatable<Triple>
     {
 
         private float mX;
@@ -61,6 +61,11 @@ namespace s3piwrappers.Granny2
         public override string Value
         {
             get { return ToString(); }
+        }
+
+        public bool Equals(Triple other)
+        {
+            return this.mX == other.mX && this.mY == other.mY && this.mZ == other.mZ;
         }
     }
 }
