@@ -131,7 +131,7 @@ namespace s3piwrappers
             {
                 MemoryStream ms = new MemoryStream(kBufferSize + mName.Length);
                 this.UnParse(ms);
-                return new Bone(requestedApiVersion, handler, ms);
+                return new Bone(base.requestedApiVersion, handler, ms);
             }
 
             public override List<string> ContentFields
@@ -242,8 +242,339 @@ namespace s3piwrappers
             }
         }
 
+        public class IKChain : AHandlerElement, IEquatable<IKChain>
+        {
+            private EAxoidRig mParent;
+
+            public IKChain(int apiVersion, EventHandler handler, EAxoidRig parent)
+                : base(apiVersion, handler)
+            {
+                mParent = parent;
+            }
+
+            public IKChain(int apiVersion, EventHandler handler, EAxoidRig parent, Stream s)
+                : base(apiVersion, handler)
+            {
+                mParent = parent;
+                this.Parse(s);
+            }
+
+            private const int kBufferSize = 64;//+ 4 * mBoneIndices.Count
+
+            private IntList mBoneIndices;
+
+            private Int32 mInfo01;
+            private Int32 mInfo02;
+            private Int32 mInfo03;
+            private Int32 mInfo04;
+            private Int32 mInfo05;
+            private Int32 mInfo06;
+            private Int32 mInfo07;
+            private Int32 mInfo08;
+            private Int32 mInfo09;
+            private Int32 mInfo10;
+            private Int32 mInfo11;
+
+            private Int32 mPole;
+            private Int32 mSlotInfo;
+            private Int32 mSlotOffset;
+            private Int32 mRoot;
+
+            [ElementPriority(16)]
+            public int Root
+            {
+                get { return mRoot; }
+                set { if (mRoot != value) { mRoot = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(15)]
+            public int SlotOffset
+            {
+                get { return mSlotOffset; }
+                set { if (mSlotOffset != value) { mSlotOffset = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(14)]
+            public int SlotInfo
+            {
+                get { return mSlotInfo; }
+                set { if (mSlotInfo != value) { mSlotInfo = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(13)]
+            public int Pole
+            {
+                get { return mPole; }
+                set { if (mPole != value) { mPole = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(12)]
+            public int Info11
+            {
+                get { return mInfo11; }
+                set { if (mInfo11 != value) { mInfo11 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(11)]
+            public int Info10
+            {
+                get { return mInfo10; }
+                set { if (mInfo10 != value) { mInfo10 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(10)]
+            public int Info09
+            {
+                get { return mInfo09; }
+                set { if (mInfo09 != value) { mInfo09 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(9)]
+            public int Info08
+            {
+                get { return mInfo08; }
+                set { if (mInfo08 != value) { mInfo08 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(8)]
+            public int Info07
+            {
+                get { return mInfo07; }
+                set { if (mInfo07 != value) { mInfo07 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(7)]
+            public int Info06
+            {
+                get { return mInfo06; }
+                set { if (mInfo06 != value) { mInfo06 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(6)]
+            public int Info05
+            {
+                get { return mInfo05; }
+                set { if (mInfo05 != value) { mInfo05 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(5)]
+            public int Info04
+            {
+                get { return mInfo04; }
+                set { if (mInfo04 != value) { mInfo04 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(4)]
+            public int Info03
+            {
+                get { return mInfo03; }
+                set { if (mInfo03 != value) { mInfo03 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(3)]
+            public int Info02
+            {
+                get { return mInfo02; }
+                set { if (mInfo02 != value) { mInfo02 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(2)]
+            public int Info01
+            {
+                get { return mInfo01; }
+                set { if (mInfo01 != value) { mInfo01 = value; OnElementChanged(); } }
+            }
+
+            [ElementPriority(1)]
+            public IntList BoneIndices
+            {
+                get { return mBoneIndices; }
+                set { mBoneIndices = value; OnElementChanged(); }
+            }
+
+            internal void SetParent(EAxoidRig parent)
+            {
+                mParent = parent;
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                MemoryStream ms = new MemoryStream(kBufferSize + 4 * mBoneIndices.Count);
+                this.UnParse(ms);
+                return new IKChain(base.requestedApiVersion, handler, this.mParent, ms);
+            }
+
+            public override List<string> ContentFields
+            {
+                get { return AApiVersionedFields.GetContentFields(base.requestedApiVersion, typeof(IKChain)); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return 1; }
+            }
+
+            private string GetBoneName(int index)
+            {
+                if (mParent == null || index < 0 || index >= mParent.mBones.Count)
+                    return index.ToString();
+                else
+                    return mParent.mBones[index].ToString();
+            }
+
+            public string Value
+            {
+                get
+                {
+                    StringBuilder builder = new StringBuilder("Bone Indices:\n");
+                    int length = mBoneIndices.Count;
+                    for (int i = 0; i < length; i++)
+                        builder.AppendFormat("[{0}]:\t{1}\n", i, GetBoneName(mBoneIndices[i]));
+
+                    builder.AppendLine(string.Concat("Info01:\t", GetBoneName(mInfo01)));
+                    builder.AppendLine(string.Concat("Info02:\t", GetBoneName(mInfo02)));
+                    builder.AppendLine(string.Concat("Info03:\t", GetBoneName(mInfo03)));
+                    builder.AppendLine(string.Concat("Info04:\t", GetBoneName(mInfo04)));
+                    builder.AppendLine(string.Concat("Info05:\t", GetBoneName(mInfo05)));
+                    builder.AppendLine(string.Concat("Info06:\t", GetBoneName(mInfo06)));
+                    builder.AppendLine(string.Concat("Info07:\t", GetBoneName(mInfo07)));
+                    builder.AppendLine(string.Concat("Info08:\t", GetBoneName(mInfo08)));
+                    builder.AppendLine(string.Concat("Info09:\t", GetBoneName(mInfo09)));
+                    builder.AppendLine(string.Concat("Info10:\t", GetBoneName(mInfo10)));
+                    builder.AppendLine(string.Concat("Info11:\t", GetBoneName(mInfo11)));
+
+                    builder.AppendLine(string.Concat("Pole:\t", GetBoneName(mPole)));
+                    builder.AppendLine(string.Concat("SlotInfo:\t", GetBoneName(mSlotInfo)));
+                    builder.AppendLine(string.Concat("SlotOffset:\t", GetBoneName(mSlotOffset)));
+                    builder.AppendLine(string.Concat("Root:\t", GetBoneName(mRoot)));
+
+                    return builder.ToString();
+                }
+            }
+
+            private void Parse(Stream s)
+            {
+                mBoneIndices = new IntList(this.handler, s);
+                BinaryReader r = new BinaryReader(s);
+                mInfo01 = r.ReadInt32();
+                mInfo02 = r.ReadInt32();
+                mInfo03 = r.ReadInt32();
+                mInfo04 = r.ReadInt32();
+                mInfo05 = r.ReadInt32();
+                mInfo06 = r.ReadInt32();
+                mInfo07 = r.ReadInt32();
+                mInfo08 = r.ReadInt32();
+                mInfo09 = r.ReadInt32();
+                mInfo10 = r.ReadInt32();
+                mInfo11 = r.ReadInt32();
+
+                mPole = r.ReadInt32();
+                mSlotInfo = r.ReadInt32();
+                mSlotOffset = r.ReadInt32();
+                mRoot = r.ReadInt32();
+            }
+
+            public void UnParse(Stream s)
+            {
+                mBoneIndices.UnParse(s);
+                BinaryWriter w = new BinaryWriter(s);
+                w.Write(mInfo01);
+                w.Write(mInfo02);
+                w.Write(mInfo03);
+                w.Write(mInfo04);
+                w.Write(mInfo05);
+                w.Write(mInfo06);
+                w.Write(mInfo07);
+                w.Write(mInfo08);
+                w.Write(mInfo09);
+                w.Write(mInfo10);
+                w.Write(mInfo11);
+
+                w.Write(mPole);
+                w.Write(mSlotInfo);
+                w.Write(mSlotOffset);
+                w.Write(mRoot);
+            }
+
+            public bool Equals(IKChain other)
+            {
+                bool flag =
+                    this.mInfo01 == other.mInfo01 &&
+                    this.mInfo02 == other.mInfo02 &&
+                    this.mInfo03 == other.mInfo03 &&
+                    this.mInfo04 == other.mInfo04 &&
+                    this.mInfo05 == other.mInfo05 &&
+                    this.mInfo06 == other.mInfo06 &&
+                    this.mInfo07 == other.mInfo07 &&
+                    this.mInfo08 == other.mInfo08 &&
+                    this.mInfo09 == other.mInfo09 &&
+                    this.mInfo10 == other.mInfo10 &&
+                    this.mInfo11 == other.mInfo11 &&
+                    this.mPole == other.mPole &&
+                    this.mSlotInfo == other.mSlotInfo &&
+                    this.mSlotOffset == other.mSlotOffset &&
+                    this.mRoot == other.mRoot;
+                if (flag)
+                {
+                    int length = this.mBoneIndices.Count;
+                    if (length != other.mBoneIndices.Count)
+                        return false;
+                    for (int i = 0; i < length && flag; i++)
+                    {
+                        flag = this.mBoneIndices[i] == other.mBoneIndices[i];
+                    }
+                    return flag;
+                }
+                return false;
+            }
+        }
+
+        public class IKChainList : DependentList<IKChain>
+        {
+            private EAxoidRig mParent;
+
+            public IKChainList(EventHandler handler, EAxoidRig parent, long size = -1L)
+                : base(handler, size) { SetParent(parent); }
+
+            public IKChainList(EventHandler handler, EAxoidRig parent, IEnumerable<IKChain> ilt, long size = -1L)
+                : base(handler, ilt, size) { SetParent(parent); }
+
+            public IKChainList(EventHandler handler, EAxoidRig parent, Stream s, long size = -1L)
+                : base(handler, s, size) { SetParent(parent); }
+
+            private void SetParent(EAxoidRig parent)
+            {
+                this.mParent = parent;
+                int length = base.Count;
+                for (int i = 0; i < length; i++)
+                {
+                    base[i].SetParent(parent);
+                }
+            }
+
+            public override void Add()
+            {
+                base.Add(new IKChain(0, base.elementHandler, this.mParent));
+            }
+
+            protected override IKChain CreateElement(Stream s)
+            {
+                return new IKChain(0, base.elementHandler, this.mParent, s);
+            }
+
+            protected override void WriteElement(Stream s, IKChain element)
+            {
+                element.UnParse(s);
+            }
+        }
+
         public EAxoidRig(int apiVersion, EventHandler handler)
-            : base(apiVersion, handler) { }
+            : base(apiVersion, handler)
+        {
+            mBones = new BoneList(handler);
+            mName = "";
+            mIKChains = new IKChainList(handler, this);
+        }
 
         public EAxoidRig(int apiVersion, EventHandler handler, Stream s)
             : base(apiVersion, handler)
@@ -251,17 +582,17 @@ namespace s3piwrappers
             Parse(s);
         }
 
-        private UInt32 mInt01;
-        private UInt32 mInt02;
+        private UInt32 mMajor = 0x00000004;
+        private UInt32 mMinor = 0x00000002;
         private BoneList mBones;
         private string mName;
-        private SimpleList<UInt32> mUnknown;
+        private IKChainList mIKChains;
 
         [ElementPriority(5)]
-        public SimpleList<UInt32> Unknown
+        public IKChainList IKChains
         {
-            get { return mUnknown; }
-            set { mUnknown = value; OnElementChanged(); }
+            get { return mIKChains; }
+            set { mIKChains = value; OnElementChanged(); }
         }
 
         [ElementPriority(4)]
@@ -279,17 +610,25 @@ namespace s3piwrappers
         }
 
         [ElementPriority(2)]
-        public uint Int02
+        public uint MinorVersion
         {
-            get { return mInt02; }
-            set { mInt02 = value; OnElementChanged(); }
+            get { return mMinor; }
+            set { mMinor = value; OnElementChanged(); }
         }
 
         [ElementPriority(1)]
-        public uint Int01
+        public uint MajorVersion
         {
-            get { return mInt01; }
-            set { mInt01 = value; OnElementChanged(); }
+            get { return mMajor; }
+            set { mMajor = value; OnElementChanged(); }
+        }
+
+        public string GetBoneName(int index)
+        {
+            if (index < 0 || index >= mBones.Count)
+                return index.ToString();
+            else
+                return mBones[index].ToString();
         }
 
         public string Value
@@ -297,28 +636,22 @@ namespace s3piwrappers
             get
             {
                 StringBuilder builder = new StringBuilder();
-                builder.AppendFormat("Int01:\t{0}\nInt02:\t{1}\n", mInt01, mInt02);
+                builder.AppendFormat("Major:\t{0}\nMinor:\t{1}\n", mMajor, mMinor);
                 builder.AppendFormat("Name:\t{0}\n", mName);
                 builder.Append("Bones:\n");
-                for (int i = 0; i < mBones.Count; i++)
+                int i, count = mBones.Count;
+                for (i = 0; i < count; i++)
                 {
                     builder.AppendFormat("==Bone[{0}]==\n{1}\n", i, mBones[i].Value);
                 }
-                builder.Append("Unknown:\n");
-                int lineCount = mUnknown.Count / 4;
-                int j, k, index = 0;
-                for (j = 0; j < lineCount; j++)
+                if (mIKChains.Count > 0)
                 {
-                    for (k = 0; k < 4; k++)
+                    builder.Append("IK Chains:\n");
+                    count = mIKChains.Count;
+                    for (i = 0; i < count; i++)
                     {
-                        builder.AppendFormat("{0:X8}\t", mUnknown[index]);
-                        index++;
+                        builder.AppendFormat("==IK Chain[{0}]==\n{1}\n", i, mIKChains[i].Value);
                     }
-                    builder.Append("\n");
-                }
-                for (; index < mUnknown.Count; index++)
-                {
-                    builder.AppendFormat("{0:X8}\t", mUnknown[index]);
                 }
                 return builder.ToString();
             }
@@ -328,30 +661,22 @@ namespace s3piwrappers
         {
             s.Position = 0L;
             BinaryReader r = new BinaryReader(s);
-            mInt01 = r.ReadUInt32();
-            mInt02 = r.ReadUInt32();
+            mMajor = r.ReadUInt32();
+            mMinor = r.ReadUInt32();
             mBones = new BoneList(handler, s);
             mName = ReadPascalString(r);
             long unkCount = (s.Length - s.Position) / 4L;
-            mUnknown = new SimpleList<uint>(handler);
-            for (int i = 0; i < unkCount; i++)
-            {
-                mUnknown.Add(r.ReadUInt32());
-            }
+            mIKChains = new IKChainList(handler, this, s);
         }
 
         public void UnParse(Stream s)
         {
             BinaryWriter w = new BinaryWriter(s);
-            w.Write(mInt01);
-            w.Write(mInt02);
+            w.Write(mMajor);
+            w.Write(mMinor);
             mBones.UnParse(s);
             WritePascalString(w, mName);
-            int unkCount = mUnknown.Count;
-            for (int i = 0; i < unkCount; i++)
-            {
-                w.Write(mUnknown[i]);
-            }
+            mIKChains.UnParse(s);
         }
 
         public override AHandlerElement Clone(EventHandler handler)
