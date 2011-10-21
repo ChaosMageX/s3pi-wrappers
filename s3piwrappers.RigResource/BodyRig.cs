@@ -85,8 +85,6 @@ namespace s3piwrappers
             }
         }
 
-
-
         public class IkChainList : DependentList<IkChain>
         {
             public IkChainList(EventHandler handler)
@@ -213,6 +211,7 @@ namespace s3piwrappers
                 return mStart.Equals(other.mStart) && mEnd.Equals(other.mEnd);
             }
         }
+
         public class IkChain : AHandlerElement, IEquatable<IkChain>
         {
             private UInt32 mUnknown01;
@@ -225,7 +224,7 @@ namespace s3piwrappers
             private Int32 mSlotOffsetRoot;
             private OptionalNodeReference[] mInfoNodes;
             private Int32 mInfoRoot;
-            private UInt32 mUnknown04;
+            private Int32 mRoot;
             private IkLinkList mLinks;
             public IkChain(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
@@ -235,9 +234,9 @@ namespace s3piwrappers
                 mInfoNodes = new OptionalNodeReference[10];
                 for (int i = 0; i < 10; i++) mInfoNodes[i] = new OptionalNodeReference(0, handler);
             }
-            public IkChain(int APIversion, EventHandler handler, IkChain basis) : this(APIversion, handler, basis.IkPole, basis.IkPoleRoot, (OptionalNodeReference[])basis.InfoNodes.Clone(), basis.InfoRoot, new IkLinkList(handler, basis.Links), basis.SlotInfo, basis.SlotInfoRoot, basis.SlotOffset, basis.SlotOffsetRoot, basis.Unknown01, (byte[])basis.Unknown02, basis.Unknown04) { }
+            public IkChain(int APIversion, EventHandler handler, IkChain basis) : this(APIversion, handler, basis.IkPole, basis.IkPoleRoot, (OptionalNodeReference[])basis.InfoNodes.Clone(), basis.InfoRoot, new IkLinkList(handler, basis.Links), basis.SlotInfo, basis.SlotInfoRoot, basis.SlotOffset, basis.SlotOffsetRoot, basis.Unknown01, (byte[])basis.Unknown02, basis.Root) { }
             public IkChain(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
-            public IkChain(int APIversion, EventHandler handler, int ikPole, int ikPoleRoot, OptionalNodeReference[] infoNodes, int infoRoot, IkLinkList links, int slotInfo, int slotInfoRoot, int slotOffset, int slotOffsetRoot, uint unknown01, byte[] unknown02, uint unknown04)
+            public IkChain(int APIversion, EventHandler handler, int ikPole, int ikPoleRoot, OptionalNodeReference[] infoNodes, int infoRoot, IkLinkList links, int slotInfo, int slotInfoRoot, int slotOffset, int slotOffsetRoot, uint unknown01, byte[] unknown02, int root)
                 : base(APIversion, handler)
             {
                 mIkPole = ikPole;
@@ -251,7 +250,7 @@ namespace s3piwrappers
                 mSlotOffsetRoot = slotOffsetRoot;
                 mUnknown01 = unknown01;
                 mUnknown02 = unknown02;
-                mUnknown04 = unknown04;
+                mRoot = root;
             }
 
             [ElementPriority(1)]
@@ -315,10 +314,10 @@ namespace s3piwrappers
                 set { if (mInfoRoot != value) { mInfoRoot = value; OnElementChanged(); } }
             }
             [ElementPriority(11)]
-            public uint Unknown04
+            public int Root
             {
-                get { return mUnknown04; }
-                set { if (mUnknown04 != value) { mUnknown04 = value; OnElementChanged(); } }
+                get { return mRoot; }
+                set { if (mRoot != value) { mRoot = value; OnElementChanged(); } }
             }
             [ElementPriority(12)]
             public IkLinkList Links
@@ -346,7 +345,7 @@ namespace s3piwrappers
                 mLinks = new IkLinkList(handler);
                 uint[] linkUnks = new uint[linkCount];
                 for (int i = 0; i < linkCount; i++) linkUnks[i] = br.ReadUInt32();
-                mUnknown04 = br.ReadUInt32();
+                mRoot = br.ReadInt32();
                 for (int i = 0; i < linkCount; i++) mLinks.Add(new IkLink(0, handler, linkUnks[i], br.ReadInt32(), br.ReadInt32()));
             }
             public void UnParse(Stream s)
@@ -367,7 +366,7 @@ namespace s3piwrappers
                 for (int i = 0; i < 10; i++) bw.Write(mInfoNodes[i].Index);
                 bw.Write(mInfoRoot);
                 for (int i = 0; i < mLinks.Count; i++) bw.Write(mLinks[i].Unknown);
-                bw.Write(mUnknown04);
+                bw.Write(mRoot);
                 for (int i = 0; i < mLinks.Count; i++)
                 {
                     bw.Write((uint)mLinks[i].End);
@@ -620,7 +619,7 @@ namespace s3piwrappers
                                 sb.AppendFormat("ExportJoint[{0}]:\t{1}\n", j, GetBoneIndexName(ikc.InfoNodes[j].Index));
                         }
                         sb.AppendFormat("ExportRoot:\t{0}\n", GetBoneIndexName(ikc.InfoRoot));
-                        sb.AppendFormat("Unknown04:\t0x{0:X8}\n", ikc.Unknown04);
+                        sb.AppendFormat("Root:\t{0}\n", GetBoneIndexName(ikc.Root));
                         if (ikc.Links.Count > 0)
                         {
                             sb.AppendFormat("Ik Links:\n");

@@ -83,6 +83,7 @@
     <Compile Include="ObjectRig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawGrannyData.cs" />
+    <Compile Include="RigConversion.cs" />
     <Compile Include="RigResource.cs" />
     <Compile Include="RigResourceHandler.cs" />
     <Compile Include="RigType.cs" />

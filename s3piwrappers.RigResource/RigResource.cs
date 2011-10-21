@@ -8,6 +8,8 @@ namespace s3piwrappers
 {
     public class RigResource : AResource
     {
+        public const RigType EAxoidRigType = (RigType)(-1);
+
         public RigResource(int APIversion, Stream s)
             : base(APIversion, s)
         {
@@ -55,7 +57,7 @@ namespace s3piwrappers
             UInt32 type = br.ReadUInt32();
             if (type < 0x0100)
             {
-                mType = (RigType)(-1);
+                mType = EAxoidRigType;
                 mEaRig = new EAxoidRig(0, new EventHandler(OnResourceChanged), s);
             }
             else
@@ -67,7 +69,7 @@ namespace s3piwrappers
         protected override Stream UnParse()
         {
             MemoryStream s = new MemoryStream();
-            if (mType == (RigType)(-1))
+            if (mType == EAxoidRigType)
             {
                 if (mEaRig == null) mEaRig = new EAxoidRig(0, new EventHandler(OnResourceChanged));
                 mEaRig.UnParse(s);
@@ -93,7 +95,7 @@ namespace s3piwrappers
             get
             { 
                 List<string> results = GetContentFields(base.requestedApiVersion, GetType());
-                if (mType == (RigType)(-1))
+                if (mType == EAxoidRigType)
                 {
                     results.Remove("Type");
                     results.Remove("Rig");
@@ -109,7 +111,7 @@ namespace s3piwrappers
         {
             get
             {
-                if (mType == (RigType)(-1))
+                if (mType == EAxoidRigType)
                     return string.Format("===EAxoid Rig===\n{0}\n", mEaRig.Value);
                 else
                     return string.Format("==={0} Rig===\n{1}\n",mType, mRig.Value); 
