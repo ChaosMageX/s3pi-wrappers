@@ -10,7 +10,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using s3piwrappers.Granny2;
 
 namespace s3piwrappers.RigEditor
 {
@@ -19,7 +18,7 @@ namespace s3piwrappers.RigEditor
     /// </summary>
     public partial class BoneSelectDialog : Window
     {
-        public BoneSelectDialog(IEnumerable<Bone> bones, String title):this()
+        public BoneSelectDialog(IEnumerable<RigResource.RigResource.Bone> bones, String title):this()
         {
             Title = title;
             DataContext = bones;
@@ -35,6 +34,6 @@ namespace s3piwrappers.RigEditor
             DialogResult = true;
             this.Close();
         }
-        public Bone SelectedBone { get { return mBoneComboBox.SelectedItem as Bone; } }
+        public RigResource.RigResource.Bone SelectedBone { get { return mBoneComboBox.SelectedItem as RigResource.RigResource.Bone; } }
     }
 }

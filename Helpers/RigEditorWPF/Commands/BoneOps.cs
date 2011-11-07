@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Input;
-using s3piwrappers.Granny2;
+using s3pi.Interfaces;
 using s3piwrappers.RigEditor.Bones;
 using s3piwrappers.RigEditor.Geometry;
 using s3piwrappers.RigEditor.ViewModels;
+using Quaternion = s3piwrappers.RigEditor.Geometry.Quaternion;
 
 namespace s3piwrappers.RigEditor.Commands
 {
@@ -63,8 +66,8 @@ namespace s3piwrappers.RigEditor.Commands
         }
         private static void ExecuteRotationMatrixInput(BoneViewModel bone)
         {
-            var q = bone.Bone.LocalTransform.Orientation;
-            var m = new Matrix(new Quaternion(q.X, q.Y, q.Z, q.W));
+            var q = bone.Bone.Orientation;
+            var m = new Matrix(new Quaternion(q.A, q.B, q.C, q.D));
             var dialog = new MatrixInputDialog(m, "Rotation Matrix Input");
             var result = dialog.ShowDialog() ?? false;
             if(result)
@@ -130,7 +133,7 @@ namespace s3piwrappers.RigEditor.Commands
         }
         private static void ExecuteSetParent(BoneViewModel target)
         {
-            var descendants = target.Manager.GetDescendants(target.Bone);
+            var descendants = target.Manager.GetDescendants(target.Bone).OrderBy(x=>x.Name);
             var choices = target.Manager.Bones.Where(x => x != target.Bone && !descendants.Contains(x)).ToList();
             choices.Sort((x, y) => x.Name.CompareTo(y.Name));
             var dialog = new BoneSelectDialog(choices,"Select a New Parent...");
@@ -153,34 +156,34 @@ namespace s3piwrappers.RigEditor.Commands
         {
             target.Manager.DeleteBone(target.Bone, true);
         }
+
+        private const string NEW_BONE_NAME = "<New Bone>";
         private static void ExecuteAddBone(BoneViewModel target)
         {
-            target.Manager.AddBone(new Bone(0, null), target.Bone);
+            target.Manager.AddBone(new RigResource.RigResource.Bone(0, null, new Vertex(0, null), new s3pi.Interfaces.Quaternion(0,null,0f,0f,0f,1f), new Vertex(0, null), NEW_BONE_NAME, target.Manager.Bones.Count, -1, FNV32.GetHash(NEW_BONE_NAME),0x23), target.Bone);
 
         }
         private static void ExecuteClone(BoneViewModel target)
         {
-            target.Manager.AddBone(new Bone(0, null, target.Bone), target.Parent is BoneViewModel ? ((BoneViewModel)target.Parent).Bone : null);
+            target.Manager.AddBone(new RigResource.RigResource.Bone(0, null, target.Bone), target.Parent is BoneViewModel ? ((BoneViewModel)target.Parent).Bone : null);
 
         }
         private static void ExecuteCloneHierarchy(BoneViewModel target)
         {
             CloneHierarchy(target.Manager, target.Bone, target.Manager.GetParent(target.Bone));
         }
-        private static void CloneHierarchy(BoneManager manager, Bone bone, Bone dest)
+        private static void CloneHierarchy(BoneManager manager, RigResource.RigResource.Bone bone, RigResource.RigResource.Bone dest)
         {
             var descendants = manager.GetDescendants(bone).ToList();
-            var clones = new List<Bone>();
-            var map = new Dictionary<Bone, Bone>();
-
-
-            var root = new Bone(0, null, bone);
+            var clones = new List<RigResource.RigResource.Bone>();
+            var map = new Dictionary<RigResource.RigResource.Bone, RigResource.RigResource.Bone>();
+            var root = new RigResource.RigResource.Bone(0, null, bone);
             map[bone] = root;
             manager.AddBone(root, dest);
 
             foreach (var descendant in descendants)
             {
-                var clone = new Bone(0, null, descendant);
+                var clone = new RigResource.RigResource.Bone(0, null, descendant);
                 map[descendant] = clone;
                 clones.Add(clone);
                 manager.AddBone(clone, manager.GetParent(descendant));

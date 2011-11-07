@@ -121,14 +121,14 @@ namespace s3piwrappers
             {
                 get
                 {
-
-                    StringBuilder sb = new StringBuilder();
-                    sb.AppendFormat("XmlIndex: 0x{0:X8}\n", mXmlIndex);
-                    sb.AppendFormat("\nColours:\n");
-                    for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i]);
-                    sb.AppendFormat("\nHSV Bases:\n");
-                    for (int i = 0; i < mHSVBases.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mHSVBases[i]);
-                    return sb.ToString();
+                    return ValueBuilder;
+                    //StringBuilder sb = new StringBuilder();
+                    //sb.AppendFormat("XmlIndex: 0x{0:X8}\n", mXmlIndex);
+                    //sb.AppendFormat("\nColours:\n");
+                    //for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i]);
+                    //sb.AppendFormat("\nHSV Bases:\n");
+                    //for (int i = 0; i < mHSVBases.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mHSVBases[i]);
+                    //return sb.ToString();
                 }
             }
             private void Parse(Stream s)
@@ -189,19 +189,19 @@ namespace s3piwrappers
         public enum eUsageSubCategory : ushort
         {
             MakeupBlush = 0x1,
-            MakeupEyebrow = 0x5,
             MakeupEyeliner = 0x2,
             MakeupEyeshadow = 0x3,
             MakeupLipstick = 0x4,
-            None = 0x0
+            MakeupEyebrow = 0x5,
+            PeltColor = 0x06,
+            PeltShift = 0x7
         }
-
-
 
         private UInt32 mVersion = 0x00000004;
         private eUsageSubCategory mUsageSubCategory;
         private ARGBList mColours;
         private FabricInfoList mFabrics;
+        private Byte[] mUnknown;
         private CountedTGIBlockList mReferences;
 
         public ColourInfoResource(int apiVersion, Stream s)
@@ -216,6 +216,7 @@ namespace s3piwrappers
 
             Parse(base.stream);
         }
+
 
         [ElementPriority(1)]
         public UInt32 Version
@@ -242,6 +243,12 @@ namespace s3piwrappers
             set { if(mFabrics!=value){mFabrics = value; OnResourceChanged(this, new EventArgs());} }
         }
         [ElementPriority(5)]
+        public byte[] Unknown
+        {
+            get { return mUnknown; }
+            set { mUnknown = value; this.OnResourceChanged(this, EventArgs.Empty); }
+        }
+        [ElementPriority(6)]
         public CountedTGIBlockList References
         {
             get { return mReferences; }
@@ -251,17 +258,18 @@ namespace s3piwrappers
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                sb.AppendFormat("Usage: {0}\n", this["UsageSubCategory"]);
+                return ValueBuilder;
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                //sb.AppendFormat("Usage: {0}\n", this["UsageSubCategory"]);
 
-                sb.AppendFormat("\nColours:\n");
-                for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i]);
-                sb.AppendFormat("\nFabrics:\n");
-                for (int i = 0; i < mFabrics.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mFabrics[i].Value);
-                sb.AppendFormat("\nReferences[{0}]:\n", mReferences.Count);
-                for (int i = 0; i < mReferences.Count; i++) sb.AppendFormat("[0x{0:X8}]{1}\n", i, mReferences[i].Value);
-                return sb.ToString();
+                //sb.AppendFormat("\nColours:\n");
+                //for (int i = 0; i < mColours.Count; i++) sb.AppendFormat("[{0,2:00}]{1}\n", i, mColours[i]);
+                //sb.AppendFormat("\nFabrics:\n");
+                //for (int i = 0; i < mFabrics.Count; i++) sb.AppendFormat("==[{0}]==\n{1}\n", i, mFabrics[i].Value);
+                //sb.AppendFormat("\nReferences[{0}]:\n", mReferences.Count);
+                //for (int i = 0; i < mReferences.Count; i++) sb.AppendFormat("[0x{0:X8}]{1}\n", i, mReferences[i].Value);
+                //return sb.ToString();
             }
         }
 
@@ -273,6 +281,7 @@ namespace s3piwrappers
             mUsageSubCategory = (eUsageSubCategory)br.ReadUInt16();
             mColours = new ARGBList(this.OnResourceChanged, s);
             mFabrics = new FabricInfoList(this.OnResourceChanged, s);
+            mUnknown = br.ReadBytes(5);
             if (checking && (offset != s.Position))
             {
                 throw new InvalidDataException(string.Format("Position of TGIBlock read: 0x{0:X8}, actual: 0x{1:X8}", offset, s.Position));
@@ -293,6 +302,7 @@ namespace s3piwrappers
             if (mFabrics == null) mFabrics = new FabricInfoList(OnResourceChanged);
             mFabrics.UnParse(s);
             long tgiOffset = s.Position - (pos + 4);
+            bw.Write(mUnknown);
             if (mReferences == null) mReferences = new CountedTGIBlockList(OnResourceChanged, "IGT");
             bw.Write((byte)mReferences.Count);
             mReferences.UnParse(s);

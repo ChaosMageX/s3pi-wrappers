@@ -8,11 +8,11 @@ namespace s3piwrappers
 {
     public class VisualEffect : SectionData, IEquatable<VisualEffect>
     {
-                public class Index : SectionData, IEquatable<Index>
+        public class Index : SectionData, IEquatable<Index>
         {
 
 
-                        private byte mBlockType;
+            private byte mBlockType;
             private uint mInt01;
             private ushort mShort01;
             private float mFloat01;
@@ -32,13 +32,13 @@ namespace s3piwrappers
             private ushort mShort02;
             private ushort mShort03;
             private float mFloat10;
-            private uint mBlockIndex;
+            private Int32 mBlockIndex;
             private byte mByte03; //version 2+
             private byte mByte04; //version 2+
 
-            
 
-            
+
+
             public Index(int apiVersion, EventHandler handler, ISection section)
                 : base(apiVersion, handler, section)
             {
@@ -178,7 +178,7 @@ namespace s3piwrappers
                 set { mFloat10 = value; OnElementChanged(); }
             }
             [ElementPriority(20)]
-            public uint BlockIndex
+            public Int32 BlockIndex
             {
                 get { return mBlockIndex; }
                 set { mBlockIndex = value; OnElementChanged(); }
@@ -195,7 +195,7 @@ namespace s3piwrappers
                 get { return mByte04; }
                 set { mByte04 = value; OnElementChanged(); }
             }
-            
+
 
             protected override void Parse(Stream stream)
             {
@@ -260,10 +260,10 @@ namespace s3piwrappers
             }
             public override System.Collections.Generic.List<string> ContentFields
             {
-                get 
-                { 
+                get
+                {
                     var fields = base.ContentFields;
-                    if(mSection.Version <2)
+                    if (mSection.Version < 2)
                     {
                         fields.Remove("Byte03");
                         fields.Remove("Byte04");
@@ -277,7 +277,7 @@ namespace s3piwrappers
                 return base.Equals(other);
             }
         }
-        
+
 
         public VisualEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
@@ -296,7 +296,7 @@ namespace s3piwrappers
         {
         }
 
-                private UInt32 mInt01;
+        private UInt32 mInt01;
         private UInt32 mInt02;
         private UInt32 mInt03;
         private float mFloat01; //LE
@@ -309,9 +309,9 @@ namespace s3piwrappers
         private float mFloat05; //LE
         private UInt32 mInt05;
         private SectionDataList<Index> mItems;
-        
 
-                [ElementPriority(1)]
+
+        [ElementPriority(1)]
         public uint Int01
         {
             get { return mInt01; }
@@ -391,7 +391,7 @@ namespace s3piwrappers
         }
 
 
-        
+
 
         public bool Equals(VisualEffect other)
         {

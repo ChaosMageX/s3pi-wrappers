@@ -4,6 +4,6 @@
     <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <StartArguments>"S3_8EAF13DE_00000000_D057FCC534C1BCBB_auRig%%+_RIG.grannyrig"</StartArguments>
+    <StartArguments>"auRig.rig"</StartArguments>
   </PropertyGroup>
 </Project>

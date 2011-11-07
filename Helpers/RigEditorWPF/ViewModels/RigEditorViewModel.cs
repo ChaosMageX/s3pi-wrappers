@@ -4,19 +4,19 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Input;
 using s3pi.Interfaces;
-using s3piwrappers.Granny2;
 using System.Collections.ObjectModel;
 using System.Linq;
 using s3piwrappers.RigEditor.Bones;
 using s3piwrappers.RigEditor.Commands;
 using s3piwrappers.RigEditor.Geometry;
 using System.Windows;
+using Quaternion = s3pi.Interfaces.Quaternion;
 
 namespace s3piwrappers.RigEditor.ViewModels
 {
     public class RigEditorViewModel : AbstractViewModel, IHaveBones
     {
-        private readonly WrappedGrannyData mGrannyData;
+        private readonly RigResource.RigResource mRig;
         private IList<BoneViewModel> mChildren;
         private readonly BoneManager mManager;
 
@@ -38,32 +38,35 @@ namespace s3piwrappers.RigEditor.ViewModels
         public ICommand CommitCommand { get; private set; }
         public ICommand CancelCommand { get; private set; }
         public ICommand ExportRigCommand { get; private set; }
-        public RigEditorViewModel(RigResource rig)
+        public RigEditorViewModel(RigResource.RigResource rig)
         {
             rig.ResourceChanged += new EventHandler(OnResourceChanged);
             mIsSaving = false;
             mChildren = new ObservableCollection<BoneViewModel>();
-            mGrannyData = (WrappedGrannyData)rig.Rig.GrannyData;
+            mRig =  rig;
             mManager = new BoneManager();
-            mManager.Bones = mGrannyData.FileInfo.Skeleton.Bones;
-            foreach (var bone in mGrannyData.FileInfo.Skeleton.Bones)
+            mManager.Bones = mRig.Bones;
+            foreach (var bone in mRig.Bones)
             {
-                if (bone.ParentIndex == -1)
+                if (bone.ParentBoneIndex == -1)
                 {
-                    mChildren.Add(new BoneViewModel(this, bone, mManager));
+                    mChildren.Add(new BoneViewModel(this,this, bone, mManager));
                 }
             }
             mManager.BoneAdded += new BoneActionEventHandler(OnBoneAdded);
             mManager.BoneRemoved += new BoneActionEventHandler(OnBoneRemoved);
             mManager.BoneParentChanged += new BoneActionEventHandler(OnBoneParentChanged);
-            AddBoneCommand = new UserCommand<RigEditorViewModel>(x => true, y => y.Manager.AddBone(new Bone(0, null), null));
+            AddBoneCommand = new UserCommand<RigEditorViewModel>(x => true, y => y.Manager.AddBone(new RigResource.RigResource.Bone(0, null), null));
             GetMatrixInfoCommand = new UserCommand<RigEditorViewModel>(x => true, ExecuteMatrixInfo);
             CommitCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = true; Application.Current.Shutdown(); });
             CancelCommand = new UserCommand<RigEditorViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
             IResourceKey key = new TGIBlock(0,null);
             key.ResourceType = 0x00000000;
         }
-
+        public IList<RigResource.RigResource.Bone> Bones
+        {
+            get { return new ObservableCollection<RigResource.RigResource.Bone>(mRig.Bones); }
+        } 
         private void OnResourceChanged(object sender, EventArgs e)
         {
             HasChanged = true;
@@ -83,15 +86,14 @@ namespace s3piwrappers.RigEditor.ViewModels
             var dialog = new InfoDialog(sb.ToString(), "Matrix Info");
             dialog.ShowDialog();
         }
-        private static Matrix GetAbsoluteTransform(BoneManager manager, Bone b)
+        private static Matrix GetAbsoluteTransform(BoneManager manager, RigResource.RigResource.Bone b)
         {
             var transforms = new List<Matrix>();
             while (b != null)
             {
-                var q = new Quaternion(b.LocalTransform.Orientation.X, b.LocalTransform.Orientation.Y, b.LocalTransform.Orientation.Z, b.LocalTransform.Orientation.W);
-                var p = new Vector3(b.LocalTransform.Position.X, b.LocalTransform.Position.Y, b.LocalTransform.Position.Z);
-                var s = new Vector3(b.LocalTransform.ScaleShearX.X, b.LocalTransform.ScaleShearY.Y,
-                                    b.LocalTransform.ScaleShearZ.Z);
+                var q = new Geometry.Quaternion(b.Orientation.A, b.Orientation.B, b.Orientation.C, b.Orientation.D);
+                var p = new Vector3(b.Position.X, b.Position.Y, b.Position.Z);
+                var s = new Vector3(b.Scaling.X, b.Scaling.Y,b.Scaling.Z);
                 Matrix t = Matrix.CreateTransformMatrix(q, s, p);
                 transforms.Add(t);
                 b = manager.GetParent(b);
@@ -107,7 +109,7 @@ namespace s3piwrappers.RigEditor.ViewModels
             }
             return absolute;
         }
-        private static void GetInfo(BoneManager manager, Bone bone, StringBuilder sb)
+        private static void GetInfo(BoneManager manager, RigResource.RigResource.Bone bone, StringBuilder sb)
         {
             var t = GetAbsoluteTransform(manager, bone);
             var ti = t.GetInverse();
@@ -128,7 +130,7 @@ namespace s3piwrappers.RigEditor.ViewModels
             {
                 if (child == null)
                 {
-                    mChildren.Add(new BoneViewModel(this, e.Bone, sender));
+                    mChildren.Add(new BoneViewModel(this,this, e.Bone, sender));
                 }
             }
             else
@@ -161,22 +163,18 @@ namespace s3piwrappers.RigEditor.ViewModels
                 var view = mChildren.FirstOrDefault(x => x.Bone == e.Bone);
                 if (view == null)
                 {
-                    mChildren.Add(new BoneViewModel(this, e.Bone, sender));
+                    var vm = new BoneViewModel(this, this, e.Bone, sender);
+                    vm.Opposite = mManager.Bones.IndexOf(e.Bone);
+                    mChildren.Add(vm);
                 }
             }
         }
-        public String Filename
-        {
-            get { return mGrannyData.FileInfo.FromFileName; }
-            set { mGrannyData.FileInfo.FromFileName = value; OnPropertyChanged("Filename"); }
-        }
         public String SkeletonName
         {
-            get { return mGrannyData.FileInfo.Skeleton.Name; }
+            get { return mRig.SkeletonName; }
             set
             {
-                mGrannyData.FileInfo.Skeleton.Name = value;
-                mGrannyData.FileInfo.Model.Name = value; 
+                mRig.SkeletonName = value;
                 OnPropertyChanged("SkeletonName");
             }
         }

@@ -1,54 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
-using s3piwrappers.Granny2;
-
 namespace s3piwrappers.RigEditor.Bones
 {
     public class BoneManager
     {
-        private IList<Bone> mBones;
+        private IList<RigResource.RigResource.Bone> mBones;
 
-        public IList<Bone> Bones
+        public IList<RigResource.RigResource.Bone> Bones
         {
             get { return mBones; }
             set { mBones = value; OnBoneSourceChanged(this, new EventArgs()); }
         }
-        public Bone GetParent(Bone b)
+        public RigResource.RigResource.Bone GetParent(RigResource.RigResource.Bone b)
         {
-            if (b.ParentIndex == -1) return null;
-            else return mBones[b.ParentIndex];
+            if (b.ParentBoneIndex == -1) return null;
+            else return mBones[b.ParentBoneIndex];
         }
-        public IEnumerable<Bone> GetChildren(Bone b)
+        public int IndexOfBone(IList<RigResource.RigResource.Bone> bones, RigResource.RigResource.Bone bone )
         {
-            var ix = mBones.IndexOf(b);
+            for (int i = 0; i < bones.Count; i++)
+            {
+                if (bone == bones[i]) return i;
+            }
+            return -1;
+        }
+        public IEnumerable<RigResource.RigResource.Bone> GetChildren(RigResource.RigResource.Bone b)
+        {
+            var ix = IndexOfBone(mBones,b);
             for (int i = 0; i < mBones.Count; i++)
             {
-                if (mBones[i].ParentIndex == ix) yield return mBones[i];
+                if (mBones[i].ParentBoneIndex == ix) yield return mBones[i];
             }
         }
-        public void AddBone(Bone child, Bone parent)
+        public void AddBone(RigResource.RigResource.Bone child, RigResource.RigResource.Bone parent)
         {
             Bones.Add(child);
             OnBoneAdded(this, new BoneActionEventArgs(child));
             SetParent(child, parent);
         }
-        public void DeleteBone(Bone b, bool recursive)
+        public void DeleteBone(RigResource.RigResource.Bone b, bool recursive)
         {
             if (b != null && mBones.Contains(b))
             {
-                var deletedIndex = mBones.IndexOf(b);
-                var parent = b.ParentIndex > -1 ? mBones[b.ParentIndex] : null;
+                var deletedIndex = IndexOfBone(mBones,b);
+                var parent = b.ParentBoneIndex > -1 ? mBones[b.ParentBoneIndex] : null;
 
                 mBones.Remove(b);
                 OnBoneRemoved(this, new BoneActionEventArgs(b));
-                var trash = new List<Bone>();
+                var trash = new List<RigResource.RigResource.Bone>();
                 for (int i = 0; i < mBones.Count; i++)
                 {
-                    if (mBones[i].ParentIndex > deletedIndex)
+                    if (mBones[i].ParentBoneIndex > deletedIndex)
                     {
-                        mBones[i].ParentIndex--;
+                        mBones[i].ParentBoneIndex--;
                     }
-                    else if (mBones[i].ParentIndex == deletedIndex)
+                    else if (mBones[i].ParentBoneIndex == deletedIndex)
                     {
                         if (recursive)
                         {
@@ -59,33 +65,33 @@ namespace s3piwrappers.RigEditor.Bones
                 foreach (var item in trash) DeleteBone(item, recursive);
             }
         }
-        public IEnumerable<Bone> GetDescendants(Bone b)
+        public IEnumerable<RigResource.RigResource.Bone> GetDescendants(RigResource.RigResource.Bone b)
         {
-            var list = new List<Bone>();
+            var list = new List<RigResource.RigResource.Bone>();
             GetDescendantsRecursive(b, list);
             return list;
         }
-        private void GetDescendantsRecursive(Bone b, IList<Bone> list)
+        private void GetDescendantsRecursive(RigResource.RigResource.Bone b, IList<RigResource.RigResource.Bone> list)
         {
-            var ix = mBones.IndexOf(b);
+            var ix  = IndexOfBone(mBones,b);
             for (int i = 0; i < mBones.Count; i++)
             {
-                if (mBones[i].ParentIndex == ix)
+                if (mBones[i].ParentBoneIndex == ix)
                 {
                     list.Add(mBones[i]);
                     GetDescendantsRecursive(mBones[i], list);
                 }
             }
         }
-        public void SetParent(Bone child, Bone parent)
+        public void SetParent(RigResource.RigResource.Bone child, RigResource.RigResource.Bone parent)
         {
-            if (child.ParentIndex != mBones.IndexOf(parent))
+            if (child.ParentBoneIndex != IndexOfBone(mBones, parent))
             {
-                child.ParentIndex = parent == null ? -1 : mBones.IndexOf(parent);
+                child.ParentBoneIndex = parent == null ? -1 : IndexOfBone(mBones, parent);
                 OnBoneParentChanged(this, new BoneActionEventArgs(child));
             }
         }
-        public void SetName(Bone b, string name)
+        public void SetName(RigResource.RigResource.Bone b, string name)
         {
             if (b.Name != name)
             {
@@ -93,7 +99,7 @@ namespace s3piwrappers.RigEditor.Bones
                 OnBoneUpdated(this, new BoneActionEventArgs(b));
             }
         }
-        public void UpdateBone(Bone b)
+        public void UpdateBone(RigResource.RigResource.Bone b)
         {
             OnBoneUpdated(this, new BoneActionEventArgs(b));
         }

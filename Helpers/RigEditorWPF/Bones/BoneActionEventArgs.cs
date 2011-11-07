@@ -1,16 +1,14 @@
-﻿using s3piwrappers.Granny2;
-
-namespace s3piwrappers.RigEditor.Bones
+﻿namespace s3piwrappers.RigEditor.Bones
 {
     public class BoneActionEventArgs
     {
-        public BoneActionEventArgs(Bone bone)
+        public BoneActionEventArgs(RigResource.RigResource.Bone bone)
         {
             mBone = bone;
         }
 
-        private Bone mBone;
-        public Bone Bone
+        private RigResource.RigResource.Bone mBone;
+        public RigResource.RigResource.Bone Bone
         {
             get { return mBone; }
         }

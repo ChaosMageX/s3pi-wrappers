@@ -1,0 +1,28 @@
+﻿using System;
+
+namespace s3piwrappers.RigEditor.Diagnostics
+{
+	[Serializable]
+	public sealed class BindingExceptionInformation
+	{
+		internal BindingExceptionInformation(string callstack, 
+			DateTime datetime, string logicalOperationStack, 
+			int processId, int threadId, long timestamp)
+			: base()
+		{
+			this.Callstack = callstack;
+			this.DateTime = datetime;
+			this.LogicalOperationStack = logicalOperationStack;
+			this.ProcessId = processId;
+			this.ThreadId = threadId;
+			this.Timestamp = timestamp;
+		}
+		
+		public string Callstack { get; private set; }
+		public DateTime DateTime { get; private set; }
+		public string LogicalOperationStack { get; private set; }
+		public int ProcessId { get; private set; }
+		public int ThreadId { get; private set; }
+		public long Timestamp { get; private set; }
+	}
+}

@@ -11,15 +11,26 @@ using System.IO;
 using s3pi.Helpers;
 using System.Globalization;
 using System.Threading;
-using s3piwrappers.Granny2;
 using s3piwrappers.RigEditor.Geometry;
 
 namespace RigExport
 {
     public partial class BonePicker : Form,IRunHelper
     {
+        class BoneListItem
+        {
+            public BoneListItem(RigResource.RigResource.Bone bone)
+            {
+                this.Bone = bone;
+            }
+            public RigResource.RigResource.Bone Bone { get; private set; }
+            public override string ToString()
+            {
+                return Bone.Name;
+            }
+        }
         private byte[] mResult;
-        private RigResource mRig;
+        private RigResource.RigResource mRig;
         public BonePicker()
         {
             InitializeComponent();
@@ -31,22 +42,18 @@ namespace RigExport
             mResult = new byte[s.Length];
             s.Read(mResult, 0, mResult.Length);
             s.Position = 0L;
-            mRig = new RigResource(0, s);
-            WrappedGrannyData grd = mRig.Rig.GrannyData as WrappedGrannyData;
-            
-            if (grd == null)
-            {
-                MessageBox.Show("Could not find Granny2 data.  Make sure you have installed the granny2.dll",
-                                "Error",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-                return;
-            }
-            var bones = grd.FileInfo.Skeleton.Bones;
+            mRig = new RigResource.RigResource(0, s);
+            var bones = mRig.Bones;
             for (int i = 0; i < bones.Count; i++)
             {
-                clbBones.Items.Add(bones[i]);
+                var b = bones[i];
+                clbBones.Items.Add(b);
+                if (!b.Name.Contains("_slot") && !b.Name.Contains("_compress"))
+                {
+                    clbBones.SetItemChecked(i,true);
+                }
             }
+           
 
         }
 
@@ -60,7 +67,7 @@ namespace RigExport
             try
             {
                 Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                var grd = (WrappedGrannyData)mRig.Rig.GrannyData;
+                var grd = mRig;
 
                 saveFileDialog1.FileName = "rigfile.txt";
                 var result = saveFileDialog1.ShowDialog();
@@ -71,16 +78,16 @@ namespace RigExport
                     {
                         if (clbBones.GetItemChecked(i))
                         {
-                            var bone = (Bone) clbBones.Items[i];
-                            bool flip = bone.ParentIndex == -1;
+                            var bone = ((BoneListItem) clbBones.Items[i]).Bone;
+                            bool flip = bone.ParentBoneIndex == -1;
                             sb.AppendFormat("\"{0}\" \"{1}\" {2} {3} {4} {5}\r\n", cbHashBones.Checked? String.Format("0x{0:X8}",FNV32.GetHash(bone.Name)): bone.Name,
-                                            bone.ParentIndex == -1
+                                            bone.ParentBoneIndex == -1
                                                 ? "unparented"
-                                                : cbHashBones.Checked? String.Format("0x{0:X8}",FNV32.GetHash(grd.FileInfo.Skeleton.Bones[bone.ParentIndex].Name)):grd.FileInfo.Skeleton.Bones[bone.ParentIndex].Name,
-                                            bone.LocalTransform.Position.X,
-                                            bone.LocalTransform.Position.Y,
-                                            bone.LocalTransform.Position.Z,
-                                            ToEuler(bone.LocalTransform.Orientation,flip));
+                                                : cbHashBones.Checked ? String.Format("0x{0:X8}", FNV32.GetHash(grd.Bones[(int)bone.ParentBoneIndex].Name)) : grd.Bones[(int)bone.ParentBoneIndex].Name,
+                                            bone.Position.X,
+                                            bone.Position.Y,
+                                            bone.Position.Z,
+                                            ToEuler(bone.Orientation,flip));
                         }
                     }
                     using (var s = new StreamWriter(File.Create(saveFileDialog1.FileName))) s.Write(sb.ToString());
@@ -108,9 +115,9 @@ namespace RigExport
                 clbBones.SetItemChecked(i, false);
             }
         }
-        public static string ToEuler(Quad q,bool flip)
+        public static string ToEuler(s3pi.Interfaces.Quaternion q,bool flip)
         {
-            var matrix = new Matrix(new Quaternion(q.X,q.Y,q.Z,q.W));
+            var matrix = new Matrix(new Quaternion(q.A,q.B,q.C,q.D));
             var euler = new EulerAngle(matrix);
             if (flip)
             {

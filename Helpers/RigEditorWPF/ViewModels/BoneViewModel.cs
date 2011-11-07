@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography;
-using s3piwrappers.Granny2;
+using System.Windows.Input;
 using s3piwrappers.RigEditor.Bones;
+using s3piwrappers.RigEditor.Commands;
 using s3piwrappers.RigEditor.Geometry;
 
 namespace s3piwrappers.RigEditor.ViewModels
@@ -16,30 +17,43 @@ namespace s3piwrappers.RigEditor.ViewModels
 
     public class BoneViewModel : AbstractViewModel, IHaveBones
     {
-
-        private readonly Bone mBone;
+        private readonly RigEditorViewModel mRig;
+        private readonly RigResource.RigResource.Bone mBone;
         private readonly BoneManager mManager;
         private readonly ObservableCollection<BoneViewModel> mChildren;
         private readonly IHaveBones mParent;
         private EulerAngle mRotation;
+        private readonly ICommand mSetOppositeCommand;
 
-        public BoneViewModel(IHaveBones parent, Bone bone, BoneManager manager)
+        public BoneViewModel(RigEditorViewModel rig,IHaveBones parent, RigResource.RigResource.Bone bone, BoneManager manager)
         {
+            if (rig == null) throw new ArgumentNullException("rig");
             if (bone == null) throw new ArgumentNullException("bone");
             if (manager == null) throw new ArgumentNullException("manager");
-
+            mRig = rig;
             mChildren = new ObservableCollection<BoneViewModel>();
             mParent = parent;
             mBone = bone;
             mManager = manager;
             foreach (var b in manager.GetChildren(mBone))
             {
-                mChildren.Add(new BoneViewModel(this, b, mManager));
+                mChildren.Add(new BoneViewModel(mRig,this, b, mManager));
             }
-            mRotation = new EulerAngle(new Quaternion(bone.LocalTransform.Orientation.X, bone.LocalTransform.Orientation.Y, bone.LocalTransform.Orientation.Z, bone.LocalTransform.Orientation.W));
+            mRotation = new EulerAngle(new Quaternion(bone.Orientation.A, bone.Orientation.B, bone.Orientation.C, bone.Orientation.D));
             manager.BoneAdded += new BoneActionEventHandler(OnBoneAdded);
             manager.BoneRemoved += new BoneActionEventHandler(OnBoneRemoved);
             manager.BoneParentChanged += new BoneActionEventHandler(OnBoneParentChanged);
+            this.mSetOppositeCommand = new UserCommand<BoneViewModel>(x => true, ExecuteSetOpposite);
+        }
+        private static void ExecuteSetOpposite(BoneViewModel view)
+        {
+            var choices = view.Manager.Bones.OrderBy(x=> x.Name);
+            var dialog = new BoneSelectDialog(choices, "Select a New Opposite...");
+            var result = dialog.ShowDialog() ?? false;
+            if (result)
+            {
+                view.Opposite = view.Manager.Bones.IndexOf(dialog.SelectedBone);
+            }
         }
 
 
@@ -51,7 +65,7 @@ namespace s3piwrappers.RigEditor.ViewModels
             {
                 if(parent.Equals(mBone) && child == null)
                 {
-                    mChildren.Add(new BoneViewModel(this,e.Bone,sender));
+                    mChildren.Add(new BoneViewModel(mRig,this,e.Bone,sender));
                 }
                 if (child != null && !sender.GetParent(e.Bone).Equals(mBone))
                 {
@@ -62,7 +76,6 @@ namespace s3piwrappers.RigEditor.ViewModels
                 if (child != null)
                     mChildren.Remove(child);
             }
-
         }
 
         private void OnBoneRemoved(BoneManager sender, BoneActionEventArgs e)
@@ -83,83 +96,86 @@ namespace s3piwrappers.RigEditor.ViewModels
             var parent = sender.GetParent(e.Bone);
             if (parent !=null && parent.Equals(mBone))
             {
-                mChildren.Add(new BoneViewModel(this, e.Bone, sender));
+                mChildren.Add(new BoneViewModel(mRig,this, e.Bone, sender));
             }
         }
 
         public bool HasChildren { get { return mChildren.Count > 0; } }
         public BoneManager Manager { get { return mManager; } }
         public IHaveBones Parent { get { return mParent; } }
-        public Bone Bone { get { return mBone; } }
+        public RigResource.RigResource.Bone Bone { get { return mBone; } }
         public IList<BoneViewModel> Children { get { return mChildren; } }
-
+        public RigEditorViewModel Rig { get { return mRig; } }
+        public string Tag
+        {
+            get
+            {
+                var bone = this;
+                var ix = bone.Manager.IndexOfBone(bone.Manager.Bones, bone.Bone);
+                var opposite = bone.Manager.Bones[(int)bone.Bone.OpposingBoneIndex];
+                var format = String.Format("(0x{1:X8}) {0}", bone.BoneName, bone.HashedName);
+                return format;
+            }
+        }
+        public ICommand SetOppositeCommand
+        {
+            get { return mSetOppositeCommand; }
+        }
+        public Int32 Opposite
+        {
+            get { return mBone.OpposingBoneIndex; }
+            set { mBone.OpposingBoneIndex = value; OnPropertyChanged("Opposite"); OnPropertyChanged("Tag"); OnPropertyChanged("OppositeName"); }
+        }
+        public String OppositeName
+        {
+            get { return Manager.Bones[Opposite].Name; }
+        }
+        public UInt32 Flags
+        {
+            get { return mBone.Unknown2; }
+            set { mBone.Unknown2 = value; OnPropertyChanged("Flags"); }
+        }
         public String BoneName
         {
             get { return mBone.Name; }
-            set { mBone.Name = value; OnPropertyChanged("BoneName"); OnPropertyChanged("HashedName"); }
-        }
-        public string HashedName
-        {
-            get { return "0x" + FNV32.GetHash(mBone.Name).ToString("X8"); }
-            set { }
-        }
-        public bool PositionEnabled
-        {
-            get { return (mBone.LocalTransform.Flags & TransformFlags.Position) != 0; }
-            set
-            {
-                mBone.LocalTransform.Flags = value
-                    ? mBone.LocalTransform.Flags |= TransformFlags.Position
-                    : mBone.LocalTransform.Flags &= ((TransformFlags)0xFFFFFFFF ^ TransformFlags.Position);
-                OnPropertyChanged("PositionEnabled");
+            set 
+            { 
+                mBone.Name = value;
+                this.HashedName = FNV32.GetHash(mBone.Name);
+                OnPropertyChanged("BoneName"); OnPropertyChanged("Tag"); OnPropertyChanged("OppositeName");
+                
             }
         }
-        public bool RotationEnabled
+        public UInt32 HashedName
         {
-            get { return (mBone.LocalTransform.Flags & TransformFlags.Orientation) != 0; }
-            set
-            {
-                mBone.LocalTransform.Flags = value
-                    ? mBone.LocalTransform.Flags |= TransformFlags.Orientation
-                    : mBone.LocalTransform.Flags &= ((TransformFlags)0xFFFFFFFF ^ TransformFlags.Orientation);
-                OnPropertyChanged("RotationEnabled");
-            }
+            get { return mBone.Hash; }
+            set { mBone.Hash = value; OnPropertyChanged("HashedName"); OnPropertyChanged("Tag"); }
         }
-        public bool ScaleEnabled
-        {
-            get { return (mBone.LocalTransform.Flags & TransformFlags.ScaleShear) != 0; }
-            set
-            {
-                mBone.LocalTransform.Flags = value
-                    ? mBone.LocalTransform.Flags |= TransformFlags.ScaleShear
-                    : mBone.LocalTransform.Flags &= ((TransformFlags)0xFFFFFFFF ^ TransformFlags.ScaleShear);
-                OnPropertyChanged("ScaleEnabled");
-            }
-        }
+      
         public float ScaleX
         {
-            get { return mBone.LocalTransform.ScaleShearX.X; }
+            get { return mBone.Scaling.X; }
             set
             {
-                mBone.LocalTransform.ScaleShearX.X = value;
+                mBone.Scaling.X = value;
                 OnPropertyChanged("ScaleX");
             }
         }
         public float ScaleY
         {
-            get { return mBone.LocalTransform.ScaleShearY.Y; }
+            get { return mBone.Scaling.Y; }
             set
             {
-                mBone.LocalTransform.ScaleShearY.Y = value;
+                mBone.Scaling.Y = value;
                 OnPropertyChanged("ScaleY");
             }
         }
         public float ScaleZ
         {
-            get { return mBone.LocalTransform.ScaleShearZ.Z; }
+            get { return mBone.Scaling.Z; }
             set
             {
-                mBone.LocalTransform.ScaleShearZ.Z = value;
+                mBone.Scaling.Z = value;
                 OnPropertyChanged("ScaleZ");
             }
         }
@@ -167,38 +183,38 @@ namespace s3piwrappers.RigEditor.ViewModels
 
         public float PositionX
         {
-            get { return mBone.LocalTransform.Position.X; }
+            get { return mBone.Position.X; }
             set
             {
-                mBone.LocalTransform.Position.X = value;
+                mBone.Position.X = value;
                 OnPropertyChanged("PositionX");
             }
         }
         public float PositionY
         {
-            get { return mBone.LocalTransform.Position.Y; }
+            get { return mBone.Position.Y; }
             set
             {
-                mBone.LocalTransform.Position.Y = value;
+                mBone.Position.Y = value;
                 OnPropertyChanged("PositionY");
             }
         }
         public float PositionZ
         {
-            get { return mBone.LocalTransform.Position.Z; }
+            get { return mBone.Position.Z; }
             set
             {
-                mBone.LocalTransform.Position.Z = value;
+                mBone.Position.Z = value;
                 OnPropertyChanged("PositionZ");
             }
         }
         private void SetEulers()
         {
             var q = new Quaternion(new Matrix(mRotation));
-            mBone.LocalTransform.Orientation.X = (float)q.X;
-            mBone.LocalTransform.Orientation.Y = (float)q.Y;
-            mBone.LocalTransform.Orientation.Z = (float)q.Z;
-            mBone.LocalTransform.Orientation.W = (float)q.W;
+            mBone.Orientation.A = (float)q.X;
+            mBone.Orientation.B = (float)q.Y;
+            mBone.Orientation.C = (float)q.Z;
+            mBone.Orientation.D = (float)q.W;
         }
         private static double RadToDeg(double rad)
         {
@@ -247,36 +263,6 @@ namespace s3piwrappers.RigEditor.ViewModels
         protected override void OnPropertyChanged(string propertyName)
         {
             base.OnPropertyChanged(propertyName);
-            UpdateInverseWorld();
-        }
-        private void UpdateInverseWorld()
-        {
-            var q = new Quaternion(mBone.LocalTransform.Orientation.X, mBone.LocalTransform.Orientation.Y, mBone.LocalTransform.Orientation.Z, mBone.LocalTransform.Orientation.W);
-            var p = new Vector3(mBone.LocalTransform.Position.X, mBone.LocalTransform.Position.Y, mBone.LocalTransform.Position.Z);
-            var s = new Vector3(mBone.LocalTransform.ScaleShearX.X, mBone.LocalTransform.ScaleShearY.Y,
-                                mBone.LocalTransform.ScaleShearZ.Z);
-            Matrix mi = Matrix.CreateTransformMatrix(q, s, p).GetInverse();
-            Matrix4x4 g = mBone.InverseWorld4X4;
-            g.M0.X = (float)mi.M00;
-            g.M0.Y = (float)mi.M10;
-            g.M0.Z = (float)mi.M20;
-            g.M0.W = (float)mi.M30;
-
-            g.M1.X = (float)mi.M01;
-            g.M1.Y = (float)mi.M11;
-            g.M1.Z = (float)mi.M21;
-            g.M1.W = (float)mi.M31;
-
-            g.M2.X = (float)mi.M02;
-            g.M2.Y = (float)mi.M12;
-            g.M2.Z = (float)mi.M22;
-            g.M2.W = (float)mi.M32;
-
-            g.M3.X = (float)mi.M03;
-            g.M3.Y = (float)mi.M13;
-            g.M3.Z = (float)mi.M23;
-            g.M3.W = (float)mi.M33;
-
         }
 
     }

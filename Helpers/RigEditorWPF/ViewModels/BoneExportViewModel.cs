@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using s3piwrappers.Granny2;
 using System.ComponentModel;
 using s3piwrappers.RigEditor.Bones;
 
@@ -13,7 +12,7 @@ namespace s3piwrappers.RigEditor.ViewModels
         private bool mIsChecked;
         private IEnumerable<BoneExportViewModel> mChildren;
 
-        public BoneExportViewModel(Bone bone, BoneManager manager)
+        public BoneExportViewModel(RigResource.RigResource.Bone bone, BoneManager manager)
         {
             mIsChecked = bone.Name.Contains("slot");
             Bone = bone;
@@ -35,7 +34,7 @@ namespace s3piwrappers.RigEditor.ViewModels
             }
         }
 
-        public Bone Bone { get; private set; }
+        public RigResource.RigResource.Bone Bone { get; private set; }
         public bool IsChecked
         {
             get { return mIsChecked; }

@@ -58,12 +58,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrackMask.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\s3piwrappers.RigResource\s3piwrappers.RigResource.csproj">
-      <Project>{E0F1EFF6-9420-4448-8EB8-8F5CB0BF0D4B}</Project>
-      <Name>s3piwrappers.RigResource</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

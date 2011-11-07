@@ -4,7 +4,7 @@
         xmlns:RigEditor="clr-namespace:s3piwrappers.RigEditor" xmlns:System="clr-namespace:System;assembly=mscorlib" xmlns:Validation="clr-namespace:s3piwrappers.RigEditor.Validation" Title=""
         Height="230"
         Width="340"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner">
     <Window.Resources>
         <System:String x:Key="DecimalFormatter">0.000000</System:String>        
     </Window.Resources>

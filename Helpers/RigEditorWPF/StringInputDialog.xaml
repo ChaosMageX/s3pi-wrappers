@@ -6,7 +6,7 @@
         Height="110"
         Width="300"
         ResizeMode="NoResize"
-        FocusManager.FocusedElement="{Binding ElementName=ValueInput}">
+        FocusManager.FocusedElement="{Binding ElementName=ValueInput}" WindowStartupLocation="CenterOwner">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>

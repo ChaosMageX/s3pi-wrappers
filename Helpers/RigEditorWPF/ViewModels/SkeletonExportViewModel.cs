@@ -11,7 +11,7 @@ namespace s3piwrappers.RigEditor.ViewModels
         public SkeletonExportViewModel(BoneManager manager)
         {
             
-            mChildren = manager.Bones.Where(x => x.ParentIndex == -1).Select(x => new BoneExportViewModel(x, manager));
+            mChildren = manager.Bones.Where(x => x.ParentBoneIndex == -1).Select(x => new BoneExportViewModel(x, manager));
             mManager = manager;
         }
 
