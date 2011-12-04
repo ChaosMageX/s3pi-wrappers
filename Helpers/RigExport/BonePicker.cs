@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
-using s3piwrappers;
 using System.IO;
-using s3pi.Helpers;
 using System.Globalization;
 using System.Threading;
 using s3piwrappers.RigEditor.Geometry;
 
 namespace RigExport
 {
-    public partial class BonePicker : Form,IRunHelper
+    public partial class BonePicker : Form
     {
         class BoneListItem
         {
@@ -29,8 +23,7 @@ namespace RigExport
                 return Bone.Name;
             }
         }
-        private byte[] mResult;
-        private RigResource.RigResource mRig;
+        private readonly RigResource.RigResource mRig;
         public BonePicker()
         {
             InitializeComponent();
@@ -39,29 +32,40 @@ namespace RigExport
         public BonePicker(Stream s)
             : this()
         {
-            mResult = new byte[s.Length];
-            s.Read(mResult, 0, mResult.Length);
             s.Position = 0L;
             mRig = new RigResource.RigResource(0, s);
             var bones = mRig.Bones;
+
+            clbBones.ItemCheck += new ItemCheckEventHandler(clbBones_ItemCheck);
             for (int i = 0; i < bones.Count; i++)
             {
                 var b = bones[i];
-                clbBones.Items.Add(b);
+                clbBones.Items.Add(new BoneListItem(b));
                 if (!b.Name.Contains("_slot") && !b.Name.Contains("_compress"))
                 {
                     clbBones.SetItemChecked(i,true);
                 }
             }
+            
            
 
         }
 
-        public byte[] Result
+        void clbBones_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-            get { return mResult; }
+            int total = clbBones.CheckedItems.Count;
+            if(e.NewValue == CheckState.Checked)
+            {
+                total += 1;
+            }else
+            {
+                total -= 1;
+            }
+
+            lbBonesSelectedCount.Text = total.ToString();
         }
 
+        
         private void btnOk_Click(object sender, EventArgs e)
         {
             try
@@ -70,6 +74,7 @@ namespace RigExport
                 var grd = mRig;
 
                 saveFileDialog1.FileName = "rigfile.txt";
+                saveFileDialog1.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
                 var result = saveFileDialog1.ShowDialog();
                 if (result == DialogResult.OK)
                 {
@@ -80,7 +85,7 @@ namespace RigExport
                         {
                             var bone = ((BoneListItem) clbBones.Items[i]).Bone;
                             bool flip = bone.ParentBoneIndex == -1;
-                            sb.AppendFormat("\"{0}\" \"{1}\" {2} {3} {4} {5}\r\n", cbHashBones.Checked? String.Format("0x{0:X8}",FNV32.GetHash(bone.Name)): bone.Name,
+                            sb.AppendFormat("\"{0}\" \"{1}\" {2} {3:F10} {4:F10} {5:F10}\r\n", cbHashBones.Checked? String.Format("0x{0:X8}",FNV32.GetHash(bone.Name)): bone.Name,
                                             bone.ParentBoneIndex == -1
                                                 ? "unparented"
                                                 : cbHashBones.Checked ? String.Format("0x{0:X8}", FNV32.GetHash(grd.Bones[(int)bone.ParentBoneIndex].Name)) : grd.Bones[(int)bone.ParentBoneIndex].Name,
@@ -123,7 +128,7 @@ namespace RigExport
             {
                 euler = new EulerAngle(0,0,Math.PI/2);
             }
-            return String.Format("{0} {1} {2}",euler.Roll, euler.Yaw, euler.Pitch);
+            return String.Format("{0:F10} {1:F10} {2:F10}",euler.Roll, euler.Yaw, euler.Pitch);
 
             
 

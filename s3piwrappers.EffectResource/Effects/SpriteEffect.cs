@@ -358,7 +358,7 @@ namespace s3piwrappers.Effects
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream);
+            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mInt01);
             s.Write(mInt02);
             s.Write(mInt03);

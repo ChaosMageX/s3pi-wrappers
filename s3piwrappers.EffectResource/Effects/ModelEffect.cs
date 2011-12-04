@@ -35,7 +35,7 @@ namespace s3piwrappers.Effects
                 Parse(s);
             }
 
-                        private float mFloat01; //LE
+            private float mFloat01; //LE
             private float mFloat02; //LE
             private DataList<FloatValue> mFloatList01;
             private UInt32 mInt01;
@@ -216,8 +216,8 @@ namespace s3piwrappers.Effects
             s.Write(mFloat01);
             s.Write(mFloat02, ByteOrder.LittleEndian); //LE
             s.Write(mFloat03, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat05, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat04);
+            s.Write(mFloat04, ByteOrder.LittleEndian); //LE
+            s.Write(mFloat05);
             mItems.UnParse(stream);
             s.Write(mLong02);
             s.Write(mByte01);

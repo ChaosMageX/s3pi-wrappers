@@ -10,7 +10,6 @@ namespace s3piwrappers.RigEditor
     /// </summary>
     public partial class MainWindow : Window
     {
-        private BindingListener mListener;
         public MainWindow(RigEditorViewModel editorViewModel):this()
         {
             DataContext = editorViewModel;
@@ -18,9 +17,6 @@ namespace s3piwrappers.RigEditor
         public MainWindow()
         {
             InitializeComponent();
-            //this.mListener = new BindingListener(TraceOptions.Callstack | TraceOptions.DateTime |
-            //    TraceOptions.LogicalOperationStack | TraceOptions.ProcessId | TraceOptions.ThreadId |
-            //    TraceOptions.Timestamp);
         }
 
         private void BoneTreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
