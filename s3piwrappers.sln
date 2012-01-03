@@ -5,10 +5,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{9F9C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.AnimationResources", "s3piwrappers.AnimationResources\s3piwrappers.AnimationResources.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.ModelResources", "s3piwrappers.ModelResources\s3piwrappers.ModelResources.csproj", "{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.ColourInfoResource", "s3piwrappers.ColourInfoResource\s3piwrappers.ColourInfoResource.csproj", "{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.ToneResources", "s3piwrappers.ToneResources\s3piwrappers.ToneResources.csproj", "{D5FF34C0-2100-413E-9A13-A8DCF2044F43}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.EffectResource", "s3piwrappers.EffectResource\s3piwrappers.EffectResource.csproj", "{03CBE006-992A-4D0A-8CB9-FAE06EBBC524}"
@@ -45,26 +41,6 @@ Global
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{B33F19DE-F211-4D32-8D03-43024B88F177}.Release|x86.ActiveCfg = Release|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{B1E4D2EC-5027-4F44-8C46-A0485DFF7060}.Release|x86.ActiveCfg = Release|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{A8C22657-AFB5-4BC4-A8D4-B6F7674B943E}.Release|x86.ActiveCfg = Release|Any CPU
 		{D5FF34C0-2100-413E-9A13-A8DCF2044F43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D5FF34C0-2100-413E-9A13-A8DCF2044F43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5FF34C0-2100-413E-9A13-A8DCF2044F43}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

@@ -136,7 +136,7 @@ namespace s3piwrappers
             public void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mAgeGenderFlags = (AgeGenderFlags)br.ReadUInt32();
+                mAgeGenderFlags = new AgeGenderFlags(0,handler,s);
                 mIsGenetic = br.ReadBoolean();
                 mDiffuseColour = Color.FromArgb(br.ReadInt32());
                 mRootColour = Color.FromArgb(br.ReadInt32());
@@ -150,7 +150,12 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write((UInt32)mAgeGenderFlags);
+
+
+                bw.Write((byte)mAgeGenderFlags.Age);
+                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
+                bw.Write((ushort)mAgeGenderFlags.Handedness);
+
                 bw.Write(mIsGenetic);
                 bw.Write(mDiffuseColour.ToArgb());
                 bw.Write(mRootColour.ToArgb());
@@ -226,18 +231,19 @@ namespace s3piwrappers
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                if (mShaderKeyList.Count > 0)
-                {
-                    sb.AppendFormat("\nShaderKeys:\n");
-                    for (int i = 0; i < mShaderKeyList.Count; i++)
-                    {
-                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
-                    }
-                }
-                sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
-                return sb.ToString();
+                return ValueBuilder;
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                //if (mShaderKeyList.Count > 0)
+                //{
+                //    sb.AppendFormat("\nShaderKeys:\n");
+                //    for (int i = 0; i < mShaderKeyList.Count; i++)
+                //    {
+                //        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                //    }
+                //}
+                //sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
+                //return sb.ToString();
             }
         }
         private void Parse(Stream s)

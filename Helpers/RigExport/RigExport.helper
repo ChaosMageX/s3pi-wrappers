@@ -1,0 +1,5 @@
+ResourceType: 0x8EAF13DE
+Label: Export rigfile.txt
+Command: Helpers\RigExportTxt\RigExport.exe
+Arguments: "{}"
+Desc: Exports skeletal data from RIG resource

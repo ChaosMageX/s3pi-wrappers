@@ -1,0 +1,5 @@
+﻿ResourceType: 0x8EAF13DE
+Label: Rig Editor
+Command: Helpers\RigEditor\RigEditor.exe
+Arguments: "{}"
+Desc: Edits granny2 rig file

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Media3D;
+using meshExpImp.ModelBlocks;
 using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
 
@@ -151,12 +152,12 @@ namespace s3piwrappers.ModelViewer
             }
             return false;
         }
-        static GeometryModel3D DrawModel(Vertex[] verts, Int32[] indices, Material material)
+        static GeometryModel3D DrawModel(meshExpImp.ModelBlocks.Vertex[] verts, Int32[] indices, Material material)
         {
             MeshGeometry3D mesh = new MeshGeometry3D();
             for (int k = 0; k < verts.Length; k++)
             {
-                Vertex v = verts[k];
+                meshExpImp.ModelBlocks.Vertex v = verts[k];
                 if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], v.Position[1], v.Position[2]));
                 if (v.Normal != null) mesh.Normals.Add(new Vector3D(v.Normal[0], v.Normal[1], v.Normal[2]));
                 if (v.UV != null && v.UV.Length > 0) mesh.TextureCoordinates.Add(new Point(v.UV[0][0], v.UV[0][1]));

@@ -105,7 +105,8 @@ namespace s3piwrappers
             public void Parse(Stream s)
             {
                 BinaryReader br = new BinaryReader(s);
-                mAgeGenderFlags = (AgeGenderFlags)br.ReadUInt32();
+                
+                mAgeGenderFlags = new AgeGenderFlags(0,handler,s);
                 mEdgeColour = Color.FromArgb(br.ReadInt32());
                 mSpecularColour = Color.FromArgb(br.ReadInt32());
                 mSpecularPower = br.ReadSingle();
@@ -114,7 +115,11 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write((UInt32)mAgeGenderFlags);
+                
+                bw.Write((byte)mAgeGenderFlags.Age);
+                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
+                bw.Write((ushort)mAgeGenderFlags.Handedness);
+
                 bw.Write(mEdgeColour.ToArgb());
                 bw.Write(mSpecularColour.ToArgb());
                 bw.Write(mSpecularPower);
@@ -137,7 +142,7 @@ namespace s3piwrappers
             private TGIBlock mCleavageNormalMapKey;
 
 
-            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner) : this(APIversion, handler, owner, (AgeGenderFlags)0, (DataTypeFlags)0, new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler)) { }
+            public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner) : this(APIversion, handler, owner, new AgeGenderFlags(0,handler), (DataTypeFlags)0, new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler), new TGIBlock(0, handler)) { }
             public TextureKey(int APIversion, EventHandler handler, TextureKey basis) : this(APIversion, handler, basis.mOwner, basis.AgeGenderFlags, basis.mTypeFlags, basis.SpecularKey, basis.DetailDarkKey, basis.DetailLightKey, basis.NormalMapKey, basis.OverlayKey, basis.MuscleNormalMapKey, basis.CleavageNormalMapKey) { }
             public TextureKey(int APIversion, EventHandler handler, Stream s, SkinToneResource owner, ResourceKeyTable keys) : base(APIversion, handler) { mOwner = owner; Parse(s, keys); }
             public TextureKey(int APIversion, EventHandler handler, SkinToneResource owner, AgeGenderFlags ageGenderFlags, DataTypeFlags typeFlags, TGIBlock specularKey, TGIBlock detailDarkKey, TGIBlock detailLightKey, TGIBlock normalMapKey, TGIBlock overlayKey, TGIBlock muscleNormalMapKey, TGIBlock cleavageNormalMapKey)
@@ -256,7 +261,7 @@ namespace s3piwrappers
             public void Parse(Stream s, ResourceKeyTable keys)
             {
                 BinaryReader br = new BinaryReader(s);
-                mAgeGenderFlags = (AgeGenderFlags)br.ReadUInt32();
+                mAgeGenderFlags = new AgeGenderFlags(0,handler,s);
                 mTypeFlags = (DataTypeFlags)br.ReadUInt32();
                 mSpecularKey = new TGIBlock(0, handler, keys[br.ReadInt32()]);
                 mDetailDarkKey = new TGIBlock(0, handler, keys[br.ReadInt32()]);
@@ -277,7 +282,11 @@ namespace s3piwrappers
             public void UnParse(Stream s, ResourceKeyTable keys)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                bw.Write((UInt32)mAgeGenderFlags);
+
+                bw.Write((byte)mAgeGenderFlags.Age);
+                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
+                bw.Write((ushort)mAgeGenderFlags.Handedness);
+
                 bw.Write((UInt32)mTypeFlags);
                 bw.Write(keys.Add(mSpecularKey));
                 bw.Write(keys.Add(mDetailDarkKey));
@@ -403,30 +412,31 @@ namespace s3piwrappers
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
-                if (mShaderKeyList.Count > 0)
-                {
-                    sb.AppendFormat("\nShaderKeys:\n");
-                    for (int i = 0; i < mShaderKeyList.Count; i++)
-                    {
-                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
-                    }
-                }
-                sb.AppendFormat("SkinSubSRampIndex: {0}\n", mSkinSubSRampKey);
-                sb.AppendFormat("ToneRampIndex: {0}\n", mToneRampKey);
+                return ValueBuilder;
+                //StringBuilder sb = new StringBuilder();
+                //sb.AppendFormat("Version: 0x{0:X8}\n", mVersion);
+                //if (mShaderKeyList.Count > 0)
+                //{
+                //    sb.AppendFormat("\nShaderKeys:\n");
+                //    for (int i = 0; i < mShaderKeyList.Count; i++)
+                //    {
+                //        sb.AppendFormat("==[{0}]==\n{1}\n", i, mShaderKeyList[i].Value);
+                //    }
+                //}
+                //sb.AppendFormat("SkinSubSRampIndex: {0}\n", mSkinSubSRampKey);
+                //sb.AppendFormat("ToneRampIndex: {0}\n", mToneRampKey);
 
-                if (mTextureKeyList.Count > 0)
-                {
-                    sb.AppendFormat("TextureKeys:\n");
-                    for (int i = 0; i < mTextureKeyList.Count; i++)
-                    {
-                        sb.AppendFormat("==[{0}]==\n{1}\n", i, mTextureKeyList[i].Value);
-                    }
-                }
-                sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
+                //if (mTextureKeyList.Count > 0)
+                //{
+                //    sb.AppendFormat("TextureKeys:\n");
+                //    for (int i = 0; i < mTextureKeyList.Count; i++)
+                //    {
+                //        sb.AppendFormat("==[{0}]==\n{1}\n", i, mTextureKeyList[i].Value);
+                //    }
+                //}
+                //sb.AppendFormat("IsDominant: {0}\n", mIsDominant);
 
-                return sb.ToString();
+                //return sb.ToString();
             }
         }
 
