@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
-using s3piwrappers.SWB.IO;
+using s3piwrappers.Helpers.IO;
 
 namespace s3piwrappers.SWB
 {

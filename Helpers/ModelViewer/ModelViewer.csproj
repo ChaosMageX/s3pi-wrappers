@@ -148,6 +148,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="checkers.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RCOLResources.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -8,7 +8,7 @@ namespace s3piwrappers
     {
         public EffectResourceHandler()
         {
-            Add(typeof(EffectResource), new List<String>() { "0xEA5118B0" });
+            Add(typeof(EffectResource), new List<String> { "0xEA5118B0" });
         }
     }
 }

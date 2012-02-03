@@ -4,8 +4,8 @@
 using System;
 using System.IO;
 using s3pi.Interfaces;
+using s3piwrappers.Helpers.IO;
 using s3piwrappers.SWB;
-using s3piwrappers.SWB.IO;
 using System.Collections.Generic;
 
 namespace s3piwrappers.Effects

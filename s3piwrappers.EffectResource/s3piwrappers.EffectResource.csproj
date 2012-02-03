@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioTunerResource.cs" />
     <Compile Include="SWB\ColourValue.cs" />
     <Compile Include="SWB\ByteValue.cs" />
     <Compile Include="SWB\ISection.cs" />
@@ -68,11 +69,6 @@
     <Compile Include="EffectResourceHandler.cs" />
     <Compile Include="SWB\FloatValue.cs" />
     <Compile Include="SWB\UInt32Value.cs" />
-    <Compile Include="SWB\IO\BinaryStreamWrapper.cs" />
-    <Compile Include="SWB\IO\ByteOrder.cs" />
-    <Compile Include="SWB\IO\DataType.cs" />
-    <Compile Include="SWB\IO\IntSize.cs" />
-    <Compile Include="SWB\IO\StringType.cs" />
     <Compile Include="Effects\MetaparticleEffect.cs" />
     <Compile Include="Effects\ModelEffect.cs" />
     <Compile Include="Effects\ParticleEffect.cs" />
@@ -103,7 +99,17 @@
   <ItemGroup>
     <Compile Include="Effects\SpriteEffect.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\s3piwrappers.Helpers\s3piwrappers.Helpers.csproj">
+      <Project>{2D22735C-2CDC-4FFD-B503-02A3153FAAB0}</Project>
+      <Name>s3piwrappers.Helpers</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
