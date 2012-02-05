@@ -84,6 +84,7 @@
                     Grid.Row="0">
                 <StackPanel Focusable="True">
                     <StackPanel Margin="5">
+                        
                     <TextBlock>Shading:</TextBlock>
                             <StackPanel Margin="2,0">
                                 <RadioButton
@@ -112,7 +113,14 @@
                               SelectionChanged="mStateListView_SelectionChanged"
                               SelectionMode="Single"
                               AllowDrop="True"></ListView>
+                           
                         </StackPanel>
+                        <TextBlock
+                            x:Name="VertexCount">
+                            Vertices: 500</TextBlock>
+                        <TextBlock
+                            x:Name="PolygonCount">
+                            Polygons: 1000</TextBlock>
                     </StackPanel>
                 </StackPanel>
             </Border>

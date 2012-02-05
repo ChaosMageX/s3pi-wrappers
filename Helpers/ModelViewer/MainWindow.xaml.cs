@@ -11,12 +11,14 @@ using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace s3piwrappers.ModelViewer
 {
-
+    
     public partial class MainWindow : Window
     {
+        
         class SceneGeostate
         {
             public SceneGeostate(SceneMesh owner, MLOD.GeometryState state, GeometryModel3D model)
@@ -31,7 +33,20 @@ namespace s3piwrappers.ModelViewer
             public GeometryModel3D Model { get; set; }
             public override string ToString()
             {
-                return State != null ? "0x" + State.Name.ToString("X8") : "None";
+                if (State == null)
+                {
+                    return "None";
+                }
+                else
+                {
+                    var stateName = "0x" + State.Name.ToString("X8");
+                    if (MainWindow.GeostateDictionary.ContainsKey(State.Name))
+                    {
+                        stateName = MainWindow.GeostateDictionary[State.Name];
+                    }
+                    return stateName;
+                }
+                
             }
         }
         class SceneMesh
@@ -49,7 +64,12 @@ namespace s3piwrappers.ModelViewer
             public s3pi.GenericRCOLResource.MATD.ShaderType Shader { get; set; }
             public override string ToString()
             {
-                return "0x" + Mesh.Name.ToString("X8");
+                var meshName = "0x" + Mesh.Name.ToString("X8");
+                if (MainWindow.MeshDictionary.ContainsKey(Mesh.Name))
+                {
+                    meshName = MainWindow.MeshDictionary[Mesh.Name];
+                }
+                return meshName;
             }
         }
 
@@ -116,6 +136,8 @@ namespace s3piwrappers.ModelViewer
 
             mShadowMapMaterial.Children.Add(new DiffuseMaterial(Brushes.DimGray));
             mShadowMapMaterial.Children.Add(new SpecularMaterial(Brushes.GhostWhite, 20d));
+            GeostateDictionary = LoadDictionary("Geostates");
+            MeshDictionary = LoadDictionary("MeshNames");
 
         }
         public MainWindow(Stream s)
@@ -128,6 +150,29 @@ namespace s3piwrappers.ModelViewer
 
 
         }
+        public static Dictionary<uint, string> GeostateDictionary;
+        public static Dictionary<uint, string> MeshDictionary;
+
+        static Dictionary<uint, string> LoadDictionary(string name)
+        {
+            var dict = new Dictionary<uint, string>();
+            var geostatePath = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), name+ ".txt");
+            if (File.Exists(geostatePath))
+            {
+                using (var sr = new StreamReader(File.OpenRead(geostatePath)))
+                {
+                    String line;
+                    while ((line = sr.ReadLine())!= null)
+                    {
+                        if (!line.Contains("#"))
+                        {
+                            dict[FNV32.GetHash(line)] = line;
+                        }
+                    }
+                }
+            }
+            return dict;
+        }
         void InitScene()
         {
             GeostatesPanel.Visibility = Visibility.Collapsed;
@@ -135,8 +180,12 @@ namespace s3piwrappers.ModelViewer
 
             if (mlod != null)
             {
+                var polyCount = 0;
+                var vertCount = 0;
                 foreach (var m in mlod.Meshes)
                 {
+                    vertCount += m.VertexCount;
+                    polyCount += m.PrimitiveCount;
                     var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
                     var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
                     var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
@@ -165,6 +214,8 @@ namespace s3piwrappers.ModelViewer
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }
+                this.VertexCount.Text = String.Format("Vertices: {0}", vertCount);
+                this.PolygonCount.Text = String.Format("Polygons: {0}", polyCount);
             }
             foreach (var s in mSceneMeshes)
             {
@@ -182,30 +233,23 @@ namespace s3piwrappers.ModelViewer
             else if (material is MTST)
             {
                 MTST mtst = material as MTST;
+                try
+                {
+                    material = GenericRCOLResource.ChunkReference.GetBlock(rcol, mtst.Index);
 
-                material = GenericRCOLResource.ChunkReference.GetBlock(rcol, mtst.Index);
-                //return null;
+                }
+                catch (NotImplementedException e)
+                {
+                    MessageBox.Show("Material is external, unable to locate UV scales.");
+                    return null;
+                }
+                
+
                 if (material is MATD)
                 {
                     MATD matd = (MATD)material;
                     return matd;
                 }
-                //                foreach (var entry in mtst.Entries)
-                //                {
-                //                    //skip materials that don't exist in this rcol
-                //                    if (entry.Index.RefType == GenericRCOLResource.ReferenceType.Private ||
-                //                        entry.Index.RefType == GenericRCOLResource.ReferenceType.Public)
-                //                    {
-                //                        material = GenericRCOLResource.ChunkReference.GetBlock(rcol, entry.Index);
-                //                        if (material is MATD)
-                //                        {
-                //                            MATD matd = (MATD)material;
-                //                            return matd;
-                //                        }
-                //                        else
-                //                            return FindMainMATD(rcol, material);
-                //                    }
-                //                }
             }
             else
             {
@@ -253,13 +297,7 @@ namespace s3piwrappers.ModelViewer
             {
                 var m = (SceneMesh)e.AddedItems[0];
                 mSelectedMesh = m;
-                GeostatesPanel.Visibility = m.States.Count() == 0 ? Visibility.Collapsed : Visibility.Visible;
-                mStateListView.Items.Add(new SceneGeostate(m, null, null));
-                foreach (var s in m.States)
-                {
-                    mStateListView.Items.Add(s);
-                }
-                mStateListView.SelectedIndex = 0;
+                
 
             }
             UpdateMaterials();
@@ -313,6 +351,22 @@ namespace s3piwrappers.ModelViewer
                     }
                 }
             }
+            var m = mSelectedMesh;
+            GeostatesPanel.Visibility = m==null || m.States.Count() == 0 ? Visibility.Collapsed : Visibility.Visible;
+            if (m!= null)
+            {
+                
+                mStateListView.Items.Add(new SceneGeostate(m, null, null));
+                foreach (var s in m.States)
+                {
+                    mStateListView.Items.Add(s);
+                }
+                mStateListView.SelectedIndex = 0;
+            }else
+            {
+                GeostatesPanel.Visibility = Visibility.Collapsed;
+            }
+            
         }
         private void mStateListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -333,7 +387,6 @@ namespace s3piwrappers.ModelViewer
             {
                 var s = (SceneGeostate)e.AddedItems[0];
                 mSelectedMesh.SelectedState = s;
-                UpdateMaterials();
                 //                if (s.State == null)
                 //                {
                 //                    s.Owner.Model.Material = mSelectedMaterial;
@@ -344,6 +397,7 @@ namespace s3piwrappers.ModelViewer
                 //                }
 
             }
+            UpdateMaterials();
         }
 
         private string mDrawMode;

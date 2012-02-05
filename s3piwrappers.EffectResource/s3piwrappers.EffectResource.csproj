@@ -50,7 +50,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AudioTunerResource.cs" />
     <Compile Include="SWB\ColourValue.cs" />
     <Compile Include="SWB\ByteValue.cs" />
     <Compile Include="SWB\ISection.cs" />

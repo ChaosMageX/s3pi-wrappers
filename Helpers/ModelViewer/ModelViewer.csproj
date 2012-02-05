@@ -151,6 +151,12 @@
     <Content Include="checkers.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="MeshNames.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Geostates.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="RCOLResources.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
