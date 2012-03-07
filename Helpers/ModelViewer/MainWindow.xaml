@@ -102,11 +102,13 @@
                                     GroupName="Shading"
                                     Checked="RadioButton_Checked" />
                             </StackPanel>
-                    
-                    <TextBlock>Meshes:</TextBlock>
+                        <StackPanel
+                            x:Name="MeshesPanel">
+                            <TextBlock>Meshes:</TextBlock>
                     <ListView x:Name="mMeshListView"
                               SelectionChanged="mMeshListView_SelectionChanged"
-                              SelectionMode="Single"></ListView>
+                                SelectionMode="Single"></ListView>
+                        </StackPanel>
                         <StackPanel x:Name="GeostatesPanel">
                     <TextBlock>States:</TextBlock>
                     <ListView x:Name="mStateListView"

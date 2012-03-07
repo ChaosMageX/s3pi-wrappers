@@ -12,6 +12,7 @@ using s3pi.Interfaces;
 using System.Windows.Media.Imaging;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using Vertex = meshExpImp.ModelBlocks.Vertex;
 
 namespace s3piwrappers.ModelViewer
 {
@@ -51,17 +52,26 @@ namespace s3piwrappers.ModelViewer
         }
         class SceneMesh
         {
-            public SceneMesh(MLOD.Mesh mesh, GeometryModel3D model)
+            public SceneMesh(GeometryModel3D model)
             {
-                Mesh = mesh;
-                Model = model;
+                this.Model = model;
+                this.States = new SceneGeostate[0];
+            }
+            public SceneGeostate[] States { get; set; }
+            public SceneGeostate SelectedState { get; set; }
+
+            public GeometryModel3D Model { get; set; }
+            public s3pi.GenericRCOLResource.MATD.ShaderType Shader { get; set; }
+            
+        }
+        class SceneMlodMesh : SceneMesh
+        {
+            public SceneMlodMesh(MLOD.Mesh mesh, GeometryModel3D model) : base(model)
+            {
+                this.Mesh = mesh;
             }
 
             public MLOD.Mesh Mesh { get; set; }
-            public GeometryModel3D Model { get; set; }
-            public SceneGeostate[] States { get; set; }
-            public SceneGeostate SelectedState { get; set; }
-            public s3pi.GenericRCOLResource.MATD.ShaderType Shader { get; set; }
             public override string ToString()
             {
                 var meshName = "0x" + Mesh.Name.ToString("X8");
@@ -70,6 +80,21 @@ namespace s3piwrappers.ModelViewer
                     meshName = MainWindow.MeshDictionary[Mesh.Name];
                 }
                 return meshName;
+            }
+            
+        }
+        class SceneGeomMesh : SceneMesh
+        {
+            public SceneGeomMesh(GEOM mesh, GeometryModel3D model)
+                : base(model)
+            {
+                this.Mesh = mesh;
+            }
+
+            public GEOM Mesh { get; set; }
+            public override string ToString()
+            {
+                return "GEOM Mesh";
             }
         }
 
@@ -176,12 +201,15 @@ namespace s3piwrappers.ModelViewer
         void InitScene()
         {
             GeostatesPanel.Visibility = Visibility.Collapsed;
-            MLOD mlod = (MLOD)rcol.ChunkEntries.FirstOrDefault(x => x.RCOLBlock is MLOD).RCOLBlock;
-
-            if (mlod != null)
+            GenericRCOLResource.ChunkEntry chunk = rcol.ChunkEntries.FirstOrDefault(x => x.RCOLBlock is MLOD);
+            
+            var polyCount = 0;
+            var vertCount = 0;
+            
+            
+            if (chunk != null)
             {
-                var polyCount = 0;
-                var vertCount = 0;
+                var mlod = chunk.RCOLBlock as MLOD;
                 foreach (var m in mlod.Meshes)
                 {
                     vertCount += m.VertexCount;
@@ -199,7 +227,7 @@ namespace s3piwrappers.ModelViewer
                         Debug.WriteLine("No scales");
                     var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
 
-                    var sceneMesh = new SceneMesh(m, model);
+                    var sceneMesh = new SceneMlodMesh(m, model);
                     if (matd != null)
                         sceneMesh.Shader = matd.Shader;
                     SceneGeostate[] sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
@@ -214,13 +242,63 @@ namespace s3piwrappers.ModelViewer
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }
-                this.VertexCount.Text = String.Format("Vertices: {0}", vertCount);
-                this.PolygonCount.Text = String.Format("Polygons: {0}", polyCount);
+            }else
+            {
+                var geomChunk = rcol.ChunkEntries.FirstOrDefault();
+                var geom = new GEOM(0, null, geomChunk.RCOLBlock.Stream);
+                var verts = new List<Vertex>();
+                polyCount = geom.Faces.Count;
+                vertCount = geom.VertexData.Count;
+                foreach (var vd in geom.VertexData)
+                {
+                    var v = new Vertex();
+
+                    var pos = (GEOM.PositionElement) vd.Vertex.FirstOrDefault(e => e is GEOM.PositionElement);
+                    if(pos!=null)
+                    {
+                        v.Position = new[] {pos.X, pos.Y, pos.Z};
+                    }
+
+
+                    var norm = (GEOM.NormalElement)vd.Vertex.FirstOrDefault(e => e is GEOM.NormalElement);
+                    if (norm != null)
+                    {
+                        v.Normal = new[] { norm.X, norm.Y, norm.Z };
+                    }
+
+
+                    var uv = (GEOM.UVElement)vd.Vertex.FirstOrDefault(e => e is GEOM.UVElement);
+                    if (uv != null)
+                    {
+                        v.UV = new float[][] { new[] { uv.U, uv.V} };
+                    }
+                    verts.Add(v);
+
+                }
+                var facepoints = new List<int>();
+                foreach (var face in geom.Faces)
+                {
+                    facepoints.Add(face.VertexDataIndex0);
+                    facepoints.Add(face.VertexDataIndex1);
+                    facepoints.Add(face.VertexDataIndex2);
+                }
+                
+                var model = DrawModel(verts.ToArray(), facepoints.ToArray(), mNonSelectedMaterial);
+                var sceneMesh = new SceneGeomMesh(geom, model);
+                mGroupMeshes.Children.Add(model);
+                mSceneMeshes.Add(sceneMesh);
+
             }
             foreach (var s in mSceneMeshes)
             {
                 mMeshListView.Items.Add(s);
             }
+            if(mSceneMeshes.Count <=1)
+            {
+                MeshesPanel.Visibility = Visibility.Collapsed;
+            }
+            this.VertexCount.Text = String.Format("Vertices: {0}", vertCount);
+            this.PolygonCount.Text = String.Format("Polygons: {0}", polyCount);
         }
         static MATD FindMainMATD(GenericRCOLResource rcol, IRCOLBlock material)
         {
@@ -299,6 +377,9 @@ namespace s3piwrappers.ModelViewer
                 mSelectedMesh = m;
                 
 
+            }else
+            {
+                mSelectedMesh = null;
             }
             UpdateMaterials();
         }

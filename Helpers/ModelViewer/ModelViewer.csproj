@@ -118,6 +118,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="GEOMViewer.helper">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="MLODViewer.helper">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
