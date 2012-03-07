@@ -834,51 +834,51 @@ namespace s3piwrappers.Effects
         }
 
 
-        public class ItemC : DataElement, IEquatable<ItemC>
-        {
-            public ItemC(int apiVersion, EventHandler handler, ItemC basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
+        //public class ItemC : DataElement, IEquatable<ItemC>
+        //{
+        //    public ItemC(int apiVersion, EventHandler handler, ItemC basis)
+        //        : base(apiVersion, handler, basis)
+        //    {
+        //    }
 
-            public ItemC(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
-            {
-            }
+        //    public ItemC(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+        //    {
+        //    }
 
-            public ItemC(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
-            {
-                mItems = new DataList<ItemE>(handler);
-            }
+        //    public ItemC(int apiVersion, EventHandler handler)
+        //        : base(apiVersion, handler)
+        //    {
+        //        mItems = new DataList<ItemE>(handler);
+        //    }
 
-            private DataList<ItemE> mItems;
+        //    private DataList<ItemE> mItems;
 
-            [ElementPriority(1)]
-            public DataList<ItemE> Items
-            {
-                get { return mItems; }
-                set
-                {
-                    mItems = value;
-                    OnElementChanged();
-                }
-            }
+        //    [ElementPriority(1)]
+        //    public DataList<ItemE> Items
+        //    {
+        //        get { return mItems; }
+        //        set
+        //        {
+        //            mItems = value;
+        //            OnElementChanged();
+        //        }
+        //    }
 
-            protected override void Parse(Stream stream)
-            {
-                mItems = new DataList<ItemE>(handler, stream);
-            }
+        //    protected override void Parse(Stream stream)
+        //    {
+        //        mItems = new DataList<ItemE>(handler, stream);
+        //    }
 
-            public override void UnParse(Stream stream)
-            {
-                mItems.UnParse(stream);
-            }
+        //    public override void UnParse(Stream stream)
+        //    {
+        //        mItems.UnParse(stream);
+        //    }
 
-            public bool Equals(ItemC other)
-            {
-                return base.Equals(other);
-            }
-        }
+        //    public bool Equals(ItemC other)
+        //    {
+        //        return base.Equals(other);
+        //    }
+        //}
 
 
         public class ItemD : DataElement, IEquatable<ItemD>
