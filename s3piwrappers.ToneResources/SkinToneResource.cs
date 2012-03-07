@@ -115,11 +115,7 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-                
-                bw.Write((byte)mAgeGenderFlags.Age);
-                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
-                bw.Write((ushort)mAgeGenderFlags.Handedness);
-
+                mAgeGenderFlags.UnParse(s);
                 bw.Write(mEdgeColour.ToArgb());
                 bw.Write(mSpecularColour.ToArgb());
                 bw.Write(mSpecularPower);
@@ -282,11 +278,7 @@ namespace s3piwrappers
             public void UnParse(Stream s, ResourceKeyTable keys)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-
-                bw.Write((byte)mAgeGenderFlags.Age);
-                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
-                bw.Write((ushort)mAgeGenderFlags.Handedness);
-
+                mAgeGenderFlags.UnParse(s);
                 bw.Write((UInt32)mTypeFlags);
                 bw.Write(keys.Add(mSpecularKey));
                 bw.Write(keys.Add(mDetailDarkKey));

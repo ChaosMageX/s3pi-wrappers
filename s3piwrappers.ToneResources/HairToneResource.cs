@@ -150,12 +150,7 @@ namespace s3piwrappers
             public void UnParse(Stream s)
             {
                 BinaryWriter bw = new BinaryWriter(s);
-
-
-                bw.Write((byte)mAgeGenderFlags.Age);
-                bw.Write((byte)(((int)mAgeGenderFlags.Gender << 4 | (int)mAgeGenderFlags.Species)));
-                bw.Write((ushort)mAgeGenderFlags.Handedness);
-
+                mAgeGenderFlags.UnParse(s);
                 bw.Write(mIsGenetic);
                 bw.Write(mDiffuseColour.ToArgb());
                 bw.Write(mRootColour.ToArgb());
