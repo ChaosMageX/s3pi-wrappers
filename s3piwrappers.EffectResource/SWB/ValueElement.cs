@@ -5,7 +5,7 @@ using s3pi.Interfaces;
 namespace s3piwrappers.SWB
 {
     public abstract class ValueElement<T> : DataElement
-        where T: struct
+        where T : struct
     {
         protected ValueElement(int APIversion, EventHandler handler, ValueElement<T> basis)
             : this(APIversion, handler, basis.mData)
@@ -15,7 +15,8 @@ namespace s3piwrappers.SWB
         protected ValueElement(int apiVersion, EventHandler handler) : base(apiVersion, handler)
         {
         }
-        protected ValueElement(int apiVersion, EventHandler handler,T data)
+
+        protected ValueElement(int apiVersion, EventHandler handler, T data)
             : base(apiVersion, handler)
         {
             mData = data;
@@ -33,9 +34,10 @@ namespace s3piwrappers.SWB
         {
             return mData.ToString();
         }
+
         public override AHandlerElement Clone(EventHandler handler)
         {
-            return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this, mData });
+            return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, this, mData});
         }
     }
 }

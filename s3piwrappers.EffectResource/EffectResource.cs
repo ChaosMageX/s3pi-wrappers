@@ -13,7 +13,6 @@ namespace s3piwrappers
 {
     public class EffectResource : AResource
     {
-
         public class EffectSectionList : SectionList<EffectSection>
         {
             public EffectSectionList(EventHandler handler)
@@ -30,21 +29,36 @@ namespace s3piwrappers
             {
                 switch (id)
                 {
-                    case 0x01: return typeof(ParticleEffectSection);
-                    case 0x02: return typeof(MetaparticleEffectSection);
-                    case 0x03: return typeof(DecalEffectSection);
-                    case 0x04: return typeof(SequenceEffectSection);
-                    case 0x05: return typeof(SoundEffectSection);
-                    case 0x06: return typeof(ShakeEffectSection);
-                    case 0x07: return typeof(CameraEffectSection);
-                    case 0x08: return typeof(ModelEffectSection);
-                    case 0x09: return typeof(ScreenEffectSection);
-                    case 0x0b: return typeof(GameEffectSection);
-                    case 0x0c: return typeof(FastParticleEffectSection);
-                    case 0x0D: return typeof(DistributeEffectSection);
-                    case 0x0E: return typeof(RibbonEffectSection);
-                    case 0x0F: return typeof(SpriteEffectSection);
-                    default: throw new NotSupportedException("Effect Section type 0x" + id.ToString("X4") + " is not supported.");
+                case 0x01:
+                    return typeof (ParticleEffectSection);
+                case 0x02:
+                    return typeof (MetaparticleEffectSection);
+                case 0x03:
+                    return typeof (DecalEffectSection);
+                case 0x04:
+                    return typeof (SequenceEffectSection);
+                case 0x05:
+                    return typeof (SoundEffectSection);
+                case 0x06:
+                    return typeof (ShakeEffectSection);
+                case 0x07:
+                    return typeof (CameraEffectSection);
+                case 0x08:
+                    return typeof (ModelEffectSection);
+                case 0x09:
+                    return typeof (ScreenEffectSection);
+                case 0x0b:
+                    return typeof (GameEffectSection);
+                case 0x0c:
+                    return typeof (FastParticleEffectSection);
+                case 0x0D:
+                    return typeof (DistributeEffectSection);
+                case 0x0E:
+                    return typeof (RibbonEffectSection);
+                case 0x0F:
+                    return typeof (SpriteEffectSection);
+                default:
+                    throw new NotSupportedException("Effect Section type 0x" + id.ToString("X4") + " is not supported.");
                 }
             }
         }
@@ -77,6 +91,7 @@ namespace s3piwrappers
                 return mType.Equals(other.mType);
             }
         }
+
         public abstract class EffectSection<T> : EffectSection
             where T : Effect, IEquatable<T>
         {
@@ -109,8 +124,7 @@ namespace s3piwrappers
         }
 
 
-
-        [ConstructorParameters(new object[] { 0x0001, 0x0003 })]
+        [ConstructorParameters(new object[] {0x0001, 0x0003})]
         public class ParticleEffectSection : EffectSection<ParticleEffect>
         {
             public ParticleEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
@@ -128,11 +142,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0002, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0002, 0x0001})]
         public class MetaparticleEffectSection : EffectSection<MetaparticleEffect>
         {
             public MetaparticleEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public MetaparticleEffectSection(int apiVersion, EventHandler handler, MetaparticleEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -144,11 +161,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0003, 0x0002 })]
+
+        [ConstructorParameters(new object[] {0x0003, 0x0002})]
         public class DecalEffectSection : EffectSection<DecalEffect>
         {
             public DecalEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public DecalEffectSection(int apiVersion, EventHandler handler, DecalEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -160,11 +180,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0004, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0004, 0x0001})]
         public class SequenceEffectSection : EffectSection<SequenceEffect>
         {
             public SequenceEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public SequenceEffectSection(int apiVersion, EventHandler handler, SequenceEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -176,11 +199,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0005, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0005, 0x0001})]
         public class SoundEffectSection : EffectSection<SoundEffect>
         {
             public SoundEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public SoundEffectSection(int apiVersion, EventHandler handler, SoundEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -192,11 +218,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0006, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0006, 0x0001})]
         public class ShakeEffectSection : EffectSection<ShakeEffect>
         {
             public ShakeEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public ShakeEffectSection(int apiVersion, EventHandler handler, ShakeEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -208,11 +237,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0007, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0007, 0x0001})]
         public class CameraEffectSection : EffectSection<CameraEffect>
         {
             public CameraEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public CameraEffectSection(int apiVersion, EventHandler handler, CameraEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -224,11 +256,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0008, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0008, 0x0001})]
         public class ModelEffectSection : EffectSection<ModelEffect>
         {
             public ModelEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public ModelEffectSection(int apiVersion, EventHandler handler, ModelEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -240,11 +275,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0009, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x0009, 0x0001})]
         public class ScreenEffectSection : EffectSection<ScreenEffect>
         {
             public ScreenEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public ScreenEffectSection(int apiVersion, EventHandler handler, ScreenEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -256,11 +294,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x000B, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x000B, 0x0001})]
         public class GameEffectSection : EffectSection<DefaultEffect>
         {
             public GameEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public GameEffectSection(int apiVersion, EventHandler handler, GameEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -272,11 +313,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x000C, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x000C, 0x0001})]
         public class FastParticleEffectSection : EffectSection<DefaultEffect>
         {
             public FastParticleEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public FastParticleEffectSection(int apiVersion, EventHandler handler, FastParticleEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -288,11 +332,14 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x000D, 0x0001 })]
+
+        [ConstructorParameters(new object[] {0x000D, 0x0001})]
         public class DistributeEffectSection : EffectSection<DistributeEffect>
         {
             public DistributeEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public DistributeEffectSection(int apiVersion, EventHandler handler, DistributeEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -309,11 +356,14 @@ namespace s3piwrappers
         /*
          * Contribution from ChaosMageX
          */
-        [ConstructorParameters(new object[] { 0x000E, 0x0002 })]
+
+        [ConstructorParameters(new object[] {0x000E, 0x0002})]
         public class RibbonEffectSection : EffectSection<RibbonEffect>
         {
             public RibbonEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public RibbonEffectSection(int apiVersion, EventHandler handler, RibbonEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -329,11 +379,14 @@ namespace s3piwrappers
         /*
          * Contribution from ChaosMageX
          */
-        [ConstructorParameters(new object[] { 0x000F, 0x0002 })]
+
+        [ConstructorParameters(new object[] {0x000F, 0x0002})]
         public class SpriteEffectSection : EffectSection<SpriteEffect>
         {
             public SpriteEffectSection(int apiVersion, EventHandler handler, UInt16 type, UInt16 version, Stream s)
-                : base(apiVersion, handler, type, version, s) { }
+                : base(apiVersion, handler, type, version, s)
+            {
+            }
 
             public SpriteEffectSection(int apiVersion, EventHandler handler, SpriteEffectSection basis)
                 : base(apiVersion, handler, basis)
@@ -363,6 +416,7 @@ namespace s3piwrappers
                 : base(apiVersion, handler, basis)
             {
             }
+
             protected abstract override void Parse(Stream s);
 
             public abstract override void UnParse(Stream s);
@@ -373,6 +427,7 @@ namespace s3piwrappers
                 return mType.Equals(other.mType);
             }
         }
+
         public abstract class ResourceSection<T> : ResourceSection
             where T : Resource, IEquatable<T>
         {
@@ -401,9 +456,9 @@ namespace s3piwrappers
             {
                 mItems.UnParse(s);
             }
-
         }
-        [ConstructorParameters(new object[] { 0x0000, 0x0000 })]
+
+        [ConstructorParameters(new object[] {0x0000, 0x0000})]
         public class MapSection : ResourceSection<Map>
         {
             public MapSection(int apiVersion, EventHandler handler, ushort type, ushort version)
@@ -421,7 +476,8 @@ namespace s3piwrappers
             {
             }
         }
-        [ConstructorParameters(new object[] { 0x0001, 0x0000 })]
+
+        [ConstructorParameters(new object[] {0x0001, 0x0000})]
         public class MaterialSection : ResourceSection<Material>
         {
             public MaterialSection(int apiVersion, EventHandler handler, ushort type, ushort version)
@@ -439,6 +495,7 @@ namespace s3piwrappers
             {
             }
         }
+
         public class ResourceSectionList : SectionList<ResourceSection>
         {
             public ResourceSectionList(EventHandler handler)
@@ -455,11 +512,12 @@ namespace s3piwrappers
             {
                 switch (id)
                 {
-                    case 0x000:
-                        return typeof(MapSection);
-                    case 0x0001:
-                        return typeof(MaterialSection);
-                    default: throw new NotSupportedException("Resource Section type 0x" + id.ToString("X4") + " is not supported.");
+                case 0x000:
+                    return typeof (MapSection);
+                case 0x0001:
+                    return typeof (MaterialSection);
+                default:
+                    throw new NotSupportedException("Resource Section type 0x" + id.ToString("X4") + " is not supported.");
                 }
             }
         }
@@ -485,13 +543,16 @@ namespace s3piwrappers
 
         public class VisualEffectHandleList : AHandlerList<VisualEffectHandle>, IGenericAdd
         {
+            public VisualEffectHandleList(EventHandler handler) : base(handler)
+            {
+            }
 
-            public VisualEffectHandleList(EventHandler handler) : base(handler) { }
             public VisualEffectHandleList(EventHandler handler, Stream s)
                 : base(handler)
             {
                 Parse(s);
             }
+
             protected void Parse(Stream s)
             {
                 BinaryStreamWrapper bw = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
@@ -509,10 +570,10 @@ namespace s3piwrappers
                 BinaryStreamWrapper w = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
                 foreach (var item in this)
                 {
-                    VisualEffectHandle handle = (VisualEffectHandle)item;
-                    ((VisualEffectHandle)item).UnParse(s);
+                    VisualEffectHandle handle = (VisualEffectHandle) item;
+                    ((VisualEffectHandle) item).UnParse(s);
                 }
-                w.Write((uint)0xFFFFFFFF);
+                w.Write((uint) 0xFFFFFFFF);
             }
 
             public bool Add(params object[] fields)
@@ -525,13 +586,13 @@ namespace s3piwrappers
                 args[0] = 0;
                 args[1] = handler;
                 Array.Copy(fields, 0, args, 2, fields.Length);
-                base.Add((VisualEffectHandle)Activator.CreateInstance(typeof(VisualEffectHandle), args));
+                base.Add((VisualEffectHandle) Activator.CreateInstance(typeof (VisualEffectHandle), args));
                 return true;
             }
 
             public void Add()
             {
-                Add(new object[] { });
+                Add(new object[] {});
             }
         }
 
@@ -548,37 +609,66 @@ namespace s3piwrappers
         public UInt16 Version
         {
             get { return mVersion; }
-            set { mVersion = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mVersion = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
+
         [ElementPriority(2)]
         public EffectSectionList EffectSections
         {
             get { return mEffectSections; }
-            set { mEffectSections = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mEffectSections = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
+
         [ElementPriority(3)]
         public ResourceSectionList ResourceSections
         {
             get { return mResourceSections; }
-            set { mResourceSections = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mResourceSections = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
+
         [ElementPriority(4)]
         public VisualEffectSection VisualEffectSections
         {
             get { return mVisualEffectSections; }
-            set { mVisualEffectSections = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mVisualEffectSections = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
+
         [ElementPriority(5)]
         public byte[] Reserved
         {
             get { return mReserved; }
-            set { mReserved = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mReserved = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
+
         [ElementPriority(6)]
         public VisualEffectHandleList VisualEffectHandles
         {
             get { return mVisualEffectHandles; }
-            set { mVisualEffectHandles = value; OnResourceChanged(this, new EventArgs()); }
+            set
+            {
+                mVisualEffectHandles = value;
+                OnResourceChanged(this, new EventArgs());
+            }
         }
 
 
@@ -618,30 +708,32 @@ namespace s3piwrappers
             if (mVisualEffectSections == null) mVisualEffectSections = new VisualEffectSection(0, this.OnResourceChanged, 2);
             s.Write(mVisualEffectSections.Version);
             mVisualEffectSections.UnParse(stream);
-            if (mReserved == null) mReserved = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+            if (mReserved == null) mReserved = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
             s.Write(mReserved);
             if (mVisualEffectHandles == null) mVisualEffectHandles = new VisualEffectHandleList(this.OnResourceChanged);
             mVisualEffectHandles.UnParse(stream);
             return stream;
         }
+
         public string Value
         {
             get
             {
                 var sb = new StringBuilder();
-                for (int i = 0; i < mVisualEffectHandles.Count;i++ )
+                for (int i = 0; i < mVisualEffectHandles.Count; i++)
                 {
                     var e = mVisualEffectHandles[i];
                     sb.AppendFormat("[0x{2:X8}]:(0x{0:X8}):{1}\r\n", FNV32.GetHash(e.EffectName), e.EffectName, i);
                 }
                 return sb.ToString();
-
             }
         }
+
         public override int RecommendedApiVersion
         {
             get { return kRecommendedAPIVersion; }
         }
-        const int kRecommendedAPIVersion = 1;
+
+        private const int kRecommendedAPIVersion = 1;
     }
 }

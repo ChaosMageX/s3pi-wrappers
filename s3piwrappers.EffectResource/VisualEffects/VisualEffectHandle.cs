@@ -14,29 +14,42 @@ namespace s3piwrappers
             mEffectName = basis.EffectName;
             mIndex = basis.Index;
         }
-        public VisualEffectHandle(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-        public VisualEffectHandle(int apiVersion, EventHandler handler, Stream s, uint index) : base(apiVersion, handler, s) { mIndex = index; }
+
+        public VisualEffectHandle(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+        {
+        }
+
+        public VisualEffectHandle(int apiVersion, EventHandler handler, Stream s, uint index) : base(apiVersion, handler, s)
+        {
+            mIndex = index;
+        }
 
 
-                private UInt32 mIndex;
+        private UInt32 mIndex;
         private string mEffectName = "<Insert Effect Name>";
 
-        
 
-                [ElementPriority(2)]
+        [ElementPriority(2)]
         public String EffectName
         {
             get { return mEffectName; }
-            set { mEffectName = value; OnElementChanged(); }
+            set
+            {
+                mEffectName = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(1)]
         public uint Index
         {
             get { return mIndex; }
-            set { mIndex = value; OnElementChanged(); }
+            set
+            {
+                mIndex = value;
+                OnElementChanged();
+            }
         }
-
-        
 
 
         protected override void Parse(Stream stream)
@@ -53,21 +66,17 @@ namespace s3piwrappers
         }
 
 
-
         public int CompareTo(VisualEffectHandle other)
         {
             return mEffectName.CompareTo(other.mEffectName);
         }
 
-        
 
-        
         public int CompareTo(object obj)
         {
-            return mEffectName.CompareTo(((VisualEffectHandle)obj).mEffectName);
+            return mEffectName.CompareTo(((VisualEffectHandle) obj).mEffectName);
         }
 
-        
 
         public override string ToString()
         {

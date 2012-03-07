@@ -9,16 +9,18 @@ namespace s3piwrappers.SWB
         protected ExportableDataElement(int apiVersion, EventHandler handler)
             : base(apiVersion, handler)
         {
+        }
 
-        }
         protected ExportableDataElement(int apiVersion, EventHandler handler, Stream s)
-            : base(apiVersion, handler,s)
+            : base(apiVersion, handler, s)
         {
         }
+
         protected ExportableDataElement(int apiVersion, EventHandler handler, ExportableDataElement basis)
-            : base(apiVersion, handler,basis)
+            : base(apiVersion, handler, basis)
         {
         }
+
         protected abstract override void Parse(Stream s);
         public abstract override void UnParse(Stream s);
 
@@ -52,11 +54,12 @@ namespace s3piwrappers.SWB
                 OnElementChanged();
             }
         }
+
         public override AHandlerElement Clone(EventHandler handler)
         {
             var s = new MemoryStream();
             UnParse(s);
-            return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, s });
+            return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, s});
         }
     }
 }

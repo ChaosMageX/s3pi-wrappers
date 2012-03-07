@@ -10,6 +10,7 @@ namespace s3piwrappers.SWB
         protected ushort mVersion;
         protected ushort mType;
         protected DataList<SectionData> mItems;
+
         protected Section(int apiVersion, EventHandler handler, ushort type, ushort version)
             : base(apiVersion, handler)
         {
@@ -18,13 +19,13 @@ namespace s3piwrappers.SWB
         }
 
         protected Section(int apiVersion, EventHandler handler, ushort type, ushort version, Stream s)
-            : this(apiVersion, handler,type,version)
+            : this(apiVersion, handler, type, version)
         {
             Parse(s);
         }
 
         protected Section(int apiVersion, EventHandler handler, Section basis)
-            : this(apiVersion, handler,basis.mType,basis.mVersion)
+            : this(apiVersion, handler, basis.mType, basis.mVersion)
         {
             var s = new MemoryStream();
             basis.UnParse(s);
@@ -35,32 +36,45 @@ namespace s3piwrappers.SWB
 
         protected abstract override void Parse(Stream s);
         public abstract override void UnParse(Stream s);
+
         [ElementPriority(2)]
         public ushort Version
         {
             get { return mVersion; }
-            set { mVersion = value; OnElementChanged(); }
+            set
+            {
+                mVersion = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(1)]
         public ushort Type
         {
             get { return mType; }
-            set {}
+            set { }
         }
+
         [ElementPriority(3)]
         public DataList<SectionData> Items
         {
-            get { return mItems; } 
-            set { mItems = value;OnElementChanged(); }
+            get { return mItems; }
+            set
+            {
+                mItems = value;
+                OnElementChanged();
+            }
         }
 
-        IEnumerable ISection.Items { get { return mItems; } }
+        IEnumerable ISection.Items
+        {
+            get { return mItems; }
+        }
     }
+
     public abstract class Section<T> : Section
         where T : SectionData, IEquatable<T>
     {
-
-
         protected Section(int apiVersion, EventHandler handler, ushort type, ushort version)
             : base(apiVersion, handler, type, version)
         {
@@ -81,10 +95,10 @@ namespace s3piwrappers.SWB
         {
             mItems = new SectionDataList<T>(handler, this, stream);
         }
+
         public override void UnParse(Stream stream)
         {
             mItems.UnParse(stream);
         }
-
     }
 }

@@ -16,11 +16,12 @@ namespace s3piwrappers.SWB
             ms.Position = 0L;
             Parse(ms);
         }
+
         protected DataElement(int apiVersion, EventHandler handler)
             : base(apiVersion, handler)
         {
-
         }
+
         protected DataElement(int apiVersion, EventHandler handler, Stream s)
             : base(apiVersion, handler)
         {
@@ -34,9 +35,10 @@ namespace s3piwrappers.SWB
         {
             get { return GetContentFields(base.requestedApiVersion, GetType()); }
         }
+
         public override AHandlerElement Clone(EventHandler handler)
         {
-            return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this });
+            return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, this});
         }
 
         public override int RecommendedApiVersion

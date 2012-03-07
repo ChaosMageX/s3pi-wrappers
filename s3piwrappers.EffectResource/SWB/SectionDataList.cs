@@ -19,16 +19,19 @@ namespace s3piwrappers.SWB
         {
             Parse(s);
         }
+
         protected ISection mSection;
 
         protected override SectionData CreateElement(Stream s)
         {
-            return (SectionData)Activator.CreateInstance(typeof(T), new object[] { 0, handler, mSection, s });
+            return (SectionData) Activator.CreateInstance(typeof (T), new object[] {0, handler, mSection, s});
         }
+
         public override void Add()
         {
-            Add(new object[] { mSection });
+            Add(new object[] {mSection});
         }
+
         public override bool Add(params object[] fields)
         {
             if (fields == null)
@@ -36,10 +39,10 @@ namespace s3piwrappers.SWB
                 return false;
             }
 
-            Type c = typeof(T);
+            Type c = typeof (T);
             Type[] types = new Type[0x2 + fields.Length];
-            types[0] = typeof(int);
-            types[1] = typeof(EventHandler);
+            types[0] = typeof (int);
+            types[1] = typeof (EventHandler);
             for (int i = 0x0; i < fields.Length; i++)
             {
                 types[2 + i] = fields[i].GetType();
@@ -52,7 +55,7 @@ namespace s3piwrappers.SWB
             {
                 return false;
             }
-            ((IList)this).Add((T)c.GetConstructor(types).Invoke(destinationArray));
+            ((IList) this).Add((T) c.GetConstructor(types).Invoke(destinationArray));
             return true;
         }
     }

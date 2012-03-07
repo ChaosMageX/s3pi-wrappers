@@ -10,11 +10,13 @@ namespace s3piwrappers.Effects
         {
             throw new NotSupportedException();
         }
-        public DefaultEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
-            : base(apiVersion, handler, section,s)
+
+        public DefaultEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
+            : base(apiVersion, handler, section, s)
         {
             throw new NotSupportedException();
         }
+
         protected override void Parse(Stream stream)
         {
             throw new NotImplementedException();

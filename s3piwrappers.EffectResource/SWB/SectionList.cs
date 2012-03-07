@@ -10,13 +10,22 @@ namespace s3piwrappers.SWB
     public abstract class SectionList<TSection> : AHandlerList<TSection>, IGenericAdd
         where TSection : Section, IEquatable<TSection>
     {
-        public SectionList(EventHandler handler) : base(handler) { }
-        public SectionList(EventHandler handler, Stream s) : base(handler) { Parse(s); }
+        public SectionList(EventHandler handler) : base(handler)
+        {
+        }
+
+        public SectionList(EventHandler handler, Stream s) : base(handler)
+        {
+            Parse(s);
+        }
+
         protected virtual TSection CreateElement(UInt16 type, UInt16 version, Stream s)
         {
-            return (TSection)Activator.CreateInstance(GetSectionType(type), new object[] { 0, handler, type, version, s });
+            return (TSection) Activator.CreateInstance(GetSectionType(type), new object[] {0, handler, type, version, s});
         }
+
         protected abstract Type GetSectionType(UInt16 id);
+
         protected void Parse(Stream stream)
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -41,7 +50,7 @@ namespace s3piwrappers.SWB
                 s.Write(list.Version);
                 list.UnParse(stream);
             }
-            s.Write((ushort)0xFFFF);
+            s.Write((ushort) 0xFFFF);
         }
 
         public bool Add(params object[] fields)
@@ -51,26 +60,25 @@ namespace s3piwrappers.SWB
                 return false;
             }
 
-            var t = GetSectionType((ushort)(int)fields[0]);
+            var t = GetSectionType((ushort) (int) fields[0]);
             object[] args = null;
             ConstructorInfo ctor = null;
             if (fields.Length == 2)
             {
-                ctor = t.GetConstructor(new Type[] { typeof(int), typeof(EventHandler), typeof(ushort), typeof(ushort) });
-                args = new object[] { 0, handler, (ushort)(int)fields[0], (ushort)(int)fields[1] };
+                ctor = t.GetConstructor(new Type[] {typeof (int), typeof (EventHandler), typeof (ushort), typeof (ushort)});
+                args = new object[] {0, handler, (ushort) (int) fields[0], (ushort) (int) fields[1]};
             }
-            else if (fields.Length == 1 && typeof(TSection).IsAssignableFrom(fields[0].GetType()))
+            else if (fields.Length == 1 && typeof (TSection).IsAssignableFrom(fields[0].GetType()))
             {
-                ctor = t.GetConstructor(new Type[] { typeof(int), typeof(EventHandler), t });
-                args = new object[] { 0, handler, fields[0] };
+                ctor = t.GetConstructor(new Type[] {typeof (int), typeof (EventHandler), t});
+                args = new object[] {0, handler, fields[0]};
             }
             else
             {
                 return false;
             }
-            if(ctor != null) base.Add((TSection)ctor.Invoke(args));
+            if (ctor != null) base.Add((TSection) ctor.Invoke(args));
             return true;
-
         }
 
         public void Add()

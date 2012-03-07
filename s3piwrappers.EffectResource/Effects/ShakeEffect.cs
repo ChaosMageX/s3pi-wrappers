@@ -12,67 +12,105 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
+
         public ShakeEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
             mFloatList01 = new DataList<FloatValue>(handler);
             mFloatList02 = new DataList<FloatValue>(handler);
         }
-        public ShakeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
+
+        public ShakeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        {
+        }
 
 
-                private float mFloat01;
+        private float mFloat01;
         private float mFloat02;
         private DataList<FloatValue> mFloatList01;
         private DataList<FloatValue> mFloatList02;
         private float mFloat03;
         private byte mByte01;
         private float mFloat04;
-        
 
-                [ElementPriority(1)]
+
+        [ElementPriority(1)]
         public float Float01
         {
             get { return mFloat01; }
-            set { mFloat01 = value; OnElementChanged(); }
+            set
+            {
+                mFloat01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(2)]
         public float Float02
         {
             get { return mFloat02; }
-            set { mFloat02 = value; OnElementChanged(); }
+            set
+            {
+                mFloat02 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(3)]
         public DataList<FloatValue> FloatList01
         {
             get { return mFloatList01; }
-            set { mFloatList01 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(4)]
         public DataList<FloatValue> FloatList02
         {
             get { return mFloatList02; }
-            set { mFloatList02 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList02 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(5)]
         public float Float03
         {
             get { return mFloat03; }
-            set { mFloat03 = value; OnElementChanged(); }
+            set
+            {
+                mFloat03 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(6)]
         public byte Byte01
         {
             get { return mByte01; }
-            set { mByte01 = value; OnElementChanged(); }
+            set
+            {
+                mByte01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(7)]
         public float Float04
         {
             get { return mFloat04; }
-            set { mFloat04 = value; OnElementChanged(); }
+            set
+            {
+                mFloat04 = value;
+                OnElementChanged();
+            }
         }
-        
+
 
         protected override void Parse(Stream stream)
         {

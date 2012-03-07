@@ -34,19 +34,27 @@ namespace s3piwrappers.Resources
             ResourceKey = 0x06
         }
 
-        
+
         public class PropertyList : DependentList<Property>
         {
-            public PropertyList(EventHandler handler) : base(handler) { }
-            public PropertyList(EventHandler handler, Stream s) : base(handler, s) { }
+            public PropertyList(EventHandler handler) : base(handler)
+            {
+            }
+
+            public PropertyList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
+
             protected override int ReadCount(Stream s)
             {
                 return new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
             }
+
             protected override void WriteCount(Stream s, int count)
             {
-                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32)count);
+                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32) count);
             }
+
             public override void Add()
             {
                 throw new NotSupportedException();
@@ -55,55 +63,57 @@ namespace s3piwrappers.Resources
             protected override Property CreateElement(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                PropertyKey key = (PropertyKey)s.ReadUInt64();
-                ValueType val = (ValueType)s.BaseStream.ReadByte();
+                PropertyKey key = (PropertyKey) s.ReadUInt64();
+                ValueType val = (ValueType) s.BaseStream.ReadByte();
                 return Property.CreateInstance(0, elementHandler, val, key, stream);
             }
 
             protected override void WriteElement(Stream stream, Property element)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write((UInt64)element.Key);
-                s.Write((byte)element.ValueType);
+                s.Write((UInt64) element.Key);
+                s.Write((byte) element.ValueType);
                 element.UnParse(stream);
             }
+
             protected override Type GetElementType(params object[] fields)
             {
                 if (fields.Length == 0) return null;
                 Property p = fields[0] as Property;
                 if (p != null) return p.GetType();
 
-                ValueType val = (ValueType)fields[0];
+                ValueType val = (ValueType) fields[0];
                 switch (val)
                 {
-                    case ValueType.Float:
-                        return typeof(FloatProperty);
-                    case ValueType.ResourceKey:
-                        return typeof(ResourceKeyProperty);
-                    default:
-                        throw new Exception("Unknown Property type!");
+                case ValueType.Float:
+                    return typeof (FloatProperty);
+                case ValueType.ResourceKey:
+                    return typeof (ResourceKeyProperty);
+                default:
+                    throw new Exception("Unknown Property type!");
                 }
             }
         }
-        
 
-        
+
         public abstract class Property : DataElement, IEquatable<Property>, IComparable<Property>
         {
             protected Property(int apiVersion, EventHandler handler, Property basis)
-                : base(apiVersion, handler,basis)
+                : base(apiVersion, handler, basis)
             {
                 mKey = basis.Key;
                 mValType = basis.ValueType;
             }
+
             protected Property(int apiVersion, EventHandler handler, ValueType type, PropertyKey key)
                 : base(apiVersion, handler)
             {
                 mKey = key;
                 mValType = type;
             }
+
             protected Property(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s)
-                : base(apiVersion, handler,s)
+                : base(apiVersion, handler, s)
             {
                 mKey = key;
                 mValType = type;
@@ -112,29 +122,35 @@ namespace s3piwrappers.Resources
             private PropertyKey mKey;
             private ValueType mValType;
             private object mValue = 0;
+
             [ElementPriority(0)]
             public PropertyKey Key
             {
                 get { return mKey; }
-                set { mKey = value; OnElementChanged(); }
+                set
+                {
+                    mKey = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(1)]
             public ValueType ValueType
             {
                 get { return mValType; }
             }
+
             public static Property CreateInstance(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s)
             {
                 switch (type)
                 {
-                    case ValueType.Float:
-                        return new FloatProperty(apiVersion, handler, type, key, s);
-                    case ValueType.ResourceKey:
-                        return new ResourceKeyProperty(apiVersion, handler, type, key, s);
-                    default:
-                        throw new Exception("Unknown Property type!");
+                case ValueType.Float:
+                    return new FloatProperty(apiVersion, handler, type, key, s);
+                case ValueType.ResourceKey:
+                    return new ResourceKeyProperty(apiVersion, handler, type, key, s);
+                default:
+                    throw new Exception("Unknown Property type!");
                 }
-
             }
 
             protected abstract override void Parse(Stream s);
@@ -153,7 +169,7 @@ namespace s3piwrappers.Resources
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return (AHandlerElement)MemberwiseClone();
+                return (AHandlerElement) MemberwiseClone();
             }
 
             public override List<string> ContentFields
@@ -171,21 +187,36 @@ namespace s3piwrappers.Resources
                 return mKey.CompareTo(other.mKey);
             }
         }
-        
 
-        [ConstructorParameters(new object[] { ValueType.Float, PropertyKey.AdditiveValue })]
+
+        [ConstructorParameters(new object[] {ValueType.Float, PropertyKey.AdditiveValue})]
         public class FloatProperty : Property
         {
-            public FloatProperty(int apiVersion, EventHandler handler, FloatProperty basis) : base(apiVersion, handler, basis) { }
-            public FloatProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key) : base(apiVersion, handler, type, key) { }
-            public FloatProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s) : base(apiVersion, handler, type, key, s) { }
+            public FloatProperty(int apiVersion, EventHandler handler, FloatProperty basis) : base(apiVersion, handler, basis)
+            {
+            }
+
+            public FloatProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key) : base(apiVersion, handler, type, key)
+            {
+            }
+
+            public FloatProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s) : base(apiVersion, handler, type, key, s)
+            {
+            }
+
             private float mValue;
+
             [ElementPriority(2)]
             public float Data
             {
                 get { return mValue; }
-                set { mValue = value; OnElementChanged(); }
+                set
+                {
+                    mValue = value;
+                    OnElementChanged();
+                }
             }
+
             protected override void Parse(Stream s)
             {
                 mValue = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadFloat();
@@ -196,19 +227,35 @@ namespace s3piwrappers.Resources
                 new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write(mValue);
             }
         }
-        [ConstructorParameters(new object[] { ValueType.ResourceKey, PropertyKey.DiffuseMap })]
+
+        [ConstructorParameters(new object[] {ValueType.ResourceKey, PropertyKey.DiffuseMap})]
         public class ResourceKeyProperty : Property
         {
-            public ResourceKeyProperty(int apiVersion, EventHandler handler, ResourceKeyProperty basis) : base(apiVersion, handler, basis) { }
-            public ResourceKeyProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key) : base(apiVersion, handler, type, key) { }
-            public ResourceKeyProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s) : base(apiVersion, handler, type, key, s) { }
+            public ResourceKeyProperty(int apiVersion, EventHandler handler, ResourceKeyProperty basis) : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ResourceKeyProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key) : base(apiVersion, handler, type, key)
+            {
+            }
+
+            public ResourceKeyProperty(int apiVersion, EventHandler handler, ValueType type, PropertyKey key, Stream s) : base(apiVersion, handler, type, key, s)
+            {
+            }
+
             private UInt64 mValue;
+
             [ElementPriority(2)]
             public UInt64 Data
             {
                 get { return mValue; }
-                set { mValue = value; OnElementChanged(); }
+                set
+                {
+                    mValue = value;
+                    OnElementChanged();
+                }
             }
+
             protected override void Parse(Stream s)
             {
                 mValue = new BinaryStreamWrapper(s, ByteOrder.LittleEndian).ReadUInt64();
@@ -226,7 +273,7 @@ namespace s3piwrappers.Resources
 
         public Material(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section)
         {
-            mProperties=new PropertyList(handler);
+            mProperties = new PropertyList(handler);
         }
 
 
@@ -243,24 +290,38 @@ namespace s3piwrappers.Resources
             return String.Format("Shader(0x{0:X16})", HashedName);
         }
 
-            
+
         [ElementPriority(1)]
         public ulong HashedName
         {
             get { return mHashedName; }
-            set { mHashedName = value; OnElementChanged(); }
+            set
+            {
+                mHashedName = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(2)]
         public ShaderType Shader
         {
             get { return mShader; }
-            set { mShader = value; OnElementChanged(); }
+            set
+            {
+                mShader = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(3)]
         public PropertyList Properties
         {
             get { return mProperties; }
-            set { mProperties = value; OnElementChanged(); }
+            set
+            {
+                mProperties = value;
+                OnElementChanged();
+            }
         }
 
 
@@ -268,7 +329,7 @@ namespace s3piwrappers.Resources
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             HashedName = s.ReadUInt64();
-            Shader = (ShaderType)s.ReadUInt64();
+            Shader = (ShaderType) s.ReadUInt64();
 
             mProperties = new PropertyList(handler, stream);
         }
@@ -277,15 +338,14 @@ namespace s3piwrappers.Resources
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(HashedName);
-            s.Write((UInt64)Shader);
+            s.Write((UInt64) Shader);
             mProperties.UnParse(stream);
         }
-            
+
 
         public bool Equals(Material other)
         {
             return mHashedName.Equals(other.mHashedName);
         }
-
     }
 }

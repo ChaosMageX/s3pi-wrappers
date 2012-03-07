@@ -7,54 +7,75 @@ using s3piwrappers.SWB;
 namespace s3piwrappers.Effects
 {
     public class ScreenEffect : Effect, IEquatable<ScreenEffect>
-    {       
-        
-                public class Item : DataElement, IEquatable<Item>
+    {
+        public class Item : DataElement, IEquatable<Item>
         {
-
             public Item(int APIversion, EventHandler handler, Item basis)
-                : base(APIversion, handler,basis)
+                : base(APIversion, handler, basis)
             {
             }
+
             public Item(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler,s){}
+                : base(APIversion, handler, s)
+            {
+            }
+
             public Item(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
                 mByteList01 = new DataList<ByteValue>(handler);
             }
 
-                        private Byte mByte01;
+            private Byte mByte01;
             private Byte mByte02;
             private UInt64 mLong01;
             private DataList<ByteValue> mByteList01;
-            
 
-                        [ElementPriority(1)]
+
+            [ElementPriority(1)]
             public byte Byte01
             {
                 get { return mByte01; }
-                set { mByte01 = value; OnElementChanged(); }
+                set
+                {
+                    mByte01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public byte Byte02
             {
                 get { return mByte02; }
-                set { mByte02 = value; OnElementChanged(); }
+                set
+                {
+                    mByte02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public ulong Long01
             {
                 get { return mLong01; }
-                set { mLong01 = value; OnElementChanged(); }
+                set
+                {
+                    mLong01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public DataList<ByteValue> ByteList01
             {
                 get { return mByteList01; }
-                set { mByteList01 = value; OnElementChanged(); }
+                set
+                {
+                    mByteList01 = value;
+                    OnElementChanged();
+                }
             }
-            
+
 
             protected override void Parse(Stream stream)
             {
@@ -64,6 +85,7 @@ namespace s3piwrappers.Effects
                 s.Read(out mLong01);
                 mByteList01 = new DataList<ByteValue>(handler, stream);
             }
+
             public override void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -72,17 +94,19 @@ namespace s3piwrappers.Effects
                 s.Write(mLong01);
                 mByteList01.UnParse(stream);
             }
+
             public bool Equals(Item other)
             {
                 return base.Equals(other);
             }
         }
-        
+
 
         public ScreenEffect(int apiVersion, EventHandler handler, ScreenEffect basis)
             : base(apiVersion, handler, basis)
         {
         }
+
         public ScreenEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
@@ -95,11 +119,13 @@ namespace s3piwrappers.Effects
             mVector3List01 = new DataList<Vector3ValueLE>(handler);
             mVector2List02 = new DataList<Vector2ValueLE>(handler);
             mIntList02 = new DataList<UInt32Value>(handler);
-
         }
-        public ScreenEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
 
-                private Byte mByte01;
+        public ScreenEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        {
+        }
+
+        private Byte mByte01;
         private UInt32 mInt01;
         private DataList<ColourValue> mColourList01;
         private DataList<FloatValue> mFloatList01;
@@ -115,105 +141,184 @@ namespace s3piwrappers.Effects
         private DataList<Vector3ValueLE> mVector3List01;
         private DataList<Vector2ValueLE> mVector2List02;
         private DataList<UInt32Value> mIntList02;
-        
 
-                [ElementPriority(1)]
+
+        [ElementPriority(1)]
         public byte Byte01
         {
             get { return mByte01; }
-            set { mByte01 = value; OnElementChanged(); }
+            set
+            {
+                mByte01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(2)]
         public uint Int01
         {
             get { return mInt01; }
-            set { mInt01 = value; OnElementChanged(); }
+            set
+            {
+                mInt01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(3)]
         public DataList<ColourValue> ColourList01
         {
             get { return mColourList01; }
-            set { mColourList01 = value; OnElementChanged(); }
+            set
+            {
+                mColourList01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(4)]
         public DataList<FloatValue> FloatList01
         {
             get { return mFloatList01; }
-            set { mFloatList01 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(5)]
         public DataList<FloatValue> FloatList02
         {
             get { return mFloatList01; }
-            set { mFloatList01 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(6)]
         public float Float01
         {
             get { return mFloat01; }
-            set { mFloat01 = value; OnElementChanged(); }
+            set
+            {
+                mFloat01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(7)]
         public uint Int02
         {
             get { return mInt02; }
-            set { mInt02 = value; OnElementChanged(); }
+            set
+            {
+                mInt02 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(8)]
         public uint Int03
         {
             get { return mInt03; }
-            set { mInt03 = value; OnElementChanged(); }
+            set
+            {
+                mInt03 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(9)]
         public uint Int04
         {
             get { return mInt04; }
-            set { mInt04 = value; OnElementChanged(); }
+            set
+            {
+                mInt04 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(10)]
         public ulong Long01
         {
             get { return mLong01; }
-            set { mLong01 = value; OnElementChanged(); }
+            set
+            {
+                mLong01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(11)]
         public DataList<Item> Items
         {
             get { return mItems; }
-            set { mItems = value; OnElementChanged(); }
+            set
+            {
+                mItems = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(12)]
         public DataList<Vector2Value> Vector2List01
         {
             get { return mVector2List01; }
-            set { mVector2List01 = value; OnElementChanged(); }
+            set
+            {
+                mVector2List01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(13)]
         public DataList<UInt32Value> IntList01
         {
             get { return mIntList01; }
-            set { mIntList01 = value; OnElementChanged(); }
+            set
+            {
+                mIntList01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(14)]
         public DataList<Vector3ValueLE> Vector3List01
         {
             get { return mVector3List01; }
-            set { mVector3List01 = value; OnElementChanged(); }
+            set
+            {
+                mVector3List01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(15)]
         public DataList<Vector2ValueLE> Vector2List02
         {
             get { return mVector2List02; }
-            set { mVector2List02 = value; OnElementChanged(); }
+            set
+            {
+                mVector2List02 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(16)]
         public DataList<UInt32Value> IntList02
         {
             get { return mIntList02; }
-            set { mIntList02 = value; OnElementChanged(); }
+            set
+            {
+                mIntList02 = value;
+                OnElementChanged();
+            }
         }
-        
+
 
         protected override void Parse(Stream stream)
         {

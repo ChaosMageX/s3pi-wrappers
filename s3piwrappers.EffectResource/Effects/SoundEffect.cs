@@ -12,48 +12,78 @@ namespace s3piwrappers.Effects
             : base(apiVersion, handler, basis)
         {
         }
-        public SoundEffect(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section) { }
-        public SoundEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s) { }
+
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section)
+        {
+        }
+
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        {
+        }
 
 
-                private UInt32 mUint01;
+        private UInt32 mUint01;
         private UInt64 mLong01;
         private float mFloat01 = 0.25f;
         private float mFloat02;
         private float mFloat03;
-        
 
-                [ElementPriority(1)]
+
+        [ElementPriority(1)]
         public uint Uint01
         {
             get { return mUint01; }
-            set { mUint01 = value; OnElementChanged(); }
+            set
+            {
+                mUint01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(2)]
         public ulong AudioResourceInstance
         {
             get { return mLong01; }
-            set { mLong01 = value; OnElementChanged(); }
+            set
+            {
+                mLong01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(3)]
         public float Float01
         {
             get { return mFloat01; }
-            set { mFloat01 = value; OnElementChanged(); }
+            set
+            {
+                mFloat01 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(4)]
         public float Float02
         {
             get { return mFloat02; }
-            set { mFloat02 = value; OnElementChanged(); }
+            set
+            {
+                mFloat02 = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(5)]
         public float Float03
         {
             get { return mFloat03; }
-            set { mFloat03 = value; OnElementChanged(); }
+            set
+            {
+                mFloat03 = value;
+                OnElementChanged();
+            }
         }
-        
+
 
         protected override void Parse(Stream stream)
         {

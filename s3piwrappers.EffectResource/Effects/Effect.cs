@@ -8,10 +8,12 @@ namespace s3piwrappers.Effects
 {
     public class Effect : SectionData, IEquatable<Effect>
     {
-
-                public class ResourceReference : DataElement
+        public class ResourceReference : DataElement
         {
-            public ResourceReference(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+            public ResourceReference(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
             public ResourceReference(int apiVersion, EventHandler handler, ResourceReference basis)
                 : base(apiVersion, handler)
             {
@@ -25,9 +27,12 @@ namespace s3piwrappers.Effects
                 mInt02 = basis.mInt02;
                 mLong01 = basis.mLong01;
             }
-            public ResourceReference(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-                        private UInt64 mInstanceId;
+            public ResourceReference(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            private UInt64 mInstanceId;
             private byte mByte01;
             private byte mByte02;
             private UInt32 mInt01; //if Byte02 & 0x80
@@ -36,7 +41,7 @@ namespace s3piwrappers.Effects
             private UInt16 mShort01;
             private UInt32 mInt02;
             private UInt64 mLong01;
-            
+
 
             protected override void Parse(Stream stream)
             {
@@ -51,6 +56,7 @@ namespace s3piwrappers.Effects
                 s.Read(out mInt02);
                 s.Read(out mLong01);
             }
+
             public override void UnParse(Stream stream)
             {
                 BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -69,72 +75,120 @@ namespace s3piwrappers.Effects
             public ulong Instance
             {
                 get { return mInstanceId; }
-                set { mInstanceId = value; OnElementChanged(); }
+                set
+                {
+                    mInstanceId = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public byte Byte01
             {
                 get { return mByte01; }
-                set { mByte01 = value; OnElementChanged(); }
+                set
+                {
+                    mByte01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public byte Byte02
             {
                 get { return mByte02; }
-                set { mByte02 = value; OnElementChanged(); }
+                set
+                {
+                    mByte02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public uint Int01
             {
                 get { return mInt01; }
-                set { mInt01 = value; OnElementChanged(); }
+                set
+                {
+                    mInt01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public byte Byte03
             {
                 get { return mByte03; }
-                set { mByte03 = value; OnElementChanged(); }
+                set
+                {
+                    mByte03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public byte Byte04
             {
                 get { return mByte04; }
-                set { mByte04 = value; OnElementChanged(); }
+                set
+                {
+                    mByte04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public ushort Short01
             {
                 get { return mShort01; }
-                set { mShort01 = value; OnElementChanged(); }
+                set
+                {
+                    mShort01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(8)]
             public uint Int02
             {
                 get { return mInt02; }
-                set { mInt02 = value; OnElementChanged(); }
+                set
+                {
+                    mInt02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(9)]
             public ulong Long01
             {
                 get { return mLong01; }
-                set { mLong01 = value; OnElementChanged(); }
+                set
+                {
+                    mLong01 = value;
+                    OnElementChanged();
+                }
             }
         }
-        
 
-                public class ParticleParams : DataElement
+
+        public class ParticleParams : DataElement
         {
             public ParticleParams(int apiVersion, EventHandler handler, ParticleParams basis)
                 : base(apiVersion, handler, basis)
             {
             }
+
             public ParticleParams(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
             }
-            public ParticleParams(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
 
-                        private float mFloat01 = 10f;
+            public ParticleParams(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            private float mFloat01 = 10f;
             private float mFloat02 = 10f;
 
             private float mFloat03;
@@ -165,142 +219,250 @@ namespace s3piwrappers.Effects
             private float mFloat21;
 
             private float mFloat22 = -1f;
-            
 
-                        [ElementPriority(1)]
+
+            [ElementPriority(1)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public float Float03
             {
                 get { return mFloat03; }
-                set { mFloat03 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public float Float04
             {
                 get { return mFloat04; }
-                set { mFloat04 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public float Float05
             {
                 get { return mFloat05; }
-                set { mFloat05 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat05 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public float Float06
             {
                 get { return mFloat06; }
-                set { mFloat06 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat06 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public float Float07
             {
                 get { return mFloat07; }
-                set { mFloat07 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat07 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(8)]
             public float Float08
             {
                 get { return mFloat08; }
-                set { mFloat08 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat08 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(9)]
             public float Float09
             {
                 get { return mFloat09; }
-                set { mFloat09 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat09 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(10)]
             public float Float10
             {
                 get { return mFloat10; }
-                set { mFloat10 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat10 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(11)]
             public float Float11
             {
                 get { return mFloat11; }
-                set { mFloat11 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat11 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(12)]
             public float Float12
             {
                 get { return mFloat12; }
-                set { mFloat12 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat12 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(13)]
             public float Float13
             {
                 get { return mFloat13; }
-                set { mFloat13 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat13 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(14)]
             public float Float14
             {
                 get { return mFloat14; }
-                set { mFloat14 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat14 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(15)]
             public float Float15
             {
                 get { return mFloat15; }
-                set { mFloat15 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat15 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(16)]
             public float Float16
             {
                 get { return mFloat16; }
-                set { mFloat16 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat16 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(17)]
             public float Float17
             {
                 get { return mFloat17; }
-                set { mFloat17 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat17 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(18)]
             public float Float18
             {
                 get { return mFloat18; }
-                set { mFloat18 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat18 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(19)]
             public float Float19
             {
                 get { return mFloat19; }
-                set { mFloat19 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat19 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(20)]
             public float Float20
             {
                 get { return mFloat20; }
-                set { mFloat20 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat20 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(21)]
             public float Float21
             {
                 get { return mFloat21; }
-                set { mFloat21 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat21 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(22)]
             public float Float22
             {
                 get { return mFloat22; }
-                set { mFloat22 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat22 = value;
+                    OnElementChanged();
+                }
             }
 
-            
 
             protected override void Parse(Stream stream)
             {
@@ -356,9 +518,9 @@ namespace s3piwrappers.Effects
                 s.Write(mFloat22);
             }
         }
-        
 
-                public class ItemA : DataElement, IEquatable<ItemA>
+
+        public class ItemA : DataElement, IEquatable<ItemA>
         {
             private float mFloat01;
             private float mFloat02;
@@ -367,6 +529,7 @@ namespace s3piwrappers.Effects
             private float mFloat05;
             private float mFloat06;
             private float mFloat07;
+
             public ItemA(int apiVersion, EventHandler handler, ItemA basis)
                 : base(apiVersion, handler)
             {
@@ -378,66 +541,89 @@ namespace s3piwrappers.Effects
                 mFloat06 = basis.mFloat06;
                 mFloat07 = basis.mFloat07;
             }
-            public ItemA(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
-            public ItemA(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+
+            public ItemA(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            public ItemA(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
             [ElementPriority(1)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public float Float02
             {
                 get { return mFloat02; }
                 set
                 {
-                    mFloat02 = value; OnElementChanged();
+                    mFloat02 = value;
+                    OnElementChanged();
                 }
             }
+
             [ElementPriority(3)]
             public float Float03
             {
                 get { return mFloat03; }
                 set
                 {
-                    mFloat03 = value; OnElementChanged();
+                    mFloat03 = value;
+                    OnElementChanged();
                 }
             }
+
             [ElementPriority(4)]
             public float Float04
             {
                 get { return mFloat04; }
                 set
                 {
-                    mFloat04 = value; OnElementChanged();
+                    mFloat04 = value;
+                    OnElementChanged();
                 }
             }
+
             [ElementPriority(5)]
             public float Float05
             {
                 get { return mFloat05; }
                 set
                 {
-                    mFloat05 = value; OnElementChanged();
+                    mFloat05 = value;
+                    OnElementChanged();
                 }
             }
+
             [ElementPriority(6)]
             public float Float06
             {
                 get { return mFloat06; }
                 set
                 {
-                    mFloat06 = value; OnElementChanged();
+                    mFloat06 = value;
+                    OnElementChanged();
                 }
             }
+
             [ElementPriority(7)]
             public float Float07
             {
                 get { return mFloat07; }
                 set
                 {
-                    mFloat07 = value; OnElementChanged();
+                    mFloat07 = value;
+                    OnElementChanged();
                 }
             }
 
@@ -471,9 +657,9 @@ namespace s3piwrappers.Effects
                 return base.Equals(other);
             }
         }
-        
 
-                public class ItemB : DataElement, IEquatable<ItemB>
+
+        public class ItemB : DataElement, IEquatable<ItemB>
         {
             private UInt32 mInt02;
             private float mFloat01;
@@ -487,72 +673,128 @@ namespace s3piwrappers.Effects
             private DataList<Vector3ValueLE> mVector3List01;
 
             public ItemB(int apiVersion, EventHandler handler, ItemB basis)
-                : base(apiVersion, handler, basis) { }
-            public ItemB(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ItemB(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
             public ItemB(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
                 mVector3List01 = new DataList<Vector3ValueLE>(handler);
             }
+
             [ElementPriority(1)]
             public UInt32 Int01
             {
                 get { return mInt01; }
-                set { mInt01 = value; OnElementChanged(); }
+                set
+                {
+                    mInt01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public UInt64 Long01
             {
                 get { return mLong01; }
-                set { mLong01 = value; OnElementChanged(); }
+                set
+                {
+                    mLong01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public float Float03
             {
                 get { return mFloat03; }
-                set { mFloat03 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public float Float04
             {
                 get { return mFloat04; }
-                set { mFloat04 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public UInt32 Int02
             {
                 get { return mInt02; }
-                set { mInt02 = value; OnElementChanged(); }
+                set
+                {
+                    mInt02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(8)]
             public String String01
             {
                 get { return mString01; }
-                set { mString01 = value; OnElementChanged(); }
+                set
+                {
+                    mString01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(9)]
             public String String02
             {
                 get { return mString02; }
-                set { mString02 = value; OnElementChanged(); }
+                set
+                {
+                    mString02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(10)]
             public DataList<Vector3ValueLE> Vector3List01
             {
                 get { return mVector3List01; }
-                set { mVector3List01 = value; OnElementChanged(); }
+                set
+                {
+                    mVector3List01 = value;
+                    OnElementChanged();
+                }
             }
 
             protected override void Parse(Stream stream)
@@ -584,46 +826,62 @@ namespace s3piwrappers.Effects
                 s.Write(mString02, StringType.ZeroDelimited);
                 mVector3List01.UnParse(stream);
             }
+
             public bool Equals(ItemB other)
             {
                 return base.Equals(other);
             }
         }
-        
 
-                public class ItemC : DataElement, IEquatable<ItemC>
+
+        public class ItemC : DataElement, IEquatable<ItemC>
         {
             public ItemC(int apiVersion, EventHandler handler, ItemC basis)
-                : base(apiVersion, handler, basis) { }
-            public ItemC(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ItemC(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
             public ItemC(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
                 mItems = new DataList<ItemE>(handler);
             }
+
             private DataList<ItemE> mItems;
+
             [ElementPriority(1)]
             public DataList<ItemE> Items
             {
                 get { return mItems; }
-                set { mItems = value; OnElementChanged(); }
+                set
+                {
+                    mItems = value;
+                    OnElementChanged();
+                }
             }
+
             protected override void Parse(Stream stream)
             {
                 mItems = new DataList<ItemE>(handler, stream);
             }
+
             public override void UnParse(Stream stream)
             {
                 mItems.UnParse(stream);
             }
+
             public bool Equals(ItemC other)
             {
                 return base.Equals(other);
             }
         }
-        
 
-                public class ItemD : DataElement, IEquatable<ItemD>
+
+        public class ItemD : DataElement, IEquatable<ItemD>
         {
             public ItemD(int apiVersion, EventHandler handler, ItemD basis)
                 : base(apiVersion, handler)
@@ -636,8 +894,15 @@ namespace s3piwrappers.Effects
                 mFloat06 = basis.mFloat06;
                 mFloat07 = basis.mFloat07;
             }
-            public ItemD(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
-            public ItemD(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+
+            public ItemD(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            public ItemD(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
             private float mFloat01;
             private float mFloat02;
             private float mFloat03;
@@ -645,47 +910,82 @@ namespace s3piwrappers.Effects
             private float mFloat05;
             private float mFloat06;
             private float mFloat07;
+
             [ElementPriority(1)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public float Float03
             {
                 get { return mFloat03; }
-                set { mFloat03 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public float Float04
             {
                 get { return mFloat04; }
-                set { mFloat04 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public float Float05
             {
                 get { return mFloat05; }
-                set { mFloat05 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat05 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public float Float06
             {
                 get { return mFloat06; }
-                set { mFloat06 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat06 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public float Timecode
             {
                 get { return mFloat07; }
-                set { mFloat07 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat07 = value;
+                    OnElementChanged();
+                }
             }
 
             protected override void Parse(Stream stream)
@@ -711,14 +1011,15 @@ namespace s3piwrappers.Effects
                 s.Write(mFloat06, ByteOrder.LittleEndian);
                 s.Write(mFloat07);
             }
+
             public bool Equals(ItemD other)
             {
                 return base.Equals(other);
             }
         }
-        
 
-                public class ItemE : DataElement, IEquatable<ItemE>
+
+        public class ItemE : DataElement, IEquatable<ItemE>
         {
             public ItemE(int apiVersion, EventHandler handler, ItemE basis)
                 : base(apiVersion, handler)
@@ -731,8 +1032,15 @@ namespace s3piwrappers.Effects
                 mFloat06 = basis.mFloat06;
                 mFloat07 = basis.mFloat07;
             }
-            public ItemE(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
-            public ItemE(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
+
+            public ItemE(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
+            public ItemE(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
             private float mFloat01;
             private float mFloat02;
             private float mFloat03;
@@ -740,47 +1048,82 @@ namespace s3piwrappers.Effects
             private float mFloat05;
             private float mFloat06;
             private float mFloat07;
+
             [ElementPriority(1)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public float Float03
             {
                 get { return mFloat03; }
-                set { mFloat03 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public float Float04
             {
                 get { return mFloat04; }
-                set { mFloat04 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public float Float05
             {
                 get { return mFloat05; }
-                set { mFloat05 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat05 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public float Float06
             {
                 get { return mFloat06; }
-                set { mFloat06 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat06 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public float Float07
             {
                 get { return mFloat07; }
-                set { mFloat07 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat07 = value;
+                    OnElementChanged();
+                }
             }
 
             protected override void Parse(Stream stream)
@@ -811,22 +1154,27 @@ namespace s3piwrappers.Effects
             {
                 return base.Equals(other);
             }
-
         }
-        
 
-                public class ItemF : DataElement
+
+        public class ItemF : DataElement
         {
             public ItemF(int apiVersion, EventHandler handler, ItemF basis)
-                : base(apiVersion, handler, basis) { }
-            public ItemF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s) { }
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ItemF(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
+
             public ItemF(int apiVersion, EventHandler handler)
                 : base(apiVersion, handler)
             {
                 mFloatList01 = new DataList<FloatValue>(handler);
             }
 
-                        private float mFloat01; //LE
+            private float mFloat01; //LE
             private float mFloat02; //LE
             private float mFloat03; //LE
             private float mFloat04; //LE
@@ -835,64 +1183,107 @@ namespace s3piwrappers.Effects
             private float mFloat07;
             private DataList<FloatValue> mFloatList01;
             private byte mByte01;
-            
 
-                        [ElementPriority(1)]
+
+            [ElementPriority(1)]
             public float Float01
             {
                 get { return mFloat01; }
-                set { mFloat01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat01 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(2)]
             public float Float02
             {
                 get { return mFloat02; }
-                set { mFloat02 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat02 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(3)]
             public float Float03
             {
                 get { return mFloat03; }
-                set { mFloat03 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat03 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(4)]
             public float Float04
             {
                 get { return mFloat04; }
-                set { mFloat04 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat04 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(5)]
             public float Float05
             {
                 get { return mFloat05; }
-                set { mFloat05 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat05 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(6)]
             public float Float06
             {
                 get { return mFloat06; }
-                set { mFloat06 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat06 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(7)]
             public float Float07
             {
                 get { return mFloat07; }
-                set { mFloat07 = value; OnElementChanged(); }
+                set
+                {
+                    mFloat07 = value;
+                    OnElementChanged();
+                }
             }
+
             [ElementPriority(8)]
             public DataList<FloatValue> FloatList01
             {
                 get { return mFloatList01; }
-                set { mFloatList01 = value; OnElementChanged(); }
+                set
+                {
+                    mFloatList01 = value;
+                    OnElementChanged();
+                }
             }
 
             [ElementPriority(9)]
             public byte Byte01
             {
                 get { return mByte01; }
-                set { mByte01 = value; OnElementChanged(); }
+                set
+                {
+                    mByte01 = value;
+                    OnElementChanged();
+                }
             }
-            
+
 
             protected override void Parse(Stream stream)
             {
@@ -922,7 +1313,7 @@ namespace s3piwrappers.Effects
                 s.Write(mByte01);
             }
         }
-        
+
 
         public Effect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
@@ -939,8 +1330,13 @@ namespace s3piwrappers.Effects
         {
         }
 
-        protected override void Parse(Stream stream) { }
-        public override void UnParse(Stream stream) { }
+        protected override void Parse(Stream stream)
+        {
+        }
+
+        public override void UnParse(Stream stream)
+        {
+        }
 
         public bool Equals(Effect other)
         {

@@ -4,11 +4,11 @@ using s3pi.Interfaces;
 
 namespace s3piwrappers
 {
-    public class EffectResourceHandler :AResourceHandler
+    public class EffectResourceHandler : AResourceHandler
     {
         public EffectResourceHandler()
         {
-            Add(typeof(EffectResource), new List<String> { "0xEA5118B0" });
+            Add(typeof (EffectResource), new List<String> {"0xEA5118B0"});
         }
     }
 }

@@ -9,11 +9,11 @@ namespace s3piwrappers.Effects
 {
     public class ParticleEffect : Effect, IEquatable<ParticleEffect>
     {
-
         public ParticleEffect(int apiVersion, EventHandler handler, ParticleEffect basis)
             : base(apiVersion, handler, basis)
         {
         }
+
         public ParticleEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
@@ -33,13 +33,14 @@ namespace s3piwrappers.Effects
             mColourList01 = new DataList<ColourValue>(handler);
             mVector3List01 = new DataList<Vector3ValueLE>(handler);
             mVector3List02 = new DataList<Vector3ValueLE>(handler);
-
-
         }
-        public ParticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
-            : base(apiVersion, handler, section, s) { }
 
-                private UInt32 mInt01;
+        public ParticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
+            : base(apiVersion, handler, section, s)
+        {
+        }
+
+        private UInt32 mInt01;
         private ParticleParams mParticleParameters;
         private DataList<FloatValue> mFloatList01;
         private float mFloat01 = 1.5f;
@@ -134,98 +135,148 @@ namespace s3piwrappers.Effects
         //Version 4+
         private float mFloat48;
 
-        
 
-        
         [ElementPriority(75)]
         public float Float48
         {
             get { return mFloat48; }
-            set { mFloat48 = value; OnElementChanged(); }
+            set
+            {
+                mFloat48 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(74)]
         public byte Byte14
         {
             get { return mByte14; }
-            set { mByte14 = value; OnElementChanged(); }
+            set
+            {
+                mByte14 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(73)]
         public DataList<Vector3ValueLE> Vector3List02
         {
             get { return mVector3List02; }
-            set { mVector3List02 = value; OnElementChanged(); }
+            set
+            {
+                mVector3List02 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(72)]
         public float Float47
         {
             get { return mFloat47; }
-            set { mFloat47 = value; OnElementChanged(); }
+            set
+            {
+                mFloat47 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(71)]
         public float Float46
         {
             get { return mFloat46; }
-            set { mFloat46 = value; OnElementChanged(); }
+            set
+            {
+                mFloat46 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(70)]
         public float Float45
         {
             get { return mFloat45; }
-            set { mFloat45 = value; OnElementChanged(); }
+            set
+            {
+                mFloat45 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(69)]
         public DataList<ItemD> ItemDList01
         {
             get { return mItemDList01; }
-            set { mItemDList01 = value; OnElementChanged(); }
+            set
+            {
+                mItemDList01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(68)]
         public float Float44
         {
             get { return mFloat44; }
-            set { mFloat44 = value; OnElementChanged(); }
+            set
+            {
+                mFloat44 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(67)]
         public float Float43
         {
             get { return mFloat43; }
-            set { mFloat43 = value; OnElementChanged(); }
+            set
+            {
+                mFloat43 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(66)]
         public DataList<FloatValue> FloatList08
         {
             get { return mFloatList08; }
-            set { mFloatList08 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList08 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(65)]
         public float Float42
         {
             get { return mFloat42; }
-            set { mFloat42 = value; OnElementChanged(); }
+            set
+            {
+                mFloat42 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(64)]
         public float Float41
         {
             get { return mFloat41; }
-            set { mFloat41 = value; OnElementChanged(); }
+            set
+            {
+                mFloat41 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(63)]
         public float Float40
         {
             get { return mFloat40; }
-            set { mFloat40 = value; OnElementChanged(); }
+            set
+            {
+                mFloat40 = value;
+                OnElementChanged();
+            }
         }
 
 
@@ -233,437 +284,684 @@ namespace s3piwrappers.Effects
         public ItemF ItemF01
         {
             get { return mItemF01; }
-            set { mItemF01 = value; OnElementChanged(); }
+            set
+            {
+                mItemF01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(61)]
         public ulong Long03
         {
             get { return mLong03; }
-            set { mLong03 = value; OnElementChanged(); }
+            set
+            {
+                mLong03 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(60)]
         public ulong Long02
         {
             get { return mLong02; }
-            set { mLong02 = value; OnElementChanged(); }
+            set
+            {
+                mLong02 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(59)]
         public ulong Long01
         {
             get { return mLong01; }
-            set { mLong01 = value; OnElementChanged(); }
+            set
+            {
+                mLong01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(58)]
         public float Float32
         {
             get { return mFloat32; }
-            set { mFloat32 = value; OnElementChanged(); }
+            set
+            {
+                mFloat32 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(57)]
         public float Float31
         {
             get { return mFloat31; }
-            set { mFloat31 = value; OnElementChanged(); }
+            set
+            {
+                mFloat31 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(56)]
         public float Float30
         {
             get { return mFloat30; }
-            set { mFloat30 = value; OnElementChanged(); }
+            set
+            {
+                mFloat30 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(55)]
         public float Float29
         {
             get { return mFloat29; }
-            set { mFloat29 = value; OnElementChanged(); }
+            set
+            {
+                mFloat29 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(54)]
         public float Float28
         {
             get { return mFloat28; }
-            set { mFloat28 = value; OnElementChanged(); }
+            set
+            {
+                mFloat28 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(53)]
         public float Float27
         {
             get { return mFloat27; }
-            set { mFloat27 = value; OnElementChanged(); }
+            set
+            {
+                mFloat27 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(52)]
         public float Float26
         {
             get { return mFloat26; }
-            set { mFloat26 = value; OnElementChanged(); }
+            set
+            {
+                mFloat26 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(51)]
         public float Float25
         {
             get { return mFloat25; }
-            set { mFloat25 = value; OnElementChanged(); }
+            set
+            {
+                mFloat25 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(50)]
         public float Float24
         {
             get { return mFloat24; }
-            set { mFloat24 = value; OnElementChanged(); }
+            set
+            {
+                mFloat24 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(49)]
         public DataList<ItemB> ItemBList01
         {
             get { return mItemBList01; }
-            set { mItemBList01 = value; OnElementChanged(); }
+            set
+            {
+                mItemBList01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(48)]
         public DataList<FloatValue> FloatList06
         {
             get { return mFloatList06; }
-            set { mFloatList06 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList06 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(47)]
         public DataList<Vector3ValueLE> Vector3List01
         {
             get { return mVector3List01; }
-            set { mVector3List01 = value; OnElementChanged(); }
+            set
+            {
+                mVector3List01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(46)]
         public byte Byte12
         {
             get { return mByte12; }
-            set { mByte12 = value; OnElementChanged(); }
+            set
+            {
+                mByte12 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(45)]
         public byte Byte11
         {
             get { return mByte11; }
-            set { mByte11 = value; OnElementChanged(); }
+            set
+            {
+                mByte11 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(44)]
         public byte Byte10
         {
             get { return mByte10; }
-            set { mByte10 = value; OnElementChanged(); }
+            set
+            {
+                mByte10 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(43)]
         public byte Byte09
         {
             get { return mByte09; }
-            set { mByte09 = value; OnElementChanged(); }
+            set
+            {
+                mByte09 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(42)]
         public DataList<ItemA> ItemAList01
         {
             get { return mItemAList01; }
-            set { mItemAList01 = value; OnElementChanged(); }
+            set
+            {
+                mItemAList01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(41)]
         public float Float23
         {
             get { return mFloat23; }
-            set { mFloat23 = value; OnElementChanged(); }
+            set
+            {
+                mFloat23 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(40)]
         public float Float22
         {
             get { return mFloat22; }
-            set { mFloat22 = value; OnElementChanged(); }
+            set
+            {
+                mFloat22 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(39)]
         public float Float21
         {
             get { return mFloat21; }
-            set { mFloat21 = value; OnElementChanged(); }
+            set
+            {
+                mFloat21 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(38)]
         public float Float20
         {
             get { return mFloat20; }
-            set { mFloat20 = value; OnElementChanged(); }
+            set
+            {
+                mFloat20 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(37)]
         public float Float19
         {
             get { return mFloat19; }
-            set { mFloat19 = value; OnElementChanged(); }
+            set
+            {
+                mFloat19 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(36)]
         public float Float18
         {
             get { return mFloat18; }
-            set { mFloat18 = value; OnElementChanged(); }
+            set
+            {
+                mFloat18 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(35)]
         public float Float17
         {
             get { return mFloat17; }
-            set { mFloat17 = value; OnElementChanged(); }
+            set
+            {
+                mFloat17 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(34)]
         public float Float16
         {
             get { return mFloat16; }
-            set { mFloat16 = value; OnElementChanged(); }
+            set
+            {
+                mFloat16 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(33)]
         public float Float15
         {
             get { return mFloat15; }
-            set { mFloat15 = value; OnElementChanged(); }
+            set
+            {
+                mFloat15 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(32)]
         public float Float14
         {
             get { return mFloat14; }
-            set { mFloat14 = value; OnElementChanged(); }
+            set
+            {
+                mFloat14 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(31)]
         public float Float13
         {
             get { return mFloat13; }
-            set { mFloat13 = value; OnElementChanged(); }
+            set
+            {
+                mFloat13 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(30)]
         public float Float12
         {
             get { return mFloat12; }
-            set { mFloat12 = value; OnElementChanged(); }
+            set
+            {
+                mFloat12 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(29)]
         public byte Byte08
         {
             get { return mByte08; }
-            set { mByte08 = value; OnElementChanged(); }
+            set
+            {
+                mByte08 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(28)]
         public byte Byte07
         {
             get { return mByte07; }
-            set { mByte07 = value; OnElementChanged(); }
+            set
+            {
+                mByte07 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(27)]
         public byte Byte06
         {
             get { return mByte06; }
-            set { mByte06 = value; OnElementChanged(); }
+            set
+            {
+                mByte06 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(26)]
         public float Float11
         {
             get { return mFloat11; }
-            set { mFloat11 = value; OnElementChanged(); }
+            set
+            {
+                mFloat11 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(25)]
         public byte Byte05
         {
             get { return mByte05; }
-            set { mByte05 = value; OnElementChanged(); }
+            set
+            {
+                mByte05 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(24)]
         public byte Byte04
         {
             get { return mByte04; }
-            set { mByte04 = value; OnElementChanged(); }
+            set
+            {
+                mByte04 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(23)]
         public byte Byte03
         {
             get { return mByte03; }
-            set { mByte03 = value; OnElementChanged(); }
+            set
+            {
+                mByte03 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(22)]
         public byte Byte02
         {
             get { return mByte02; }
-            set { mByte02 = value; OnElementChanged(); }
+            set
+            {
+                mByte02 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(21)]
         public byte Byte01
         {
             get { return mByte01; }
-            set { mByte01 = value; OnElementChanged(); }
+            set
+            {
+                mByte01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(20)]
         public ResourceReference ResourceKey
         {
             get { return mResource; }
-            set { mResource = value; OnElementChanged(); }
+            set
+            {
+                mResource = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(19)]
         public float Float10
         {
             get { return mFloat10; }
-            set { mFloat10 = value; OnElementChanged(); }
+            set
+            {
+                mFloat10 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(18)]
         public float Float09
         {
             get { return mFloat09; }
-            set { mFloat09 = value; OnElementChanged(); }
+            set
+            {
+                mFloat09 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(17)]
         public float Float08
         {
             get { return mFloat08; }
-            set { mFloat08 = value; OnElementChanged(); }
+            set
+            {
+                mFloat08 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(16)]
         public DataList<ColourValue> ColourDeltas
         {
             get { return mColourList01; }
-            set { mColourList01 = value; OnElementChanged(); }
+            set
+            {
+                mColourList01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(15)]
         public float Float07
         {
             get { return mFloat07; }
-            set { mFloat07 = value; OnElementChanged(); }
+            set
+            {
+                mFloat07 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(14)]
         public DataList<FloatValue> FloatList05
         {
             get { return mFloatList05; }
-            set { mFloatList05 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList05 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(13)]
         public DataList<FloatValue> FloatList04
         {
             get { return mFloatList04; }
-            set { mFloatList04 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList04 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(12)]
         public float Float06
         {
             get { return mFloat06; }
-            set { mFloat06 = value; OnElementChanged(); }
+            set
+            {
+                mFloat06 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(11)]
         public float Float05
         {
             get { return mFloat05; }
-            set { mFloat05 = value; OnElementChanged(); }
+            set
+            {
+                mFloat05 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(10)]
         public float Float04
         {
             get { return mFloat04; }
-            set { mFloat04 = value; OnElementChanged(); }
+            set
+            {
+                mFloat04 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(9)]
         public DataList<FloatValue> FloatList03
         {
             get { return mFloatList03; }
-            set { mFloatList03 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList03 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(8)]
         public float Float03
         {
             get { return mFloat03; }
-            set { mFloat03 = value; OnElementChanged(); }
+            set
+            {
+                mFloat03 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(7)]
         public DataList<FloatValue> ScaleDeltas
         {
             get { return mFloatList02; }
-            set { mFloatList02 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList02 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(6)]
         public float Float02
         {
             get { return mFloat02; }
-            set { mFloat02 = value; OnElementChanged(); }
+            set
+            {
+                mFloat02 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(5)]
         public ushort Short02
         {
             get { return mShort01; }
-            set { mShort01 = value; OnElementChanged(); }
+            set
+            {
+                mShort01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(4)]
         public float Float01
         {
             get { return mFloat01; }
-            set { mFloat01 = value; OnElementChanged(); }
+            set
+            {
+                mFloat01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(3)]
         public DataList<FloatValue> FloatList01
         {
             get { return mFloatList01; }
-            set { mFloatList01 = value; OnElementChanged(); }
+            set
+            {
+                mFloatList01 = value;
+                OnElementChanged();
+            }
         }
 
         [ElementPriority(2)]
         public ParticleParams ParticleParameters
         {
             get { return mParticleParameters; }
-            set { mParticleParameters = value; OnElementChanged(); }
+            set
+            {
+                mParticleParameters = value;
+                OnElementChanged();
+            }
         }
+
         [ElementPriority(1)]
         public uint Int01
         {
             get { return mInt01; }
-            set { mInt01 = value; OnElementChanged(); }
+            set
+            {
+                mInt01 = value;
+                OnElementChanged();
+            }
         }
 
-
-        
 
         protected override void Parse(Stream stream)
         {
@@ -740,7 +1038,6 @@ namespace s3piwrappers.Effects
             mItemF01 = new ItemF(0, handler, stream);
 
 
-
             s.Read(out mFloat40, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat41, ByteOrder.LittleEndian); //LE
             s.Read(out mFloat42, ByteOrder.LittleEndian); //LE
@@ -750,7 +1047,7 @@ namespace s3piwrappers.Effects
             s.Read(out mFloat44);
 
             mItemDList01 = new DataList<ItemD>(handler, stream);
-            
+
             //Version 2+
             if (mSection.Version >= 0x0002 && stream.Position < stream.Length)
             {
@@ -765,8 +1062,8 @@ namespace s3piwrappers.Effects
 
             //Version 4+
             if (mSection.Version >= 0x0004 && stream.Position < stream.Length) s.Read(out mFloat48);
-
         }
+
         public override void UnParse(Stream stream)
         {
             BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
@@ -864,8 +1161,8 @@ namespace s3piwrappers.Effects
 
             //Version 4+
             if (mSection.Version >= 0x0004) s.Write(mFloat48);
-
         }
+
         public override List<string> ContentFields
         {
             get
@@ -882,6 +1179,7 @@ namespace s3piwrappers.Effects
                 return fields;
             }
         }
+
         public bool Equals(ParticleEffect other)
         {
             return base.Equals(other);
