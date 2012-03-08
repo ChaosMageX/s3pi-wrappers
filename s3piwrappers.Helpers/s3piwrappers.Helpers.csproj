@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="s3pi.Interfaces">
       <HintPath>..\lib\s3pi_current\s3pi.Interfaces.dll</HintPath>
