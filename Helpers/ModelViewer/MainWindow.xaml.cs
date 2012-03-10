@@ -108,7 +108,7 @@ namespace s3piwrappers.ModelViewer
         private Material mCheckerMaterial;
         private Material mTexturedMaterial;
         private MaterialGroup mGlassMaterial = new MaterialGroup();
-        private MaterialGroup mShadowMapMaterial = new MaterialGroup();
+        private Material mShadowMapMaterial;
         public String TextureSource
         {
             set
@@ -117,7 +117,12 @@ namespace s3piwrappers.ModelViewer
                 {
                     try
                     {
-                        mTexturedMaterial = new DiffuseMaterial(new ImageBrush(new BitmapImage(new Uri(value))));
+                        var imgBrush = new ImageBrush(new BitmapImage(new Uri(value)));
+                        mTexturedMaterial = new DiffuseMaterial(imgBrush);
+                        imgBrush.Stretch = Stretch.Fill;
+                        imgBrush.TileMode = TileMode.Tile;
+                        imgBrush.ViewboxUnits = BrushMappingMode.RelativeToBoundingBox;
+                        imgBrush.ViewportUnits = BrushMappingMode.Absolute;
                         rbTextured.Visibility = Visibility.Visible;
                         rbTextured.IsChecked = true;
                     }
@@ -149,18 +154,31 @@ namespace s3piwrappers.ModelViewer
             mXrayMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.4f, 1f, 0f, 0f)));
 
 
-            var checkerBrush = new ImageBrush();
+            var checkerBrush = new ImageBrush
+            {
+                Stretch = Stretch.Fill,
+                TileMode = TileMode.Tile,
+                ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
+                ViewportUnits = BrushMappingMode.Absolute
+            };
+
             checkerBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "checkers.png")));
-            checkerBrush.TileMode = TileMode.Tile;
             mCheckerMaterial = new DiffuseMaterial(checkerBrush);
 
 
             mGlassMaterial.Children.Add(new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.6f, .9f, .9f, 1f))));
             mGlassMaterial.Children.Add(new SpecularMaterial(Brushes.White, 100d));
 
+            var shadowBrush = new ImageBrush
+                {
+                    Stretch = Stretch.Fill,
+                    TileMode = TileMode.Tile,
+                    ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
+                    ViewportUnits = BrushMappingMode.Absolute
+                };
 
-            mShadowMapMaterial.Children.Add(new DiffuseMaterial(Brushes.DimGray));
-            mShadowMapMaterial.Children.Add(new SpecularMaterial(Brushes.GhostWhite, 20d));
+            shadowBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "dropShadow.png")));
+            mShadowMapMaterial = new DiffuseMaterial(shadowBrush);
             GeostateDictionary = LoadDictionary("Geostates");
             MeshDictionary = LoadDictionary("MeshNames");
 
@@ -225,8 +243,9 @@ namespace s3piwrappers.ModelViewer
                         Debug.WriteLine(string.Format("{0} - {1} - {2}", uvscale[0], uvscale[2], uvscale[2]));
                     else
                         Debug.WriteLine("No scales");
-                    var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
 
+                    var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
+                    
                     var sceneMesh = new SceneMlodMesh(m, model);
                     if (matd != null)
                         sceneMesh.Shader = matd.Shader;
@@ -357,6 +376,7 @@ namespace s3piwrappers.ModelViewer
             for (int k = 0; k < verts.Length; k++)
             {
                 meshExpImp.ModelBlocks.Vertex v = verts[k];
+                
                 if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], v.Position[1], v.Position[2]));
                 if (v.Normal != null) mesh.Normals.Add(new Vector3D(v.Normal[0], v.Normal[1], v.Normal[2]));
                 if (v.UV != null && v.UV.Length > 0) mesh.TextureCoordinates.Add(new Point(v.UV[0][0], v.UV[0][1]));
@@ -404,6 +424,7 @@ namespace s3piwrappers.ModelViewer
                                 meshMaterial = mGlassMaterial;
                                 break;
                             case MATD.ShaderType.ShadowMap:
+                            case MATD.ShaderType.DropShadow:
                                 meshMaterial = mShadowMapMaterial;
                                 break;
                             default:
@@ -451,31 +472,10 @@ namespace s3piwrappers.ModelViewer
         }
         private void mStateListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //            if (e.RemovedItems.Count > 0)
-            //            {
-            //                var s = (SceneGeostate)e.RemovedItems[0];
-            //                if (s.State == null)
-            //                {
-            //                    s.Owner.Model.Material = mHiddenMaterial;
-            //                }
-            //                else
-            //                {
-            //                    s.Model.Material = mHiddenMaterial;
-            //                }
-            //
-            //            }
             if (e.AddedItems.Count > 0)
             {
                 var s = (SceneGeostate)e.AddedItems[0];
                 mSelectedMesh.SelectedState = s;
-                //                if (s.State == null)
-                //                {
-                //                    s.Owner.Model.Material = mSelectedMaterial;
-                //                }
-                //                else
-                //                {
-                //                    s.Model.Material = mSelectedMaterial;
-                //                }
 
             }
             UpdateMaterials();

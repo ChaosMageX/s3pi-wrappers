@@ -8,11 +8,11 @@ namespace s3piwrappers.ModelViewer
 {
     public class App
     {
-        
+
         [STAThread()]
         static void Main(params String[] args)
         {
-            
+
 
             Stream s = File.OpenRead(args[0]);
 
@@ -24,6 +24,9 @@ namespace s3piwrappers.ModelViewer
                 {
                     case "-texture":
                         win.TextureSource = args[++i];
+                        break;
+                    case "-title":
+                        win.Title += " - " + args[++i];
                         break;
                     default:
                         break;
