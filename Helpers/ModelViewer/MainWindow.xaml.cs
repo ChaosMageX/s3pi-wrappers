@@ -16,10 +16,10 @@ using Vertex = meshExpImp.ModelBlocks.Vertex;
 
 namespace s3piwrappers.ModelViewer
 {
-    
+
     public partial class MainWindow : Window
     {
-        
+
         class SceneGeostate
         {
             public SceneGeostate(SceneMesh owner, MLOD.GeometryState state, GeometryModel3D model)
@@ -47,7 +47,7 @@ namespace s3piwrappers.ModelViewer
                     }
                     return stateName;
                 }
-                
+
             }
         }
         class SceneMesh
@@ -62,11 +62,12 @@ namespace s3piwrappers.ModelViewer
 
             public GeometryModel3D Model { get; set; }
             public s3pi.GenericRCOLResource.MATD.ShaderType Shader { get; set; }
-            
+
         }
         class SceneMlodMesh : SceneMesh
         {
-            public SceneMlodMesh(MLOD.Mesh mesh, GeometryModel3D model) : base(model)
+            public SceneMlodMesh(MLOD.Mesh mesh, GeometryModel3D model)
+                : base(model)
             {
                 this.Mesh = mesh;
             }
@@ -81,7 +82,7 @@ namespace s3piwrappers.ModelViewer
                 }
                 return meshName;
             }
-            
+
         }
         class SceneGeomMesh : SceneMesh
         {
@@ -109,6 +110,7 @@ namespace s3piwrappers.ModelViewer
         private Material mTexturedMaterial;
         private MaterialGroup mGlassMaterial = new MaterialGroup();
         private Material mShadowMapMaterial;
+        private ImageBrush mCheckerBrush;
         public String TextureSource
         {
             set
@@ -154,16 +156,18 @@ namespace s3piwrappers.ModelViewer
             mXrayMaterial = new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.4f, 1f, 0f, 0f)));
 
 
-            var checkerBrush = new ImageBrush
+            mCheckerBrush = new ImageBrush
             {
                 Stretch = Stretch.Fill,
                 TileMode = TileMode.Tile,
                 ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
                 ViewportUnits = BrushMappingMode.Absolute
+                
+
             };
 
-            checkerBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "checkers.png")));
-            mCheckerMaterial = new DiffuseMaterial(checkerBrush);
+            mCheckerBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "checkers.png")));
+            mCheckerMaterial = new DiffuseMaterial(mCheckerBrush);
 
 
             mGlassMaterial.Children.Add(new DiffuseMaterial(new SolidColorBrush(Color.FromScRgb(0.6f, .9f, .9f, 1f))));
@@ -174,10 +178,18 @@ namespace s3piwrappers.ModelViewer
                     Stretch = Stretch.Fill,
                     TileMode = TileMode.Tile,
                     ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
-                    ViewportUnits = BrushMappingMode.Absolute
+                    ViewportUnits = BrushMappingMode.Absolute,
+                    Transform = new ScaleTransform(1, 1)
                 };
 
-            shadowBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "dropShadow.png")));
+            try
+            {
+                shadowBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "dropShadow.png")));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine("Unable to load DropShadow.");
+            }
             mShadowMapMaterial = new DiffuseMaterial(shadowBrush);
             GeostateDictionary = LoadDictionary("Geostates");
             MeshDictionary = LoadDictionary("MeshNames");
@@ -199,13 +211,13 @@ namespace s3piwrappers.ModelViewer
         static Dictionary<uint, string> LoadDictionary(string name)
         {
             var dict = new Dictionary<uint, string>();
-            var geostatePath = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), name+ ".txt");
+            var geostatePath = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), name + ".txt");
             if (File.Exists(geostatePath))
             {
                 using (var sr = new StreamReader(File.OpenRead(geostatePath)))
                 {
                     String line;
-                    while ((line = sr.ReadLine())!= null)
+                    while ((line = sr.ReadLine()) != null)
                     {
                         if (!line.Contains("#"))
                         {
@@ -220,11 +232,11 @@ namespace s3piwrappers.ModelViewer
         {
             GeostatesPanel.Visibility = Visibility.Collapsed;
             GenericRCOLResource.ChunkEntry chunk = rcol.ChunkEntries.FirstOrDefault(x => x.RCOLBlock is MLOD);
-            
+
             var polyCount = 0;
             var vertCount = 0;
-            
-            
+
+
             if (chunk != null)
             {
                 var mlod = chunk.RCOLBlock as MLOD;
@@ -238,6 +250,7 @@ namespace s3piwrappers.ModelViewer
                     var material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
 
                     var matd = FindMainMATD(rcol, material);
+
                     var uvscale = GetUvScales(matd);
                     if (uvscale != null)
                         Debug.WriteLine(string.Format("{0} - {1} - {2}", uvscale[0], uvscale[2], uvscale[2]));
@@ -245,10 +258,27 @@ namespace s3piwrappers.ModelViewer
                         Debug.WriteLine("No scales");
 
                     var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
-                    
+
                     var sceneMesh = new SceneMlodMesh(m, model);
                     if (matd != null)
+                    {
                         sceneMesh.Shader = matd.Shader;
+                        switch (matd.Shader)
+                        {
+                            case MATD.ShaderType.ShadowMap:
+                            case MATD.ShaderType.DropShadow:
+                                break;
+                            default:
+                            var maskWidth = GetMATDParam<MATD.ElementInt>(matd, MATD.FieldType.MaskWidth);
+                            var maskHeight = GetMATDParam<MATD.ElementInt>(matd, MATD.FieldType.MaskHeight);
+                                if(maskWidth != null && maskHeight != null)
+                                {
+                                    float scalar = Math.Max(maskWidth.Data, maskHeight.Data);
+                                    mCheckerBrush.Transform = new ScaleTransform(maskHeight.Data / scalar, maskWidth.Data / scalar);
+                                }
+                                break;
+                        }
+                    }
                     SceneGeostate[] sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
                     for (int i = 0; i < sceneGeostates.Length; i++)
                     {
@@ -261,7 +291,8 @@ namespace s3piwrappers.ModelViewer
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }
-            }else
+            }
+            else
             {
                 var geomChunk = rcol.ChunkEntries.FirstOrDefault();
                 var geom = new GEOM(0, null, geomChunk.RCOLBlock.Stream);
@@ -272,10 +303,10 @@ namespace s3piwrappers.ModelViewer
                 {
                     var v = new Vertex();
 
-                    var pos = (GEOM.PositionElement) vd.Vertex.FirstOrDefault(e => e is GEOM.PositionElement);
-                    if(pos!=null)
+                    var pos = (GEOM.PositionElement)vd.Vertex.FirstOrDefault(e => e is GEOM.PositionElement);
+                    if (pos != null)
                     {
-                        v.Position = new[] {pos.X, pos.Y, pos.Z};
+                        v.Position = new[] { pos.X, pos.Y, pos.Z };
                     }
 
 
@@ -289,7 +320,7 @@ namespace s3piwrappers.ModelViewer
                     var uv = (GEOM.UVElement)vd.Vertex.FirstOrDefault(e => e is GEOM.UVElement);
                     if (uv != null)
                     {
-                        v.UV = new float[][] { new[] { uv.U, uv.V} };
+                        v.UV = new float[][] { new[] { uv.U, uv.V } };
                     }
                     verts.Add(v);
 
@@ -301,7 +332,7 @@ namespace s3piwrappers.ModelViewer
                     facepoints.Add(face.VertexDataIndex1);
                     facepoints.Add(face.VertexDataIndex2);
                 }
-                
+
                 var model = DrawModel(verts.ToArray(), facepoints.ToArray(), mNonSelectedMaterial);
                 var sceneMesh = new SceneGeomMesh(geom, model);
                 mGroupMeshes.Children.Add(model);
@@ -312,7 +343,7 @@ namespace s3piwrappers.ModelViewer
             {
                 mMeshListView.Items.Add(s);
             }
-            if(mSceneMeshes.Count <=1)
+            if (mSceneMeshes.Count <= 1)
             {
                 MeshesPanel.Visibility = Visibility.Collapsed;
             }
@@ -340,7 +371,7 @@ namespace s3piwrappers.ModelViewer
                     MessageBox.Show("Material is external, unable to locate UV scales.");
                     return null;
                 }
-                
+
 
                 if (material is MATD)
                 {
@@ -356,19 +387,14 @@ namespace s3piwrappers.ModelViewer
             return null;
 
         }
+        static T GetMATDParam<T>(MATD matd, MATD.FieldType type) where T : class
+        {
+            return matd == null ? null : (matd.Mtnf != null ? matd.Mtnf.SData : matd.Mtrl.SData).FirstOrDefault(x => x.Field == type) as T;
+        }
         static float[] GetUvScales(MATD matd)
         {
-            if (matd != null)
-            {
-                var param =
-                    (matd.Mtnf != null ? matd.Mtnf.SData : matd.Mtrl.SData).FirstOrDefault(
-                                                                                           x => x.Field == MATD.FieldType.UVScales) as MATD.ElementFloat3;
-                if (param != null)
-                {
-                    return new[] { param.Data0, param.Data1, param.Data2 };
-                }
-            }
-            return null;
+            var param = GetMATDParam<MATD.ElementFloat3>(matd, MATD.FieldType.UVScales);
+            return param != null ? new[] { param.Data0, param.Data1, param.Data2 } : new[] { 1f / short.MaxValue, 1f / short.MaxValue, 1f / short.MaxValue };
         }
         static GeometryModel3D DrawModel(meshExpImp.ModelBlocks.Vertex[] verts, Int32[] indices, Material material)
         {
@@ -376,7 +402,7 @@ namespace s3piwrappers.ModelViewer
             for (int k = 0; k < verts.Length; k++)
             {
                 meshExpImp.ModelBlocks.Vertex v = verts[k];
-                
+
                 if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], v.Position[1], v.Position[2]));
                 if (v.Normal != null) mesh.Normals.Add(new Vector3D(v.Normal[0], v.Normal[1], v.Normal[2]));
                 if (v.UV != null && v.UV.Length > 0) mesh.TextureCoordinates.Add(new Point(v.UV[0][0], v.UV[0][1]));
@@ -391,15 +417,33 @@ namespace s3piwrappers.ModelViewer
         private void mMeshListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mStateListView.Items.Clear();
+            SceneMesh m;
             if (e.AddedItems.Count > 0)
             {
-                var m = (SceneMesh)e.AddedItems[0];
+                m = (SceneMesh)e.AddedItems[0];
                 mSelectedMesh = m;
-                
 
-            }else
+
+            }
+            else
             {
                 mSelectedMesh = null;
+            }
+            m = mSelectedMesh;
+            GeostatesPanel.Visibility = m == null || m.States.Count() == 0 ? Visibility.Collapsed : Visibility.Visible;
+            if (m != null)
+            {
+
+                mStateListView.Items.Add(new SceneGeostate(m, null, null));
+                foreach (var s in m.States)
+                {
+                    mStateListView.Items.Add(s);
+                }
+                mStateListView.SelectedIndex = 0;
+            }
+            else
+            {
+                GeostatesPanel.Visibility = Visibility.Collapsed;
             }
             UpdateMaterials();
         }
@@ -433,7 +477,16 @@ namespace s3piwrappers.ModelViewer
                         }
                         break;
                     case "UV":
-                        meshMaterial = mCheckerMaterial;
+                        switch (sceneMesh.Shader)
+                        {
+                            case MATD.ShaderType.ShadowMap:
+                            case MATD.ShaderType.DropShadow:
+                                meshMaterial = mShadowMapMaterial;
+                                break;
+                            default:
+                                meshMaterial = mCheckerMaterial;
+                                break;
+                        }
                         break;
                 }
                 if (sceneMesh.SelectedState != null && sceneMesh.SelectedState.Model != null)
@@ -453,22 +506,8 @@ namespace s3piwrappers.ModelViewer
                     }
                 }
             }
-            var m = mSelectedMesh;
-            GeostatesPanel.Visibility = m==null || m.States.Count() == 0 ? Visibility.Collapsed : Visibility.Visible;
-            if (m!= null)
-            {
-                
-                mStateListView.Items.Add(new SceneGeostate(m, null, null));
-                foreach (var s in m.States)
-                {
-                    mStateListView.Items.Add(s);
-                }
-                mStateListView.SelectedIndex = 0;
-            }else
-            {
-                GeostatesPanel.Visibility = Visibility.Collapsed;
-            }
-            
+
+
         }
         private void mStateListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

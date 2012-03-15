@@ -154,9 +154,9 @@
     <Content Include="checkers.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="dropShadow.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Content Include="dropShadow.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="MeshNames.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
