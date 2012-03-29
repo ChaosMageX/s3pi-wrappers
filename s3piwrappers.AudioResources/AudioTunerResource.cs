@@ -56,6 +56,7 @@ namespace s3piwrappers
             PanDistance = 0x6eb7a717,
             PanSize = 0xce78d695,
             PanTwist = 0xa4d2160b,
+            Parent = 0x5f6317d5,
             Pause = 0xb85523e5,
             PerformanceLevel = 0x6df5822d,
             PickupIndex = 0xed1f36d5,
