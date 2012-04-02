@@ -1,0 +1,5 @@
+ResourceType: 0xEA5118B0
+Label: Effect Cloner
+Command: Helpers\EffectCloner\EffectCloner.exe
+Arguments: "{}"
+Desc: Visual Effect Cloner
