@@ -27,6 +27,7 @@ namespace s3piwrappers
             DacOutputSampleRate = 0x6a371e0,
             DefaultToMaster = 0x6b16ae3d,
             Delay = 0x15525baa,
+			DistanceCurve = 0xEC361CD1,
             DopplerCurve = 0x9bfc37ac,
             Duration = 0xb1f42539,
             EffectiveGain = 0xc2d1f579,
@@ -52,8 +53,10 @@ namespace s3piwrappers
             NoteDuration = 0xcd928a9,
             NoteNumber = 0x66ef9aba,
             NoteVelocity = 0xe4dd1818,
+            OutsideCurve = 0xD9B1D9DF,
             Pan = 0x4a77693a,
             PanDistance = 0x6eb7a717,
+			PanLFE = 0xB73EE5C5,
             PanSize = 0xce78d695,
             PanTwist = 0xa4d2160b,
             Parent = 0x5f6317d5,
@@ -64,6 +67,7 @@ namespace s3piwrappers
             PitchShiftModifier = 0x779a5ff4,
             Polyphony = 0xbaf7f4f9,
             PolyphonyMode = 0x7f28acc,
+            PondEnabledCurve = 0x0774F9BC,
             PositionX = 0x50c5d67,
             PositionY = 0x50c5d66,
             PositionZ = 0x50c5d65,
@@ -88,6 +92,9 @@ namespace s3piwrappers
             SurroundOn = 0xfe3c587c,
             Symbols = 0x4b2a3424,
             TimeInvariantPitch = 0x82beafe0,
+            TimeOfDayCurve = 0x8AC7E06E,
+			VoiceTemplate = 0x544E850B,
+            WaterEnabledCurve = 0xCE0EB28E,
             WetLevel = 0x49eb68db,
             WetLevelCurve = 0x173c2710
         }
@@ -677,8 +684,8 @@ namespace s3piwrappers
                     case DataType.Float: return new FloatData(0, handler, stream);
                     case DataType.SoundKey: return new SoundKeyData(requestedApiVersion, handler, stream);
                     case DataType.String: return new StringData(0, handler, stream);
-                    default: Debug.WriteLine("Unknown Data Type: " + type.ToString("X8")); return null;
-
+                    //default: Debug.WriteLine("Unknown Data Type: " + type.ToString()); return null;
+                    default: throw new Exception("Unknown Data Type: " + type.ToString());
                 }
             }
             public override int RecommendedApiVersion
