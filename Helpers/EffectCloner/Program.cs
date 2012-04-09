@@ -15,7 +15,18 @@ namespace s3piwrappers.EffectCloner
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+#if DEBUG
             Application.Run(new MainForm(args));
+#else
+            try
+            {
+                Application.Run(new MainForm(args));
+            }
+            catch (Exception ex)
+            {
+                MainForm.ShowException(ex);
+            }
+#endif
         }
     }
 }
