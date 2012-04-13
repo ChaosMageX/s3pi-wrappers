@@ -296,13 +296,13 @@ namespace s3piwrappers.Helpers.IO
                     len = (byte) mStream.ReadByte();
                     break;
                 case 16:
-                    len = ReadUInt16();
+                    len = ReadUInt16(order);
                     break;
                 case 32:
-                    len = ReadUInt32();
+                    len = ReadUInt32(order);
                     break;
                 case 64:
-                    len = ReadUInt64();
+                    len = ReadUInt64(order);
                     break;
                 default:
                     throw new ArgumentException("Invalid bit size for string length!");
@@ -615,13 +615,13 @@ namespace s3piwrappers.Helpers.IO
                     Write((byte) len);
                     break;
                 case 16:
-                    Write((UInt16) len);
+                    Write((UInt16) len,order);
                     break;
                 case 32:
-                    Write((UInt32) len);
+                    Write((UInt32) len,order);
                     break;
                 case 64:
-                    Write((UInt64) len);
+                    Write((UInt64) len,order);
                     break;
                 default:
                     throw new ArgumentException("Invalid bit size for string length!");
