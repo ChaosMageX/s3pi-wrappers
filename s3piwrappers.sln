@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.Helpers", "s3p
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EffectCloner", "Helpers\EffectCloner\EffectCloner.csproj", "{8258A9DA-FB64-4B0C-A390-F08A60823DF5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.SceneGraph", "s3piwrappers.SceneGraph\s3piwrappers.SceneGraph.csproj", "{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +149,16 @@ Global
 		{8258A9DA-FB64-4B0C-A390-F08A60823DF5}.Release|Mixed Platforms.Build.0 = Release|x86
 		{8258A9DA-FB64-4B0C-A390-F08A60823DF5}.Release|x86.ActiveCfg = Release|x86
 		{8258A9DA-FB64-4B0C-A390-F08A60823DF5}.Release|x86.Build.0 = Release|x86
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{413B0749-6B62-4A6D-89A4-27AE51C4FF2C}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
