@@ -99,7 +99,7 @@ namespace s3piwrappers.SceneGraph
             return this.includeDDSes || !ResourceGraph.IsDDS(key.ResourceType);
         }
 
-        public override List<IResourceConnection> SlurpConnections(object constraints)
+        protected List<IResourceConnection> SlurpAllRKs()
         {
             List<IResourceConnection> results = new List<IResourceConnection>();
             string rootStr = this.GetContentPathRootName();
@@ -109,19 +109,19 @@ namespace s3piwrappers.SceneGraph
                     + ResourceGraph.PrintRK(base.originalKey) + ":" + rootStr);
                 rootStr = "root";
             }
-            if (base.baseResource is GenericRCOLResource)
+            if (base.resource is GenericRCOLResource)
             {
                 Diagnostics.Log("Slurping RCOL Resource RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
-                GenericRCOLResource rcol = base.baseResource as GenericRCOLResource;
+                GenericRCOLResource rcol = base.resource as GenericRCOLResource;
                 TGIBlock tgiBlock;
                 int i, count = rcol.Resources.Count;
                 for (i = 0; i < count; i++)
                 {
                     tgiBlock = rcol.Resources[i];
                     if (includeDDSes || !ResourceGraph.IsDDS(tgiBlock.ResourceType))
-                        results.Add(new DefaultConnection(tgiBlock, tgiBlock, false,
-                            rootStr + ".Resources[" + i + "]"));
+                        results.Add(new DefaultConnection(tgiBlock, tgiBlock, 
+                            ResourceDataActions.FindWrite, rootStr + ".Resources[" + i + "]"));
                 }
                 Diagnostics.Log("Slurping RCOL ChunkEntry RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
@@ -146,20 +146,25 @@ namespace s3piwrappers.SceneGraph
                             break;
                         case ChunkEntryType.Unique:
                             results.Add(new DefaultConnection(tgiBlock,
-                                chunk.RCOLBlock, true, absolutePath));
+                                chunk.RCOLBlock, ResourceDataActions.None, absolutePath));
                             break;
                     }
                 }
             }
-            else if (base.baseResource is AApiVersionedFields)
+            else if (base.resource is AApiVersionedFields)
             {
                 Diagnostics.Log("Slurping RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
                 results.AddRange(RKContainer.SlurpRKsFromField(rootStr,
-                    base.baseResource as AApiVersionedFields,
+                    base.resource as AApiVersionedFields,
                     this.rkContainers, this.ICanSlurpRK));
             }
             return results;
+        }
+
+        public override List<IResourceConnection> SlurpConnections(object constraints)
+        {
+            return SlurpAllRKs();
         }
 
         protected virtual uint[] GetKindredResourceTypes(out string[] kinNames)

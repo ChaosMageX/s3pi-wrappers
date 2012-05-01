@@ -72,7 +72,7 @@ namespace s3piwrappers.SceneGraph
                 }
                 else if (e is IResourceKey && (validate == null || validate(e as IResourceKey)))
                 {
-                    keys.Add(new DefaultConnection(e as IResourceKey, rootField, false, elem));
+                    keys.Add(new DefaultConnection(e as IResourceKey, rootField, ResourceDataActions.FindWrite, elem));
                 }
             }
             return keys;
@@ -92,7 +92,7 @@ namespace s3piwrappers.SceneGraph
 
             if (rootField is IResourceKey && (validate == null || validate(rootField as IResourceKey)))
                 keys.Add(new DefaultConnection(rootField as IResourceKey, rootField,
-                    false, absolutePath));
+                    ResourceDataActions.FindWrite, absolutePath));
 
             List<string> contentFields = rootField.ContentFields;
             TypedValue tv;
@@ -125,12 +125,13 @@ namespace s3piwrappers.SceneGraph
                 else if (typeof(TextReader).IsAssignableFrom(tv.Type))
                 {
                     TextRKContainer textHelper = new TextRKContainer(name, rootField,
-                        tv.Value as TextReader, absoluteName);
+                        tv.Value as TextReader, absoluteName, validate);
                     keys.AddRange(textHelper.Owners);
                 }
                 else if (tv.Value is IResourceKey && (validate == null || validate(tv.Value as IResourceKey)))
                 {
-                    keys.Add(new DefaultConnection(tv.Value as IResourceKey, rootField, false, name));
+                    keys.Add(new DefaultConnection(tv.Value as IResourceKey, rootField, 
+                        ResourceDataActions.FindWrite, name));
                 }
             }
 
@@ -292,6 +293,7 @@ namespace s3piwrappers.SceneGraph
         protected string absolutePath;
         protected string contentFieldPath;
         protected AApiVersionedFields rootField;
+        protected Predicate<IResourceKey> validate;
 
         public string AbsolutePath
         {
@@ -319,11 +321,12 @@ namespace s3piwrappers.SceneGraph
         }
 
         public RKContainer(string fieldPath, AApiVersionedFields rootField,
-            string absolutePath)
+            string absolutePath, Predicate<IResourceKey> validate)
         {
             this.contentFieldPath = fieldPath;
             this.rootField = rootField;
             this.absolutePath = absolutePath;
+            this.validate = validate;
         }
     }
 }

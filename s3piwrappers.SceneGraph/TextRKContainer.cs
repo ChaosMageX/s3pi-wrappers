@@ -11,7 +11,7 @@ namespace s3piwrappers.SceneGraph
 {
     public class TextRKContainer : RKContainer
     {
-        private static bool ParseRK(string value, out RK result)
+        public static bool ParseRK(string value, out RK result)
         {
             result = null;
             string[] entries = value.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -32,7 +32,7 @@ namespace s3piwrappers.SceneGraph
             return true;
         }
 
-        private static string PrintRK(IResourceKey key)
+        public static string PrintRK(IResourceKey key)
         {
             return string.Format("{0:x8}:{1:x8}:{2:x16}",
                 key.ResourceType, key.ResourceGroup, key.Instance);
@@ -43,7 +43,7 @@ namespace s3piwrappers.SceneGraph
             public List<int> Positions = new List<int>();
             public RK OldResourceKey;
             public RK NewResourceKey;
-            public RKPos(RK rk) { this.OldResourceKey = rk; this.NewResourceKey = rk; }
+            public RKPos(RK rk) { this.OldResourceKey = this.NewResourceKey = rk; }
         }
 
         private List<RKPos> oldToNewRKs = new List<RKPos>();
@@ -56,10 +56,11 @@ namespace s3piwrappers.SceneGraph
         }
 
         public TextRKContainer(string fieldPath, AApiVersionedFields rootField, 
-            TextReader reader, string absolutePath) 
-            : base(fieldPath, rootField, absolutePath)
+            TextReader reader, string absolutePath, Predicate<IResourceKey> validate,
+            bool checkAltKeyFields = false) 
+            : base(fieldPath, rootField, absolutePath, validate)
         {
-            this.SlurpReferenceRKs(reader, absolutePath);
+            this.SlurpReferenceRKs(reader, checkAltKeyFields);
         }
 
         public override bool SetRK(IResourceKey oldKey, IResourceKey newKey)
@@ -117,7 +118,7 @@ namespace s3piwrappers.SceneGraph
             return new StringReader(builder.ToString());
         }
 
-        private void SlurpReferenceRKs(TextReader reader, string absolutePath)
+        private void SlurpReferenceRKs(TextReader reader, bool checkAltKeyFields)
         {
             const int keyLen = 8 + 1 + 8 + 1 + 16;//TTTTTTTT:GGGGGGGG:IIIIIIIIIIIIIIII
             string absoluteName, line = reader.ReadLine();
@@ -130,7 +131,7 @@ namespace s3piwrappers.SceneGraph
                 this.textLines.Add(line);
                 keyOffset = 4;
                 index = line.IndexOf("key:", linePos);
-                if (index == -1)
+                if (index == -1 && checkAltKeyFields)
                 {
                     index = line.IndexOf("key=\"", linePos);
                     if (index != -1) keyOffset = 5;
@@ -144,13 +145,13 @@ namespace s3piwrappers.SceneGraph
 
                     linePos = 0;
                     index = line.IndexOf("key:", linePos);
-                    if (index == -1)
+                    if (index == -1 && checkAltKeyFields)
                     {
                         index = line.IndexOf("key=\"", linePos);
                         if (index != -1) keyOffset = 5;
                     }
                 }
-                linePos += keyLen + keyOffset;
+                linePos += keyOffset + keyLen;
                 if (linePos > line.Length)
                 {
                     line = reader.ReadLine();
@@ -169,16 +170,20 @@ namespace s3piwrappers.SceneGraph
                         if (rkPos.OldResourceKey.Equals(rk))
                             foundIndex = i;
                     }
-                    if (foundIndex == -1)
+                    if (foundIndex == -1 && (base.validate == null || base.validate(rk)))
                     {
                         rkPos = new RKPos(rk);
                         absoluteName = absolutePath + string.Format("{txt:{0},{1}}",
                             this.textLines.Count - 1, index + keyOffset);
-                        this.owners.Add(new DefaultConnection(rk, this, false, absoluteName));
+                        this.owners.Add(new DefaultConnection(rk, this, ResourceDataActions.FindWrite, absoluteName));
                     }
                     rkPos.Positions.Add(this.textLines.Count - 1);
                     rkPos.Positions.Add(index + keyOffset);
                     this.oldToNewRKs.Add(rkPos);
+                }
+                else
+                {
+                    linePos -= keyLen;
                 }
             }
         }

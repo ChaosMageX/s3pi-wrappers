@@ -35,7 +35,18 @@ namespace s3piwrappers.SceneGraph
             this.resourceType = resourceType;
             if (string.IsNullOrWhiteSpace(name))
             {
-                this.kinName = string.Concat("0x", resourceType.ToString("X8"));
+                try
+                {
+                    this.kinName = s3pi.Extensions.ExtList.Ext[resourceType][0];
+                }
+                catch
+                {
+                    this.kinName = string.Concat("0x", resourceType.ToString("X8"));
+                }
+                if (string.IsNullOrWhiteSpace(this.kinName))
+                {
+                    this.kinName = string.Concat("0x", resourceType.ToString("X8"));
+                }
             }
         }
     }

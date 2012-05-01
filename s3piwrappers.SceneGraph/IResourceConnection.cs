@@ -52,7 +52,7 @@ namespace s3piwrappers.SceneGraph
         /// </summary>
         bool IsChildThum { get; }
 
-        /// <summary><para>
+        /*/// <summary><para>
         /// Whether or not the child resource node of this connection
         /// is actually an internal RCOL block within the parent
         /// node's resource data, 
@@ -68,7 +68,18 @@ namespace s3piwrappers.SceneGraph
         /// ResourceGraph searches the FileTable for a resource
         /// with the <see cref="OriginalChildKey"/>.
         /// </remarks>
-        bool IsChildRCOLBlock { get; }
+        bool IsChildRCOLBlock { get; }/**/
+
+        /// <summary><para>
+        /// The actions to be taken by the containing <see cref="ResourceGraph"/>
+        /// relating to the resource data of the child node.
+        /// </para><para>The Find flag determines if the ResourceGraph
+        /// searches the FileTable for the child's <see cref="IResource"/> data
+        /// or just passes null to <see cref="CreateChild"/>
+        /// </para><para>The Write flag determines if the child node's
+        /// <see cref="IResourceNode.Resource"/> data is written to the final package
+        /// </para></summary>
+        ResourceDataActions ChildDataActions { get; }
 
         /// <summary>
         /// Whether or not a new child resource node is created

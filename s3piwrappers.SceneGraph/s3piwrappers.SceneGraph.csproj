@@ -85,10 +85,12 @@
       <HintPath>..\lib\s3pi_current\System.Custom.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AResourceConnection.cs" />
+    <Compile Include="AResourceKinFinder.cs" />
     <Compile Include="AResourceKinHelper.cs" />
     <Compile Include="AResourceNode.cs" />
     <Compile Include="AResourceNodeHandler.cs" />
@@ -97,21 +99,48 @@
     <Compile Include="DefaultKinHelper.cs" />
     <Compile Include="Diagnostics.cs" />
     <Compile Include="IResourceConnection.cs" />
+    <Compile Include="IResourceKinFinder.cs" />
     <Compile Include="IResourceKinHelper.cs" />
     <Compile Include="IResourceNode.cs" />
     <Compile Include="IResourceNodeHandler.cs" />
     <Compile Include="IResourceStblHandle.cs" />
+    <Compile Include="Managers\CatalogType.cs" />
     <Compile Include="Managers\NameMap.cs" />
     <Compile Include="Managers\STBL.cs" />
+    <Compile Include="Managers\THUM.cs" />
+    <Compile Include="Managers\ThumbnailKinFinder.cs" />
+    <Compile Include="Nodes\CASPartNode.cs" />
+    <Compile Include="Nodes\CASPresetXmlNode.cs" />
+    <Compile Include="Nodes\CatalogBrushNode.cs" />
+    <Compile Include="Nodes\CatalogNode.cs" />
+    <Compile Include="Nodes\CatalogObjectNode.cs" />
+    <Compile Include="Nodes\CatalogResourceNode.cs" />
     <Compile Include="Nodes\CoreNodeHandler.cs" />
     <Compile Include="DefaultNode.cs" />
+    <Compile Include="Nodes\GeometryNode.cs" />
     <Compile Include="Nodes\ModelNode.cs" />
+    <Compile Include="Nodes\SpeedTreeNode.cs" />
+    <Compile Include="ResourceDataActions.cs" />
     <Compile Include="ResourceNodeDealer.cs" />
+    <Compile Include="SGResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SGResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TextRKContainer.cs" />
     <Compile Include="Nodes\VisualProxyNode.cs" />
     <Compile Include="ResourceGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RKContainer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="SGResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SGResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\defaultThumbnail.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

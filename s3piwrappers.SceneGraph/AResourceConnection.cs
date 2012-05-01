@@ -11,7 +11,8 @@ namespace s3piwrappers.SceneGraph
         private readonly IResourceKey originalChildKey;
         protected readonly bool isChildDDS;
         protected readonly bool isChildThum;
-        protected readonly bool isChildRCOLBlock;
+        //protected readonly bool isChildRCOLBlock;
+        protected readonly ResourceDataActions childDataActions;
 
         public string AbsolutePath
         {
@@ -37,9 +38,14 @@ namespace s3piwrappers.SceneGraph
             get { return this.isChildThum; }
         }
 
-        public bool IsChildRCOLBlock
+        /*public bool IsChildRCOLBlock
         {
             get { return this.isChildRCOLBlock; }
+        }/**/
+
+        public ResourceDataActions ChildDataActions
+        {
+            get { return this.childDataActions; }
         }
 
         public virtual bool AlwaysCreateChild
@@ -51,11 +57,12 @@ namespace s3piwrappers.SceneGraph
 
         public abstract bool SetParentReferenceRK(IResourceKey newKey);
 
-        public AResourceConnection(IResourceKey childKey, string path, bool isRCOLBlock)
+        public AResourceConnection(IResourceKey childKey, string path, 
+            ResourceDataActions childActions)
         {
             this.absolutePath = path;
             this.originalChildKey = childKey;
-            this.isChildRCOLBlock = isRCOLBlock;
+            this.childDataActions = childActions;
             this.isChildDDS = ResourceGraph.IsDDS(childKey.ResourceType);
             this.isChildThum = ResourceGraph.IsThum(childKey.ResourceType);
         }

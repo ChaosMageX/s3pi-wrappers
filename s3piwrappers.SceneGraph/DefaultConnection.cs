@@ -12,7 +12,7 @@ namespace s3piwrappers.SceneGraph
 
         public override IResourceNode CreateChild(IResource resource, object constraints)
         {
-            if (base.IsChildRCOLBlock)
+            if (base.childDataActions < ResourceDataActions.Find)
                 return ResourceNodeDealer.GetResource(this.rkContainer.RootField as ARCOLBlock,
                     base.OriginalChildKey);
             else
@@ -235,17 +235,18 @@ namespace s3piwrappers.SceneGraph
         }/**/
 
         public DefaultConnection(IResourceKey rk,
-            AApiVersionedFields rkField, bool isRCOLBlock,
-            string absolutePath, string rkFieldPath = "root")
-            : base(rk, absolutePath, isRCOLBlock)
+            AApiVersionedFields rkField, ResourceDataActions childActions,
+            string absolutePath, string rkFieldPath = "root",
+            Predicate<IResourceKey> validate = null)
+            : base(rk, absolutePath, childActions)
         {
-            this.rkContainer = new RKContainer(rkFieldPath, rkField, absolutePath);
+            this.rkContainer = new RKContainer(rkFieldPath, rkField, absolutePath, validate);
         }
 
         public DefaultConnection(IResourceKey rk,
-            RKContainer rkContainer, bool isRCOLBlock,
+            RKContainer rkContainer, ResourceDataActions childActions,
             string absolutePath)
-            : base(rk, absolutePath, isRCOLBlock)
+            : base(rk, absolutePath, childActions)
         {
             this.rkContainer = rkContainer;
         }

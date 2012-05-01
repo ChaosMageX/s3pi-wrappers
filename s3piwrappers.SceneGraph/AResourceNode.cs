@@ -8,7 +8,7 @@ namespace s3piwrappers.SceneGraph
     public abstract class AResourceNode : IResourceNode
     {
         protected readonly IResourceKey originalKey;
-        protected IResource baseResource;
+        protected IResource resource;
 
         public IResourceKey OriginalKey
         {
@@ -21,7 +21,7 @@ namespace s3piwrappers.SceneGraph
 
         public IResource Resource
         {
-            get { return this.baseResource; }
+            get { return this.resource; }
         }
 
         public virtual bool SetRK(IResourceKey newKey, IResourceKey originalKey)
@@ -48,7 +48,7 @@ namespace s3piwrappers.SceneGraph
 
         public AResourceNode(IResource resource, IResourceKey originalKey)
         {
-            this.baseResource = resource;
+            this.resource = resource;
         }
     }
 }

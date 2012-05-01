@@ -268,7 +268,9 @@ namespace s3piwrappers.SceneGraph
                     for (int i = 0; i < this.Seen.Count; i++)
                     {
                         if (rk.Equals(this.Seen[i]))
+                        {
                             return false;
+                        }
                     }
                     return true;
                 }
@@ -281,6 +283,8 @@ namespace s3piwrappers.SceneGraph
         {
             List<SpecificResource> resources = new List<SpecificResource>();
             int i, j;
+            IResourceKey kinKey = new RK(RK.NULL);
+            kinHelper.CreateKindredRK(parentKey, parentKey, ref kinKey);
             List<PathPackageTuple> ppts = FileTable.GameContent;
             if (ppts != null)
             {
@@ -335,7 +339,8 @@ namespace s3piwrappers.SceneGraph
             /// </summary>
             public readonly RK OriginalKey;
             public readonly string ExtensionTag;
-            public readonly bool IsRCOLBlock;
+            //public readonly bool IsRCOLBlock;
+            public readonly ResourceDataActions NodeActions;
 
             protected internal ResourceGraph Graph;
             protected internal IResourceNode Core;
@@ -356,12 +361,13 @@ namespace s3piwrappers.SceneGraph
             }
 
             public GraphNode(ResourceGraph graph, IResourceKey originalKey, IResourceNode core, 
-                PathPackageTuple origin, bool isRCOLBlock, RFileType fileType = RFileType.Unknown)
+                PathPackageTuple origin, ResourceDataActions nodeActions, RFileType fileType = RFileType.Unknown)
             {
                 this.Graph = graph;
                 this.key = new RK(originalKey);
                 this.OriginalKey = new RK(originalKey);
                 this.ExtensionTag = s3pi.Extensions.ExtList.Ext[originalKey.ResourceType][0];
+                this.NodeActions = nodeActions;
                 this.Core = core;
                 this.Origin = origin;
                 if (fileType == RFileType.Unknown)
@@ -719,7 +725,7 @@ namespace s3piwrappers.SceneGraph
                     RFileType fileType = RFileType.Game;
                     SpecificResource sr = null;
                     IResourceNode childCore = null;
-                    if (child.IsChildRCOLBlock)
+                    if (child.ChildDataActions < ResourceDataActions.Find)
                     {
                         childCore = child.CreateChild(null, constraints);
                     }
@@ -761,7 +767,7 @@ namespace s3piwrappers.SceneGraph
                     else
                     {
                         childNode = new GraphNode(this, childKey, childCore, 
-                            sr == null ? null : sr.PathPackage, child.IsChildRCOLBlock, fileType);
+                            sr == null ? null : sr.PathPackage, child.ChildDataActions, fileType);
                         if (child.AlwaysCreateChild && foundIndex >= 0)
                         {
                             Diagnostics.Log("Dup Ref Node Added:" + PrintRKRef(childKey, child.AbsolutePath));
@@ -785,6 +791,7 @@ namespace s3piwrappers.SceneGraph
             IResourceIndexEntry kinKey;
             GraphConnectionKin kinConnection;
             IResourceKinHelper kinHelper;
+            List<SpecificResource> kin;
             List<IResourceKinHelper> kinHelpers = graphNode.Core.CreateKinHelpers(constraints);
             count = (kinHelpers == null) ? 0 : kinHelpers.Count;
             Diagnostics.Log("Resolving " + count + " RK Kin types for " + graphNodeKeyStr);
@@ -792,7 +799,10 @@ namespace s3piwrappers.SceneGraph
             {
                 kinHelper = kinHelpers[i];
                 Diagnostics.Log("Slurping " + kinHelper.KinName + " Kin of " + graphNodeKeyStr);
-                List<SpecificResource> kin = SlurpKindredResources(graphNode.OriginalKey, kinHelper);
+                if (kinHelper is IResourceKinFinder)
+                    kin = (kinHelper as IResourceKinFinder).FindKindredResources(graphNode.OriginalKey);
+                else
+                    kin = SlurpKindredResources(graphNode.OriginalKey, kinHelper);
                 for (j = 0; j < kin.Count; j++)
                 {
                     kinKey = kin[j].ResourceIndexEntry;
@@ -846,7 +856,7 @@ namespace s3piwrappers.SceneGraph
                             else
                             {
                                 childNode = new GraphNode(this, kinKey, kinCore, 
-                                    kin[j].PathPackage, false);
+                                    kin[j].PathPackage, ResourceDataActions.Find | ResourceDataActions.Write);
                                 this.nodeLookupTable.Add(childNode);
                                 Diagnostics.Log("New Kin Node Added:" + PrintRKTag(kinKey, childNode.ExtensionTag));
                                 CreateChildren(childNode, constraints);
@@ -889,7 +899,7 @@ namespace s3piwrappers.SceneGraph
             {
                 IResourceNode node = ResourceNodeDealer.GetResource(sr.Resource, originalKey);
                 GraphNode graphNode = new GraphNode(this, originalKey, node,
-                    sr.PathPackage, false);
+                    sr.PathPackage, ResourceDataActions.Find | ResourceDataActions.Write);
                 Diagnostics.Log("New Node Added:" + PrintRKRef(originalKey, graphNode.ExtensionTag));
                 this.nodeLookupTable.Add(graphNode);
                 this.CreateChildren(graphNode, constraints);
@@ -915,7 +925,7 @@ namespace s3piwrappers.SceneGraph
         internal ResourceGraph(IResourceNode rootNode, object constraints)
         {
             GraphNode graphNode = new GraphNode(this, rootNode.OriginalKey, 
-                rootNode, null, false);
+                rootNode, null, ResourceDataActions.Find | ResourceDataActions.Write);
             this.nodeLookupTable.Add(graphNode);
             this.CreateChildren(graphNode, constraints);
         }
@@ -932,7 +942,7 @@ namespace s3piwrappers.SceneGraph
             {
                 IResourceNode node = ResourceNodeDealer.GetResource(sr.Resource, rootOriginalKey);
                 GraphNode graphNode = new GraphNode(this, rootOriginalKey, node,
-                    sr.PathPackage, false);
+                    sr.PathPackage, ResourceDataActions.Find | ResourceDataActions.Write);
                 Diagnostics.Log("New Root Node Added:" + PrintRKRef(rootOriginalKey, tag));
                 this.nodeLookupTable.Add(graphNode);
                 this.CreateChildren(graphNode, constraints);
@@ -1060,7 +1070,8 @@ namespace s3piwrappers.SceneGraph
             for (i = 0; i < count; i++)
             {
                 node = this.nodeLookupTable[i];
-                if (node.IsRCOLBlock) continue;
+                if ((node.NodeActions & ResourceDataActions.Write) == ResourceDataActions.None) 
+                    continue;
                 // TODO: Ensure every resource is forced to update its stream
                 result.AddResource(node.Key, node.Core.Resource.Stream, false);
                 if (!nmap.SetName(node.Key.Instance, node.Name, false))
