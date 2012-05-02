@@ -9,6 +9,18 @@ namespace s3piwrappers.Helpers.Cryptography
     {
         public const byte kNotFoundChar = 0x50; // P = 0x50
 
+        private static string BytesToString(byte[] value, int length)
+        {
+            if (value == null || length < 0 || length > value.Length)
+                return "";
+            char[] result = new char[length];
+            if (length > 0)
+                Array.Copy(value, 0, result, 0, length);
+            else
+                return "";
+            return new string(result);
+        }
+
         private FNVSearchTable mSearchTable;
         private int mLowerCharsLength;
         private byte[] mLowerChars;
@@ -106,17 +118,20 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             if (this.mResults == null)
                 return null;
+            string prefixStr = BytesToString(this.mPrefixChars, this.mPrefixLength);
+            string suffixStr = BytesToString(this.mSuffixChars, this.mSuffixLength);
             for (int i = this.mMatchCount - 1; i >= 0; i--)
             {
                 if (this.mResults[i] == null)
                 {
-                    this.mResults[i] = "";
+                    this.mResults[i] = prefixStr;
                     for (int j = 0; j < this.mMaxLevel; j++)
                     {
                         if (this.mMatch[i][j] == kNotFoundChar)
                             break;
                         this.mResults[i] += (char)this.mMatch[i][j];
                     }
+                    this.mResults[i] += suffixStr;
                 }
             }
             return this.mResults;
