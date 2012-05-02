@@ -5,11 +5,23 @@ namespace s3piwrappers.SceneGraph
 {
     public class DefaultKinHelper : AResourceKinHelper
     {
-        private readonly uint resourceType;
+        protected readonly uint resourceType;
+        protected readonly bool isKinDDS;
+        protected readonly bool isKinThum;
 
         public uint ResourceType
         {
             get { return this.resourceType; }
+        }
+
+        public override bool IsKinDDS
+        {
+            get { return this.isKinDDS; }
+        }
+
+        public override bool IsKinThum
+        {
+            get { return this.isKinThum; }
         }
 
         public override bool IsKindred(IResourceKey parentKey, IResourceKey key)
@@ -48,6 +60,8 @@ namespace s3piwrappers.SceneGraph
                     this.kinName = string.Concat("0x", resourceType.ToString("X8"));
                 }
             }
+            this.isKinDDS = ResourceGraph.IsDDS(resourceType);
+            this.isKinThum = ResourceGraph.IsThum(resourceType);
         }
     }
 }

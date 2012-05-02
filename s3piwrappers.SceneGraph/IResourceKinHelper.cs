@@ -21,6 +21,26 @@ namespace s3piwrappers.SceneGraph
         string KinName { get; }
 
         /// <summary>
+        /// Whether or not the kindred resources
+        /// resolved and created by this helper
+        /// are DDS images or should be treated as such
+        /// when searching the FileTable for each kindred resource's data
+        /// that will be passed to this helper's 
+        /// <see cref="CreateKin"/> function.
+        /// </summary>
+        bool IsKinDDS { get; }
+
+        /// <summary>
+        /// Whether or not the kindred resources
+        /// resolved and created by this helper
+        /// are thumbnail images or should be treated as such
+        /// when searching the FileTable for each kindred resource's data
+        /// that will be passed to this helper's 
+        /// <see cref="CreateKin"/> function.
+        /// </summary>
+        bool IsKinThum { get; }
+
+        /// <summary>
         /// Tests whether a specified resource key is kindred to
         /// a specified parent resource.
         /// </summary>

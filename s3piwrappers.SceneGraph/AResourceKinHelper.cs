@@ -15,6 +15,16 @@ namespace s3piwrappers.SceneGraph
             get { return this.kinName; }
         }
 
+        public virtual bool IsKinDDS
+        {
+            get { return false; }
+        }
+
+        public virtual bool IsKinThum
+        {
+            get { return false; }
+        }
+
         public virtual bool IsKindred(IResourceKey parentKey, IResourceKey key)
         {
             return key.Instance == parentKey.Instance;

@@ -12,6 +12,11 @@ namespace s3piwrappers.SceneGraph.Managers
         private uint thumType;
         private bool isCWAL;
 
+        public override bool IsKinThum
+        {
+            get { return this.isCWAL || !this.isPNG; }
+        }
+
         public override bool IsKindred(IResourceKey parentKey, IResourceKey key)
         {
             if (this.thumInstance != 0)
@@ -48,7 +53,8 @@ namespace s3piwrappers.SceneGraph.Managers
 
             List<SpecificResource> results = new List<SpecificResource>();
             SpecificResource sr = THUM.getItem(this.isPNG,
-                this.thumInstance != 0 ? this.thumInstance : parentKey.Instance, this.thumType);
+                this.thumInstance != 0 ? this.thumInstance : parentKey.Instance, 
+                this.thumType);
             if (sr != null && sr.Resource != null)
                 results.Add(sr);
             return results;
