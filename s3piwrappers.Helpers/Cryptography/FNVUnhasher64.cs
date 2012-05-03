@@ -444,7 +444,7 @@ namespace s3piwrappers.Helpers.Cryptography
                                 }
                             }/**/
                             if (xorFold)
-                                tester = ((tester >> 0x18) ^ (tester & 0xffffffU));
+                                tester = ((tester >> 0x30) ^ (tester & 0xffffffffffffUL));
                             tester &= filter;
                             if (tester == target)
                             {
