@@ -54,10 +54,10 @@ namespace FNVUnhasher
             if (this.unhasher64 != null && !this.unhasher64.Finished)
                 return;
             string strToHash = this.inputTxt.Text;
-            uint xor32Hash  = FNVHash.HashString24(strToHash);
-            uint fnv32Hash  = FNVHash.HashString32(strToHash);
-            ulong xor64Hash = FNVHash.HashString48(strToHash);
-            ulong fnv64Hash = FNVHash.HashString64(strToHash);
+            uint xor32Hash  = FNVHash.HashString24(strToHash) & filter32;
+            uint fnv32Hash  = FNVHash.HashString32(strToHash) & filter32;
+            ulong xor64Hash = FNVHash.HashString48(strToHash) & filter64;
+            ulong fnv64Hash = FNVHash.HashString64(strToHash) & filter64;
             this.resultsTXT.Lines = new string[]
             {
                 string.Concat("0x", fnv32Hash.ToString("X8")),
@@ -102,12 +102,19 @@ namespace FNVUnhasher
                     if (uint.TryParse(input, System.Globalization.NumberStyles.HexNumber,
                         System.Globalization.CultureInfo.CurrentCulture, out hash))
                     {
-                        int maxChars = (int)this.maxCharsNUM.Value;
-                        int maxMatches = (int)this.maxMatchesNUM.Value;
-                        this.unhasher32 = new FNVUnhasher32(hash, this.searchTable, maxChars, maxMatches, !unhashCmbStr.Equals(kFNV32), filter32);
-                        this.prevResultCount = 0;
-                        this.unhasher32.Start();
-                        this.updateTimer.Start();
+                        bool xorFold = !unhashCmbStr.Equals(kFNV32);
+                        if (xorFold && (hash & filter32) > 0xffffffU)
+                            MessageBox.Show("Xor 32 will never find matches for 0x" + (hash & filter32).ToString("X8")
+                                + ".\nIt is greater than 24 bits in length.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        else
+                        {
+                            int maxChars = (int)this.maxCharsNUM.Value;
+                            int maxMatches = (int)this.maxMatchesNUM.Value;
+                            this.unhasher32 = new FNVUnhasher32(hash, this.searchTable, maxChars, maxMatches, xorFold, filter32);
+                            this.prevResultCount = 0;
+                            this.unhasher32.Start();
+                            this.updateTimer.Start();
+                        }
                     }
                 }
             }
@@ -129,9 +136,13 @@ namespace FNVUnhasher
                     if (ulong.TryParse(input, System.Globalization.NumberStyles.HexNumber,
                         System.Globalization.CultureInfo.CurrentCulture, out hash))
                     {
+                        bool xorFold = !unhashCmbStr.Equals(kFNV64);
+                        if (xorFold && (hash & filter64) > 0xffffffffffffUL)
+                            MessageBox.Show("Xor 64 will never find matches for 0x" + (hash & filter64).ToString("X16")
+                                + ".\nIt is greater than 48 bits in length.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         int maxChars = (int)this.maxCharsNUM.Value;
                         int maxMatches = (int)this.maxMatchesNUM.Value;
-                        this.unhasher64 = new FNVUnhasher64(hash, this.searchTable, maxChars, maxMatches, !unhashCmbStr.Equals(kFNV64), filter64);
+                        this.unhasher64 = new FNVUnhasher64(hash, this.searchTable, maxChars, maxMatches, xorFold, filter64);
                         this.prevResultCount = 0;
                         this.unhasher64.Start();
                         this.updateTimer.Start();
