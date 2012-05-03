@@ -45,6 +45,10 @@
             this.defSearchTablesTxt = new System.Windows.Forms.Label();
             this.okBtn = new System.Windows.Forms.Button();
             this.cancelBtn = new System.Windows.Forms.Button();
+            this.filter32Lbl = new System.Windows.Forms.Label();
+            this.filter32Txt = new System.Windows.Forms.TextBox();
+            this.filter64Lbl = new System.Windows.Forms.Label();
+            this.filter64Txt = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -241,7 +245,7 @@
             // 
             this.okBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.okBtn.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okBtn.Location = new System.Drawing.Point(216, 213);
+            this.okBtn.Location = new System.Drawing.Point(216, 251);
             this.okBtn.Name = "okBtn";
             this.okBtn.Size = new System.Drawing.Size(75, 23);
             this.okBtn.TabIndex = 1;
@@ -252,19 +256,59 @@
             // 
             this.cancelBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancelBtn.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancelBtn.Location = new System.Drawing.Point(297, 213);
+            this.cancelBtn.Location = new System.Drawing.Point(297, 251);
             this.cancelBtn.Name = "cancelBtn";
             this.cancelBtn.Size = new System.Drawing.Size(75, 23);
             this.cancelBtn.TabIndex = 2;
             this.cancelBtn.Text = "Cancel";
             this.cancelBtn.UseVisualStyleBackColor = true;
             // 
+            // filter32Lbl
+            // 
+            this.filter32Lbl.AutoSize = true;
+            this.filter32Lbl.Location = new System.Drawing.Point(13, 215);
+            this.filter32Lbl.Name = "filter32Lbl";
+            this.filter32Lbl.Size = new System.Drawing.Size(61, 13);
+            this.filter32Lbl.TabIndex = 3;
+            this.filter32Lbl.Text = "32-bit Filter:";
+            // 
+            // filter32Txt
+            // 
+            this.filter32Txt.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.filter32Txt.Location = new System.Drawing.Point(80, 212);
+            this.filter32Txt.Name = "filter32Txt";
+            this.filter32Txt.Size = new System.Drawing.Size(80, 20);
+            this.filter32Txt.TabIndex = 4;
+            this.filter32Txt.Text = "0xFFFFFFFF";
+            // 
+            // filter64Lbl
+            // 
+            this.filter64Lbl.AutoSize = true;
+            this.filter64Lbl.Location = new System.Drawing.Point(167, 215);
+            this.filter64Lbl.Name = "filter64Lbl";
+            this.filter64Lbl.Size = new System.Drawing.Size(61, 13);
+            this.filter64Lbl.TabIndex = 5;
+            this.filter64Lbl.Text = "64-bit Filter:";
+            // 
+            // filter64Txt
+            // 
+            this.filter64Txt.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.filter64Txt.Location = new System.Drawing.Point(234, 212);
+            this.filter64Txt.Name = "filter64Txt";
+            this.filter64Txt.Size = new System.Drawing.Size(135, 20);
+            this.filter64Txt.TabIndex = 6;
+            this.filter64Txt.Text = "0xFFFFFFFFFFFFFFFF";
+            // 
             // SettingsDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 264);
+            this.ClientSize = new System.Drawing.Size(384, 286);
             this.ControlBox = false;
+            this.Controls.Add(this.filter64Txt);
+            this.Controls.Add(this.filter64Lbl);
+            this.Controls.Add(this.filter32Txt);
+            this.Controls.Add(this.filter32Lbl);
             this.Controls.Add(this.cancelBtn);
             this.Controls.Add(this.okBtn);
             this.Controls.Add(this.groupBox1);
@@ -281,6 +325,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -303,5 +348,9 @@
         private System.Windows.Forms.Button setSuffixBtn;
         private System.Windows.Forms.TextBox suffixInputTxt;
         private System.Windows.Forms.TextBox suffixOutputTxt;
+        private System.Windows.Forms.Label filter32Lbl;
+        private System.Windows.Forms.TextBox filter32Txt;
+        private System.Windows.Forms.Label filter64Lbl;
+        private System.Windows.Forms.TextBox filter64Txt;
     }
 }

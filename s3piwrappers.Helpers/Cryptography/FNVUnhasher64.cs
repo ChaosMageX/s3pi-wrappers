@@ -29,6 +29,8 @@ namespace s3piwrappers.Helpers.Cryptography
         private int mSuffixLength;
         private byte[] mSuffixChars;
 
+        private ulong mFilter;
+        private bool mXorFold;
         private readonly ulong mTargetHash;
         private int mMaxLevel;
         private int mMaxMatches;
@@ -47,6 +49,26 @@ namespace s3piwrappers.Helpers.Cryptography
         public FNVSearchTable SearchTable
         {
             get { return this.mSearchTable; }
+        }
+
+        public ulong Filter
+        {
+            get { return this.mFilter; }
+        }
+
+        public bool XorFold
+        {
+            get { return this.mXorFold; }
+        }
+
+        public ulong TargetHash
+        {
+            get { return this.mTargetHash; }
+        }
+
+        public int MaxResultLength
+        {
+            get { return this.mMaxLevel; }
         }
 
         public ulong MaxIterations
@@ -138,14 +160,16 @@ namespace s3piwrappers.Helpers.Cryptography
         }
 
         public FNVUnhasher64(ulong hash, FNVSearchTable searchTable,
-            int maxChars = 10, int maxMatches = 5)
+            int maxChars = 10, int maxMatches = 5,
+            bool xorFold = false, ulong filter = ulong.MaxValue)
         {
             this.mSearchTable = searchTable;
             this.mTargetHash = hash;
-            this.Reset(maxChars, maxMatches);
+            this.Reset(maxChars, maxMatches, xorFold, filter);
         }
 
-        public void Reset(int maxChars = 10, int maxMatches = 5)
+        public void Reset(int maxChars = 10, int maxMatches = 5,
+            bool xorFold = false, ulong filter = ulong.MaxValue)
         {
             // Only reset if the it hasn't started yet 
             // or it's been started and has finished
@@ -165,6 +189,8 @@ namespace s3piwrappers.Helpers.Cryptography
 
             this.mMaxLevel = maxChars;
             this.mMaxMatches = maxMatches;
+            this.mFilter = filter;
+            this.mXorFold = xorFold;
 
             // Fail-safe in case another thread finds a match
             // between the time the final match is found
@@ -293,11 +319,13 @@ namespace s3piwrappers.Helpers.Cryptography
 #endif
  private void MatchFinder()
             {
+                bool xorFold = this.mParent.mXorFold;
                 int i, j, stop, offset, lcLength = this.mParent.mLowerCharsLength;
                 int level, maxLevel = this.mParent.mMaxLevel;
                 int minIndex = this.mMinIndex;
                 int maxIndex = this.mMaxIndex;
-                ulong result, product, current, target = this.mParent.mTargetHash;
+                ulong result, product, current, target, tester, filter = this.mParent.mFilter;
+                target = this.mParent.mTargetHash & filter;
                 //bool finished = false;
 #if UNSAFE
                 int* index = stackalloc int[maxLevel];
@@ -407,15 +435,18 @@ namespace s3piwrappers.Helpers.Cryptography
                         if (i < stop)
                         {
                             result = product ^ chars[i];
-
+                            tester = result;
                             if (suffixLength > 0)
                             {
                                 for (j = 0; j < suffixLength; j++)
                                 {
-                                    result = (result * FNVHash.TS3Prime64) ^ suffixChars[j];
+                                    tester = (tester * FNVHash.TS3Prime64) ^ suffixChars[j];
                                 }
                             }/**/
-                            if (result == target)
+                            if (xorFold)
+                                tester = ((tester >> 0x18) ^ (tester & 0xffffffU));
+                            tester &= filter;
+                            if (tester == target)
                             {
                                 lock (this.mParent.mMatch)
                                 {

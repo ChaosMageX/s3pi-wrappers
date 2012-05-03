@@ -12,12 +12,22 @@ namespace FNVUnhasher
 {
     public partial class MainForm : Form
     {
+        private const string kXor32 = "24 (Xor 32)";
+        private const string kFNV32 = "32";
+        private const string kXor64 = "48 (Xor 64)";
+        private const string kFNV64 = "64";
+
         public MainForm()
         {
             InitializeComponent();
+            this.unhashCmb.Items.Clear();
+            this.unhashCmb.Items.AddRange(new object[] {
+            kFNV32, kFNV64, kXor32, kXor64 });
         }
 
         private FNVSearchTable searchTable = FNVSearchTable.EnglishAlphabet;
+        private uint filter32 = uint.MaxValue;
+        private ulong filter64 = ulong.MaxValue;
         private FNVUnhasher32 unhasher32;
         private FNVUnhasher64 unhasher64;
         private int prevResultCount;
@@ -37,6 +47,33 @@ namespace FNVUnhasher
             base.OnClosing(e);
         }
 
+        private void hash_Click(object sender, EventArgs e)
+        {
+            if (this.unhasher32 != null && !this.unhasher32.Finished)
+                return;
+            if (this.unhasher64 != null && !this.unhasher64.Finished)
+                return;
+            string strToHash = this.inputTxt.Text;
+            uint xor32Hash  = FNVHash.HashString24(strToHash);
+            uint fnv32Hash  = FNVHash.HashString32(strToHash);
+            ulong xor64Hash = FNVHash.HashString48(strToHash);
+            ulong fnv64Hash = FNVHash.HashString64(strToHash);
+            this.resultsTXT.Lines = new string[]
+            {
+                string.Concat("0x", fnv32Hash.ToString("X8")),
+                string.Concat("0x", fnv64Hash.ToString("X16")),
+                string.Concat("0x", xor32Hash.ToString("X8")),
+                string.Concat("0x", xor64Hash.ToString("X16"))
+            };
+            this.endTimesTXT.Lines = new string[]
+            { 
+                "FNV 32", 
+                "FNV 64", 
+                "Xor Folded FNV 32",
+                "Xor Folded FNV 64"
+            };
+        }
+
         private void unhash_Click(object sender, EventArgs e)
         {
             string unhashCmbStr = unhashCmb.SelectedItem as string;
@@ -47,7 +84,7 @@ namespace FNVUnhasher
             if (unhashCmbStr == null)
                 MessageBox.Show("No Unhashing Algorithm selected", "Error", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-            else if (unhashCmbStr == "32")
+            else if (unhashCmbStr.Equals(kFNV32) || unhashCmbStr.Equals(kXor32))
             {
                 if (this.unhasher64 != null)
                 {
@@ -67,14 +104,14 @@ namespace FNVUnhasher
                     {
                         int maxChars = (int)this.maxCharsNUM.Value;
                         int maxMatches = (int)this.maxMatchesNUM.Value;
-                        this.unhasher32 = new FNVUnhasher32(hash, this.searchTable, maxChars, maxMatches);
+                        this.unhasher32 = new FNVUnhasher32(hash, this.searchTable, maxChars, maxMatches, !unhashCmbStr.Equals(kFNV32), filter32);
                         this.prevResultCount = 0;
                         this.unhasher32.Start();
                         this.updateTimer.Start();
                     }
                 }
             }
-            else if (unhashCmbStr == "64")
+            else if (unhashCmbStr.Equals(kFNV64) || unhashCmbStr.Equals(kXor64))
             {
                 if (this.unhasher32 != null)
                 {
@@ -94,7 +131,7 @@ namespace FNVUnhasher
                     {
                         int maxChars = (int)this.maxCharsNUM.Value;
                         int maxMatches = (int)this.maxMatchesNUM.Value;
-                        this.unhasher64 = new FNVUnhasher64(hash, this.searchTable, maxChars, maxMatches);
+                        this.unhasher64 = new FNVUnhasher64(hash, this.searchTable, maxChars, maxMatches, !unhashCmbStr.Equals(kFNV64), filter64);
                         this.prevResultCount = 0;
                         this.unhasher64.Start();
                         this.updateTimer.Start();
@@ -163,12 +200,14 @@ namespace FNVUnhasher
 
         private void settings_Click(object sender, EventArgs e)
         {
-            using (SettingsDialog sDialog = new SettingsDialog(this.searchTable))
+            using (SettingsDialog sDialog = new SettingsDialog(searchTable, filter32, filter64))
             {
                 DialogResult result = sDialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
                     this.searchTable = sDialog.SearchTable;
+                    this.filter32 = sDialog.Filter32;
+                    this.filter64 = sDialog.Filter64;
                 }
             }
         }

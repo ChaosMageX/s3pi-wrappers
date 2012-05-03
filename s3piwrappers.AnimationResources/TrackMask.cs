@@ -11,18 +11,51 @@ namespace s3piwrappers
         private TrackMaskList mTrackMasks;
         private byte[] mUnused;
         private UInt32 mVersion;
+        // Part of Unused in version 0x201
+        private TGIBlock mRigKey;
+        private float mVertexAnimBlendWeight;
+        private const string kRigKeyOrder = "ITG";
 
         public TrackMask(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
 
-        public TrackMask(int APIversion, EventHandler handler, TrackMask basis) : this(APIversion, handler, basis.Version, basis.Unused, basis.TrackMasks) { }
+        public TrackMask(int APIversion, EventHandler handler, TrackMask basis) 
+            : this(APIversion, handler, basis.Version, basis.RigKey, basis.VertexAnimBlendWeight, basis.Unused, basis.TrackMasks) { }
 
         public TrackMask(int APIversion, EventHandler handler) : this(APIversion, handler, kDefaultVersion, null, null) { }
 
-        public TrackMask(int APIversion, EventHandler handler, uint version, byte[] unused, TrackMaskList trackMasks) : base(APIversion, handler, null)
+        public TrackMask(int APIversion, EventHandler handler, uint version, byte[] unused, TrackMaskList trackMasks) 
+            : base(APIversion, handler, null)
         {
             mVersion = version;
-            mUnused = unused ?? new byte[48];
+            mRigKey = new TGIBlock(APIversion, handler, kRigKeyOrder);
+            mUnused = unused ?? (version < 0x201 ? new byte[48] : new byte[28]);
             mTrackMasks = trackMasks ?? new TrackMaskList(handler);
+        }
+
+        public TrackMask(int APIversion, EventHandler handler, uint version,
+            IResourceKey rigKey, float vertexAnimBlendWeight, byte[] unused, TrackMaskList trackMasks)
+            : base(APIversion, handler, null)
+        {
+            mVersion = version;
+            mRigKey = rigKey == null ? new TGIBlock(APIversion, handler, kRigKeyOrder) 
+                : new TGIBlock(APIversion, handler, kRigKeyOrder, rigKey);
+            mVertexAnimBlendWeight = vertexAnimBlendWeight;
+            mUnused = unused ?? (version < 0x201 ? new byte[48] : new byte[28]);
+            mTrackMasks = trackMasks ?? new TrackMaskList(handler);
+        }
+
+        public override List<string> ContentFields
+        {
+            get
+            {
+                List<string> results = base.ContentFields;
+                if (mVersion < 0x201)
+                {
+                    results.Remove("RigKey");
+                    results.Remove("VertexAnimBlendWeight");
+                }
+                return results;
+            }
         }
 
         [ElementPriority(1)]
@@ -40,6 +73,34 @@ namespace s3piwrappers
         }
 
         [ElementPriority(2)]
+        public IResourceKey RigKey
+        {
+            get { return mRigKey; }
+            set
+            {
+                if (!mRigKey.Equals(value))
+                {
+                    mRigKey = new TGIBlock(requestedApiVersion, handler, kRigKeyOrder, value);
+                    OnRCOLChanged(this, new EventArgs());
+                }
+            }
+        }
+
+        [ElementPriority(3)]
+        public float VertexAnimBlendWeight
+        {
+            get { return mVertexAnimBlendWeight; }
+            set
+            {
+                if (mVertexAnimBlendWeight != value)
+                {
+                    mVertexAnimBlendWeight = value;
+                    OnRCOLChanged(this, new EventArgs());
+                }
+            }
+        }
+
+        [ElementPriority(4)]
         public byte[] Unused
         {
             get { return mUnused; }
@@ -53,7 +114,7 @@ namespace s3piwrappers
             }
         }
 
-        [ElementPriority(3)]
+        [ElementPriority(5)]
         public TrackMaskList TrackMasks
         {
             get { return mTrackMasks; }
@@ -79,7 +140,16 @@ namespace s3piwrappers
             if (FOURCC(br.ReadUInt32()) != Tag)
                 throw new InvalidDataException("Invalid Tag, Expected "+Tag);
             mVersion = br.ReadUInt32();
-            mUnused = br.ReadBytes(48);
+            if (mVersion < 0x201)
+            {
+                mUnused = br.ReadBytes(48);
+            }
+            else
+            {
+                mRigKey = new TGIBlock(requestedApiVersion, handler, kRigKeyOrder, s);
+                mVertexAnimBlendWeight = br.ReadSingle();
+                mUnused = br.ReadBytes(28);
+            }
             mTrackMasks = new TrackMaskList(handler, s);
             if (s.Position != s.Length)
                 throw new InvalidDataException("Unexpected End of File");
@@ -91,8 +161,32 @@ namespace s3piwrappers
             var bw = new BinaryWriter(s);
             bw.Write((uint) FOURCC(Tag));
             bw.Write(mVersion);
-            if (mUnused == null) mUnused = new byte[48];
-            bw.Write(mUnused);
+            if (mVersion < 0x201)
+            {
+                if (mUnused == null) mUnused = new byte[48];
+                if (mUnused.Length != 48)
+                {
+                    byte[] unused = mUnused;
+                    mUnused = new byte[48];
+                    Array.Copy(unused, 0, mUnused, 0, unused.Length < 48 ? unused.Length : 48);
+                }
+                bw.Write(mUnused);
+            }
+            else
+            {
+                if (mRigKey == null)
+                    mRigKey = new TGIBlock(requestedApiVersion, handler, kRigKeyOrder);
+                mRigKey.UnParse(s);
+                bw.Write(mVertexAnimBlendWeight);
+                if (mUnused == null) mUnused = new byte[28];
+                if (mUnused.Length != 28)
+                {
+                    byte[] unused = mUnused;
+                    mUnused = new byte[28];
+                    Array.Copy(unused, 0, mUnused, 0, unused.Length < 28 ? unused.Length : 28);
+                }
+                bw.Write(mUnused);
+            }
             if (mTrackMasks == null) mTrackMasks = new TrackMaskList(handler);
             mTrackMasks.UnParse(s);
             return s;

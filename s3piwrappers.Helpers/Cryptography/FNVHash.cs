@@ -55,13 +55,13 @@ namespace s3piwrappers.Helpers.Cryptography
         public static uint HashString24(string str)
         {
             uint num = HashString32(str);
-            return ((num >> 0x18) ^ (num & 0xffffff));
+            return ((num >> 0x18) ^ (num & 0xffffffU));
         }
 
         public static uint XorFoldHashString32(string str)
         {
             uint num = HashString32(str);
-            return ((num >> 0x18) ^ (num & 0xffffff));
+            return ((num >> 0x18) ^ (num & 0xffffffU));
         }
 
         public const ulong TS3Offset64 = 0xcbf29ce484222325UL;
@@ -90,6 +90,16 @@ namespace s3piwrappers.Helpers.Cryptography
             return num;
         }
 
-        
+        public static ulong HashString48(string str)
+        {
+            ulong num = HashString64(str);
+            return ((num >> 0x30) ^ (num & 0xffffffffffffUL));
+        }
+
+        public static ulong XorFoldHashString64(string str)
+        {
+            ulong num = HashString64(str);
+            return ((num >> 0x30) ^ (num & 0xffffffffffffUL));
+        }
     }
 }

@@ -75,7 +75,7 @@
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settings_Click);
             // 
@@ -87,6 +87,7 @@
             this.hashBtn.TabIndex = 1;
             this.hashBtn.Text = "Hash";
             this.hashBtn.UseVisualStyleBackColor = true;
+            this.hashBtn.Click += new System.EventHandler(this.hash_Click);
             // 
             // unhashBtn
             // 
