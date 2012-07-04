@@ -1,0 +1,5 @@
+﻿ResourceType: 0xD382BF57
+Label: Footprint Editor
+Command: Helpers\Footsy\Footsy.exe
+Arguments: "{}"
+Desc: Footprint Editor

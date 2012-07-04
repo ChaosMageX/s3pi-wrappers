@@ -1,0 +1,460 @@
+﻿<Window
+    x:Class="FootprintViewer.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:System="clr-namespace:System;assembly=mscorlib"
+    xmlns:Models="clr-namespace:FootprintViewer.Models"
+    xmlns:Converters="clr-namespace:FootprintViewer.Converters"
+    xmlns:Validation="clr-namespace:FootprintViewer.Validation"
+    Title="Footsy"
+    Height="600"
+    Width="800">
+    <Window.Resources>
+        <DataTemplate
+            x:Key="AreaListItem">
+            <TextBlock
+                Text="{Binding Text}" />
+        </DataTemplate>
+        <SolidColorBrush
+            x:Key="{x:Static SystemColors.ControlBrushKey}"
+            Color="LightBlue" />
+        <Style
+            TargetType="ListView">
+            <Setter
+                Property="Background"
+                Value="White" />
+            <Setter
+                Property="AlternationCount"
+                Value="2" />
+            <Setter
+                Property="Margin"
+                Value="5,3" />
+        </Style>
+        <Style
+            TargetType="{x:Type ListViewItem}">
+            <Style.Triggers>
+                <Trigger
+                    Property="ItemsControl.AlternationIndex"
+                    Value="0">
+                    <Setter
+                        Property="Background"
+                        Value="GhostWhite"></Setter>
+                </Trigger>
+                <Trigger
+                    Property="ItemsControl.AlternationIndex"
+                    Value="1">
+                    <Setter
+                        Property="Background"
+                        Value="LightGray"></Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style
+            TargetType="Button">
+            <Setter
+                Property="Margin"
+                Value="3" />
+        </Style>
+        <Style
+            TargetType="TextBlock">
+            <Setter
+                Property="Margin"
+                Value="5,3" />
+        </Style>
+        <Style
+            TargetType="TextBox">
+            <Setter
+                Property="Margin"
+                Value="5,3" />
+            <Setter
+                Property="TextAlignment"
+                Value="Right" />
+            <Setter
+                Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border
+                            BorderBrush="Red"
+                            BorderThickness="1">
+                            <AdornedElementPlaceholder></AdornedElementPlaceholder>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger
+                    Property="Validation.HasError"
+                    Value="true">
+                    <Setter
+                        Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self},
+                Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Converters:FootprintPointConverter
+            Factor="100"
+            x:Key="polygonPreviewConverter" />
+        <Converters:ScaleConverter
+            Scale="100"
+            Offset="-5"
+            x:Key="previewCoordinateScale" />
+        <Converters:PointColorConverter
+            x:Key="pointColorConverter"
+            Default="Black"
+            Selected="Red" />
+        <Converters:HexConverter
+            x:Key="hexConverter" />
+        <Validation:DecimalValidationRule
+            x:Key="coordinateValidator"
+            Min="0.0" />
+        <Validation:DecimalValidationRule
+            x:Key="decimalValidator" />
+        <System:String
+            x:Key="DecimalFormatter">0.000000</System:String>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition
+                Height="*" />
+            <RowDefinition
+                Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Content="Commit"
+                Command="{Binding CommitCommand}"
+                CommandParameter="{Binding}" />
+            <Button
+                Content="Cancel"
+                Command="{Binding CancelCommand}"
+                CommandParameter="{Binding}" />
+        </StackPanel>
+        <Grid
+            Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition
+                    Width="1*" />
+                <ColumnDefinition
+                    Width="3*" />
+                <ColumnDefinition
+                    Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Grid
+                Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition
+                        Height="Auto" />
+                    <RowDefinition
+                        Height="Auto" />
+                    <RowDefinition
+                        Height="1*" />
+                    <RowDefinition
+                        Height="Auto" />
+                    <RowDefinition
+                        Height="Auto" />
+                    <RowDefinition
+                        Height="1*" />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="0"
+                    Text="Footprint Areas:" />
+                <Grid
+                    Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Content="Add"
+                        Command="{Binding AddFootprintCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="0" />
+                    <Button
+                        Content="Clone"
+                        Command="{Binding CloneFootprintCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="1" />
+                    <Button
+                        Content="Delete"
+                        Command="{Binding DeleteFootprintCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="2" />
+                </Grid>
+                <ListView
+                    Grid.Row="2"
+                    ItemsSource="{Binding FootprintAreas}"
+                    SelectedItem="{Binding SelectedFootprint, Mode= TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    ItemTemplate="{StaticResource ResourceKey=AreaListItem}" />
+                <TextBlock
+                    Grid.Row="3"
+                    Text="Slot Areas:" />
+                <Grid
+                    Grid.Row="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Content="Add"
+                        Command="{Binding AddSlotCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="0" />
+                    <Button
+                        Content="Clone"
+                        Command="{Binding CloneSlotCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="1" />
+                    <Button
+                        Content="Delete"
+                        Command="{Binding DeleteSlotCommand}"
+                        CommandParameter="{Binding}"
+                        Grid.Column="2" />
+                </Grid>
+                <ListView
+                    Grid.Row="5"
+                    ItemsSource="{Binding SlotAreas}"
+                    SelectedItem="{Binding SelectedSlot, Mode= TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    VerticalAlignment="Stretch"
+                    HorizontalAlignment="Stretch"
+                    ItemTemplate="{StaticResource ResourceKey=AreaListItem}"></ListView>
+            </Grid>
+            <ScrollViewer
+                Grid.Column="1"
+                DataContext="{Binding SelectedArea, UpdateSourceTrigger=PropertyChanged}"
+                HorizontalScrollBarVisibility="Visible">
+                <Border
+                    BorderBrush="Black"
+                    BorderThickness="3">
+                    <Grid
+                        Width="5000"
+                        Height="5000"
+                        Margin="20"
+                        x:Name="AreaCanvas"
+                        MouseLeftButtonDown="AreaCanvas_MouseLeftButtonDown"
+                        MouseMove="AreaCanvas_MouseMove"
+                        MouseLeftButtonUp="AreaCanvas_MouseLeftButtonUp"
+                        MouseLeave="AreaCanvas_MouseLeave"
+                        Background="White">
+                        <Canvas
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch">
+                            <Polygon
+                                Stroke="Black"
+                                Fill="Gray"
+                                Points="{Binding Points, Converter={StaticResource ResourceKey=polygonPreviewConverter}}" />
+                        </Canvas>
+                        <ItemsControl
+                            ItemsSource="{Binding Points}"
+                            x:Name="PointView">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Grid
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"></Grid>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate
+                                    DataType="{x:Type Models:PointViewModel}">
+                                    <Canvas
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch">
+                                        <Ellipse
+                                            Width="10"
+                                            Height="10"
+                                            Fill="{Binding IsSelected, Converter={StaticResource ResourceKey=pointColorConverter}}"
+                                            Canvas.Left="{Binding X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewCoordinateScale}}"
+                                            Canvas.Top="{Binding Z, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewCoordinateScale}}"></Ellipse>
+                                    </Canvas>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
+                </Border>
+            </ScrollViewer>
+            <ScrollViewer
+                DataContext="{Binding SelectedArea}"
+                Grid.Column="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="Auto" />
+                        <RowDefinition
+                            Height="1*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Row="0"
+                        Text="Name" />
+                    <TextBox
+                        Grid.Row="1">
+                        <TextBox.Text>
+                            <Binding
+                                Path="Name"
+                                Converter="{StaticResource ResourceKey=hexConverter}">
+                                <Binding.ValidationRules>
+                                    <Validation:HexValidationRule />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <TextBlock
+                        Grid.Row="2"
+                        Text="Level Offset" />
+                    <TextBox
+                        Grid.Row="3"
+                        Text="{Binding LevelOffset, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock
+                        Grid.Row="4"
+                        Text="Offset X" />
+                    <TextBox
+                        Grid.Row="5">
+                        <TextBox.Text>
+                            <Binding
+                                Path="OffsetX"
+                                UpdateSourceTrigger="PropertyChanged"
+                                StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
+                                <Binding.ValidationRules>
+                                    <Validation:DecimalValidationRule />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <TextBlock
+                        Grid.Row="6"
+                        Text="Offset Z" />
+                    <TextBox
+                        Grid.Row="7">
+                        <TextBox.Text>
+                            <Binding
+                                Path="OffsetZ"
+                                UpdateSourceTrigger="PropertyChanged"
+                                StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
+                                <Binding.ValidationRules>
+                                    <Validation:DecimalValidationRule />
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Expander
+                        IsExpanded="True"
+                        Grid.Row="8"
+                        Header="Points"
+                        DataContext="{Binding}">
+                        <StackPanel
+                            Orientation="Vertical"
+                            VerticalAlignment="Stretch"
+                            HorizontalAlignment="Stretch">
+                            <Grid
+                                Grid.Row="4"
+                                DataContext="{Binding SelectedPoint}">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition
+                                        Height="Auto" />
+                                    <RowDefinition
+                                        Height="Auto" />
+                                    <RowDefinition
+                                        Height="Auto" />
+                                    <RowDefinition
+                                        Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Text="X" />
+                                <TextBox
+                                    Grid.Row="1">
+                                    <TextBox.Text>
+                                        <Binding
+                                            Path="X"
+                                            UpdateSourceTrigger="PropertyChanged"
+                                            StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <Validation:DecimalValidationRule
+                                                    Min="0" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                                <TextBlock
+                                    Grid.Row="2"
+                                    Text="Z" />
+                                <TextBox
+                                    Grid.Row="3">
+                                    <TextBox.Text>
+                                        <Binding
+                                            Path="Z"
+                                            UpdateSourceTrigger="PropertyChanged"
+                                            StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
+                                            <Binding.ValidationRules>
+                                                <Validation:DecimalValidationRule
+                                                    Min="0" />
+                                            </Binding.ValidationRules>
+                                        </Binding>
+                                    </TextBox.Text>
+                                </TextBox>
+                            </Grid>
+                            <TextBlock
+                                Grid.Row="4"
+                                Text="Points:" />
+                            <Grid
+                                Grid.Row="5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Button
+                                    Grid.Column="0"
+                                    Command="{Binding AddPointCommand}"
+                                    CommandParameter="{Binding}"
+                                    Content="Add" />
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding DeletePointCommand}"
+                                    CommandParameter="{Binding}"
+                                    Content="Delete" />
+                            </Grid>
+                            <ListView
+                                Grid.Row="9"
+                                ItemsSource="{Binding Points}"
+                                SelectedItem="{Binding SelectedPoint, Mode= TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                VerticalAlignment="Stretch"
+                                HorizontalAlignment="Stretch">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock
+                                            Text="{Binding Text}" />
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                        </StackPanel>
+                    </Expander>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>
