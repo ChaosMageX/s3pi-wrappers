@@ -35,9 +35,6 @@ namespace FootprintViewer
         }
 
 
-
-
-
         private Ellipse draggedPoint;
         
         private void AreaCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -60,6 +57,8 @@ namespace FootprintViewer
                 var pos = e.GetPosition((IInputElement)draggedPoint.Parent);
                 double x = pos.X;
                 double y = pos.Y;
+                if (x < 0) x = 0;
+                if (y < 0) y = 0;
                 x -= draggedPoint.Width / 2;
                 y -= draggedPoint.Height / 2;
                 Canvas.SetLeft(draggedPoint, x);

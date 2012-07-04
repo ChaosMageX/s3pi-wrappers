@@ -232,11 +232,10 @@
                 HorizontalScrollBarVisibility="Visible">
                 <Border
                     BorderBrush="Black"
-                    BorderThickness="3">
+                    BorderThickness="3" Padding="20">
                     <Grid
                         Width="5000"
                         Height="5000"
-                        Margin="20"
                         x:Name="AreaCanvas"
                         MouseLeftButtonDown="AreaCanvas_MouseLeftButtonDown"
                         MouseMove="AreaCanvas_MouseMove"
