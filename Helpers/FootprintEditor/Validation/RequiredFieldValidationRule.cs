@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Controls;
 
-namespace FootprintViewer.Validation
+namespace s3piwrappers.Validation
 {
     class RequiredFieldValidationRule : ValidationRule
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace FootprintViewer.Commands
+namespace s3piwrappers.Commands
 {
     class UserCommand<T> : ICommand
     {

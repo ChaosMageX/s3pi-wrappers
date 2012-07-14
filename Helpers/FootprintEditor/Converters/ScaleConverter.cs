@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Data;
 
-namespace FootprintViewer.Converters
+namespace s3piwrappers.Converters
 {
     public class ScaleConverter : IValueConverter
     {

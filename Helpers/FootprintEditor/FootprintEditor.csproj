@@ -8,8 +8,8 @@
     <ProjectGuid>{F6232E3A-1445-40D4-A59E-8BD3C067667A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FootprintViewer</RootNamespace>
-    <AssemblyName>Footsy</AssemblyName>
+    <RootNamespace>s3piwrappers</RootNamespace>
+    <AssemblyName>Footsie</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\Debug\Helpers\Footsy\</OutputPath>
+    <OutputPath>..\..\bin\Debug\Helpers\FootprintEditor\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -30,19 +30,16 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\Release\Helpers\Footsy\</OutputPath>
+    <OutputPath>..\..\bin\Release\Helpers\FootprintEditor\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
+    <ApplicationIcon>footprint.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
-    <NoWin32Manifest>true</NoWin32Manifest>
-  </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
@@ -75,6 +72,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Converters\HexConverter.cs" />
+    <Compile Include="Converters\NullConverter.cs" />
+    <Compile Include="Models\AreaTypeAttributes.cs" />
+    <Compile Include="Models\FlagFieldViewModel.cs" />
+    <Compile Include="Models\IntersectionAttributes.cs" />
+    <Compile Include="Models\SurfaceAttributes.cs" />
+    <Compile Include="Models\SurfaceTypeAttributes.cs" />
     <Compile Include="Validation\DecimalValidationRule.cs" />
     <Compile Include="Validation\HexValidationRule.cs" />
     <Compile Include="Validation\RequiredFieldValidationRule.cs" />
@@ -114,7 +117,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="Footsy.helper">
+    <None Include="FootprintEditor.helper">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Properties\Settings.settings">

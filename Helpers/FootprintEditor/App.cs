@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using FootprintViewer.Models;
 using s3pi.GenericRCOLResource;
+using s3piwrappers.Models;
 
-namespace FootprintViewer
+namespace s3piwrappers
 {
     class App
     {
@@ -28,7 +25,7 @@ namespace FootprintViewer
             var win = new MainWindow(viewModel);
             app.Run(win);
 
-            if (viewModel.IsIsSaving)
+            if (viewModel.IsSaving)
             {
                 byte[] output = rcol.AsBytes;
                 using (var s = File.Create(args[0]))

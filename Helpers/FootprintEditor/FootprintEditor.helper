@@ -1,0 +1,5 @@
+﻿ResourceType: 0xD382BF57
+Label: Footsie
+Command: Helpers\FootprintEditor\Footsie.exe
+Arguments: "{}"
+Desc: Footprint Editor

@@ -2,10 +2,10 @@
 using s3pi.GenericRCOLResource;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using FootprintViewer.Commands;
 using System.Windows;
+using s3piwrappers.Commands;
 
-namespace FootprintViewer.Models
+namespace s3piwrappers.Models
 {
     public class FootprintEditorViewModel : AbstractViewModel
     {
@@ -68,7 +68,7 @@ namespace FootprintViewer.Models
             get { return mFootprintAreas; }
         }
 
-        public bool IsIsSaving { get { return mIsSaving; } }
+        public bool IsSaving { get { return mIsSaving; } }
 
 
         public ICommand AddSlotCommand { get; private set; }
@@ -82,6 +82,8 @@ namespace FootprintViewer.Models
 
         public ICommand CancelCommand { get; private set; }
         public ICommand CommitCommand { get; private set; }
+
+
         public FootprintEditorViewModel(GenericRCOLResource rcol)
         {
             this.mRcol = rcol;
@@ -108,8 +110,6 @@ namespace FootprintViewer.Models
                 this.SelectedSlot = this.SlotAreas.FirstOrDefault();
             }
         }
-
-
 
 
         private void AddSlotArea()

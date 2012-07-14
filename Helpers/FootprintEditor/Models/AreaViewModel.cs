@@ -2,10 +2,11 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-using FootprintViewer.Commands;
 using s3pi.GenericRCOLResource;
+using s3piwrappers.Commands;
+using System;
 
-namespace FootprintViewer.Models
+namespace s3piwrappers.Models
 {
     public class AreaViewModel : AbstractViewModel
     {
@@ -13,27 +14,53 @@ namespace FootprintViewer.Models
         private FTPT.Area mArea;
         private ObservableCollection<PointViewModel> mPoints;
         private PointViewModel mSelectedPoint;
-        private float mOffsetX;
-        private float mOffsetZ;
         private ICommand mDeletePointCommand;
         private ICommand mAddPointCommand;
+
+
+        private AreaTypeAttributes mAreaTypeAttributes;
+        private SurfaceTypeAttributes mSurfaceTypeAttributes;
+        private SurfaceAttributes mSurfaceAttributes;
+        private IntersectionAttributes mIntersectionAttributes;
         public AreaViewModel(FootprintEditorViewModel parent, FTPT.Area area)
         {
-            mParent = parent;
-            mArea = area;
-            if (mArea.ClosedPolygon.Any())
-            {
-                this.mOffsetX = mArea.ClosedPolygon.Min(x => x.X);
-                this.mOffsetZ = mArea.ClosedPolygon.Min(x => x.Z);
-            }
-            mPoints = new ObservableCollection<PointViewModel>();
+            this.mParent = parent;
+            this.mArea = area;
+            this.mAreaTypeAttributes = new AreaTypeAttributes(this.mArea);
+            this.mSurfaceTypeAttributes = new SurfaceTypeAttributes(this.mArea);
+            this.mSurfaceAttributes = new SurfaceAttributes(this.mArea);
+            this.mIntersectionAttributes = new IntersectionAttributes(this.mArea);
+
+            this.mPoints = new ObservableCollection<PointViewModel>();
             foreach (var pt in area.ClosedPolygon)
             {
-                Add(new PointViewModel(this, pt));
+                this.Add(new PointViewModel(this, pt));
             }
             this.SelectedPoint = this.Points.FirstOrDefault();
             this.mDeletePointCommand = new UserCommand<AreaViewModel>(x => x != null && x.SelectedPoint != null && x.Points.Contains(x.SelectedPoint), x => x.Remove(x.SelectedPoint));
+            
             this.mAddPointCommand = new UserCommand<AreaViewModel>(x => x != null && true, x => x.Add());
+            
+        }
+
+        public IntersectionAttributes IntersectionAttributes
+        {
+            get { return mIntersectionAttributes; }
+        }
+
+        public SurfaceAttributes SurfaceAttributes
+        {
+            get { return mSurfaceAttributes; }
+        }
+
+        public SurfaceTypeAttributes SurfaceTypeAttributes
+        {
+            get { return mSurfaceTypeAttributes; }
+        }
+
+        public AreaTypeAttributes AreaTypeAttributes
+        {
+            get { return mAreaTypeAttributes; }
         }
 
         public FTPT.Area Area
@@ -55,8 +82,8 @@ namespace FootprintViewer.Models
         {
             this.mArea.ClosedPolygon.Add();
             var point = this.mArea.ClosedPolygon.Last();
-            point.X = this.mOffsetX;
-            point.Z = this.mOffsetZ;
+            point.X = this.OffsetX;
+            point.Z = this.OffsetZ;
             var vm = new PointViewModel(this, point);
             this.Add(vm);
         }
@@ -76,41 +103,15 @@ namespace FootprintViewer.Models
         }
         private void OnPointChanged(object sender, PropertyChangedEventArgs e)
         {
-            FixOffsets();
+            OnPropertyChanged("Points");
+            OnPropertyChanged("OffsetZ");
+            OnPropertyChanged("OffsetX");
         }
-        private void FixOffsets()
+        public Byte Priority
         {
-            var min = this.Area.Lower;
-            min.X = 0;
-            min.Z = 0;
-            var max = this.Area.Upper;
-            max.X = 0;
-            max.Z = 0;
-            foreach (var pointViewModel in Points)
-            {
-                var point = pointViewModel.Point;
-                point.X = this.OffsetX + pointViewModel.X;
-                point.Z = this.OffsetZ + pointViewModel.Z;
-                if (point.X < min.X)
-                {
-                    min.X = point.X;
-                }
-                if (point.X > max.X)
-                {
-                    max.X = point.X;
-                }
-                if (point.Z < min.Z)
-                {
-                    min.Z = point.Z;
-                }
-                if (point.Z > max.Z)
-                {
-                    max.Z = point.Z;
-                }
-            }
-            this.OnPropertyChanged("Points");
+            get { return mArea.Priority; }
+            set { mArea.Priority = value;OnPropertyChanged("Priority"); }
         }
-
         public uint Name
         {
             get { return mArea.Name; }
@@ -125,23 +126,31 @@ namespace FootprintViewer.Models
 
         public float OffsetZ
         {
-            get { return mOffsetZ; }
+            get { return mArea.ClosedPolygon.Any() ? mArea.ClosedPolygon.Min(x => x.Z) : 0f; }
             set
             {
-                mOffsetZ = value;
-                FixOffsets();
+                var diff =value- this.OffsetZ ;
+                foreach (var pointViewModel in Points)
+                {
+                    pointViewModel.Z += diff;
+                }
                 OnPropertyChanged("OffsetZ");
+                OnPropertyChanged("Points");
             }
         }
 
         public float OffsetX
         {
-            get { return mOffsetX; }
+            get { return mArea.ClosedPolygon.Any() ? mArea.ClosedPolygon.Min(x => x.X) : 0f; }
             set
             {
-                mOffsetX = value;
-                FixOffsets();
+                var diff = value - this.OffsetX ;
+                foreach (var pointViewModel in Points)
+                {
+                    pointViewModel.X += diff;
+                }
                 OnPropertyChanged("OffsetX");
+                OnPropertyChanged("Points");
             }
         }
         public string Text

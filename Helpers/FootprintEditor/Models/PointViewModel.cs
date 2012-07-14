@@ -2,20 +2,16 @@ using System;
 using System.ComponentModel;
 using s3pi.GenericRCOLResource;
 
-namespace FootprintViewer.Models
+namespace s3piwrappers.Models
 {
     public class PointViewModel : AbstractViewModel
     {
         private FTPT.PolygonPoint mPoint;
         private AreaViewModel mArea;
-        private float mX;
-        private float mZ;
         public PointViewModel(AreaViewModel area, FTPT.PolygonPoint point)
         {
             mArea = area;
             mPoint = point;
-            mX = mPoint.X - mArea.OffsetX;
-            mZ = mPoint.Z - mArea.OffsetZ;
             mArea.PropertyChanged += new PropertyChangedEventHandler(mArea_PropertyChanged);
 
 
@@ -34,31 +30,42 @@ namespace FootprintViewer.Models
         {
             switch (e.PropertyName)
             {
-            case "OffsetX":
-                mPoint.X = mX + mArea.OffsetX;
-                break;
-            case "OffsetZ":
-                mPoint.Z = mZ + mArea.OffsetZ;
-                break;
-            case "SelectedPoint":
-                this.OnPropertyChanged("IsSelected");
-                break;
+                case "SelectedPoint":
+                    this.OnPropertyChanged("IsSelected");
+                    break;
             }
         }
         public float X
         {
-            get { return mX; }
+            get { return mPoint.X; }
             set
             {
-                mX = value; OnPropertyChanged("X"); OnPropertyChanged("Text"); mPoint.X = mX + mArea.OffsetX;
+                mPoint.X = value; OnPropertyChanged("X"); OnPropertyChanged("Text");
             }
         }
         public float Z
         {
-            get { return mZ; }
+            get { return mPoint.Z; }
             set
             {
-                mZ = value; OnPropertyChanged("Z"); OnPropertyChanged("Text"); mPoint.Z = mZ + mArea.OffsetZ;
+                mPoint.Z = value; OnPropertyChanged("Z"); OnPropertyChanged("Text");
+            }
+        }
+
+        public float RelativeX
+        {
+            get { return mPoint.X - mArea.OffsetX; }
+            set
+            {
+                mPoint.X = value + mArea.OffsetZ; OnPropertyChanged("X"); OnPropertyChanged("Text");
+            }
+        }
+        public float RelativeZ
+        {
+            get { return mPoint.Z - mArea.OffsetZ; }
+            set
+            {
+                mPoint.Z = value + mArea.OffsetZ; OnPropertyChanged("Z"); OnPropertyChanged("Text");
             }
         }
         public String Text
@@ -67,7 +74,7 @@ namespace FootprintViewer.Models
         }
         public override string ToString()
         {
-            return String.Format("[{0:0.00},{1:0.00}]", X, Z);
+            return String.Format("[{0:0.00},{1:0.00}] ([{2:0.00},{3:0.00}])", X, Z,RelativeX,RelativeZ);
         }
     }
 }

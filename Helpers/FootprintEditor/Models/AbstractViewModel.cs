@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
 
-namespace FootprintViewer.Models
+namespace s3piwrappers.Models
 {
     public abstract class AbstractViewModel : INotifyPropertyChanged, IDisposable
     {
