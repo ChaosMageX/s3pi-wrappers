@@ -106,6 +106,7 @@ namespace s3piwrappers.Models
             OnPropertyChanged("Points");
             OnPropertyChanged("OffsetZ");
             OnPropertyChanged("OffsetX");
+            
         }
         public Byte Priority
         {

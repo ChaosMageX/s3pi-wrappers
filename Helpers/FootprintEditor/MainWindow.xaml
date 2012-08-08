@@ -110,14 +110,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Converters:ScaleConverter
-            Scale="100"
-            Offset="4987"
-            x:Key="previewOffsetScale" />
-        <Converters:ScaleConverter
-            Scale="100"
-            Offset="4995"
-            x:Key="previewCoordinateScale" />
+        
         <Converters:PointColorConverter
             x:Key="pointColorConverter"
             Default="Black"
@@ -127,24 +120,15 @@
         <Converters:NullConverter
             x:Key="nullConverter" />
         <Validation:DecimalValidationRule
-            x:Key="coordinateValidator"
-            Min="0.0" />
+            x:Key="coordinateValidator" />
         <Validation:IntValidationRule
             x:Key="intValidator" />
         <Validation:DecimalValidationRule
             x:Key="decimalValidator" />
         <System:String
             x:Key="DecimalFormatter">0.000000</System:String>
-        <DataTemplate
-            x:Key="GridLine">
-            <Line
-                Stroke="Chartreuse"
-                StrokeThickness="2"
-                X1="0"
-                X2="10000"
-                Y1="100"
-                Y2="100" />
-        </DataTemplate>
+        <Converters:DebugConverter
+            x:Key="debugger" />
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -152,11 +136,16 @@
                 Height="*" />
             <RowDefinition
                 Height="Auto" />
+            <RowDefinition
+                Height="Auto" />
         </Grid.RowDefinitions>
-        <MediaElement
-            x:Name="SoundPlayer"
-            UnloadedBehavior="Manual"
-            Visibility="Hidden" />
+        <StatusBar
+            Grid.Row="2">
+            <StatusBar.Items>
+                <ListViewItem
+                    Content="{Binding StatusText}"></ListViewItem>
+            </StatusBar.Items>
+        </StatusBar>
         <StackPanel
             Grid.Row="1"
             HorizontalAlignment="Right"
@@ -178,10 +167,30 @@
                 <ColumnDefinition
                     Width="200" />
                 <ColumnDefinition
-                    Width="4*" />
+                    Width="*" />
                 <ColumnDefinition
                     Width="Auto" />
             </Grid.ColumnDefinitions>
+            <Grid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem
+                        Header="Set Background Overlay"
+                        Command="{Binding SetBackgroundImageCommand}"
+                        CommandParameter="{Binding}" />
+                    <MenuItem
+                        Header="Clear Background Overlay"
+                        Command="{Binding ClearBackgroundImageCommand}"
+                        CommandParameter="{Binding}" />
+                    <MenuItem
+                        Header="Set Reference Mesh"
+                        Command="{Binding SetReferenceMeshCommand}"
+                        CommandParameter="{Binding}" />
+                    <MenuItem
+                        Header="Clear Reference Mesh"
+                        Command="{Binding ClearReferenceMeshCommand}"
+                        CommandParameter="{Binding}" />
+                </ContextMenu>
+            </Grid.ContextMenu>
             <Grid
                 Grid.Column="0">
                 <Grid.RowDefinitions>
@@ -232,7 +241,8 @@
                             VerticalAlignment="Stretch"
                             HorizontalAlignment="Stretch"
                             ItemTemplate="{StaticResource ResourceKey=AreaListItem}"
-                            SelectionMode="Single" />
+                            SelectionMode="Single"
+                            SelectionChanged="ListView_SelectionChanged" />
                     </Grid>
                 </GroupBox>
                 <GroupBox
@@ -275,7 +285,8 @@
                             VerticalAlignment="Stretch"
                             HorizontalAlignment="Stretch"
                             ItemTemplate="{StaticResource ResourceKey=AreaListItem}"
-                            SelectionMode="Single"></ListView>
+                            SelectionMode="Single"
+                            SelectionChanged="ListView_SelectionChanged"></ListView>
                     </Grid>
                 </GroupBox>
             </Grid>
@@ -296,27 +307,95 @@
                         MouseMove="AreaCanvas_MouseMove"
                         MouseLeftButtonUp="AreaCanvas_MouseLeftButtonUp"
                         MouseLeave="AreaCanvas_MouseLeave"
+                        MouseWheel="AreaCanvas_MouseWheel"
                         Background="White">
                         <Canvas
                             x:Name="PointGrid"
                             VerticalAlignment="Stretch"
                             HorizontalAlignment="Stretch"></Canvas>
+                        <Image
+                            Opacity="0.5"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Width="Auto"
+                            Height="Auto"
+                            Stretch="None">
+                            <Image.Source>
+                                <Binding
+                                    Path="DataContext.BackgroundImagePath"
+                                    UpdateSourceTrigger="PropertyChanged"
+                                    RelativeSource="{RelativeSource AncestorType=Window}">
+                                    <Binding.Converter>
+                                        <Converters:ImageConverter />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Image.Source>
+                        </Image>
+                        <Image
+                            Opacity="0.5"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"
+                            Width="Auto"
+                            Height="Auto"
+                            Stretch="None">
+                            <Image.Source>
+                                <Binding
+                                    Path="DataContext.ReferenceMesh"
+                                    UpdateSourceTrigger="PropertyChanged"
+                                    RelativeSource="{RelativeSource AncestorType=Window}">
+                                    <Binding.Converter>
+                                        <Converters:OrthogonalMLODImageConverter
+                                            Scale="100"
+                                            Offset="0"
+                                            Fill="#FFE5A71D"
+                                            Stroke="#FFFFDF00" />
+                                    </Binding.Converter>
+                                </Binding>
+                            </Image.Source>
+                        </Image>
                         <Canvas>
                             <Ellipse
-                                Stroke="DarkBlue"
-                                StrokeThickness="2"
-                                Fill="#6F009DFF"
+                                x:Name="O"
+                                Stroke="#FFF89B16"
+                                StrokeThickness="5.5"
+                                Fill="#11F89B16"
                                 Width="25"
-                                Height="25"
-                                Canvas.Top="{Binding OffsetZ, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewOffsetScale}}"
-                                Canvas.Left="{Binding OffsetX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewOffsetScale}}" />
+                                Height="25">
+                                <Canvas.Top>
+                                    <Binding
+                                        Path="OffsetZ"
+                                        Mode="TwoWay"
+                                        UpdateSourceTrigger="PropertyChanged">
+                                        <Binding.Converter>
+                                            <Converters:ScaleConverter
+                                                Scale="100"
+                                                Offset="4987" />
+                                        </Binding.Converter>
+                                        
+                                    </Binding>
+                                </Canvas.Top>
+                                <Canvas.Left>
+                                    <Binding
+                                        Path="OffsetX"
+                                        Mode="TwoWay"
+                                        UpdateSourceTrigger="PropertyChanged">
+                                        <Binding.Converter>
+                                            <Converters:ScaleConverter
+                                                Scale="100"
+                                                Offset="4987">
+                                                
+                                            </Converters:ScaleConverter>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Canvas.Left>
+                            </Ellipse>
                         </Canvas>
                         <Canvas
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch">
                             <Polygon
-                                Stroke="#FFF5A11C"
-                                Fill="#1EF5A11C">
+                                Stroke="#FF3ADC1C"
+                                Fill="#1E3ADC1C">
                                 <Polygon.Points>
                                     <Binding
                                         Path="Points">
@@ -364,15 +443,39 @@
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch">
                                         <Ellipse
-                                            Width="10"
-                                            Height="10"
-                                            Fill="{Binding IsSelected, Converter={StaticResource ResourceKey=pointColorConverter}}"
-                                            Canvas.Left="{Binding X, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewCoordinateScale}}"
-                                            Canvas.Top="{Binding Z, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ResourceKey=previewCoordinateScale}}"></Ellipse>
+                                            Width="7"
+                                            Height="7"
+                                            Fill="{Binding IsSelected, Converter={StaticResource ResourceKey=pointColorConverter}}">
+                                            <Canvas.Left>
+                                                <Binding
+                                                    Path="X"
+                                                    Mode="TwoWay"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding.Converter>
+                                                        <Converters:ScaleConverter
+                                                            Scale="100"
+                                                            Offset="4997" />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Canvas.Left>
+                                            <Canvas.Top>
+                                                <Binding
+                                                    Path="Z"
+                                                    Mode="TwoWay"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <Binding.Converter>
+                                                        <Converters:ScaleConverter
+                                                            Scale="100"
+                                                            Offset="4997" />
+                                                    </Binding.Converter>
+                                                </Binding>
+                                            </Canvas.Top>
+                                        </Ellipse>
+                                        
                                     </Canvas>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        </ItemsControl>                                                
                     </Grid>
                 </Border>
             </ScrollViewer>
@@ -478,7 +581,6 @@
                                         <TextBox.Text>
                                             <Binding
                                                 Path="OffsetX"
-                                                UpdateSourceTrigger="PropertyChanged"
                                                 StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
                                                 <Binding.ValidationRules>
                                                     <Validation:DecimalValidationRule />
@@ -505,7 +607,6 @@
                                 </Grid>
                             </GroupBox>
                         </StackPanel>
-                        <!--</Expander>-->
                         <GroupBox
                             Header="Flags">
                             <Grid>
@@ -898,11 +999,9 @@
                                         <TextBox.Text>
                                             <Binding
                                                 Path="X"
-                                                UpdateSourceTrigger="PropertyChanged"
                                                 StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
                                                 <Binding.ValidationRules>
-                                                    <Validation:DecimalValidationRule
-                                                        Min="0" />
+                                                    <Validation:DecimalValidationRule />
                                                 </Binding.ValidationRules>
                                             </Binding>
                                         </TextBox.Text>
@@ -915,11 +1014,9 @@
                                         <TextBox.Text>
                                             <Binding
                                                 Path="Z"
-                                                UpdateSourceTrigger="PropertyChanged"
                                                 StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
                                                 <Binding.ValidationRules>
-                                                    <Validation:DecimalValidationRule
-                                                        Min="0" />
+                                                    <Validation:DecimalValidationRule />
                                                 </Binding.ValidationRules>
                                             </Binding>
                                         </TextBox.Text>
@@ -966,11 +1063,9 @@
                                         <TextBox.Text>
                                             <Binding
                                                 Path="RelativeX"
-                                                UpdateSourceTrigger="PropertyChanged"
                                                 StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
                                                 <Binding.ValidationRules>
-                                                    <Validation:DecimalValidationRule
-                                                        Min="0" />
+                                                    <Validation:DecimalValidationRule />
                                                 </Binding.ValidationRules>
                                             </Binding>
                                         </TextBox.Text>
@@ -983,11 +1078,9 @@
                                         <TextBox.Text>
                                             <Binding
                                                 Path="RelativeZ"
-                                                UpdateSourceTrigger="PropertyChanged"
                                                 StringFormat="{StaticResource ResourceKey=DecimalFormatter}">
                                                 <Binding.ValidationRules>
-                                                    <Validation:DecimalValidationRule
-                                                        Min="0" />
+                                                    <Validation:DecimalValidationRule />
                                                 </Binding.ValidationRules>
                                             </Binding>
                                         </TextBox.Text>
@@ -1011,12 +1104,13 @@
                                         Content="Delete" />
                                 </Grid>
                                 <ListView
+                                    x:Name="PointBox"
                                     Grid.Row="9"
                                     ItemsSource="{Binding Points}"
                                     SelectedItem="{Binding SelectedPoint, Mode= TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     VerticalAlignment="Stretch"
                                     HorizontalAlignment="Stretch"
-                                    SelectionMode="Single">
+                                    SelectionMode="Single" >
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock

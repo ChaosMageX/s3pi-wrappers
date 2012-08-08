@@ -1,25 +1,20 @@
+﻿using System.Windows.Data;
 using System;
-using System.Windows.Data;
-using System.Windows;
-
 namespace s3piwrappers.Converters
 {
-    public class ScaleConverter : IValueConverter
+    /// <summary>
+    /// Firetruck!
+    /// </summary>
+    class DebugConverter : IValueConverter
     {
-        public double Scale { get; set; }
-
-        public double Offset { get; set; }
-
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            return (((float)value) * Scale) + Offset;
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            var inc = (double)value - Offset;
-            inc = inc / Scale;
-            return inc;
+            return value;
         }
     }
 }

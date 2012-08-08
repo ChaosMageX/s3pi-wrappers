@@ -35,12 +35,13 @@ namespace s3piwrappers.Models
                     break;
             }
         }
+        
         public float X
         {
             get { return mPoint.X; }
             set
             {
-                mPoint.X = value; OnPropertyChanged("X"); OnPropertyChanged("Text");
+                mPoint.X = value; OnPropertyChanged("X"); OnPropertyChanged("RelativeX"); OnPropertyChanged("Text");
             }
         }
         public float Z
@@ -48,7 +49,7 @@ namespace s3piwrappers.Models
             get { return mPoint.Z; }
             set
             {
-                mPoint.Z = value; OnPropertyChanged("Z"); OnPropertyChanged("Text");
+                mPoint.Z = value; OnPropertyChanged("Z"); OnPropertyChanged("RelativeZ"); OnPropertyChanged("Text");
             }
         }
 
@@ -57,7 +58,7 @@ namespace s3piwrappers.Models
             get { return mPoint.X - mArea.OffsetX; }
             set
             {
-                mPoint.X = value + mArea.OffsetZ; OnPropertyChanged("X"); OnPropertyChanged("Text");
+                mPoint.X = value + mArea.OffsetX; OnPropertyChanged("X"); OnPropertyChanged("Text");
             }
         }
         public float RelativeZ
@@ -74,7 +75,7 @@ namespace s3piwrappers.Models
         }
         public override string ToString()
         {
-            return String.Format("[{0:0.00},{1:0.00}] ([{2:0.00},{3:0.00}])", X, Z,RelativeX,RelativeZ);
+            return String.Format("[{0:0.00},{1:0.00}] ({2:0.00},{3:0.00})", X, Z,RelativeX,RelativeZ);
         }
     }
 }

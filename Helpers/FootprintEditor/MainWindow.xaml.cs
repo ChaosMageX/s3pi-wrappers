@@ -8,6 +8,7 @@ using s3piwrappers.Models;
 using System.Windows.Media;
 using System.Windows.Threading;
 using System.Threading;
+using System.Linq;
 
 namespace s3piwrappers
 {
@@ -27,14 +28,21 @@ namespace s3piwrappers
         {
             this.viewModel = vm;
             this.DataContext = this.viewModel;
-            Area_Scroller.ScrollToHorizontalOffset(4800);
-            Area_Scroller.ScrollToVerticalOffset(4800);
+            
         }
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
+            if(viewModel.SelectedArea == null)
+                SetGrid(0 ,0);
             DrawGridLines();
             Register();
+        }
+        void SetGrid(double x,double y)
+        {
+            Area_Scroller.ScrollToHorizontalOffset(x+(  5000 - Area_Scroller.ActualWidth / 2));
+            Area_Scroller.ScrollToVerticalOffset(y+(  5000 - Area_Scroller.ActualHeight / 2));
+            
         }
 
         private static void Register()
@@ -137,6 +145,11 @@ namespace s3piwrappers
 
         private void AreaCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            var crs = e.GetPosition((IInputElement)AreaCanvas);
+
+
+            viewModel.CursorX = (crs.X - AreaCanvas.ActualWidth/2)  / 100;
+            viewModel.CursorZ = (crs.Y - AreaCanvas.ActualHeight/2) / 100;
             if (draggedPoint != null)
             {
                 var pos = e.GetPosition((IInputElement)draggedPoint.Parent);
@@ -157,13 +170,52 @@ namespace s3piwrappers
             {
                 draggedPoint = null;
             }
+            viewModel.CursorX = null;
+            viewModel.CursorZ = null;
         }
 
         private void AreaCanvas_MouseLeave(object sender, MouseEventArgs e)
         {
 
             draggedPoint = null;
+            viewModel.CursorX = null;
+            viewModel.CursorZ = null;
 
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(e.AddedItems.Count > 0)
+            {
+                var item = e.AddedItems[0] as AreaViewModel;
+                if(item!=null)
+                {
+                    SetGrid(item.OffsetX * 100,item.OffsetZ * 100);
+                }
+            }
+
+        }
+
+        private void PointBox_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var pnt = PointBox.SelectedItem as PointViewModel;
+            if (pnt != null)
+            {
+                SetGrid(pnt.X * 100, pnt.Z * 100);
+            }
+
+        }
+
+        private void AreaCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if(e.Delta > 0)
+            {
+                viewModel.Zoom += 5;
+            }else
+            {
+                viewModel.Zoom -= 5;
+            }
+            e.Handled = true;
         }
     }
 }

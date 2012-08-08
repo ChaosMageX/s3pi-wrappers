@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using System.Windows;
 using s3piwrappers.Commands;
+using System.Text;
+using System;
+using Microsoft.Win32;
 
 namespace s3piwrappers.Models
 {
@@ -16,8 +19,59 @@ namespace s3piwrappers.Models
         private bool mIsSaving;
         private AreaViewModel mSelectedArea;
 
+        public int MinZoom
+        {
+            get { return 5; }
+        }
+        public int MaxZoom
+        {
+            get { return 10000; }
+        }
+        private int mZoom;
+        public int Zoom
+        {
+            get { return mZoom; }
+            set { mZoom = value; OnPropertyChanged("Zoom"); OnPropertyChanged("StatusText"); }
+        }
 
+        private double? mCursorX;
+        public double? CursorX
+        {
+            get { return mCursorX; }
+            set { mCursorX = value; OnPropertyChanged("CursorX"); OnPropertyChanged("StatusText"); }
+        }
 
+        private double? mCursorZ;
+        public double? CursorZ
+        {
+            get { return mCursorZ; }
+            set
+            {
+                mCursorZ = value; OnPropertyChanged("CursorZ");
+                OnPropertyChanged("StatusText");
+            }
+        }
+
+        private string mBackgroundImagePath;
+        public string BackgroundImagePath
+        {
+            get { return mBackgroundImagePath; }
+            set { mBackgroundImagePath = value; OnPropertyChanged("BackgroundImagePath"); }
+        }
+
+        public string StatusText
+        {
+            get
+            {
+                var sb = new StringBuilder();
+                if (CursorX != null && CursorZ != null)
+                {
+                    sb.AppendFormat("({0},{1}) %{2}", CursorX, CursorZ,Zoom);
+                }
+                return sb.ToString();
+
+            }
+        }
         private AreaViewModel mSelectedFootprint;
 
         private AreaViewModel mSelectedSlot;
@@ -52,6 +106,13 @@ namespace s3piwrappers.Models
             }
         }
 
+        private string mReferenceMesh;
+        public String ReferenceMesh
+        {
+            get { return mReferenceMesh; }
+            set { mReferenceMesh = value; OnPropertyChanged("ReferenceMesh"); }
+        }
+
         public ObservableCollection<AreaViewModel> SlotAreas
         {
             get { return mSlotAreas; }
@@ -83,10 +144,15 @@ namespace s3piwrappers.Models
         public ICommand CancelCommand { get; private set; }
         public ICommand CommitCommand { get; private set; }
 
+        public ICommand SetBackgroundImageCommand { get; private set; }
+        public ICommand ClearBackgroundImageCommand { get; private set; }
+        public ICommand SetReferenceMeshCommand { get; private set; }
+        public ICommand ClearReferenceMeshCommand { get; private set; }
 
         public FootprintEditorViewModel(GenericRCOLResource rcol)
         {
             this.mRcol = rcol;
+            this.Zoom = 100;
             this.mFootprint = rcol.ChunkEntries[0].RCOLBlock as FTPT;
             this.mFootprintAreas = new ObservableCollection<AreaViewModel>(mFootprint.FootprintAreas.Select(x => new AreaViewModel(this, x)));
             this.mSlotAreas = new ObservableCollection<AreaViewModel>(mFootprint.SlotAreas.Select(x => new AreaViewModel(this, x)));
@@ -104,6 +170,40 @@ namespace s3piwrappers.Models
 
             this.CommitCommand = new UserCommand<FootprintEditorViewModel>(x => true, y => { mIsSaving = true; Application.Current.Shutdown(); });
             this.CancelCommand = new UserCommand<FootprintEditorViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
+
+
+            this.SetBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
+                x => true,
+                y =>
+                {
+                    var d = new OpenFileDialog { CheckFileExists = true, Multiselect = false };
+                    if (d.ShowDialog() == true)
+                    {
+                        this.BackgroundImagePath = d.FileName;
+                    }
+
+                }
+                );
+            this.ClearBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
+                x => x != null && !String.IsNullOrEmpty(x.BackgroundImagePath),
+                y => y.BackgroundImagePath = null
+            );
+            this.SetReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
+                x => true,
+                y =>
+                {
+                    var d = new OpenFileDialog { CheckFileExists = true, Multiselect = false };
+                    if (d.ShowDialog() == true)
+                    {
+                        this.ReferenceMesh = d.FileName;
+                    }
+
+                }
+                );
+            this.ClearReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
+                x => x != null && !String.IsNullOrEmpty(x.ReferenceMesh),
+                y => y.ReferenceMesh = null
+            );
             this.SelectedFootprint = this.FootprintAreas.FirstOrDefault();
             if (this.SelectedArea == null)
             {
@@ -162,11 +262,11 @@ namespace s3piwrappers.Models
             area = this.NewArea(area);
             this.mFootprint.FootprintAreas.Add(area);
             area = this.mFootprint.FootprintAreas.Last();
-            var vm = new AreaViewModel(this,area);
+            var vm = new AreaViewModel(this, area);
             this.mFootprintAreas.Add(vm);
             this.SelectedArea = vm;
 
-            
+
         }
         private void CopyFootprintArea()
         {
