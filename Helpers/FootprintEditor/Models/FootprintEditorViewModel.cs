@@ -19,21 +19,6 @@ namespace s3piwrappers.Models
         private bool mIsSaving;
         private AreaViewModel mSelectedArea;
 
-        public int MinZoom
-        {
-            get { return 5; }
-        }
-        public int MaxZoom
-        {
-            get { return 10000; }
-        }
-        private int mZoom;
-        public int Zoom
-        {
-            get { return mZoom; }
-            set { mZoom = value; OnPropertyChanged("Zoom"); OnPropertyChanged("StatusText"); }
-        }
-
         private double? mCursorX;
         public double? CursorX
         {
@@ -66,7 +51,7 @@ namespace s3piwrappers.Models
                 var sb = new StringBuilder();
                 if (CursorX != null && CursorZ != null)
                 {
-                    sb.AppendFormat("({0},{1}) %{2}", CursorX, CursorZ,Zoom);
+                    sb.AppendFormat("({0:0.00},{1:0.00})", CursorX, CursorZ);
                 }
                 return sb.ToString();
 
@@ -152,7 +137,6 @@ namespace s3piwrappers.Models
         public FootprintEditorViewModel(GenericRCOLResource rcol)
         {
             this.mRcol = rcol;
-            this.Zoom = 100;
             this.mFootprint = rcol.ChunkEntries[0].RCOLBlock as FTPT;
             this.mFootprintAreas = new ObservableCollection<AreaViewModel>(mFootprint.FootprintAreas.Select(x => new AreaViewModel(this, x)));
             this.mSlotAreas = new ObservableCollection<AreaViewModel>(mFootprint.SlotAreas.Select(x => new AreaViewModel(this, x)));

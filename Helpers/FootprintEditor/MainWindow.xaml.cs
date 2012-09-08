@@ -17,6 +17,7 @@ namespace s3piwrappers
     /// </summary>
     public partial class MainWindow : Window
     {
+        public const int kGridSize = 200;
         public MainWindow()
         {
             InitializeComponent();
@@ -28,21 +29,21 @@ namespace s3piwrappers
         {
             this.viewModel = vm;
             this.DataContext = this.viewModel;
-            
+
         }
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            if(viewModel.SelectedArea == null)
-                SetGrid(0 ,0);
+            if (viewModel.SelectedArea == null)
+                SetGrid(0, 0);
             DrawGridLines();
             Register();
         }
-        void SetGrid(double x,double y)
+        void SetGrid(double x, double y)
         {
-            Area_Scroller.ScrollToHorizontalOffset(x+(  5000 - Area_Scroller.ActualWidth / 2));
-            Area_Scroller.ScrollToVerticalOffset(y+(  5000 - Area_Scroller.ActualHeight / 2));
-            
+            Area_Scroller.ScrollToHorizontalOffset(x + (5000 - Area_Scroller.ActualWidth / 2));
+            Area_Scroller.ScrollToVerticalOffset(y + (5000 - Area_Scroller.ActualHeight / 2));
+
         }
 
         private static void Register()
@@ -77,7 +78,7 @@ namespace s3piwrappers
         {
             var zmax = AreaCanvas.ActualHeight;
             var xmax = AreaCanvas.ActualWidth;
-            var interval = 100;
+            var interval = kGridSize;
             Line line;
             Brush stroke = Brushes.LightGreen;
             double strokeThickness = 1;
@@ -148,8 +149,8 @@ namespace s3piwrappers
             var crs = e.GetPosition((IInputElement)AreaCanvas);
 
 
-            viewModel.CursorX = (crs.X - AreaCanvas.ActualWidth/2)  / 100;
-            viewModel.CursorZ = (crs.Y - AreaCanvas.ActualHeight/2) / 100;
+            viewModel.CursorX = (crs.X - AreaCanvas.ActualWidth / 2) / kGridSize;
+            viewModel.CursorZ = (crs.Y - AreaCanvas.ActualHeight / 2) / kGridSize;
             if (draggedPoint != null)
             {
                 var pos = e.GetPosition((IInputElement)draggedPoint.Parent);
@@ -185,12 +186,12 @@ namespace s3piwrappers
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count > 0)
+            if (e.AddedItems.Count > 0)
             {
                 var item = e.AddedItems[0] as AreaViewModel;
-                if(item!=null)
+                if (item != null)
                 {
-                    SetGrid(item.OffsetX * 100,item.OffsetZ * 100);
+                    SetGrid(item.OffsetX * kGridSize, item.OffsetZ * kGridSize);
                 }
             }
 
@@ -201,21 +202,10 @@ namespace s3piwrappers
             var pnt = PointBox.SelectedItem as PointViewModel;
             if (pnt != null)
             {
-                SetGrid(pnt.X * 100, pnt.Z * 100);
+                SetGrid(pnt.X * kGridSize, pnt.Z * kGridSize);
             }
 
         }
 
-        private void AreaCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if(e.Delta > 0)
-            {
-                viewModel.Zoom += 5;
-            }else
-            {
-                viewModel.Zoom -= 5;
-            }
-            e.Handled = true;
-        }
     }
 }

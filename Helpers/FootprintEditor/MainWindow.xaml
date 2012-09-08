@@ -307,7 +307,6 @@
                         MouseMove="AreaCanvas_MouseMove"
                         MouseLeftButtonUp="AreaCanvas_MouseLeftButtonUp"
                         MouseLeave="AreaCanvas_MouseLeave"
-                        MouseWheel="AreaCanvas_MouseWheel"
                         Background="White">
                         <Canvas
                             x:Name="PointGrid"
@@ -345,7 +344,7 @@
                                     RelativeSource="{RelativeSource AncestorType=Window}">
                                     <Binding.Converter>
                                         <Converters:OrthogonalMLODImageConverter
-                                            Scale="100"
+                                            Scale="200"
                                             Offset="0"
                                             Fill="#FFE5A71D"
                                             Stroke="#FFFFDF00" />
@@ -368,7 +367,7 @@
                                         UpdateSourceTrigger="PropertyChanged">
                                         <Binding.Converter>
                                             <Converters:ScaleConverter
-                                                Scale="100"
+                                                Scale="200"
                                                 Offset="4987" />
                                         </Binding.Converter>
                                         
@@ -381,7 +380,7 @@
                                         UpdateSourceTrigger="PropertyChanged">
                                         <Binding.Converter>
                                             <Converters:ScaleConverter
-                                                Scale="100"
+                                                Scale="200"
                                                 Offset="4987">
                                                 
                                             </Converters:ScaleConverter>
@@ -401,7 +400,7 @@
                                         Path="Points">
                                         <Binding.Converter>
                                             <Converters:FootprintPointBoundsConverter
-                                                Scale="100"
+                                                Scale="200"
                                                 Offset="5000" />
                                         </Binding.Converter>
                                     </Binding>
@@ -419,7 +418,7 @@
                                         Path="Points">
                                         <Binding.Converter>
                                             <Converters:FootprintPointConverter
-                                                Scale="100"
+                                                Scale="200"
                                                 Offset="5000" />
                                         </Binding.Converter>
                                     </Binding>
@@ -453,7 +452,7 @@
                                                     UpdateSourceTrigger="PropertyChanged">
                                                     <Binding.Converter>
                                                         <Converters:ScaleConverter
-                                                            Scale="100"
+                                                            Scale="200"
                                                             Offset="4997" />
                                                     </Binding.Converter>
                                                 </Binding>
@@ -465,7 +464,7 @@
                                                     UpdateSourceTrigger="PropertyChanged">
                                                     <Binding.Converter>
                                                         <Converters:ScaleConverter
-                                                            Scale="100"
+                                                            Scale="200"
                                                             Offset="4997" />
                                                     </Binding.Converter>
                                                 </Binding>

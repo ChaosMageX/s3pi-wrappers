@@ -90,7 +90,6 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Grid3D.cs" />
-    <Compile Include="tangents.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
