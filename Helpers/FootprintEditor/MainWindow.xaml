@@ -358,8 +358,8 @@
                                 Stroke="#FFF89B16"
                                 StrokeThickness="5.5"
                                 Fill="#11F89B16"
-                                Width="25"
-                                Height="25">
+                                Width="50"
+                                Height="50">
                                 <Canvas.Top>
                                     <Binding
                                         Path="OffsetZ"
@@ -368,7 +368,7 @@
                                         <Binding.Converter>
                                             <Converters:ScaleConverter
                                                 Scale="200"
-                                                Offset="4987" />
+                                                Offset="4976" />
                                         </Binding.Converter>
                                         
                                     </Binding>
@@ -381,7 +381,7 @@
                                         <Binding.Converter>
                                             <Converters:ScaleConverter
                                                 Scale="200"
-                                                Offset="4987">
+                                                Offset="4976">
                                                 
                                             </Converters:ScaleConverter>
                                         </Binding.Converter>
@@ -442,8 +442,8 @@
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch">
                                         <Ellipse
-                                            Width="7"
-                                            Height="7"
+                                            Width="14"
+                                            Height="14"
                                             Fill="{Binding IsSelected, Converter={StaticResource ResourceKey=pointColorConverter}}">
                                             <Canvas.Left>
                                                 <Binding
@@ -453,7 +453,7 @@
                                                     <Binding.Converter>
                                                         <Converters:ScaleConverter
                                                             Scale="200"
-                                                            Offset="4997" />
+                                                            Offset="4990" />
                                                     </Binding.Converter>
                                                 </Binding>
                                             </Canvas.Left>
@@ -465,7 +465,7 @@
                                                     <Binding.Converter>
                                                         <Converters:ScaleConverter
                                                             Scale="200"
-                                                            Offset="4997" />
+                                                            Offset="4990" />
                                                     </Binding.Converter>
                                                 </Binding>
                                             </Canvas.Top>
