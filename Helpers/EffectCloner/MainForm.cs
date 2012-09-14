@@ -452,11 +452,11 @@ namespace s3piwrappers.EffectCloner
                             + "\n\ninstead of:\n\n" + Path.GetFileName(fileName);
                         result = MessageBox.Show(prompt, "Make S3PI File Name?", MessageBoxButtons.YesNo);
                         if (result == DialogResult.Yes)
-                            fileName = dialog.FileName.Replace(fileName, resName);
+                            fileName = dialog.FileName.Replace(Path.GetFileNameWithoutExtension(fileName), resName);
                         else
                             fileName = dialog.FileName;
                     }
-
+                    
                     VisualEffectHandleContainer con;
                     int i, count = this.outputEffectLST.Items.Count;
                     for (i = 0; i < count; i++)
@@ -474,7 +474,7 @@ namespace s3piwrappers.EffectCloner
                     //EffectResource output = this.mInputEffectResBuilder.BuildResource();
                     //this.mInputEffectResBuilder.ResetOld();
 
-                    if (extension == ".effect")
+                    if (extension == ".effects")
                     {
                         using (FileStream fileStream = new FileStream(fileName, FileMode.Create))
                         {
