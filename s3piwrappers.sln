@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Helpers", "Helpers", "{9F9C64E9-B8A3-4933-9C3B-78560F6A206E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "s3piwrappers.AnimationResources", "s3piwrappers.AnimationResources\s3piwrappers.AnimationResources.csproj", "{B33F19DE-F211-4D32-8D03-43024B88F177}"

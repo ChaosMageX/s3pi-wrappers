@@ -54,9 +54,8 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="3DTools, Version=1.0.2614.20437, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\3DTools-1.01-bin\3DTools.dll</HintPath>
+    <Reference Include="HelixToolkit.Wpf">
+      <HintPath>..\..\..\..\..\..\lib\NET\helix\HelixToolkit.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
@@ -89,7 +88,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="Grid3D.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

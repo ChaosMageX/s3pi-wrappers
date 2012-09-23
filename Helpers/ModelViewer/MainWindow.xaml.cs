@@ -193,6 +193,22 @@ namespace s3piwrappers.ModelViewer
             mShadowMapMaterial = new DiffuseMaterial(shadowBrush);
             GeostateDictionary = LoadDictionary("Geostates");
             MeshDictionary = LoadDictionary("MeshNames");
+            Help.Text =
+                @"
+Zoom:
+1. Mouse Wheel
+2. Ctrl+RMB+Drag
+3. PageUp/PageDown
+
+Pan:
+1. MouseWheel+Drag
+2. Shift+RMB+Drag
+3. Shift+Arrow Keys
+
+Rotate:
+1. RMB+Drag
+2. Arrow Keys
+";
 
         }
         public MainWindow(Stream s)
@@ -240,8 +256,13 @@ namespace s3piwrappers.ModelViewer
             if (chunk != null)
             {
                 var mlod = chunk.RCOLBlock as MLOD;
+                double max_height = 0;
                 foreach (var m in mlod.Meshes)
                 {
+                    if (m.Bounds.Max.Y > max_height)
+                    {
+                        max_height = m.Bounds.Max.Y;
+                    }
                     vertCount += m.VertexCount;
                     polyCount += m.PrimitiveCount;
                     var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
@@ -291,6 +312,7 @@ namespace s3piwrappers.ModelViewer
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }
+                
             }
             else
             {
@@ -403,7 +425,7 @@ namespace s3piwrappers.ModelViewer
             {
                 meshExpImp.ModelBlocks.Vertex v = verts[k];
 
-                if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], v.Position[1], v.Position[2]));
+                if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], -v.Position[2], v.Position[1]));
                 if (v.Normal != null) mesh.Normals.Add(new Vector3D(v.Normal[0], v.Normal[1], v.Normal[2]));
                 if (v.UV != null && v.UV.Length > 0) mesh.TextureCoordinates.Add(new Point(v.UV[0][0], v.UV[0][1]));
             }

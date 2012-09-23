@@ -1,8 +1,8 @@
 ﻿<Window x:Class="s3piwrappers.ModelViewer.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="clr-namespace:_3DTools;assembly=3DTools"
-        xmlns:ModelViewer="clr-namespace:s3piwrappers.ModelViewer"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"        
+        xmlns:ModelViewer="clr-namespace:s3piwrappers.ModelViewer"        
+        xmlns:helix="http://helixtoolkit.codeplex.com" 
         Title="Model Viewer"
         Height="600"
         Width="800"
@@ -80,42 +80,43 @@
             <Grid.RowDefinitions>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
+
             <Border Grid.Column="0"
                     Grid.Row="0">
                 <StackPanel Focusable="True">
                     <StackPanel Margin="5">
-                        
-                    <TextBlock>Shading:</TextBlock>
-                            <StackPanel Margin="2,0">
-                                <RadioButton
+
+                        <TextBlock>Shading:</TextBlock>
+                        <StackPanel Margin="2,0">
+                            <RadioButton
                                     x:Name="rbSolid"
                                     Content="Solid"
                                     GroupName="Shading"
                                     Checked="RadioButton_Checked" />
-                                <RadioButton
+                            <RadioButton
                                     x:Name="rbTextured"
                                     Content="Textured"
                                     GroupName="Shading"
                                     Checked="RadioButton_Checked" />
-                                <RadioButton
+                            <RadioButton
                                     Content="UV"
                                     GroupName="Shading"
                                     Checked="RadioButton_Checked" />
-                            </StackPanel>
+                        </StackPanel>
                         <StackPanel
                             x:Name="MeshesPanel">
                             <TextBlock>Meshes:</TextBlock>
-                    <ListView x:Name="mMeshListView"
+                            <ListView x:Name="mMeshListView"
                               SelectionChanged="mMeshListView_SelectionChanged"
                                 SelectionMode="Single"></ListView>
                         </StackPanel>
                         <StackPanel x:Name="GeostatesPanel">
-                    <TextBlock>States:</TextBlock>
-                    <ListView x:Name="mStateListView"
+                            <TextBlock>States:</TextBlock>
+                            <ListView x:Name="mStateListView"
                               SelectionChanged="mStateListView_SelectionChanged"
                               SelectionMode="Single"
                               AllowDrop="True"></ListView>
-                           
+
                         </StackPanel>
                         <TextBlock
                             x:Name="VertexCount">
@@ -123,6 +124,10 @@
                         <TextBlock
                             x:Name="PolygonCount">
                             Polygons: 1000</TextBlock>
+                        
+                        <TextBlock x:Name="Help">
+                            
+                        </TextBlock>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -137,35 +142,17 @@
                    Grid.RowSpan="1"
                    MinWidth="320"
                    Background="#FF6F6F6F">
-            <local:TrackballDecorator>
-                <local:Interactive3DDecorator>
-                    <Viewport3D Name="mainViewport"
+            <helix:HelixViewport3D Name="mainViewport"
                                 ClipToBounds="True"
-                                Focusable="True">
-                        <Viewport3D.Camera>
-                            <PerspectiveCamera x:Name="viewCamera"
-                                               Position="0,0.5,5" />
-                        </Viewport3D.Camera>
-                        <ModelViewer:Grid3D x:Name="mGrid"></ModelViewer:Grid3D>
-                        <ModelVisual3D x:Name="mLightGroup">
-                            <ModelVisual3D.Content>
-                                <Model3DGroup>
-                                    <AmbientLight Color="Gray"
-                                                  x:Name="mAmbient" />
-                                    <DirectionalLight Color="White"
-                                                      Direction="0,-2,-5"
-                                                      x:Name="mDirectional" />
-                                </Model3DGroup>
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-                        <ModelVisual3D>
-                            <ModelVisual3D.Content>
-                                <Model3DGroup x:Name="mGroupMeshes"></Model3DGroup>
-                            </ModelVisual3D.Content>
-                        </ModelVisual3D>
-                    </Viewport3D>
-                </local:Interactive3DDecorator>
-            </local:TrackballDecorator>
+                                Focusable="True" CameraRotationMode="Trackball"  ModelUpDirection="0,0,-1">
+                <helix:DefaultLights/>
+                <ModelVisual3D>
+                    <helix:GridLinesVisual3D MajorDistance="1" ></helix:GridLinesVisual3D>
+                    <ModelVisual3D.Content>
+                        <Model3DGroup x:Name="mGroupMeshes"></Model3DGroup>
+                    </ModelVisual3D.Content>
+                </ModelVisual3D>
+            </helix:HelixViewport3D>
         </DockPanel>
     </Grid>
 </Window>
