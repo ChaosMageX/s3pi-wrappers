@@ -256,13 +256,8 @@ Rotate:
             if (chunk != null)
             {
                 var mlod = chunk.RCOLBlock as MLOD;
-                double max_height = 0;
                 foreach (var m in mlod.Meshes)
                 {
-                    if (m.Bounds.Max.Y > max_height)
-                    {
-                        max_height = m.Bounds.Max.Y;
-                    }
                     vertCount += m.VertexCount;
                     polyCount += m.PrimitiveCount;
                     var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
