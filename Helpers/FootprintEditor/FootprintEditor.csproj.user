@@ -5,4 +5,7 @@
     <StartAction>Project</StartAction>
     <StartProgram>C:\TS3\Workspace\s3piwrappers\trunk\bin\Debug\s3pe.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ShowAllFiles</ProjectView>
+  </PropertyGroup>
 </Project>

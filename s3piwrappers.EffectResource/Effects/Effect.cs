@@ -45,7 +45,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mInstanceId);
                 s.Read(out mByte01);
                 s.Read(out mByte02);
@@ -59,7 +59,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(Instance);
                 s.Write(Byte01);
                 s.Write(Byte02);
@@ -466,7 +466,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01, ByteOrder.LittleEndian);
                 s.Read(out mFloat02, ByteOrder.LittleEndian);
                 s.Read(out mFloat03, ByteOrder.LittleEndian);
@@ -493,7 +493,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01, ByteOrder.LittleEndian);
                 s.Write(mFloat02, ByteOrder.LittleEndian);
                 s.Write(mFloat03, ByteOrder.LittleEndian);
@@ -630,7 +630,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01);
                 s.Read(out mFloat02, ByteOrder.LittleEndian);
                 s.Read(out mFloat03, ByteOrder.LittleEndian);
@@ -642,7 +642,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01);
                 s.Write(mFloat02, ByteOrder.LittleEndian);
                 s.Write(mFloat03, ByteOrder.LittleEndian);
@@ -799,7 +799,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mInt01);
                 s.Read(out mLong01);
                 s.Read(out mFloat01);
@@ -814,7 +814,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mInt01);
                 s.Write(mLong01);
                 s.Write(mFloat01);
@@ -990,7 +990,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01, ByteOrder.LittleEndian);
                 s.Read(out mFloat02, ByteOrder.LittleEndian);
                 s.Read(out mFloat03, ByteOrder.LittleEndian);
@@ -1002,7 +1002,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01, ByteOrder.LittleEndian);
                 s.Write(mFloat02, ByteOrder.LittleEndian);
                 s.Write(mFloat03, ByteOrder.LittleEndian);
@@ -1128,7 +1128,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01);
                 s.Read(out mFloat02, ByteOrder.LittleEndian);
                 s.Read(out mFloat03, ByteOrder.LittleEndian);
@@ -1140,7 +1140,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01);
                 s.Write(mFloat02, ByteOrder.LittleEndian);
                 s.Write(mFloat03, ByteOrder.LittleEndian);
@@ -1287,7 +1287,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
                 s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
@@ -1301,7 +1301,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat02, ByteOrder.LittleEndian); //LE
                 s.Write(mFloat03, ByteOrder.LittleEndian); //LE

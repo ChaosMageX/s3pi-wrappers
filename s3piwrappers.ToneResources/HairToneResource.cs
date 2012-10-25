@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using s3pi.Interfaces;
 using System.Drawing;
-using System.ComponentModel;
-using System.Globalization;
 using System.IO;
 using CASPartResource;
+using s3pi.Interfaces;
 
 namespace s3piwrappers
 {
     public class HairToneResource : AResource
     {
-
         public class ShaderKey : AHandlerElement, IEquatable<ShaderKey>
         {
             private AgeGenderFlags mAgeGenderFlags;
@@ -25,9 +21,19 @@ namespace s3piwrappers
             private Color mHaloLowColour;
             private float mHaloBlur;
 
-            public ShaderKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
-            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis): this(APIversion, handler,basis.AgeGenderFlags,basis.IsGenetic,basis.DiffuseColour,basis.RootColour,basis.HighlightColour,basis.TipColour,basis.HaloHighColour,basis.HaloLowColour,basis.HaloBlur){}
-            public ShaderKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
+            public ShaderKey(int APIversion, EventHandler handler) : base(APIversion, handler)
+            {
+            }
+
+            public ShaderKey(int APIversion, EventHandler handler, ShaderKey basis) : this(APIversion, handler, basis.AgeGenderFlags, basis.IsGenetic, basis.DiffuseColour, basis.RootColour, basis.HighlightColour, basis.TipColour, basis.HaloHighColour, basis.HaloLowColour, basis.HaloBlur)
+            {
+            }
+
+            public ShaderKey(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler)
+            {
+                Parse(s);
+            }
+
             public ShaderKey(int APIversion, EventHandler handler, AgeGenderFlags ageGenderFlags, bool isGenetic, Color diffuseColour, Color rootColour, Color highlightColour, Color tipColour, Color haloHighColour, Color haloLowColour, float haloBlur) : base(APIversion, handler)
             {
                 mAgeGenderFlags = ageGenderFlags;
@@ -45,63 +51,134 @@ namespace s3piwrappers
             public AgeGenderFlags AgeGenderFlags
             {
                 get { return mAgeGenderFlags; }
-                set { if(mAgeGenderFlags!=value){mAgeGenderFlags = value; OnElementChanged();} }
+                set
+                {
+                    if (mAgeGenderFlags != value)
+                    {
+                        mAgeGenderFlags = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(2)]
             public bool IsGenetic
             {
                 get { return mIsGenetic; }
-                set { if(mIsGenetic!=value){mIsGenetic = value; OnElementChanged();} }
+                set
+                {
+                    if (mIsGenetic != value)
+                    {
+                        mIsGenetic = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(3)]
             public Color DiffuseColour
             {
                 get { return mDiffuseColour; }
-                set { if(mDiffuseColour!=value){mDiffuseColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mDiffuseColour != value)
+                    {
+                        mDiffuseColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(4)]
             public Color RootColour
             {
                 get { return mRootColour; }
-                set { if(mRootColour!=value){mRootColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mRootColour != value)
+                    {
+                        mRootColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(5)]
             public Color HighlightColour
             {
                 get { return mHighlightColour; }
-                set { if(mHighlightColour!=value){mHighlightColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mHighlightColour != value)
+                    {
+                        mHighlightColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(6)]
             public Color TipColour
             {
                 get { return mTipColour; }
-                set { if(mTipColour!=value){mTipColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mTipColour != value)
+                    {
+                        mTipColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(7)]
             public Color HaloHighColour
             {
                 get { return mHaloHighColour; }
-                set { if(mHaloHighColour!=value){mHaloHighColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mHaloHighColour != value)
+                    {
+                        mHaloHighColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
-            [ElementPriority(8)]
 
+            [ElementPriority(8)]
             public Color HaloLowColour
             {
                 get { return mHaloLowColour; }
-                set { if(mHaloLowColour!=value){mHaloLowColour = value; OnElementChanged();} }
+                set
+                {
+                    if (mHaloLowColour != value)
+                    {
+                        mHaloLowColour = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(9)]
             public float HaloBlur
             {
                 get { return mHaloBlur; }
-                set { if(mHaloBlur!=value){mHaloBlur = value; OnElementChanged();} }
+                set
+                {
+                    if (mHaloBlur != value)
+                    {
+                        mHaloBlur = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             public string Value
             {
                 get
                 {
                     string str = "";
-                    foreach (string field in this.ContentFields)
+                    foreach (string field in ContentFields)
                     {
                         if (!field.Equals("Value"))
                         {
@@ -119,7 +196,7 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get {return GetContentFields(base.requestedApiVersion, base.GetType());}
+                get { return GetContentFields(base.requestedApiVersion, base.GetType()); }
             }
 
             public override int RecommendedApiVersion
@@ -135,8 +212,8 @@ namespace s3piwrappers
 
             public void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
-                mAgeGenderFlags = new AgeGenderFlags(0,handler,s);
+                var br = new BinaryReader(s);
+                mAgeGenderFlags = new AgeGenderFlags(0, handler, s);
                 mIsGenetic = br.ReadBoolean();
                 mDiffuseColour = Color.FromArgb(br.ReadInt32());
                 mRootColour = Color.FromArgb(br.ReadInt32());
@@ -145,11 +222,11 @@ namespace s3piwrappers
                 mHaloHighColour = Color.FromArgb(br.ReadInt32());
                 mHaloLowColour = Color.FromArgb(br.ReadInt32());
                 mHaloBlur = br.ReadSingle();
-
             }
+
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 mAgeGenderFlags.UnParse(s);
                 bw.Write(mIsGenetic);
                 bw.Write(mDiffuseColour.ToArgb());
@@ -160,24 +237,26 @@ namespace s3piwrappers
                 bw.Write(mHaloLowColour.ToArgb());
                 bw.Write(mHaloBlur);
             }
-
         }
 
 
         public class ShaderKeyList : DependentList<ShaderKey>
         {
-            public ShaderKeyList(EventHandler handler) : base(handler) { }
-            public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s) { }
-            public ShaderKeyList(EventHandler handler, IEnumerable<ShaderKey> ilt) : base(handler, ilt) {}
-
-            public override void Add()
+            public ShaderKeyList(EventHandler handler) : base(handler)
             {
-                this.Add(new object[]{});
+            }
+
+            public ShaderKeyList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
+
+            public ShaderKeyList(EventHandler handler, IEnumerable<ShaderKey> ilt) : base(handler, ilt)
+            {
             }
 
             protected override ShaderKey CreateElement(Stream s)
             {
-                return new ShaderKey(0,handler, s);
+                return new ShaderKey(0, handler, s);
             }
 
             protected override void WriteElement(Stream s, ShaderKey element)
@@ -196,30 +275,53 @@ namespace s3piwrappers
         {
             if (base.stream == null)
             {
-                base.stream = this.UnParse();
-                this.OnResourceChanged(this, new EventArgs());
+                base.stream = UnParse();
+                OnResourceChanged(this, new EventArgs());
             }
             base.stream.Position = 0L;
             Parse(base.stream);
         }
-        
+
         [ElementPriority(1)]
         public UInt32 Version
         {
             get { return mVersion; }
-            set { if(mVersion!=value){mVersion = value; OnResourceChanged(this, new EventArgs());} }
+            set
+            {
+                if (mVersion != value)
+                {
+                    mVersion = value;
+                    OnResourceChanged(this, new EventArgs());
+                }
+            }
         }
+
         [ElementPriority(2)]
         public ShaderKeyList ShaderKeys
         {
             get { return mShaderKeyList; }
-            set { if(mShaderKeyList!=value){mShaderKeyList = value; OnResourceChanged(this, new EventArgs());} }
+            set
+            {
+                if (mShaderKeyList != value)
+                {
+                    mShaderKeyList = value;
+                    OnResourceChanged(this, new EventArgs());
+                }
+            }
         }
+
         [ElementPriority(3)]
         public Byte IsDominant
         {
             get { return mIsDominant; }
-            set { if(mIsDominant!=value){mIsDominant = value; OnResourceChanged(this, new EventArgs());} }
+            set
+            {
+                if (mIsDominant != value)
+                {
+                    mIsDominant = value;
+                    OnResourceChanged(this, new EventArgs());
+                }
+            }
         }
 
         public String Value
@@ -241,17 +343,19 @@ namespace s3piwrappers
                 //return sb.ToString();
             }
         }
+
         private void Parse(Stream s)
         {
-            BinaryReader br = new BinaryReader(s);
+            var br = new BinaryReader(s);
             mVersion = br.ReadUInt32();
-            mShaderKeyList = new ShaderKeyList(this.OnResourceChanged, s);
+            mShaderKeyList = new ShaderKeyList(OnResourceChanged, s);
             mIsDominant = br.ReadByte();
         }
+
         protected override Stream UnParse()
         {
             Stream s = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(s);
+            var bw = new BinaryWriter(s);
             bw.Write(mVersion);
             if (mShaderKeyList == null) mShaderKeyList = new ShaderKeyList(OnResourceChanged);
             mShaderKeyList.UnParse(s);
@@ -265,4 +369,3 @@ namespace s3piwrappers
         }
     }
 }
-

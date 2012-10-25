@@ -1,19 +1,18 @@
 using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace s3piwrappers.Validation
 {
-    class HexValidationRule : ValidationRule
+    internal class HexValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             uint parameter = 0;
 
             try
             {
-                parameter = Convert.ToUInt32('0' + value.ToString().TrimStart('0','x','X'),16);
-
-
+                parameter = Convert.ToUInt32('0' + value.ToString().TrimStart('0', 'x', 'X'), 16);
             }
             catch (Exception)
             {
@@ -22,20 +21,18 @@ namespace s3piwrappers.Validation
 
 
             return new ValidationResult(true, null);
-
         }
     }
-    class IntValidationRule : ValidationRule
+
+    internal class IntValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             uint parameter = 0;
 
             try
             {
                 parameter = Convert.ToUInt32(value);
-
-
             }
             catch (Exception)
             {
@@ -44,7 +41,6 @@ namespace s3piwrappers.Validation
 
 
             return new ValidationResult(true, null);
-
         }
     }
 }

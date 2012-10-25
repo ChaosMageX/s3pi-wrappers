@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Xml;
-using s3pi.Interfaces;
 using s3pi.Filetable;
+using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph.Nodes
 {
@@ -18,60 +16,66 @@ namespace s3piwrappers.SceneGraph.Nodes
   </complate>
 </preset>
             /**/
-            private static string[] CasRgbMaskWantedKeys = new string[] {
-                 "Overlay"          
-                ,"Mask"             
-                ,"Transparency Map" 
-                ,"Multiplier"       
-                ,"Clothing Specular"
-                ,"Clothing Ambient" 
-                ,"Stencil A"        
-                ,"Stencil B"        
-                ,"Stencil C"        
-                ,"Stencil D"        
-                ,"Stencil E"        
-                ,"Stencil F"        
-                ,"Logo Texture"     
-                ,"Logo 2 Texture"   
-                ,"Logo 3 Texture"   
-                ,
-            };
+
+            private static readonly string[] CasRgbMaskWantedKeys = new[]
+                {
+                    "Overlay"
+                    , "Mask"
+                    , "Transparency Map"
+                    , "Multiplier"
+                    , "Clothing Specular"
+                    , "Clothing Ambient"
+                    , "Stencil A"
+                    , "Stencil B"
+                    , "Stencil C"
+                    , "Stencil D"
+                    , "Stencil E"
+                    , "Stencil F"
+                    , "Logo Texture"
+                    , "Logo 2 Texture"
+                    , "Logo 3 Texture"
+                    ,
+                };
 
             private class RKElem
             {
                 public string Name;
-                public RK OldResourceKey;
+                public readonly RK OldResourceKey;
                 public RK NewResourceKey;
-                public XmlElement Element;
+                public readonly XmlElement Element;
+
                 public RKElem(string name, RK key, XmlElement elem)
                 {
-                    this.Name = name;
-                    this.OldResourceKey = this.NewResourceKey = key;
-                    this.Element = elem;
+                    Name = name;
+                    OldResourceKey = NewResourceKey = key;
+                    Element = elem;
                 }
+
                 public void Commit()
                 {
-                    this.Element.SetAttribute("value", 
-                        "key:" + TextRKContainer.PrintRK(this.NewResourceKey));
+                    Element.SetAttribute("value",
+                                         "key:" + TextRKContainer.PrintRK(NewResourceKey));
                 }
             }
 
-            private List<RKElem> oldToNewRKs = new List<RKElem>();
-            private XmlDocument xmlDocument;
-            private List<IResourceConnection> owners = new List<IResourceConnection>();
+            private readonly List<RKElem> oldToNewRKs = new List<RKElem>();
+            private readonly XmlDocument xmlDocument;
+            private readonly List<IResourceConnection> owners = new List<IResourceConnection>();
+
             public XmlDocument Document
             {
-                get { return this.xmlDocument; }
+                get { return xmlDocument; }
             }
+
             public List<IResourceConnection> Owners
             {
-                get { return this.owners; }
+                get { return owners; }
             }
 
             public XmlRKContainer(XmlDocument xmlDoc)
                 : base("caspPresetXML", null, "caspPresetXML", null)
             {
-                this.xmlDocument = xmlDoc;
+                xmlDocument = xmlDoc;
                 int i, foundIndex, length = CasRgbMaskWantedKeys.Length;
                 XmlAttribute keyAttr, valueAttr;
                 string keyStr, valueStr;
@@ -100,10 +104,10 @@ namespace s3piwrappers.SceneGraph.Nodes
                                         RK rk;
                                         if (TextRKContainer.ParseRK(valueStr.Substring(4), out rk))
                                         {
-                                            this.oldToNewRKs.Add(new RKElem(keyStr, rk, elem));
-                                            this.owners.Add(new DefaultConnection(rk, this, 
-                                                ResourceDataActions.FindWrite,
-                                                "caspPresetXML{" + keyStr + "}"));
+                                            oldToNewRKs.Add(new RKElem(keyStr, rk, elem));
+                                            owners.Add(new DefaultConnection(rk, this,
+                                                                             ResourceDataActions.FindWrite,
+                                                                             "caspPresetXML{" + keyStr + "}"));
                                         }
                                     }
                                 }
@@ -117,9 +121,9 @@ namespace s3piwrappers.SceneGraph.Nodes
             {
                 RKElem elem;
                 bool success = false;
-                for (int i = 0; i < this.oldToNewRKs.Count; i++)
+                for (int i = 0; i < oldToNewRKs.Count; i++)
                 {
-                    elem = this.oldToNewRKs[i];
+                    elem = oldToNewRKs[i];
                     if (elem.OldResourceKey.Equals(oldKey))
                     {
                         elem.NewResourceKey = new RK(newKey);
@@ -131,15 +135,15 @@ namespace s3piwrappers.SceneGraph.Nodes
 
             public override bool CommitChanges()
             {
-                for (int i = 0; i < this.oldToNewRKs.Count; i++)
+                for (int i = 0; i < oldToNewRKs.Count; i++)
                 {
-                    this.oldToNewRKs[i].Commit();
+                    oldToNewRKs[i].Commit();
                 }
                 return true;
             }
         }
 
-        private XmlRKContainer mainContainer = null;
+        private XmlRKContainer mainContainer;
 
         public CASPresetXmlNode(IResource resource, IResourceKey originalKey)
             : base(resource, originalKey)
@@ -150,10 +154,10 @@ namespace s3piwrappers.SceneGraph.Nodes
         {
             Diagnostics.Log("CASP_getXMLDDSes");
             if (base.resource == null) return null;
-            XmlDocument caspDoc = new XmlDocument();
+            var caspDoc = new XmlDocument();
             caspDoc.Load(base.resource.Stream);
-            this.mainContainer = new XmlRKContainer(caspDoc);
-            return this.mainContainer.Owners;
+            mainContainer = new XmlRKContainer(caspDoc);
+            return mainContainer.Owners;
 
             /*XElement casp = XElement.Load(base.Resource.Stream);
             foreach (Tuple<string, string> tuple in
@@ -174,13 +178,13 @@ namespace s3piwrappers.SceneGraph.Nodes
             if (base.includeDDSes)
                 return base.SlurpConnections(constraints);
             else
-                return this.CASPKinXML_getDDSes();
+                return CASPKinXML_getDDSes();
         }
 
         public override bool CommitChanges()
         {
-            if (this.mainContainer != null)
-                this.mainContainer.Document.Save(base.resource.Stream);
+            if (mainContainer != null)
+                mainContainer.Document.Save(base.resource.Stream);
             return base.CommitChanges();
         }
     }

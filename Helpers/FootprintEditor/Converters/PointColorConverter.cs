@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
 
@@ -8,17 +9,18 @@ namespace s3piwrappers.Converters
     {
         public Brush Selected { get; set; }
         public Brush Default { get; set; }
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Brush b = Default;
-            if (value is bool && (bool)value)
+            if (value is bool && (bool) value)
             {
                 b = Selected;
             }
             return b;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return null;
         }

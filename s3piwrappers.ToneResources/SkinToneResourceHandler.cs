@@ -7,7 +7,7 @@ namespace s3piwrappers
     {
         public SkinToneResourceHandler()
         {
-            Add(typeof(SkinToneResource),new List<string>(new string[]{"0x0354796A"}));
+            Add(typeof (SkinToneResource), new List<string>(new[] {"0x0354796A"}));
         }
     }
 }

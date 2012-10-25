@@ -322,7 +322,7 @@ namespace s3piwrappers.Effects
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mByte01);
             s.Read(out mInt01);
             mColourList01 = new DataList<ColourValue>(handler, stream);
@@ -343,7 +343,7 @@ namespace s3piwrappers.Effects
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mByte01);
             s.Write(mInt01);
             mColourList01.UnParse(stream);

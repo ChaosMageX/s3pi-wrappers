@@ -17,69 +17,67 @@ namespace s3piwrappers.RigEditor.Diagnostics
         private string Timestamp { get; set; }
 
         public BindingListener(TraceOptions options)
-            : base()
         {
-            this.IsFirstWrite = true;
+            IsFirstWrite = true;
             PresentationTraceSources.Refresh();
             PresentationTraceSources.DataBindingSource.Listeners.Add(this);
             PresentationTraceSources.DataBindingSource.Switch.Level = SourceLevels.Error;
-            this.TraceOutputOptions = options;
-            this.DetermineInformationPropertyCount();
+            TraceOutputOptions = options;
+            DetermineInformationPropertyCount();
         }
 
         private void DetermineInformationPropertyCount()
         {
-            foreach (TraceOptions traceOptionValue in Enum.GetValues(typeof(TraceOptions)))
+            foreach (TraceOptions traceOptionValue in Enum.GetValues(typeof (TraceOptions)))
             {
                 if (traceOptionValue != TraceOptions.None)
                 {
-                    this.InformationPropertyCount += this.GetTraceOptionEnabled(traceOptionValue);
+                    InformationPropertyCount += GetTraceOptionEnabled(traceOptionValue);
                 }
             }
         }
 
         private int GetTraceOptionEnabled(TraceOptions option)
         {
-            return (this.TraceOutputOptions & option) == option ? 1 : 0;
+            return (TraceOutputOptions & option) == option ? 1 : 0;
         }
 
         public override void WriteLine(string message)
         {
-            if (this.IsFirstWrite)
+            if (IsFirstWrite)
             {
-                this.Message = message;
-                this.IsFirstWrite = false;
+                Message = message;
+                IsFirstWrite = false;
             }
             else
             {
-                var propertyInformation = message.Split(new string[] { "=" }, StringSplitOptions.None);
+                string[] propertyInformation = message.Split(new[] {"="}, StringSplitOptions.None);
 
                 if (propertyInformation.Length == 1)
                 {
-                    this.LogicalOperationStack = propertyInformation[0];
+                    LogicalOperationStack = propertyInformation[0];
                 }
                 else
                 {
-                    this.GetType().GetProperty(propertyInformation[0],
-                        BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Instance)
+                    GetType().GetProperty(propertyInformation[0],
+                                          BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Instance)
                         .SetValue(this, propertyInformation[1], null);
                 }
 
-                this.InformationPropertyCount--;
+                InformationPropertyCount--;
             }
 
-            this.Flush();
+            Flush();
 
-            if (this.InformationPropertyCount == 0)
+            if (InformationPropertyCount == 0)
             {
                 PresentationTraceSources.DataBindingSource.Listeners.Remove(this);
-                throw new BindingException(this.Message,
-                    new BindingExceptionInformation(this.Callstack,
-                        System.DateTime.Parse(this.DateTime),
-                        this.LogicalOperationStack, int.Parse(this.ProcessId),
-                        int.Parse(this.ThreadId), long.Parse(this.Timestamp)));
+                throw new BindingException(Message,
+                                           new BindingExceptionInformation(Callstack,
+                                                                           System.DateTime.Parse(DateTime),
+                                                                           LogicalOperationStack, int.Parse(ProcessId),
+                                                                           int.Parse(ThreadId), long.Parse(Timestamp)));
             }
         }
     }
-    
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 
 namespace s3piwrappers.Helpers.Cryptography
@@ -13,7 +11,7 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             if (value == null || length < 0 || length > value.Length)
                 return "";
-            char[] result = new char[length];
+            var result = new char[length];
             if (length > 0)
                 Array.Copy(value, 0, result, 0, length);
             else
@@ -21,7 +19,7 @@ namespace s3piwrappers.Helpers.Cryptography
             return new string(result);
         }
 
-        private FNVSearchTable mSearchTable;
+        private readonly FNVSearchTable mSearchTable;
         private int mLowerCharsLength;
         private byte[] mLowerChars;
         private int mPrefixLength;
@@ -40,52 +38,52 @@ namespace s3piwrappers.Helpers.Cryptography
         private byte[][] mMatch;
         private Matcher[] mMatchers;
 
-        private bool mStarted = false;
-        private bool mFinished = false;
+        private bool mStarted;
+        private bool mFinished;
         private string[] mResults;
         private DateTime mStartTime;
         private DateTime[] mEndTimes;
 
         public FNVSearchTable SearchTable
         {
-            get { return this.mSearchTable; }
+            get { return mSearchTable; }
         }
 
         public ulong Filter
         {
-            get { return this.mFilter; }
+            get { return mFilter; }
         }
 
         public bool XorFold
         {
-            get { return this.mXorFold; }
+            get { return mXorFold; }
         }
 
         public ulong TargetHash
         {
-            get { return this.mTargetHash; }
+            get { return mTargetHash; }
         }
 
         public int MaxResultLength
         {
-            get { return this.mMaxLevel; }
+            get { return mMaxLevel; }
         }
 
         public ulong MaxIterations
         {
-            get { return this.mMaxIterations; }
+            get { return mMaxIterations; }
         }
 
         public ulong Iterations
         {
             get
             {
-                if (this.mMatchers == null)
+                if (mMatchers == null)
                     return 0;
                 ulong iterations = 0;
-                for (int i = 0; i < this.mMatchers.Length; i++)
+                for (int i = 0; i < mMatchers.Length; i++)
                 {
-                    iterations += this.mMatchers[i].Iterations;
+                    iterations += mMatchers[i].Iterations;
                 }
                 return iterations;
             }
@@ -93,29 +91,29 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public bool Finished
         {
-            get { return this.mFinished; }
+            get { return mFinished; }
         }
 
         public int ResultCount
         {
-            get { return this.mMatchCount; }
+            get { return mMatchCount; }
         }
 
         public string[] Results
         {
-            get { return this.GetResults(); }
+            get { return GetResults(); }
         }
 
         public TimeSpan[] ElapsedTimes
         {
             get
             {
-                if (this.mEndTimes == null)
+                if (mEndTimes == null)
                     return null;
-                TimeSpan[] elapsed = new TimeSpan[this.mMatchCount];
-                for (int i = 0; i < this.mMatchCount; i++)
+                var elapsed = new TimeSpan[mMatchCount];
+                for (int i = 0; i < mMatchCount; i++)
                 {
-                    elapsed[i] = this.mEndTimes[i] - this.mStartTime;
+                    elapsed[i] = mEndTimes[i] - mStartTime;
                 }
                 return elapsed;
             }
@@ -125,12 +123,12 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             get
             {
-                if (this.mEndTimes == null)
+                if (mEndTimes == null)
                     return null;
-                string[] elapsed = new string[this.mMatchCount];
-                for (int i = 0; i < this.mMatchCount; i++)
+                var elapsed = new string[mMatchCount];
+                for (int i = 0; i < mMatchCount; i++)
                 {
-                    elapsed[i] = (this.mEndTimes[i] - this.mStartTime).ToString();
+                    elapsed[i] = (mEndTimes[i] - mStartTime).ToString();
                 }
                 return elapsed;
             }
@@ -138,59 +136,59 @@ namespace s3piwrappers.Helpers.Cryptography
 
         private string[] GetResults()
         {
-            if (this.mResults == null)
+            if (mResults == null)
                 return null;
-            string prefixStr = BytesToString(this.mPrefixChars, this.mPrefixLength);
-            string suffixStr = BytesToString(this.mSuffixChars, this.mSuffixLength);
-            for (int i = this.mMatchCount - 1; i >= 0; i--)
+            string prefixStr = BytesToString(mPrefixChars, mPrefixLength);
+            string suffixStr = BytesToString(mSuffixChars, mSuffixLength);
+            for (int i = mMatchCount - 1; i >= 0; i--)
             {
-                if (this.mResults[i] == null)
+                if (mResults[i] == null)
                 {
-                    this.mResults[i] = prefixStr;
-                    for (int j = 0; j < this.mMaxLevel; j++)
+                    mResults[i] = prefixStr;
+                    for (int j = 0; j < mMaxLevel; j++)
                     {
-                        if (this.mMatch[i][j] == kNotFoundChar)
+                        if (mMatch[i][j] == kNotFoundChar)
                             break;
-                        this.mResults[i] += (char)this.mMatch[i][j];
+                        mResults[i] += (char) mMatch[i][j];
                     }
-                    this.mResults[i] += suffixStr;
+                    mResults[i] += suffixStr;
                 }
             }
-            return this.mResults;
+            return mResults;
         }
 
         public FNVUnhasher64(ulong hash, FNVSearchTable searchTable,
-            int maxChars = 10, int maxMatches = 5,
-            bool xorFold = false, ulong filter = ulong.MaxValue)
+                             int maxChars = 10, int maxMatches = 5,
+                             bool xorFold = false, ulong filter = ulong.MaxValue)
         {
-            this.mSearchTable = searchTable;
-            this.mTargetHash = hash;
-            this.Reset(maxChars, maxMatches, xorFold, filter);
+            mSearchTable = searchTable;
+            mTargetHash = hash;
+            Reset(maxChars, maxMatches, xorFold, filter);
         }
 
         public void Reset(int maxChars = 10, int maxMatches = 5,
-            bool xorFold = false, ulong filter = ulong.MaxValue)
+                          bool xorFold = false, ulong filter = ulong.MaxValue)
         {
             // Only reset if the it hasn't started yet 
             // or it's been started and has finished
-            if (this.mStarted && !this.mFinished) // !(!this.mStarted || this.mFinished)
+            if (mStarted && !mFinished) // !(!this.mStarted || this.mFinished)
                 return;
-            this.mStarted = false;
-            this.mFinished = false;
+            mStarted = false;
+            mFinished = false;
 
             // Copied from the search table in case the user modifies it
             // while the unhasher is running.
-            this.mLowerCharsLength = this.mSearchTable.Count;
-            this.mLowerChars = this.mSearchTable.Table;
-            this.mPrefixChars = this.mSearchTable.PrefixBytes;
-            this.mPrefixLength = this.mPrefixChars.Length;
-            this.mSuffixChars = this.mSearchTable.SuffixBytes;
-            this.mSuffixLength = this.mSuffixChars.Length;
+            mLowerCharsLength = mSearchTable.Count;
+            mLowerChars = mSearchTable.Table;
+            mPrefixChars = mSearchTable.PrefixBytes;
+            mPrefixLength = mPrefixChars.Length;
+            mSuffixChars = mSearchTable.SuffixBytes;
+            mSuffixLength = mSuffixChars.Length;
 
-            this.mMaxLevel = maxChars;
-            this.mMaxMatches = maxMatches;
-            this.mFilter = filter;
-            this.mXorFold = xorFold;
+            mMaxLevel = maxChars;
+            mMaxMatches = maxMatches;
+            mFilter = filter;
+            mXorFold = xorFold;
 
             // Fail-safe in case another thread finds a match
             // between the time the final match is found
@@ -199,82 +197,82 @@ namespace s3piwrappers.Helpers.Cryptography
             // the parent stops all threads within a locked 
             // block of code, but just in case.
             maxMatches += Environment.ProcessorCount << 1;
-            this.mMatch = new byte[maxMatches][];
-            this.mResults = new string[maxMatches];
-            this.mEndTimes = new DateTime[maxMatches];
+            mMatch = new byte[maxMatches][];
+            mResults = new string[maxMatches];
+            mEndTimes = new DateTime[maxMatches];
             int i, j;
             for (i = 0; i < maxMatches; i++)
             {
-                this.mResults[i] = null;
-                this.mMatch[i] = new byte[maxChars];
+                mResults[i] = null;
+                mMatch[i] = new byte[maxChars];
                 for (j = 0; j < maxChars; j++)
                 {
-                    this.mMatch[i][j] = kNotFoundChar;
+                    mMatch[i][j] = kNotFoundChar;
                 }
             }
-            this.mMaxIterations = 1;
+            mMaxIterations = 1;
             for (j = 0; j < maxChars; j++)
             {
-                this.mMaxIterations *= (ulong)this.mLowerCharsLength;
+                mMaxIterations *= (ulong) mLowerCharsLength;
             }
-            this.InitMatchers();
+            InitMatchers();
         }
 
         private void InitMatchers()
         {
             int i, step, threadCount = Environment.ProcessorCount << 1;
-            step = this.mLowerCharsLength / threadCount;
-            this.mMatchers = new Matcher[threadCount];
-            this.mMatchers[0] = new Matcher(this, 0, step);
+            step = mLowerCharsLength/threadCount;
+            mMatchers = new Matcher[threadCount];
+            mMatchers[0] = new Matcher(this, 0, step);
             threadCount--;
             for (i = 1; i < threadCount; i++)
             {
-                this.mMatchers[i] = new Matcher(this, i * step, (i + 1) * step);
+                mMatchers[i] = new Matcher(this, i*step, (i + 1)*step);
             }
-            this.mMatchers[threadCount] = new Matcher(this, i * step, this.mLowerCharsLength);
+            mMatchers[threadCount] = new Matcher(this, i*step, mLowerCharsLength);
         }
 
         ~FNVUnhasher64()
         {
-            this.Stop();
+            Stop();
         }
 
         public void Dispose()
         {
-            this.Stop();
+            Stop();
         }
 
         public void Stop()
         {
-            if (this.mStarted && !this.mFinished)
+            if (mStarted && !mFinished)
             {
-                this.mFinished = true;
-                for (int i = 0; i < this.mMatchers.Length; i++)
+                mFinished = true;
+                for (int i = 0; i < mMatchers.Length; i++)
                 {
-                    this.mMatchers[i].StopThread();
+                    mMatchers[i].StopThread();
                 }
             }
         }
 
         public void Start()
         {
-            if (!this.mStarted)
+            if (!mStarted)
             {
-                this.mStartTime = DateTime.Now;
+                mStartTime = DateTime.Now;
                 int i;
-                for (i = 0; i < this.mMaxMatches; i++)
+                for (i = 0; i < mMaxMatches; i++)
                 {
-                    this.mEndTimes[i] = this.mStartTime;
+                    mEndTimes[i] = mStartTime;
                 }
-                for (i = 0; i < this.mMatchers.Length; i++)
+                for (i = 0; i < mMatchers.Length; i++)
                 {
-                    this.mMatchers[i].InitThread();
+                    mMatchers[i].InitThread();
                 }
-                for (i = 0; i < this.mMatchers.Length; i++)
+                for (i = 0; i < mMatchers.Length; i++)
                 {
-                    this.mMatchers[i].Thread.Start();
+                    mMatchers[i].Thread.Start();
                 }
-                this.mStarted = true;
+                mStarted = true;
             }
         }
 
@@ -285,47 +283,48 @@ namespace s3piwrappers.Helpers.Cryptography
             private readonly int mMinIndex;
             private readonly int mMaxIndex;
 
-            public ulong Iterations = 0;
-            private bool mFinished = false;
+            public ulong Iterations;
+            private bool mFinished;
 
             public Matcher(FNVUnhasher64 parent, int minIndex, int maxIndex)
             {
-                this.mParent = parent;
-                this.mMinIndex = minIndex;
-                this.mMaxIndex = maxIndex;
+                mParent = parent;
+                mMinIndex = minIndex;
+                mMaxIndex = maxIndex;
             }
 
             public void InitThread()
             {
-                this.Thread = new Thread(new ThreadStart(this.MatchFinder));
-                this.Thread.Priority = ThreadPriority.BelowNormal;
-                this.Thread.Name = string.Format("0x{0:X8}:({1}-{2})", this.mParent.mTargetHash,
-                    (char)this.mParent.mLowerChars[this.mMinIndex],
-                    (char)this.mParent.mLowerChars[this.mMaxIndex - 1]);
+                Thread = new Thread(MatchFinder);
+                Thread.Priority = ThreadPriority.BelowNormal;
+                Thread.Name = string.Format("0x{0:X8}:({1}-{2})", mParent.mTargetHash,
+                                            (char) mParent.mLowerChars[mMinIndex],
+                                            (char) mParent.mLowerChars[mMaxIndex - 1]);
             }
 
             public void StopThread()
             {
-                this.mFinished = true;
-                if (this.Thread != null)
+                mFinished = true;
+                if (Thread != null)
                 {
-                    this.Thread.Join();
-                    this.Thread = null;
+                    Thread.Join();
+                    Thread = null;
                 }
             }
 
 #if UNSAFE
             unsafe
 #endif
- private void MatchFinder()
+
+            private void MatchFinder()
             {
-                bool xorFold = this.mParent.mXorFold;
-                int i, j, stop, offset, lcLength = this.mParent.mLowerCharsLength;
-                int level, maxLevel = this.mParent.mMaxLevel;
-                int minIndex = this.mMinIndex;
-                int maxIndex = this.mMaxIndex;
-                ulong result, product, current, target, tester, filter = this.mParent.mFilter;
-                target = this.mParent.mTargetHash & filter;
+                bool xorFold = mParent.mXorFold;
+                int i, j, stop, offset, lcLength = mParent.mLowerCharsLength;
+                int level, maxLevel = mParent.mMaxLevel;
+                int minIndex = mMinIndex;
+                int maxIndex = mMaxIndex;
+                ulong result, product, current, target, tester, filter = mParent.mFilter;
+                target = mParent.mTargetHash & filter;
                 //bool finished = false;
 #if UNSAFE
                 int* index = stackalloc int[maxLevel];
@@ -374,8 +373,8 @@ namespace s3piwrappers.Helpers.Cryptography
                     }
                 }
 #else
-                int[] index = new int[maxLevel];
-                ulong[] prevResult = new ulong[maxLevel];
+                var index = new int[maxLevel];
+                var prevResult = new ulong[maxLevel];
                 for (i = 0; i < maxLevel; i++)
                 {
                     index[i] = 0;
@@ -385,10 +384,10 @@ namespace s3piwrappers.Helpers.Cryptography
 
                 ulong prefixHash = FNVHash.TS3Offset64;
                 int suffixLength;
-                byte[] chars = new byte[lcLength];
+                var chars = new byte[lcLength];
                 //lock (this.mParent.mLowerChars)
                 {
-                    byte[] lcChars = this.mParent.mLowerChars;
+                    byte[] lcChars = mParent.mLowerChars;
                     {
                         for (i = 0; i < lcLength; i++)
                         {
@@ -398,20 +397,20 @@ namespace s3piwrappers.Helpers.Cryptography
                 }
                 //lock (this.mParent.mPrefixChars)
                 {
-                    suffixLength = this.mParent.mPrefixLength;
-                    byte[] pChars = this.mParent.mPrefixChars;
+                    suffixLength = mParent.mPrefixLength;
+                    byte[] pChars = mParent.mPrefixChars;
                     {
                         for (i = 0; i < suffixLength; i++)
                         {
-                            prefixHash = (prefixHash * FNVHash.TS3Prime64) ^ pChars[i];
+                            prefixHash = (prefixHash*FNVHash.TS3Prime64) ^ pChars[i];
                         }
                     }
-                    suffixLength = this.mParent.mSuffixLength;
+                    suffixLength = mParent.mSuffixLength;
                 }
-                byte[] suffixChars = new byte[suffixLength];
+                var suffixChars = new byte[suffixLength];
                 //lock (this.mParent.mSuffixChars)
                 {
-                    byte[] sChars = this.mParent.mSuffixChars;
+                    byte[] sChars = mParent.mSuffixChars;
                     {
                         for (i = 0; i < suffixLength; i++)
                         {
@@ -428,9 +427,9 @@ namespace s3piwrappers.Helpers.Cryptography
                     current = prefixHash;
                     i = index[offset];
                     stop = maxIndex;
-                    product = current * FNVHash.TS3Prime64;
+                    product = current*FNVHash.TS3Prime64;
 
-                    while (!this.mFinished)
+                    while (!mFinished)
                     {
                         if (i < stop)
                         {
@@ -440,46 +439,46 @@ namespace s3piwrappers.Helpers.Cryptography
                             {
                                 for (j = 0; j < suffixLength; j++)
                                 {
-                                    tester = (tester * FNVHash.TS3Prime64) ^ suffixChars[j];
+                                    tester = (tester*FNVHash.TS3Prime64) ^ suffixChars[j];
                                 }
-                            }/**/
+                            } /**/
                             if (xorFold)
                                 tester = ((tester >> 0x30) ^ (tester & 0xffffffffffffUL));
                             tester &= filter;
                             if (tester == target)
                             {
-                                lock (this.mParent.mMatch)
+                                lock (mParent.mMatch)
                                 {
                                     bool matchExists = false;
-                                    int k, matchCount = this.mParent.mMatchCount;
+                                    int k, matchCount = mParent.mMatchCount;
                                     for (j = 0; j < matchCount && !matchExists; j++)
                                     {
                                         matchExists = true;
                                         for (k = offset - 1; k >= 0 && matchExists; k--)
                                         {
                                             matchExists = matchExists &&
-                                                this.mParent.mMatch[j][k] == chars[index[k]];
+                                                mParent.mMatch[j][k] == chars[index[k]];
                                         }
                                     }
                                     if (!matchExists)
                                     {
-                                        this.mParent.mEndTimes[matchCount] = DateTime.Now;
-                                        this.mParent.mMatch[matchCount][offset] = chars[i];
+                                        mParent.mEndTimes[matchCount] = DateTime.Now;
+                                        mParent.mMatch[matchCount][offset] = chars[i];
                                         for (k = offset - 1; k >= 0; k--)
                                         {
-                                            this.mParent.mMatch[matchCount][k] = chars[index[k]];
+                                            mParent.mMatch[matchCount][k] = chars[index[k]];
                                         }
-                                        this.mParent.mMatchCount++;
-                                        if (this.mParent.mMatchCount >= this.mParent.mMaxMatches)
+                                        mParent.mMatchCount++;
+                                        if (mParent.mMatchCount >= mParent.mMaxMatches)
                                         {
                                             //this.mParent.mFinished = true;
-                                            this.mFinished = true;
-                                            this.mParent.Stop();
+                                            mFinished = true;
+                                            mParent.Stop();
                                         }
                                     }
                                 }
                             }
-                            this.Iterations++;
+                            Iterations++;
                             if (offset < level)
                             {
                                 // Save the current level index and hash
@@ -490,7 +489,7 @@ namespace s3piwrappers.Helpers.Cryptography
                                 current = result;
                                 i = index[offset];
                                 stop = (offset == 0) ? maxIndex : lcLength;
-                                product = current * FNVHash.TS3Prime64;
+                                product = current*FNVHash.TS3Prime64;
                             }
                             else
                             {
@@ -512,7 +511,7 @@ namespace s3piwrappers.Helpers.Cryptography
                                 current = prevResult[offset];
                                 i = index[offset] + 1;
                                 stop = (offset == 0) ? maxIndex : lcLength;
-                                product = current * FNVHash.TS3Prime64;
+                                product = current*FNVHash.TS3Prime64;
                             }
                             else
                             {

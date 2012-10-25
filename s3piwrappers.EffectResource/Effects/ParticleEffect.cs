@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
 using s3piwrappers.SWB;
-using System.Collections.Generic;
 
 namespace s3piwrappers.Effects
 {
@@ -965,7 +965,7 @@ namespace s3piwrappers.Effects
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mInt01);
             ParticleParameters = new ParticleParams(0, handler, stream);
             mFloatList01 = new DataList<FloatValue>(handler, stream);
@@ -1066,7 +1066,7 @@ namespace s3piwrappers.Effects
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(Int01);
             ParticleParameters.UnParse(stream);
             mFloatList01.UnParse(stream);
@@ -1167,7 +1167,7 @@ namespace s3piwrappers.Effects
         {
             get
             {
-                var fields = base.ContentFields;
+                List<string> fields = base.ContentFields;
                 if (mSection.Version < 4) fields.Remove("Float48");
                 if (mSection.Version < 3) fields.Remove("Byte14");
                 if (mSection.Version < 2)

@@ -6,11 +6,15 @@ namespace s3piwrappers.Models
     public abstract class AbstractViewModel : INotifyPropertyChanged, IDisposable
     {
         public event PropertyChangedEventHandler PropertyChanged;
+
         protected virtual void OnPropertyChanged(String propertyName)
         {
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
-        public virtual void Dispose() { }
+
+        public virtual void Dispose()
+        {
+        }
     }
 }

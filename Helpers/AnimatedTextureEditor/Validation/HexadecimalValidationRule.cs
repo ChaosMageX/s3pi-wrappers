@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace s3piwrappers.AnimatedTextureEditor.Validation
 {
-    class HexadecimalValidationRule : ValidationRule
+    internal class HexadecimalValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             try
             {
-                var str = ((string) value).Replace("x", "").Replace("X", "");
+                string str = ((string) value).Replace("x", "").Replace("X", "");
                 Convert.ToUInt32(str, 16);
             }
             catch (Exception)

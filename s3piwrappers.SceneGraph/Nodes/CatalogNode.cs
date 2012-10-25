@@ -8,26 +8,25 @@ using s3piwrappers.SceneGraph.Managers;
 namespace s3piwrappers.SceneGraph.Nodes
 {
     /// <summary>
-    /// Handles Modular Catalog Resources, Fireplaces,
-    /// and all Catalog Resources that only need thumbnails.
+    ///   Handles Modular Catalog Resources, Fireplaces,
+    ///   and all Catalog Resources that only need thumbnails.
     /// </summary>
     public class CatalogNode : DefaultNode
     {
         public static readonly uint OBJD_TID = 0x319E4F1D;
-        public static readonly uint CFIR_TID = (uint)CatalogType.CatalogFireplace;
-        public static readonly uint MDLR_TID = (uint)CatalogType.ModularResource;
+        public static readonly uint CFIR_TID = (uint) CatalogType.CatalogFireplace;
+        public static readonly uint MDLR_TID = (uint) CatalogType.ModularResource;
 
-        public static readonly uint[] thumbAndModularTIDs = new uint[]
-        {
-            (uint)CatalogType.CatalogProxyProduct,
-            (uint)CatalogType.CatalogFountainPool,
-            (uint)CatalogType.CatalogFoundation,
-            (uint)CatalogType.CatalogWallStyle,
-            (uint)CatalogType.CatalogRoofStyle,
-
-            (uint)CatalogType.CatalogFireplace,
-            (uint)CatalogType.ModularResource
-        };
+        public static readonly uint[] thumbAndModularTIDs = new[]
+            {
+                (uint) CatalogType.CatalogProxyProduct,
+                (uint) CatalogType.CatalogFountainPool,
+                (uint) CatalogType.CatalogFoundation,
+                (uint) CatalogType.CatalogWallStyle,
+                (uint) CatalogType.CatalogRoofStyle,
+                (uint) CatalogType.CatalogFireplace,
+                (uint) CatalogType.ModularResource
+            };
 
         public enum Mode
         {
@@ -35,14 +34,16 @@ namespace s3piwrappers.SceneGraph.Nodes
             FromGame,
             FromUser,
         }
+
         protected Mode mode = Mode.None;
 
         /// <summary>
-        /// Determines whether or not attempt find in the FileTable 
-        /// the resources referenced in the catalog resource's data
-        /// before the ResourceGraph tests for their existence.
+        ///   Determines whether or not attempt find in the FileTable 
+        ///   the resources referenced in the catalog resource's data
+        ///   before the ResourceGraph tests for their existence.
         /// </summary>
         protected bool preTestResources = false;
+
         protected bool wantThumbs = false;
         protected bool justSelf = false;
         protected bool isDeepClone = true;
@@ -55,10 +56,10 @@ namespace s3piwrappers.SceneGraph.Nodes
         private List<IResourceConnection> Item_findObjds()
         {
             Diagnostics.Log("Item_findObjds");
-            List<IResourceConnection> results = new List<IResourceConnection>();
-            TGIBlockList ltgi = (TGIBlockList)base.Resource["TGIBlocks"].Value;
+            var results = new List<IResourceConnection>();
+            var ltgi = (TGIBlockList) base.Resource["TGIBlocks"].Value;
             TGIBlock tgi;
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             bool addOBJD;
             int missing = 0;
             for (int i = 0; i < ltgi.Count; i++)
@@ -68,7 +69,7 @@ namespace s3piwrappers.SceneGraph.Nodes
                 addOBJD = true;
                 if (preTestResources)
                 {
-                    SpecificResource objd = new SpecificResource(FileTable.GameContent, tgi);
+                    var objd = new SpecificResource(FileTable.GameContent, tgi);
                     if (objd.Resource != null)
                     {
                         Diagnostics.Log(String.Format("Item_findObjds: Found {0}", objd.LongName));
@@ -81,22 +82,22 @@ namespace s3piwrappers.SceneGraph.Nodes
                     }
                     if (addOBJD)
                     {
-                        results.Add(new DefaultConnection(tgi, tgi, ResourceDataActions.FindWrite, 
-                            "root.TGIBlocks[" + i + "]"));
+                        results.Add(new DefaultConnection(tgi, tgi, ResourceDataActions.FindWrite,
+                                                          "root.TGIBlocks[" + i + "]"));
                     }
                 }
             }
             if (preTestResources && missing > 0)
             {
                 Diagnostics.Show(builder.ToString(),
-                    String.Format("Item {0} has {1} missing OBJDs:", base.originalKey, missing));
+                                 String.Format("Item {0} has {1} missing OBJDs:", base.originalKey, missing));
             }
             return results;
         }
 
         public override string GetContentPathRootName()
         {
-            string rootName = Enum.GetName(typeof(CatalogType), base.originalKey.ResourceType);
+            string rootName = Enum.GetName(typeof (CatalogType), base.originalKey.ResourceType);
             if (string.IsNullOrEmpty(rootName))
                 return base.GetContentPathRootName();
             return rootName;
@@ -111,23 +112,23 @@ namespace s3piwrappers.SceneGraph.Nodes
                 return null;
         }
 
-        private static readonly THUM.THUMSize[] NeededThumbnailSizes = new THUM.THUMSize[]
-        {
-            THUM.THUMSize.small, 
-            THUM.THUMSize.medium, 
-            THUM.THUMSize.large,
-        };
+        private static readonly THUM.THUMSize[] NeededThumbnailSizes = new[]
+            {
+                THUM.THUMSize.small,
+                THUM.THUMSize.medium,
+                THUM.THUMSize.large,
+            };
 
         public override List<IResourceKinHelper> CreateKinHelpers(object constraints)
         {
-            List<IResourceKinHelper> results = new List<IResourceKinHelper>();
+            var results = new List<IResourceKinHelper>();
             if (wantThumbs && base.originalKey.ResourceType != MDLR_TID)
             {
-                SpecificResource sr = new SpecificResource(FileTable.GameContent, base.originalKey);
+                var sr = new SpecificResource(FileTable.GameContent, base.originalKey);
                 for (int i = 0; i < 3; i++)
                 {
                     results.Add(new ThumbnailKinFinder(base.originalKey, base.resource,
-                        NeededThumbnailSizes[i]));
+                                                       NeededThumbnailSizes[i]));
                 }
             }
             return results;

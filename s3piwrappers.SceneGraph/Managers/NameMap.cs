@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using s3pi.Interfaces;
 using s3pi.Filetable;
+using s3pi.Interfaces;
 using s3pi.WrapperDealer;
 
 namespace s3piwrappers.SceneGraph.Managers
@@ -14,8 +12,9 @@ namespace s3piwrappers.SceneGraph.Managers
         {
             private const string NameMapTIDStr = "0x0166038C";
 
-            private IPackage package;
-            private List<KeyValuePair<IResourceIndexEntry, IResource>> nmaps
+            private readonly IPackage package;
+
+            private readonly List<KeyValuePair<IResourceIndexEntry, IResource>> nmaps
                 = new List<KeyValuePair<IResourceIndexEntry, IResource>>();
 
             public PackagedNMap(IPackage package, bool create)
@@ -27,12 +26,12 @@ namespace s3piwrappers.SceneGraph.Managers
                 List<IResourceIndexEntry> rieList = package.FindAll(IsNameMap);
                 if ((rieList == null || rieList.Count == 0) && create)
                 {
-                    TGIBlock tgi = new TGIBlock(0, null, NameMapTID, 0u, 0ul);
+                    var tgi = new TGIBlock(0, null, NameMapTID, 0u, 0ul);
                     nmap = WrapperDealer.CreateNewResource(0, NameMapTIDStr);
-                    IResourceIndexEntry rie 
+                    IResourceIndexEntry rie
                         = package.AddResource(tgi, nmap.Stream, false);
-                    this.nmaps.Add(new KeyValuePair<IResourceIndexEntry, 
-                        IResource>(rie, nmap));
+                    nmaps.Add(new KeyValuePair<IResourceIndexEntry,
+                                  IResource>(rie, nmap));
                 }
                 else
                 {
@@ -44,10 +43,12 @@ namespace s3piwrappers.SceneGraph.Managers
                         {
                             nmap = WrapperDealer.GetResource(0, package, rieList[i]);
                         }
-                        catch { }
+                        catch
+                        {
+                        }
                         if (nmap != null)
-                            this.nmaps.Add(new KeyValuePair<IResourceIndexEntry, 
-                                IResource>(rieList[i], nmap));
+                            nmaps.Add(new KeyValuePair<IResourceIndexEntry,
+                                          IResource>(rieList[i], nmap));
                     }
                 }
             }
@@ -55,9 +56,9 @@ namespace s3piwrappers.SceneGraph.Managers
             public string GetName(ulong instance)
             {
                 IDictionary<ulong, string> nmap;
-                for (int i = 0; i < this.nmaps.Count; i++)
+                for (int i = 0; i < nmaps.Count; i++)
                 {
-                    nmap = this.nmaps[i].Value as IDictionary<ulong, string>;
+                    nmap = nmaps[i].Value as IDictionary<ulong, string>;
                     if (nmap != null && nmap.ContainsKey(instance))
                         return nmap[instance];
                 }
@@ -67,10 +68,10 @@ namespace s3piwrappers.SceneGraph.Managers
             public bool SetName(ulong instance, string name, bool replace)
             {
                 IDictionary<ulong, string> nmap;
-                int i, count = this.nmaps.Count;
+                int i, count = nmaps.Count;
                 for (i = 0; i < count; i++)
                 {
-                    nmap = this.nmaps[i].Value as IDictionary<ulong, string>;
+                    nmap = nmaps[i].Value as IDictionary<ulong, string>;
                     if (nmap == null) continue;
                     if (nmap.ContainsKey(instance))
                     {
@@ -79,11 +80,11 @@ namespace s3piwrappers.SceneGraph.Managers
                             nmap[instance] = name;
                             return true;
                         }
-                        else 
+                        else
                             return false;
                     }
                 }
-                nmap = this.nmaps[0].Value as IDictionary<ulong, string>;
+                nmap = nmaps[0].Value as IDictionary<ulong, string>;
                 if (nmap == null)
                     return false;
                 nmap.Add(instance, name);
@@ -92,9 +93,9 @@ namespace s3piwrappers.SceneGraph.Managers
 
             public bool CommitChanges()
             {
-                for (int i = 0; i < this.nmaps.Count; i++)
+                for (int i = 0; i < nmaps.Count; i++)
                 {
-                    this.package.ReplaceResource(this.nmaps[i].Key, this.nmaps[i].Value);
+                    package.ReplaceResource(nmaps[i].Key, nmaps[i].Value);
                 }
                 return true;
             }
@@ -102,19 +103,21 @@ namespace s3piwrappers.SceneGraph.Managers
 
         private class PNMap
         {
-            public PathPackageTuple Package;
-            public IDictionary<ulong, string> NMap;
+            public readonly PathPackageTuple Package;
+            public readonly IDictionary<ulong, string> NMap;
+
             public PNMap(PathPackageTuple package,
-                IDictionary<ulong, string> nmap)
+                         IDictionary<ulong, string> nmap)
             {
-                this.Package = package; this.NMap = nmap;
+                Package = package;
+                NMap = nmap;
             }
         }
 
         public const uint NameMapTID = 0x0166038C;
 
-        private SpecificResource latest = null;
-        private List<PNMap> namemaps;
+        private readonly SpecificResource latest;
+        private readonly List<PNMap> namemaps;
 
         private static bool IsNameMap(IResourceIndexEntry rie)
         {
@@ -123,7 +126,7 @@ namespace s3piwrappers.SceneGraph.Managers
 
         public NameMap(List<PathPackageTuple> nameMapPPTs)
         {
-            this.namemaps = new List<PNMap>();
+            namemaps = new List<PNMap>();
             if (nameMapPPTs == null) return;
             List<IResourceIndexEntry> rieList;
             IResource resource;
@@ -139,18 +142,21 @@ namespace s3piwrappers.SceneGraph.Managers
                     {
                         resource = WrapperDealer.GetResource(0, nameMapPPTs[i].Package, rieList[j]);
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                     if (resource != null)
                     {
-                        IDictionary<ulong, string> nmp = resource as IDictionary<ulong, string>;
+                        var nmp = resource as IDictionary<ulong, string>;
                         if (nmp == null) continue;
-                        if (this.latest == null)
-                            this.latest = new SpecificResource(nameMapPPTs[i], rieList[j]);
-                        this.namemaps.Add(new PNMap(nameMapPPTs[i], nmp));
+                        if (latest == null)
+                            latest = new SpecificResource(nameMapPPTs[i], rieList[j]);
+                        namemaps.Add(new PNMap(nameMapPPTs[i], nmp));
                     }
                 }
             }
         }
+
         public string this[ulong instance]
         {
             get
@@ -161,6 +167,7 @@ namespace s3piwrappers.SceneGraph.Managers
                 return null;
             }
         }
+
         public string GetName(ulong instance, PathPackageTuple package)
         {
             int i;
@@ -185,21 +192,33 @@ namespace s3piwrappers.SceneGraph.Managers
             }
             return null;
         }
+
         public IResourceKey ResourceKey
-        { 
-            get { return latest == null ? RK.NULL : latest.RequestedRK; } 
+        {
+            get { return latest == null ? RK.NULL : latest.RequestedRK; }
         }
+
         public IDictionary<ulong, string> Map
-        { 
-            get { return latest == null ? null : (IDictionary<ulong, string>)latest.Resource; } 
+        {
+            get { return latest == null ? null : (IDictionary<ulong, string>) latest.Resource; }
         }
-        public void Commit() { latest.Commit(); }
+
+        public void Commit()
+        {
+            latest.Commit();
+        }
 
         #region Global
+
         private static NameMap gamenmap;
         private static NameMap ddsnmap;
         private static NameMap thumnmap;
-        public static void Reset() { gamenmap = null; }
+
+        public static void Reset()
+        {
+            gamenmap = null;
+        }
+
         public static NameMap GameNMap
         {
             get
@@ -209,6 +228,7 @@ namespace s3piwrappers.SceneGraph.Managers
                 return gamenmap;
             }
         }
+
         public static NameMap DDSNMap
         {
             get
@@ -218,6 +238,7 @@ namespace s3piwrappers.SceneGraph.Managers
                 return ddsnmap;
             }
         }
+
         public static NameMap ThumNMap
         {
             get
@@ -227,16 +248,19 @@ namespace s3piwrappers.SceneGraph.Managers
                 return thumnmap;
             }
         }
+
         public static bool IsOK
-        { 
+        {
             get { return GameNMap != null && GameNMap.Map != null && GameNMap.Map.Count > 0; }
         }
+
         public static string GetName(IResourceKey key)
         {
             return ResourceGraph.IsDDS(key.ResourceType) ? DDSNMap[key.Instance] :
-                   ResourceGraph.IsThum(key.ResourceType) ? ThumNMap[key.Instance] :
-                   GameNMap[key.Instance];
+                                                                                     ResourceGraph.IsThum(key.ResourceType) ? ThumNMap[key.Instance] :
+                                                                                                                                                         GameNMap[key.Instance];
         }
+
         #endregion
     }
 }

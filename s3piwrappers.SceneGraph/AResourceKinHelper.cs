@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using s3pi.Interfaces;
+﻿using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph
 {
@@ -12,7 +8,7 @@ namespace s3piwrappers.SceneGraph
 
         public string KinName
         {
-            get { return this.kinName; }
+            get { return kinName; }
         }
 
         public virtual bool IsKinDDS
@@ -31,17 +27,17 @@ namespace s3piwrappers.SceneGraph
         }
 
         public virtual void CreateKindredRK(IResourceKey parentKey,
-            IResourceKey newParentKey, ref IResourceKey kindredKey)
+                                            IResourceKey newParentKey, ref IResourceKey kindredKey)
         {
             kindredKey.Instance = newParentKey.Instance;
         }
 
-        public abstract IResourceNode CreateKin(IResource resource, 
-            IResourceKey originalKey, object constraints);
+        public abstract IResourceNode CreateKin(IResource resource,
+                                                IResourceKey originalKey, object constraints);
 
         public AResourceKinHelper(string name)
         {
-            this.kinName = name;
+            kinName = name;
         }
     }
 }

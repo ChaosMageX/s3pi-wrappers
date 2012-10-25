@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
-using System.Collections;
-using System.Text;
 
 namespace s3piwrappers.SWB
 {
@@ -11,7 +9,7 @@ namespace s3piwrappers.SWB
     {
         protected DataElement(int APIversion, EventHandler handler, DataElement basis) : base(APIversion, handler)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
             basis.UnParse(ms);
             ms.Position = 0L;
             Parse(ms);
@@ -38,8 +36,13 @@ namespace s3piwrappers.SWB
 
         public override AHandlerElement Clone(EventHandler handler)
         {
-            return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, this});
+            return (AHandlerElement) Activator.CreateInstance(GetType(),0, handler, this);
         }
+
+//        public virtual string Value
+//        {
+//            get { return ValueBuilder; }
+//        }
 
         public override int RecommendedApiVersion
         {

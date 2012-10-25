@@ -16,14 +16,20 @@ namespace s3piwrappers
         private float mVertexAnimBlendWeight;
         private const string kRigKeyOrder = "ITG";
 
-        public TrackMask(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s) { }
+        public TrackMask(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler, s)
+        {
+        }
 
-        public TrackMask(int APIversion, EventHandler handler, TrackMask basis) 
-            : this(APIversion, handler, basis.Version, basis.RigKey, basis.VertexAnimBlendWeight, basis.Unused, basis.TrackMasks) { }
+        public TrackMask(int APIversion, EventHandler handler, TrackMask basis)
+            : this(APIversion, handler, basis.Version, basis.RigKey, basis.VertexAnimBlendWeight, basis.Unused, basis.TrackMasks)
+        {
+        }
 
-        public TrackMask(int APIversion, EventHandler handler) : this(APIversion, handler, kDefaultVersion, null, null) { }
+        public TrackMask(int APIversion, EventHandler handler) : this(APIversion, handler, kDefaultVersion, null, null)
+        {
+        }
 
-        public TrackMask(int APIversion, EventHandler handler, uint version, byte[] unused, TrackMaskList trackMasks) 
+        public TrackMask(int APIversion, EventHandler handler, uint version, byte[] unused, TrackMaskList trackMasks)
             : base(APIversion, handler, null)
         {
             mVersion = version;
@@ -33,11 +39,11 @@ namespace s3piwrappers
         }
 
         public TrackMask(int APIversion, EventHandler handler, uint version,
-            IResourceKey rigKey, float vertexAnimBlendWeight, byte[] unused, TrackMaskList trackMasks)
+                         IResourceKey rigKey, float vertexAnimBlendWeight, byte[] unused, TrackMaskList trackMasks)
             : base(APIversion, handler, null)
         {
             mVersion = version;
-            mRigKey = rigKey == null ? new TGIBlock(APIversion, handler, kRigKeyOrder) 
+            mRigKey = rigKey == null ? new TGIBlock(APIversion, handler, kRigKeyOrder)
                 : new TGIBlock(APIversion, handler, kRigKeyOrder, rigKey);
             mVertexAnimBlendWeight = vertexAnimBlendWeight;
             mUnused = unused ?? (version < 0x201 ? new byte[48] : new byte[28]);
@@ -128,17 +134,26 @@ namespace s3piwrappers
             }
         }
 
-        public string Value { get { return ValueBuilder; } }
+        public string Value
+        {
+            get { return ValueBuilder; }
+        }
 
-        public override uint ResourceType { get { return 0x033260E3; } }
+        public override uint ResourceType
+        {
+            get { return 0x033260E3; }
+        }
 
-        public override string Tag { get { return "TkMk"; } }
+        public override string Tag
+        {
+            get { return "TkMk"; }
+        }
 
         protected override void Parse(Stream s)
         {
             var br = new BinaryReader(s);
             if (FOURCC(br.ReadUInt32()) != Tag)
-                throw new InvalidDataException("Invalid Tag, Expected "+Tag);
+                throw new InvalidDataException("Invalid Tag, Expected " + Tag);
             mVersion = br.ReadUInt32();
             if (mVersion < 0x201)
             {
@@ -192,19 +207,36 @@ namespace s3piwrappers
             return s;
         }
 
-        public override AHandlerElement Clone(EventHandler handler) { return new TrackMask(0, handler, this); }
+        public override AHandlerElement Clone(EventHandler handler)
+        {
+            return new TrackMask(0, handler, this);
+        }
 
         #region Nested type: TrackMaskList
 
         public class TrackMaskList : SimpleList<Single>
         {
-            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement) { }
+            public TrackMaskList(EventHandler handler) : base(handler, ReadElement, WriteElement)
+            {
+            }
 
-            public TrackMaskList(EventHandler handler, IEnumerable<float> ilt) : base(handler, ilt, ReadElement, WriteElement) { }
+            public TrackMaskList(EventHandler handler, IEnumerable<float> ilt) : base(handler, ilt, ReadElement, WriteElement)
+            {
+            }
 
-            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement) { }
-            private static Single ReadElement(Stream s) { return new BinaryReader(s).ReadSingle(); }
-            private static void WriteElement(Stream s, Single element) { new BinaryWriter(s).Write(element); }
+            public TrackMaskList(EventHandler handler, Stream s) : base(handler, s, ReadElement, WriteElement)
+            {
+            }
+
+            private static Single ReadElement(Stream s)
+            {
+                return new BinaryReader(s).ReadSingle();
+            }
+
+            private static void WriteElement(Stream s, Single element)
+            {
+                new BinaryWriter(s).Write(element);
+            }
         }
 
         #endregion

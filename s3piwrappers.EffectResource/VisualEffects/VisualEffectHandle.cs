@@ -54,13 +54,13 @@ namespace s3piwrappers
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mEffectName = s.ReadString(StringType.ZeroDelimited);
         }
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mIndex);
             s.Write(mEffectName, StringType.ZeroDelimited);
         }

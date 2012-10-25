@@ -6,10 +6,10 @@ using s3piwrappers.AnimatedTextureEditor.ViewModels;
 
 namespace s3piwrappers.AnimatedTextureEditor
 {
-    class App
+    internal class App
     {
-        [STAThread()]
-        static void Main(params String[] args)
+        [STAThread]
+        private static void Main(params String[] args)
         {
             byte[] buffer = null;
             using (Stream s = File.OpenRead(args[0]))
@@ -24,16 +24,12 @@ namespace s3piwrappers.AnimatedTextureEditor
             app.Run(win);
             if (viewModel.IsSaving)
             {
-                byte[] output =resource.AsBytes;
-                using (var s = File.Create(args[0]))
+                byte[] output = resource.AsBytes;
+                using (FileStream s = File.Create(args[0]))
                 {
                     s.Write(output, 0, output.Length);
                 }
             }
         }
-
-
-
-       
     }
 }

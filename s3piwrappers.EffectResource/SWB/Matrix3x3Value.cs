@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
 using s3pi.Interfaces;
-using s3piwrappers.SWB.Structures;
 
 namespace s3piwrappers.SWB
 {
-    [DataGridExpandable]
     public class Matrix3x3Value : DataElement, IEquatable<Matrix3x3Value>
     {
         public Matrix3x3Value(int apiVersion, EventHandler handler, Matrix3x3Value basis)

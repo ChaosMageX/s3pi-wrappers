@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using s3pi.Interfaces;
 using s3pi.Settings;
@@ -24,28 +25,33 @@ namespace s3piwrappers
             : base(apiVersion, s)
         {
             mS3Clip = new Byte[0];
-            mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
-            mEventSectionTable = new EventTable(0, this.OnResourceChanged);
-            mEndSection = new ClipEndSection(0, this.OnResourceChanged);
+            mIKTargetInfo = new IKTargetTable(0, OnResourceChanged);
+            mEventSectionTable = new EventTable(0, OnResourceChanged);
+            mEndSection = new ClipEndSection(0, OnResourceChanged);
 
             if (base.stream == null)
             {
-                base.stream = this.UnParse();
-                this.OnResourceChanged(this, new EventArgs());
+                base.stream = UnParse();
+                OnResourceChanged(this, new EventArgs());
             }
             base.stream.Position = 0L;
             Parse(s);
         }
+
         protected override List<string> ValueBuilderFields
         {
-            get 
-            { 
-                var fields = base.ValueBuilderFields;
+            get
+            {
+                List<string> fields = base.ValueBuilderFields;
                 fields.Remove("S3Clip");
-                return fields; 
+                return fields;
             }
         }
-        public string Value { get { return ValueBuilder; } }
+
+        public string Value
+        {
+            get { return ValueBuilder; }
+        }
 
         [ElementPriority(1)]
         public uint Unknown01
@@ -133,13 +139,24 @@ namespace s3piwrappers
 
 
         [ElementPriority(3)]
-        public Byte[] S3Clip { get { return mS3Clip; } set { mS3Clip = value; OnResourceChanged(this, new EventArgs()); } }
+        public Byte[] S3Clip
+        {
+            get { return mS3Clip; }
+            set
+            {
+                mS3Clip = value;
+                OnResourceChanged(this, new EventArgs());
+            }
+        }
 
-        public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+        public override int RecommendedApiVersion
+        {
+            get { return kRecommendedApiVersion; }
+        }
 
         private void Parse(Stream s)
         {
-            BinaryReader br = new BinaryReader(s);
+            var br = new BinaryReader(s);
 
             //header
             if (br.ReadUInt32() != 0x6B20C4F3)
@@ -177,29 +194,29 @@ namespace s3piwrappers
             }
 
             s.Seek(clipOffset, SeekOrigin.Begin);
-            byte[] clipBytes = new byte[(int)clipSize];
-            mS3Clip = br.ReadBytes((int)clipSize);
+            var clipBytes = new byte[(int) clipSize];
+            mS3Clip = br.ReadBytes((int) clipSize);
             //mS3Clip = new Clip(0, this.OnResourceChanged, new MemoryStream(clipBytes));
 
 
             if (ikOffset > 0)
             {
                 s.Seek(ikOffset, SeekOrigin.Begin);
-                mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged, s);
+                mIKTargetInfo = new IKTargetTable(0, OnResourceChanged, s);
             }
             else
             {
-                mIKTargetInfo = new IKTargetTable(0, this.OnResourceChanged);
+                mIKTargetInfo = new IKTargetTable(0, OnResourceChanged);
             }
             s.Seek(actorOffset, SeekOrigin.Begin);
             mActorName = ReadZString(br);
 
 
             s.Seek(eventOffset, SeekOrigin.Begin);
-            mEventSectionTable = new EventTable(0, this.OnResourceChanged, s);
+            mEventSectionTable = new EventTable(0, OnResourceChanged, s);
 
             s.Seek(-16, SeekOrigin.End);
-            mEndSection = new ClipEndSection(0, this.OnResourceChanged, s);
+            mEndSection = new ClipEndSection(0, OnResourceChanged, s);
 
             if (checking && s.Position != s.Length)
                 throw new InvalidDataException("Unexpected end of data.");
@@ -208,13 +225,13 @@ namespace s3piwrappers
         private static void WritePadding(Stream s)
         {
             var bw = new BinaryWriter(s);
-            while ((s.Position % 4) != 0) bw.Write((byte)0x7E); //padding to next dword
+            while ((s.Position%4) != 0) bw.Write((byte) 0x7E); //padding to next dword
         }
 
         protected override Stream UnParse()
         {
-            MemoryStream s = new MemoryStream();
-            BinaryWriter bw = new BinaryWriter(s);
+            var s = new MemoryStream();
+            var bw = new BinaryWriter(s);
             bw.Write(0x6B20C4F3);
             long mainOffsetList = s.Position;
             long clipSize = 0;
@@ -256,21 +273,24 @@ namespace s3piwrappers
 
             //write header last
             s.Seek(mainOffsetList, SeekOrigin.Begin);
-            bw.Write((uint)(0));
-            bw.Write((uint)clipSize);
-            bw.Write((uint)(clipOffset - s.Position));
-            bw.Write((uint)(hasIkData ? ikOffset - s.Position : 0));
-            bw.Write((uint)(actorOffset - s.Position));
-            bw.Write((uint)(eventOffset - s.Position));
+            bw.Write((uint) (0));
+            bw.Write((uint) clipSize);
+            bw.Write((uint) (clipOffset - s.Position));
+            bw.Write((uint) (hasIkData ? ikOffset - s.Position : 0));
+            bw.Write((uint) (actorOffset - s.Position));
+            bw.Write((uint) (eventOffset - s.Position));
             bw.Write(mUnknown01);
             bw.Write(mUnknown02);
-            bw.Write((uint)(endOffset - s.Position));
+            bw.Write((uint) (endOffset - s.Position));
             bw.Write(new byte[16]);
             s.Position = s.Length;
             return s;
         }
 
-        public static string ReadZString(BinaryReader br) { return ReadZString(br, 0); }
+        public static string ReadZString(BinaryReader br)
+        {
+            return ReadZString(br, 0);
+        }
 
         public static string ReadZString(BinaryReader br, int padLength)
         {
@@ -278,7 +298,7 @@ namespace s3piwrappers
             byte b = br.ReadByte();
             while (b != 0)
             {
-                s += Encoding.ASCII.GetString(new byte[1] { b });
+                s += Encoding.ASCII.GetString(new byte[1] {b});
                 b = br.ReadByte();
             }
             if (padLength != 0)
@@ -289,7 +309,10 @@ namespace s3piwrappers
             return s;
         }
 
-        public static void WriteZString(BinaryWriter bw, String s) { WriteZString(bw, s, 0x00, 0); }
+        public static void WriteZString(BinaryWriter bw, String s)
+        {
+            WriteZString(bw, s, 0x00, 0);
+        }
 
         public static void WriteZString(BinaryWriter bw, String s, byte paddingChar, int padLength)
         {
@@ -298,7 +321,7 @@ namespace s3piwrappers
                 bw.Write(Encoding.ASCII.GetBytes(s));
             }
 
-            bw.Write((byte)0x00);
+            bw.Write((byte) 0x00);
             if (padLength > 0)
             {
                 int count = padLength - 1;
@@ -319,10 +342,18 @@ namespace s3piwrappers
             private Single mY;
             private Single mZ;
 
-            public ClipEndSection(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public ClipEndSection(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public ClipEndSection(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : this(apiVersion, handler, basis.X, basis.Y, basis.Z, basis.W) { }
+            public ClipEndSection(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+
+            public ClipEndSection(int apiVersion, EventHandler handler, ClipEndSection basis) : this(apiVersion, handler, basis.X, basis.Y, basis.Z, basis.W)
+            {
+            }
 
             public ClipEndSection(int APIversion, EventHandler handler, float x, float y, float z, float w)
                 : base(APIversion, handler)
@@ -389,14 +420,24 @@ namespace s3piwrappers
                 }
             }
 
-            public string Value { get { return ValueBuilder; } }
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
             private void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mX = br.ReadSingle();
                 mY = br.ReadSingle();
                 mZ = br.ReadSingle();
@@ -405,14 +446,17 @@ namespace s3piwrappers
 
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mX);
                 bw.Write(mY);
                 bw.Write(mZ);
                 bw.Write(mW);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new ClipEndSection(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ClipEndSection(requestedApiVersion, handler, this);
+            }
         }
 
         #endregion
@@ -421,17 +465,25 @@ namespace s3piwrappers
 
         public abstract class CountedOffsetDependentList<T> : DependentList<T> where T : AHandlerElement, IEquatable<T>
         {
-            protected CountedOffsetDependentList(EventHandler handler) : base(handler) { }
-            protected CountedOffsetDependentList(EventHandler handler, Stream s) : base(handler, s) { }
-            protected CountedOffsetDependentList(EventHandler handler, IEnumerable<T> ilt) : base(handler, ilt) { }
+            protected CountedOffsetDependentList(EventHandler handler) : base(handler)
+            {
+            }
+
+            protected CountedOffsetDependentList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
+
+            protected CountedOffsetDependentList(EventHandler handler, IEnumerable<T> ilt) : base(handler, ilt)
+            {
+            }
 
             protected override void Parse(Stream s)
             {
                 base.Clear();
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 int count = ReadCount(s);
                 long startOffset = s.Position;
-                long[] offsets = new long[count];
+                var offsets = new long[count];
                 for (int i = 0; i < count; i++)
                 {
                     offsets[i] = br.ReadUInt32() + startOffset;
@@ -441,14 +493,14 @@ namespace s3piwrappers
                 {
                     if (s.Position != offsets[i])
                         throw new InvalidDataException(String.Format("Bad Offset: Expected 0x{0:X8}, but got 0x{1:X8}.", offsets[i], s.Position));
-                    ((IList<T>)this).Add(CreateElement(s));
+                    ((IList<T>) this).Add(CreateElement(s));
                 }
             }
 
             public override void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
-                uint[] offsets = new uint[base.Count];
+                var bw = new BinaryWriter(s);
+                var offsets = new uint[base.Count];
                 WriteCount(s, Count);
                 long startOffset = s.Position;
                 for (int i = 0; i < base.Count; i++)
@@ -457,7 +509,7 @@ namespace s3piwrappers
                 }
                 for (int i = 0; i < base.Count; i++)
                 {
-                    offsets[i] = (uint)(s.Position - startOffset);
+                    offsets[i] = (uint) (s.Position - startOffset);
                     WriteElement(s, this[i]);
                 }
                 long endOffset = s.Position;
@@ -469,8 +521,6 @@ namespace s3piwrappers
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
 
-            public override void Add() { base.Add(new object[] { }); }
-
             protected abstract override T CreateElement(Stream s);
 
             protected abstract override void WriteElement(Stream s, T element);
@@ -480,18 +530,27 @@ namespace s3piwrappers
 
         #region Nested type: DestroyPropEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.DestroyProp })]
         public class DestroyPropEvent : Event
         {
             private UInt32 mPropNameHash;
 
-            public DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public DestroyPropEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public DestroyPropEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public DestroyPropEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
-            public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis) : base(apiVersion, handler, basis) { mPropNameHash = basis.PropNameHash; }
+            public DestroyPropEvent(int apiVersion, EventHandler handler, DestroyPropEvent basis) : base(apiVersion, handler, basis)
+            {
+                mPropNameHash = basis.PropNameHash;
+            }
 
-            public DestroyPropEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint propNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mPropNameHash = propNameHash; }
+            public DestroyPropEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint propNameHash, string eventName) : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
+            {
+                mPropNameHash = propNameHash;
+            }
 
             [ElementPriority(8)]
             public uint PropNameHash
@@ -510,25 +569,32 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mPropNameHash = br.ReadUInt32();
             }
 
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mPropNameHash);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new DestroyPropEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new DestroyPropEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.DestroyProp; }
+            }
         }
 
         #endregion
 
         #region Nested type: EffectEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.Effect })]
         public class EffectEvent : Event
         {
             private UInt32 mActorNameHash;
@@ -538,9 +604,13 @@ namespace s3piwrappers
             private UInt32 mUnknown02;
             private UInt32 mUnknown03;
 
-            public EffectEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public EffectEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public EffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public EffectEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
             public EffectEvent(int apiVersion, EventHandler handler, EffectEvent basis)
                 : base(apiVersion, handler, basis)
@@ -553,8 +623,8 @@ namespace s3piwrappers
                 mUnknown03 = basis.Unknown03;
             }
 
-            public EffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint unknown01, uint unknown02, uint effectNameHash, uint actorNameHash, uint slotNameHash, uint unknown03, string eventName)
-                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public EffectEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint unknown01, uint unknown02, uint effectNameHash, uint actorNameHash, uint slotNameHash, uint unknown03, string eventName)
+                : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mUnknown01 = unknown01;
                 mUnknown02 = unknown02;
@@ -651,7 +721,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mUnknown01 = br.ReadUInt32();
                 mUnknown02 = br.ReadUInt32();
                 mEffectNameHash = br.ReadUInt32();
@@ -663,7 +733,7 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mUnknown01);
                 bw.Write(mUnknown02);
                 bw.Write(mEffectNameHash);
@@ -673,7 +743,15 @@ namespace s3piwrappers
             }
 
 
-            public override AHandlerElement Clone(EventHandler handler) { return new EffectEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new EffectEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.Effect; }
+            }
         }
 
         #endregion
@@ -695,7 +773,6 @@ namespace s3piwrappers
         public abstract class Event : AHandlerElement,
                                       IEquatable<Event>
         {
-            private readonly ClipEventType mType;
             private String mEventName;
             private Single mFloat01;
             private Single mFloat02;
@@ -704,21 +781,23 @@ namespace s3piwrappers
             private UInt16 mShort01;
             private Single mTimecode;
 
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type) : this(apiVersion, handler, type, 0xC1E4, 0, 0f, -1f, -1f, 0, "") { }
-
-            protected Event(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
-                : this(apiVersion, handler, type)
+            protected Event(int apiVersion, EventHandler handler) : this(apiVersion, handler, 0xC1E4, 0, 0f, -1f, -1f, 0, "")
             {
-                mType = type;
+            }
+
+            protected Event(int apiVersion, EventHandler handler, Stream s)
+                : this(apiVersion, handler)
+            {
                 Parse(s);
             }
 
-            protected Event(int apiVersion, EventHandler handler, Event basis) : this(apiVersion, handler, basis.Type, basis.Short01, basis.Id, basis.Timecode, basis.Float01, basis.Float02, basis.Int01, basis.EventName) { }
+            protected Event(int apiVersion, EventHandler handler, Event basis) : this(apiVersion, handler, basis.Short01, basis.Id, basis.Timecode, basis.Float01, basis.Float02, basis.Int01, basis.EventName)
+            {
+            }
 
-            protected Event(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName)
+            protected Event(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName)
                 : base(APIversion, handler)
             {
-                mType = type;
                 mShort01 = short01;
                 mId = id;
                 mTimecode = timecode;
@@ -746,7 +825,7 @@ namespace s3piwrappers
             }
 
             [ElementPriority(0)]
-            public ClipEventType Type { get { return mType; } }
+            public abstract ClipEventType Type { get; }
 
             [ElementPriority(1)]
             public string EventName
@@ -846,46 +925,58 @@ namespace s3piwrappers
                 }
             }
 
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
             #region IEquatable<Event> Members
 
-            public bool Equals(Event other) { return base.Equals(other); }
+            public bool Equals(Event other)
+            {
+                return base.Equals(other);
+            }
 
             #endregion
 
-            public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type) { return CreateInstance(apiVersion, handler, type, null); }
+            public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type)
+            {
+                return CreateInstance(apiVersion, handler, type, null);
+            }
 
             public static Event CreateInstance(int apiVersion, EventHandler handler, ClipEventType type, Stream s)
             {
                 switch (type)
                 {
-                    case ClipEventType.Parent:
-                        return new ParentEvent(apiVersion, handler, type, s);
-                    case ClipEventType.DestroyProp:
-                        return new DestroyPropEvent(apiVersion, handler, type, s);
-                    case ClipEventType.Effect:
-                        return new EffectEvent(apiVersion, handler, type, s);
-                    case ClipEventType.Sound:
-                        return new SoundEvent(apiVersion, handler, type, s);
-                    case ClipEventType.Script:
-                        return new ScriptEvent(apiVersion, handler, type, s);
-                    case ClipEventType.Visibility:
-                        return new VisibilityEvent(apiVersion, handler, type, s);
-                    case ClipEventType.StopEffect:
-                        return new StopEffectEvent(apiVersion, handler, type, s);
-                    case ClipEventType.UnParent:
-                        return new UnparentEvent(apiVersion, handler, type, s);
-                    default:
-                        throw new InvalidDataException(String.Format("Event type: {0} not implemented", type));
+                case ClipEventType.Parent:
+                    return new ParentEvent(apiVersion, handler, s);
+                case ClipEventType.DestroyProp:
+                    return new DestroyPropEvent(apiVersion, handler, s);
+                case ClipEventType.Effect:
+                    return new EffectEvent(apiVersion, handler, s);
+                case ClipEventType.Sound:
+                    return new SoundEvent(apiVersion, handler, s);
+                case ClipEventType.Script:
+                    return new ScriptEvent(apiVersion, handler, s);
+                case ClipEventType.Visibility:
+                    return new VisibilityEvent(apiVersion, handler, s);
+                case ClipEventType.StopEffect:
+                    return new StopEffectEvent(apiVersion, handler, s);
+                case ClipEventType.UnParent:
+                    return new UnparentEvent(apiVersion, handler, s);
+                default:
+                    throw new InvalidDataException(String.Format("Event type: {0} not implemented", type));
                 }
             }
 
             protected virtual void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mShort01 = br.ReadUInt16();
                 mId = br.ReadUInt32();
                 mTimecode = br.ReadSingle();
@@ -894,12 +985,12 @@ namespace s3piwrappers
                 mInt01 = br.ReadUInt32();
                 uint strlen = br.ReadUInt32();
                 mEventName = ReadZString(br);
-                while ((s.Position % 4) != 0) br.ReadByte(); //padding to next DWORD
+                while ((s.Position%4) != 0) br.ReadByte(); //padding to next DWORD
             }
 
             public virtual void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mShort01);
                 bw.Write(mId);
                 bw.Write(mTimecode);
@@ -908,10 +999,13 @@ namespace s3piwrappers
                 bw.Write(mInt01);
                 bw.Write(mEventName.Length);
                 WriteZString(bw, mEventName);
-                while ((s.Position % 4) != 0) bw.Write((byte)0x00); //padding to next DWORD
+                while ((s.Position%4) != 0) bw.Write((byte) 0x00); //padding to next DWORD
             }
 
-            public override string ToString() { return mType.ToString(); }
+            public override string ToString()
+            {
+                return Type.ToString();
+            }
 
             public abstract override AHandlerElement Clone(EventHandler handler);
         }
@@ -922,12 +1016,17 @@ namespace s3piwrappers
 
         public class EventList : DependentList<Event>
         {
-            public EventList(EventHandler handler) : base(handler) { }
-            public EventList(EventHandler handler, Stream s) : base(handler, s) { }
+            public EventList(EventHandler handler) : base(handler)
+            {
+            }
+
+            public EventList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
 
             protected override void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 int count = ReadCount(s);
                 long endOffset = br.ReadUInt32() + 4 + s.Position;
                 long startOffset = br.ReadUInt32();
@@ -935,14 +1034,14 @@ namespace s3piwrappers
                     throw new Exception(String.Format("Expected startOffset of 4 at =CE= section, but got 0x{0:X8}", startOffset));
                 for (uint i = 0; i < count; i++)
                 {
-                    ((IList<Event>)this).Add(CreateElement(s));
+                    ((IList<Event>) this).Add(CreateElement(s));
                 }
                 s.Seek(endOffset, SeekOrigin.Begin);
             }
 
             public override void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 WriteCount(s, Count);
                 long offsetPos = s.Position;
                 bw.Write(0);
@@ -953,7 +1052,7 @@ namespace s3piwrappers
                     WriteElement(s, this[i]);
                 }
                 long endPos = s.Position;
-                uint size = (uint)(endPos - startPos);
+                var size = (uint) (endPos - startPos);
                 s.Seek(offsetPos, SeekOrigin.Begin);
                 bw.Write(size);
                 s.Seek(endPos, SeekOrigin.Begin);
@@ -961,13 +1060,13 @@ namespace s3piwrappers
 
             protected override Event CreateElement(Stream s)
             {
-                ClipEventType type = (ClipEventType)new BinaryReader(s).ReadUInt16();
+                var type = (ClipEventType) new BinaryReader(s).ReadUInt16();
                 return Event.CreateInstance(0, handler, type, s);
             }
 
             protected override void WriteElement(Stream s, Event element)
             {
-                new BinaryWriter(s).Write((ushort)element.Type);
+                new BinaryWriter(s).Write((ushort) element.Type);
                 element.UnParse(s);
             }
 
@@ -975,40 +1074,43 @@ namespace s3piwrappers
             {
                 if (fields != null && fields.Length > 0)
                 {
-                    if (typeof(Event).IsAssignableFrom(fields[0].GetType()))
+                    if (fields[0] is Event)
                     {
                         return fields[0].GetType();
                     }
-                    if (typeof(ClipEventType).IsAssignableFrom(fields[0].GetType()))
+                    if (fields[0] is ClipEventType)
                     {
-                        ClipEventType type = (ClipEventType)fields[0];
+                        var type = (ClipEventType) fields[0];
                         switch (type)
                         {
-                            case ClipEventType.Parent:
-                                return typeof(ParentEvent);
-                            case ClipEventType.DestroyProp:
-                                return typeof(DestroyPropEvent);
-                            case ClipEventType.Effect:
-                                return typeof(EffectEvent);
-                            case ClipEventType.Sound:
-                                return typeof(SoundEvent);
-                            case ClipEventType.Script:
-                                return typeof(ScriptEvent);
-                            case ClipEventType.Visibility:
-                                return typeof(VisibilityEvent);
-                            case ClipEventType.StopEffect:
-                                return typeof(StopEffectEvent);
-                            case ClipEventType.UnParent:
-                                return typeof(UnparentEvent);
-                            default:
-                                throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
+                        case ClipEventType.Parent:
+                            return typeof (ParentEvent);
+                        case ClipEventType.DestroyProp:
+                            return typeof (DestroyPropEvent);
+                        case ClipEventType.Effect:
+                            return typeof (EffectEvent);
+                        case ClipEventType.Sound:
+                            return typeof (SoundEvent);
+                        case ClipEventType.Script:
+                            return typeof (ScriptEvent);
+                        case ClipEventType.Visibility:
+                            return typeof (VisibilityEvent);
+                        case ClipEventType.StopEffect:
+                            return typeof (StopEffectEvent);
+                        case ClipEventType.UnParent:
+                            return typeof (UnparentEvent);
+                        default:
+                            throw new NotImplementedException(String.Format("Event type: {0} not implemented", type));
                         }
                     }
                 }
                 return base.GetElementType(fields);
             }
 
-            public override void Add() { throw new NotSupportedException(); }
+            public override void Add()
+            {
+                throw new NotSupportedException();
+            }
         }
 
         #endregion
@@ -1020,11 +1122,19 @@ namespace s3piwrappers
             private EventList mEvents;
             private UInt32 mVersion;
 
-            public EventTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mEvents = new EventList(handler); }
+            public EventTable(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mEvents = new EventList(handler);
+            }
 
-            public EventTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public EventTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
 
-            public EventTable(int apiVersion, EventHandler handler, EventTable basis) : this(apiVersion, handler, basis.Version, basis.Events) { }
+            public EventTable(int apiVersion, EventHandler handler, EventTable basis) : this(apiVersion, handler, basis.Version, basis.Events)
+            {
+            }
 
             public EventTable(int APIversion, EventHandler handler, uint version, EventList events)
                 : base(APIversion, handler)
@@ -1062,15 +1172,24 @@ namespace s3piwrappers
             }
 
 
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
-            public string Value { get { return ValueBuilder; } }
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
             private void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 string magic = Encoding.ASCII.GetString(br.ReadBytes(4));
                 if (magic != "=CE=")
                     throw new InvalidDataException(String.Format("Bad ClipEvent header: Expected \"=CE=\", but got {0}", magic));
@@ -1081,13 +1200,16 @@ namespace s3piwrappers
 
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(Encoding.ASCII.GetBytes("=CE="));
                 bw.Write(mVersion);
                 mEvents.UnParse(s);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new EventTable(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new EventTable(requestedApiVersion, handler, this);
+            }
         }
 
         #endregion
@@ -1099,13 +1221,24 @@ namespace s3piwrappers
         {
             private IKTargetList mIkTargets;
 
-            public IKChainEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mIkTargets = new IKTargetList(handler); }
+            public IKChainEntry(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mIkTargets = new IKTargetList(handler);
+            }
 
-            public IKChainEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public IKChainEntry(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
 
-            public IKChainEntry(int apiVersion, EventHandler handler, IKChainEntry basis) : this(apiVersion, handler, basis.IKTargets) { }
+            public IKChainEntry(int apiVersion, EventHandler handler, IKChainEntry basis) : this(apiVersion, handler, basis.IKTargets)
+            {
+            }
 
-            public IKChainEntry(int APIversion, EventHandler handler, IKTargetList ikTargets) : base(APIversion, handler) { mIkTargets = ikTargets; }
+            public IKChainEntry(int APIversion, EventHandler handler, IKTargetList ikTargets) : base(APIversion, handler)
+            {
+                mIkTargets = ikTargets;
+            }
 
             public IKTargetList IKTargets
             {
@@ -1120,21 +1253,33 @@ namespace s3piwrappers
                 }
             }
 
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
-            public string Value { get { return ValueBuilder; } }
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
             #region IEquatable<IKChainEntry> Members
 
-            public bool Equals(IKChainEntry other) { return base.Equals(other); }
+            public bool Equals(IKChainEntry other)
+            {
+                return base.Equals(other);
+            }
 
             #endregion
 
             private void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 if (br.ReadUInt32() != 0x7E7E7E7E)
                     throw new InvalidDataException(String.Format("Expected 0x7E7E7E7E Padding at 0x{0:X8}", s.Position - 4)); //7E7E7E7E padding
                 mIkTargets = new IKTargetList(handler, s);
@@ -1142,12 +1287,15 @@ namespace s3piwrappers
 
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
-                bw.Write(new byte[] { 0x7E, 0x7E, 0x7E, 0x7E }); //7E7E7E7E padding
+                var bw = new BinaryWriter(s);
+                bw.Write(new byte[] {0x7E, 0x7E, 0x7E, 0x7E}); //7E7E7E7E padding
                 mIkTargets.UnParse(s);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new IKChainEntry(0, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKChainEntry(0, handler, this);
+            }
         }
 
         #endregion
@@ -1156,15 +1304,27 @@ namespace s3piwrappers
 
         public class IKChainList : CountedOffsetDependentList<IKChainEntry>
         {
-            public IKChainList(EventHandler handler) : base(handler) { }
+            public IKChainList(EventHandler handler) : base(handler)
+            {
+            }
 
-            public IKChainList(EventHandler handler, Stream s) : base(handler, s) { }
+            public IKChainList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
 
-            public IKChainList(EventHandler handler, IEnumerable<IKChainEntry> ilt) : base(handler, ilt) { }
+            public IKChainList(EventHandler handler, IEnumerable<IKChainEntry> ilt) : base(handler, ilt)
+            {
+            }
 
-            protected override IKChainEntry CreateElement(Stream s) { return new IKChainEntry(0, handler, s); }
+            protected override IKChainEntry CreateElement(Stream s)
+            {
+                return new IKChainEntry(0, handler, s);
+            }
 
-            protected override void WriteElement(Stream s, IKChainEntry element) { element.UnParse(s); }
+            protected override void WriteElement(Stream s, IKChainEntry element)
+            {
+                element.UnParse(s);
+            }
         }
 
         #endregion
@@ -1177,10 +1337,19 @@ namespace s3piwrappers
             private UInt32 mIndex;
             private string mTargetName;
             private string mTargetNamespace;
-            public IKTarget(int apiVersion, EventHandler handler) : base(apiVersion, handler) { }
-            public IKTarget(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
 
-            public IKTarget(int apiVersion, EventHandler handler, IKTarget basis) : this(apiVersion, handler, basis.Index, basis.TargetNamespace, basis.TargetName) { }
+            public IKTarget(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
+
+            public IKTarget(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
+
+            public IKTarget(int apiVersion, EventHandler handler, IKTarget basis) : this(apiVersion, handler, basis.Index, basis.TargetNamespace, basis.TargetName)
+            {
+            }
 
             public IKTarget(int APIversion, EventHandler handler, uint index, string targetNamespace, string targetName)
                 : base(APIversion, handler)
@@ -1232,20 +1401,33 @@ namespace s3piwrappers
                 }
             }
 
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
-            public string Value { get { return ValueBuilder; } }
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
+
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
             #region IEquatable<IKTarget> Members
 
-            public bool Equals(IKTarget other) { return mIndex.Equals(other.mIndex) && mTargetNamespace.Equals(other.mTargetNamespace) && mTargetName.Equals(other.mTargetName); }
+            public bool Equals(IKTarget other)
+            {
+                return mIndex.Equals(other.mIndex) && mTargetNamespace.Equals(other.mTargetNamespace) && mTargetName.Equals(other.mTargetName);
+            }
 
             #endregion
 
             private void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mIndex = br.ReadUInt32();
                 mTargetNamespace = ReadZString(br, 512);
                 mTargetName = ReadZString(br, 512);
@@ -1253,15 +1435,21 @@ namespace s3piwrappers
 
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mIndex);
                 WriteZString(bw, mTargetNamespace, 0x23, 512);
                 WriteZString(bw, mTargetName, 0x23, 512);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new IKTarget(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKTarget(requestedApiVersion, handler, this);
+            }
 
-            public override string ToString() { return String.Format("(0x{0:X8}){1}:{2}", mIndex, mTargetNamespace, mTargetName); }
+            public override string ToString()
+            {
+                return String.Format("(0x{0:X8}){1}:{2}", mIndex, mTargetNamespace, mTargetName);
+            }
         }
 
         #endregion
@@ -1270,15 +1458,27 @@ namespace s3piwrappers
 
         public class IKTargetList : CountedOffsetDependentList<IKTarget>
         {
-            public IKTargetList(EventHandler handler) : base(handler) { }
+            public IKTargetList(EventHandler handler) : base(handler)
+            {
+            }
 
-            public IKTargetList(EventHandler handler, Stream s) : base(handler, s) { }
+            public IKTargetList(EventHandler handler, Stream s) : base(handler, s)
+            {
+            }
 
-            public IKTargetList(EventHandler handler, IEnumerable<IKTarget> ilt) : base(handler, ilt) { }
+            public IKTargetList(EventHandler handler, IEnumerable<IKTarget> ilt) : base(handler, ilt)
+            {
+            }
 
-            protected override IKTarget CreateElement(Stream s) { return new IKTarget(0, handler, s); }
+            protected override IKTarget CreateElement(Stream s)
+            {
+                return new IKTarget(0, handler, s);
+            }
 
-            protected override void WriteElement(Stream s, IKTarget element) { element.UnParse(s); }
+            protected override void WriteElement(Stream s, IKTarget element)
+            {
+                element.UnParse(s);
+            }
         }
 
         #endregion
@@ -1289,13 +1489,24 @@ namespace s3piwrappers
         {
             private IKChainList mIkChains;
 
-            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mIkChains = new IKChainList(base.handler); }
+            public IKTargetTable(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mIkChains = new IKChainList(base.handler);
+            }
 
-            public IKTargetTable(int apiVersion, EventHandler handler, IKTargetTable basis) : this(apiVersion, handler, basis.IKChains) { }
+            public IKTargetTable(int apiVersion, EventHandler handler, IKTargetTable basis) : this(apiVersion, handler, basis.IKChains)
+            {
+            }
 
-            public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler) { Parse(s); }
+            public IKTargetTable(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
+            {
+                Parse(s);
+            }
 
-            public IKTargetTable(int APIversion, EventHandler handler, IKChainList ikChains) : base(APIversion, handler) { mIkChains = ikChains; }
+            public IKTargetTable(int APIversion, EventHandler handler, IKChainList ikChains) : base(APIversion, handler)
+            {
+                mIkChains = ikChains;
+            }
 
             public IKChainList IKChains
             {
@@ -1310,22 +1521,41 @@ namespace s3piwrappers
                 }
             }
 
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
-            public string Value { get { return ValueBuilder; } }
-            private void Parse(Stream s) { mIkChains = new IKChainList(handler, s); }
-            public void UnParse(Stream s) { mIkChains.UnParse(s); }
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new IKTargetTable(0, handler, this); }
+            private void Parse(Stream s)
+            {
+                mIkChains = new IKChainList(handler, s);
+            }
+
+            public void UnParse(Stream s)
+            {
+                mIkChains.UnParse(s);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new IKTargetTable(0, handler, this);
+            }
         }
 
         #endregion
 
         #region Nested type: ParentEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.Parent })]
         public class ParentEvent : Event
         {
             private UInt32 mActorNameHash;
@@ -1334,9 +1564,14 @@ namespace s3piwrappers
             private Single[] mTransform;
             private UInt32 mUnknown01;
 
-            public ParentEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { mTransform = new Single[16]; }
+            public ParentEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mTransform = new Single[16];
+            }
 
-            public ParentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public ParentEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
             public ParentEvent(int apiVersion, EventHandler handler, ParentEvent basis)
                 : base(apiVersion, handler, basis)
@@ -1349,8 +1584,8 @@ namespace s3piwrappers
             }
 
 
-            public ParentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName, uint actorNameHash, uint objectNameHash, uint slotNameHash, uint unknown01, float[] transform)
-                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public ParentEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName, uint actorNameHash, uint objectNameHash, uint slotNameHash, uint unknown01, float[] transform)
+                : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mActorNameHash = actorNameHash;
                 mObjectNameHash = objectNameHash;
@@ -1432,7 +1667,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mActorNameHash = br.ReadUInt32();
                 mObjectNameHash = br.ReadUInt32();
                 mSlotNameHash = br.ReadUInt32();
@@ -1447,7 +1682,7 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mActorNameHash);
                 bw.Write(mObjectNameHash);
                 bw.Write(mSlotNameHash);
@@ -1455,45 +1690,79 @@ namespace s3piwrappers
                 for (int i = 0; i < 16; i++) bw.Write(mTransform[i]);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new ParentEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ParentEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.Parent; }
+            }
         }
 
         #endregion
 
         #region Nested type: ScriptEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.Script })]
         public class ScriptEvent : Event
         {
-            public ScriptEvent(int apiVersion, EventHandler handler, ScriptEvent basis) : base(apiVersion, handler, basis) { }
+            public ScriptEvent(int apiVersion, EventHandler handler, ScriptEvent basis) : base(apiVersion, handler, basis)
+            {
+            }
 
-            public ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public ScriptEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public ScriptEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public ScriptEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
-            public ScriptEvent(int apiVersion, EventHandler handler, Event basis) : base(apiVersion, handler, basis) { }
+            public ScriptEvent(int apiVersion, EventHandler handler, Event basis) : base(apiVersion, handler, basis)
+            {
+            }
 
-            public ScriptEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { }
+            public ScriptEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string eventName) : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
+            {
+            }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new ScriptEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new ScriptEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.Script; }
+            }
         }
 
         #endregion
 
         #region Nested type: SoundEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.Sound })]
         public class SoundEvent : Event
         {
             private String mSoundName;
 
-            public SoundEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public SoundEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public SoundEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public SoundEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
-            public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis) : base(apiVersion, handler, basis) { mSoundName = basis.SoundName; }
+            public SoundEvent(int apiVersion, EventHandler handler, SoundEvent basis) : base(apiVersion, handler, basis)
+            {
+                mSoundName = basis.SoundName;
+            }
 
-            public SoundEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string soundName, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mSoundName = soundName; }
+            public SoundEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, string soundName, string eventName) : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
+            {
+                mSoundName = soundName;
+            }
 
             [ElementPriority(8)]
             public string SoundName
@@ -1512,33 +1781,44 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mSoundName = ReadZString(br, 128);
             }
 
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 WriteZString(bw, mSoundName, 0x00, 128);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new SoundEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new SoundEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.Sound; }
+            }
         }
 
         #endregion
 
         #region Nested type: StopEffectEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.StopEffect })]
         public class StopEffectEvent : Event
         {
             private UInt32 mEffectNameHash;
             private UInt32 mUnknown01;
 
-            public StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public StopEffectEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public StopEffectEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public StopEffectEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
             public StopEffectEvent(int apiVersion, EventHandler handler, StopEffectEvent basis)
                 : base(apiVersion, handler, basis)
@@ -1547,8 +1827,8 @@ namespace s3piwrappers
                 mUnknown01 = basis.Unknown01;
             }
 
-            public StopEffectEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint effectNameHash, uint unknown01, string eventName)
-                : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName)
+            public StopEffectEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint effectNameHash, uint unknown01, string eventName)
+                : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
             {
                 mEffectNameHash = effectNameHash;
                 mUnknown01 = unknown01;
@@ -1585,7 +1865,7 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mEffectNameHash = br.ReadUInt32();
                 mUnknown01 = br.ReadUInt32();
             }
@@ -1593,31 +1873,49 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mEffectNameHash);
                 bw.Write(mUnknown01);
             }
 
 
-            public override AHandlerElement Clone(EventHandler handler) { return new StopEffectEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new StopEffectEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.StopEffect; }
+            }
         }
 
         #endregion
 
         #region Nested type: UnparentEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.UnParent })]
         public class UnparentEvent : Event
         {
             private UInt32 mObjectNameHash;
 
-            public UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public UnparentEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public UnparentEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public UnparentEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
-            public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis) : base(apiVersion, handler, basis) { mObjectNameHash = basis.ObjectNameHash; }
+            public UnparentEvent(int apiVersion, EventHandler handler, UnparentEvent basis) : base(apiVersion, handler, basis)
+            {
+                mObjectNameHash = basis.ObjectNameHash;
+            }
 
-            public UnparentEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint objectNameHash, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mObjectNameHash = objectNameHash; }
+            public UnparentEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, uint objectNameHash, string eventName)
+                : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
+            {
+                mObjectNameHash = objectNameHash;
+            }
 
             [ElementPriority(8)]
             public uint ObjectNameHash
@@ -1636,36 +1934,53 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mObjectNameHash = br.ReadUInt32();
             }
 
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mObjectNameHash);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new UnparentEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new UnparentEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.UnParent; }
+            }
         }
 
         #endregion
 
         #region Nested type: VisibilityEvent
 
-        [ConstructorParameters(new object[] { ClipEventType.Visibility })]
         public class VisibilityEvent : Event
         {
             private Single mVisibility;
 
-            public VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type) : base(apiVersion, handler, type) { }
+            public VisibilityEvent(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+            }
 
-            public VisibilityEvent(int apiVersion, EventHandler handler, ClipEventType type, Stream s) : base(apiVersion, handler, type, s) { }
+            public VisibilityEvent(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+            {
+            }
 
-            public VisibilityEvent(int apiVersion, EventHandler handler, VisibilityEvent basis) : base(apiVersion, handler, basis) { mVisibility = basis.Visibility; }
+            public VisibilityEvent(int apiVersion, EventHandler handler, VisibilityEvent basis) : base(apiVersion, handler, basis)
+            {
+                mVisibility = basis.Visibility;
+            }
 
-            public VisibilityEvent(int APIversion, EventHandler handler, ClipEventType type, ushort short01, uint id, float timecode, float float01, float float02, uint int01, float visibility, string eventName) : base(APIversion, handler, type, short01, id, timecode, float01, float02, int01, eventName) { mVisibility = visibility; }
+            public VisibilityEvent(int APIversion, EventHandler handler, ushort short01, uint id, float timecode, float float01, float float02, uint int01, float visibility, string eventName) : base(APIversion, handler, short01, id, timecode, float01, float02, int01, eventName)
+            {
+                mVisibility = visibility;
+            }
 
             [ElementPriority(8)]
             public float Visibility
@@ -1684,25 +1999,32 @@ namespace s3piwrappers
             protected override void Parse(Stream s)
             {
                 base.Parse(s);
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mVisibility = br.ReadSingle();
             }
 
             public override void UnParse(Stream s)
             {
                 base.UnParse(s);
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mVisibility);
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { return new VisibilityEvent(requestedApiVersion, handler, this); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new VisibilityEvent(requestedApiVersion, handler, this);
+            }
+
+            public override ClipEventType Type
+            {
+                get { return ClipEventType.Visibility; }
+            }
         }
 
         #endregion
 
         public class Clip : AHandlerElement
         {
-
             #region Fields
 
             private String mAnimName;
@@ -1805,14 +2127,20 @@ namespace s3piwrappers
                     OnElementChanged();
                 }
             }
-            
-            public string Value { get { return ValueBuilder; } }
+
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
             #endregion
 
             #region Constructors
 
-            public Clip(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mTracks = new TrackList(handler); }
+            public Clip(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mTracks = new TrackList(handler);
+            }
 
             public Clip(int apiVersion, EventHandler handler, Stream s)
                 : base(apiVersion, handler)
@@ -1827,8 +2155,8 @@ namespace s3piwrappers
 
             protected void Parse(Stream s)
             {
-                BinaryReader br = new BinaryReader(s);
-                var foo = FOURCC(br.ReadUInt64());
+                var br = new BinaryReader(s);
+                string foo = FOURCC(br.ReadUInt64());
                 if (foo != "_pilC3S_")
                     throw new Exception("Bad clip header: Expected \"_S3Clip_\"");
                 mVersion = br.ReadUInt32();
@@ -1847,48 +2175,48 @@ namespace s3piwrappers
                 if (Settings.Checking && s.Position != curveDataOffset)
                     throw new InvalidDataException("Bad Curve Data Offset");
 
-                List<CurveDataInfo> curveDataInfos = new List<CurveDataInfo>();
+                var curveDataInfos = new List<CurveDataInfo>();
                 for (int i = 0; i < curveCount; i++)
                 {
-                    CurveDataInfo p = new CurveDataInfo();
+                    var p = new CurveDataInfo();
                     p.FrameDataOffset = br.ReadUInt32();
                     p.TrackKey = br.ReadUInt32();
                     p.Offset = br.ReadSingle();
                     p.Scale = br.ReadSingle();
                     p.FrameCount = br.ReadUInt16();
                     p.Flags = new CurveDataFlags(br.ReadByte());
-                    p.Type = (CurveType)br.ReadByte();
+                    p.Type = (CurveType) br.ReadByte();
                     curveDataInfos.Add(p);
                 }
 
                 if (Settings.Checking && s.Position != animNameOffset)
                     throw new InvalidDataException("Bad Name Offset");
-                mAnimName = ClipResource.ReadZString(br);
+                mAnimName = ReadZString(br);
                 if (Settings.Checking && s.Position != srcNameOffset)
                     throw new InvalidDataException("Bad SourceName Offset");
-                mSrcName = ClipResource.ReadZString(br);
+                mSrcName = ReadZString(br);
 
                 if (Settings.Checking && s.Position != frameDataOffset)
                     throw new InvalidDataException("Bad Indexed Floats Offset");
-                List<float> indexedFloats = new List<float>();
+                var indexedFloats = new List<float>();
                 for (int i = 0; i < indexedFloatCount; i++)
                 {
                     indexedFloats.Add(br.ReadSingle());
                 }
 
-                Dictionary<uint, List<Curve>> trackMap = new Dictionary<uint, List<Curve>>();
+                var trackMap = new Dictionary<uint, List<Curve>>();
                 for (int i = 0; i < curveDataInfos.Count; i++)
                 {
                     CurveDataInfo curveDataInfo = curveDataInfos[i];
                     if (Settings.Checking && s.Position != curveDataInfo.FrameDataOffset)
                         throw new InvalidDataException("Bad FrameData offset.");
-                    Curve curve = (Curve)Activator.CreateInstance(Curve.GetCurveType(curveDataInfo.Type), new object[] { 0, handler, curveDataInfo.Type, s, curveDataInfo, indexedFloats });
+                    var curve = (Curve) Activator.CreateInstance(Curve.GetCurveType(curveDataInfo.Type), new object[] {0, handler, curveDataInfo.Type, s, curveDataInfo, indexedFloats});
                     if (!trackMap.ContainsKey(curveDataInfo.TrackKey)) trackMap[curveDataInfo.TrackKey] = new List<Curve>();
                     trackMap[curveDataInfo.TrackKey].Add(curve);
                 }
 
-                List<Track> tracks = new List<Track>();
-                foreach (var k in trackMap.Keys)
+                var tracks = new List<Track>();
+                foreach (uint k in trackMap.Keys)
                 {
                     tracks.Add(new Track(0, handler, k, trackMap[k]));
                 }
@@ -1900,7 +2228,7 @@ namespace s3piwrappers
 
             public void UnParse(Stream s)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(Encoding.ASCII.GetBytes("_pilC3S_"));
                 bw.Write(mVersion);
                 bw.Write(mUnknown01);
@@ -1908,29 +2236,29 @@ namespace s3piwrappers
                 bw.Write(mMaxFrameCount);
                 bw.Write(Unknown02);
 
-                List<float> indexedFloats = new List<float>();
-                List<CurveDataInfo> curveDataInfos = new List<CurveDataInfo>();
+                var indexedFloats = new List<float>();
+                var curveDataInfos = new List<CurveDataInfo>();
 
 
                 UInt32 curveCount = 0;
                 byte[] frameData;
                 using (var frameStream = new MemoryStream())
                 {
-                    foreach (var track in Tracks)
+                    foreach (Track track in Tracks)
                     {
-                        foreach (var curve in track.Curves)
+                        foreach (Curve curve in track.Curves)
                         {
                             curveCount++;
                             Single scale = 1f;
                             Single offset = 0f;
 
-                            var values = curve.SelectFloats();
+                            IEnumerable<float> values = curve.SelectFloats();
                             if (values.Any())
                             {
                                 float min = values.Min();
                                 float max = values.Max();
-                                offset = (min + max) / 2f;
-                                scale = (min - max) / 2f;
+                                offset = (min + max)/2f;
+                                scale = (min - max)/2f;
                             }
                             //not sure what really determines whether to index or not
                             Boolean isIndexed = curve.Frames.Count == 0 ? true : curve.Type == CurveType.Position ? IsIndexed(curve.Frames.Cast<Float3Frame>()) : false;
@@ -1938,7 +2266,7 @@ namespace s3piwrappers
                             flags.Format = isIndexed ? CurveDataFormat.Indexed : CurveDataFormat.Packed;
                             flags.Type = Curve.GetDataType(curve.Type);
                             flags.Static = curve.Frames.Count == 0;
-                            var curveDataInfo = new CurveDataInfo { Offset = offset, Flags = flags, FrameCount = curve.Frames.Count, FrameDataOffset = (UInt32)frameStream.Position, Scale = scale, TrackKey = track.TrackKey, Type = curve.Type };
+                            var curveDataInfo = new CurveDataInfo {Offset = offset, Flags = flags, FrameCount = curve.Frames.Count, FrameDataOffset = (UInt32) frameStream.Position, Scale = scale, TrackKey = track.TrackKey, Type = curve.Type};
                             curve.UnParse(frameStream, curveDataInfo, indexedFloats);
                             curveDataInfos.Add(curveDataInfo);
                         }
@@ -1953,29 +2281,29 @@ namespace s3piwrappers
                 uint frameDataOffset = 0;
                 uint animNameOffset = 0;
                 uint srcNameOffset = 0;
-                s.Seek(4 * sizeof(UInt32), SeekOrigin.Current);
+                s.Seek(4*sizeof (UInt32), SeekOrigin.Current);
 
 
-                curveDataOffset = (uint)s.Position;
-                uint frameOffset = (uint)(curveDataOffset + (20 * curveDataInfos.Count) + mAnimName.Length + mSrcName.Length + 2 + (sizeof(Single) * indexedFloats.Count));
-                foreach (var curveDataInfo in curveDataInfos)
+                curveDataOffset = (uint) s.Position;
+                var frameOffset = (uint) (curveDataOffset + (20*curveDataInfos.Count) + mAnimName.Length + mSrcName.Length + 2 + (sizeof (Single)*indexedFloats.Count));
+                foreach (CurveDataInfo curveDataInfo in curveDataInfos)
                 {
                     bw.Write((curveDataInfo.FrameDataOffset + frameOffset));
                     bw.Write(curveDataInfo.TrackKey);
                     bw.Write(curveDataInfo.Offset);
                     bw.Write(curveDataInfo.Scale);
-                    bw.Write((UInt16)curveDataInfo.FrameCount);
+                    bw.Write((UInt16) curveDataInfo.FrameCount);
                     bw.Write(curveDataInfo.Flags.Raw);
-                    bw.Write((Byte)curveDataInfo.Type);
+                    bw.Write((Byte) curveDataInfo.Type);
                 }
 
-                animNameOffset = (uint)s.Position;
-                ClipResource.WriteZString(bw, AnimName);
-                srcNameOffset = (uint)s.Position;
-                ClipResource.WriteZString(bw, SrcName);
+                animNameOffset = (uint) s.Position;
+                WriteZString(bw, AnimName);
+                srcNameOffset = (uint) s.Position;
+                WriteZString(bw, SrcName);
 
-                frameDataOffset = (uint)s.Position;
-                foreach (var f in indexedFloats) bw.Write(f);
+                frameDataOffset = (uint) s.Position;
+                foreach (float f in indexedFloats) bw.Write(f);
                 bw.Write(frameData);
                 s.Seek(offsets, SeekOrigin.Begin);
                 bw.Write(curveDataOffset);
@@ -1988,30 +2316,47 @@ namespace s3piwrappers
             #endregion
 
             private const int kRecommendedApiVersion = 1;
-            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
 
-            public override int RecommendedApiVersion { get { return kRecommendedApiVersion; } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(0, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return kRecommendedApiVersion; }
+            }
 
             private static Boolean IsIndexed(IEnumerable<Float3Frame> source)
             {
                 if (source.Count() < 5) return false;
-                var x = source.Select(frame => frame.Data[0]).Distinct();
-                var y = source.Select(frame => frame.Data[0]).Distinct();
-                var z = source.Select(frame => frame.Data[0]).Distinct();
+                IEnumerable<float> x = source.Select(frame => frame.Data[0]).Distinct();
+                IEnumerable<float> y = source.Select(frame => frame.Data[0]).Distinct();
+                IEnumerable<float> z = source.Select(frame => frame.Data[0]).Distinct();
 
                 return x.Count() == 1 && x.First() == 0 || y.Count() == 1 && y.First() == 0 || z.Count() == 1 && z.First() == 0;
             }
 
-            public override AHandlerElement Clone(EventHandler handler) { throw new NotImplementedException(); }
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                throw new NotImplementedException();
+            }
         }
+
         public class Track : AHandlerElement,
                              IEquatable<Track>
         {
             private CurveList mCurves;
             private UInt32 mTrackKey;
-            public Track(int APIversion, EventHandler handler) : base(APIversion, handler) { mCurves = new CurveList(handler); }
 
-            public Track(int APIversion, EventHandler handler, Track basis) : this(APIversion, handler, basis.mTrackKey, basis.Curves) { }
+            public Track(int APIversion, EventHandler handler) : base(APIversion, handler)
+            {
+                mCurves = new CurveList(handler);
+            }
+
+            public Track(int APIversion, EventHandler handler, Track basis) : this(APIversion, handler, basis.mTrackKey, basis.Curves)
+            {
+            }
 
             public Track(int APIversion, EventHandler handler, UInt32 trackKey, IEnumerable<Curve> curves)
                 : this(APIversion, handler)
@@ -2044,29 +2389,64 @@ namespace s3piwrappers
                     OnElementChanged();
                 }
             }
-            public override List<string> ContentFields { get { return GetContentFields(requestedApiVersion, GetType()); } }
-            public override int RecommendedApiVersion { get { return 1; } }
-            public string Value { get { return ValueBuilder; } }
+
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(requestedApiVersion, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return 1; }
+            }
+
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
+
             #region IEquatable<Track> Members
-            public bool Equals(Track other) { return mTrackKey.Equals(other.mTrackKey); }
+
+            public bool Equals(Track other)
+            {
+                return mTrackKey.Equals(other.mTrackKey);
+            }
+
             #endregion
-            public override AHandlerElement Clone(EventHandler handler) { return new Track(0, handler, this); }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return new Track(0, handler, this);
+            }
         }
+
         public class TrackList : DependentList<Track>
         {
-            public TrackList(EventHandler handler) : base(handler) { }
-            public TrackList(EventHandler handler, IEnumerable<Track> ilt) : base(handler, ilt) { }
-            public TrackList(EventHandler handler, long size) : base(handler, size) { }
+            public TrackList(EventHandler handler) : base(handler)
+            {
+            }
 
+            public TrackList(EventHandler handler, IEnumerable<Track> ilt) : base(handler, ilt)
+            {
+            }
 
-            public override void Add() { base.Add(new object[] { }); }
+            public TrackList(EventHandler handler, long size) : base(handler, size)
+            {
+            }
 
-            protected override Track CreateElement(Stream s) { throw new NotSupportedException(); }
+            protected override Track CreateElement(Stream s)
+            {
+                throw new NotSupportedException();
+            }
 
-            protected override void WriteElement(Stream s, Track element) { throw new NotSupportedException(); }
+            protected override void WriteElement(Stream s, Track element)
+            {
+                throw new NotSupportedException();
+            }
         }
+
         public abstract class Curve : AHandlerElement,
-                                  IEquatable<Curve>
+                                      IEquatable<Curve>
         {
             protected FrameList mFrames;
             protected CurveType mType;
@@ -2075,15 +2455,24 @@ namespace s3piwrappers
                 : base(apiVersion, handler)
             {
                 mType = type;
-                mFrames = new FrameList(handler, Curve.GetDataType(type));
+                mFrames = new FrameList(handler, GetDataType(type));
             }
 
-            protected Curve(int apiVersion, EventHandler handler, Curve basis) : this(apiVersion, handler, basis.mType) { mFrames = new FrameList(handler, Curve.GetDataType(mType), basis.Frames); }
+            protected Curve(int apiVersion, EventHandler handler, Curve basis) : this(apiVersion, handler, basis.mType)
+            {
+                mFrames = new FrameList(handler, GetDataType(mType), basis.Frames);
+            }
 
-            public Curve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler, type) { Parse(s, info, indexedFloats); }
+            public Curve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler, type)
+            {
+                Parse(s, info, indexedFloats);
+            }
 
             [ElementPriority(2)]
-            public CurveType Type { get { return mType; } }
+            public CurveType Type
+            {
+                get { return mType; }
+            }
 
             [ElementPriority(3)]
             public FrameList Frames
@@ -2098,126 +2487,186 @@ namespace s3piwrappers
                     }
                 }
             }
+
             protected override List<string> ValueBuilderFields
             {
                 get
                 {
-                    var f = base.ValueBuilderFields;
+                    List<string> f = base.ValueBuilderFields;
                     f.Remove("Frames");
                     return f;
                 }
             }
-            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
 
-            public override int RecommendedApiVersion { get { return 1; } }
-            public string Value { get { return ValueBuilder; } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(0, GetType()); }
+            }
+
+            public override int RecommendedApiVersion
+            {
+                get { return 1; }
+            }
+
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
             #region IEquatable<Curve> Members
 
-            public bool Equals(Curve other) { return base.Equals(other); }
+            public bool Equals(Curve other)
+            {
+                return base.Equals(other);
+            }
 
             #endregion
+
             public static Int32 GetBitsPerFloat(CurveDataType curveType)
             {
                 switch (curveType)
                 {
-                    case CurveDataType.Float3:
-                        return 10;
-                    case CurveDataType.Float4:
-                        return 12;
-                    default: throw new NotSupportedException();
+                case CurveDataType.Float3:
+                    return 10;
+                case CurveDataType.Float4:
+                    return 12;
+                default:
+                    throw new NotSupportedException();
                 }
             }
+
             public static Int32 GetFloatCount(CurveDataType curveType)
             {
                 switch (curveType)
                 {
-                    case CurveDataType.Float3:
-                        return 3;
-                    case CurveDataType.Float4:
-                        return 4;
-                    default: throw new NotSupportedException();
+                case CurveDataType.Float3:
+                    return 3;
+                case CurveDataType.Float4:
+                    return 4;
+                default:
+                    throw new NotSupportedException();
                 }
             }
+
             public static Int32 GetPackedCount(CurveDataType curveType)
             {
                 switch (curveType)
                 {
-                    case CurveDataType.Float3:
-                        return 1;
-                    case CurveDataType.Float4:
-                        return 4;
-                    default: throw new NotSupportedException();
+                case CurveDataType.Float3:
+                    return 1;
+                case CurveDataType.Float4:
+                    return 4;
+                default:
+                    throw new NotSupportedException();
                 }
             }
+
             public static Type GetCurveType(CurveType t)
             {
                 switch (t)
                 {
-                    case CurveType.Position:
-                        return typeof(PositionCurve);
-                    case CurveType.Orientation:
-                        return typeof(OrientationCurve);
-                    default:
-                        throw new NotSupportedException();
+                case CurveType.Position:
+                    return typeof (PositionCurve);
+                case CurveType.Orientation:
+                    return typeof (OrientationCurve);
+                default:
+                    throw new NotSupportedException();
                 }
             }
+
             public static CurveDataType GetDataType(CurveType t)
             {
                 switch (t)
                 {
-                    case CurveType.Position:
-                        return CurveDataType.Float3;
-                    case CurveType.Orientation:
-                        return CurveDataType.Float4;
-                    default:
-                        throw new NotSupportedException();
+                case CurveType.Position:
+                    return CurveDataType.Float3;
+                case CurveType.Orientation:
+                    return CurveDataType.Float4;
+                default:
+                    throw new NotSupportedException();
                 }
             }
-            protected virtual void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats) { mFrames = new FrameList(handler, Curve.GetDataType(mType), s, info, indexedFloats); }
-            public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats) { mFrames.UnParse(s, info, indexedFloats); }
-            public override AHandlerElement Clone(EventHandler handler) { return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this }); }
+
+            protected virtual void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
+            {
+                mFrames = new FrameList(handler, GetDataType(mType), s, info, indexedFloats);
+            }
+
+            public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
+            {
+                mFrames.UnParse(s, info, indexedFloats);
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, this});
+            }
 
             public virtual IEnumerable<float> SelectFloats()
             {
                 var floats = new List<float>();
-                foreach (var f in mFrames) floats.AddRange(f.GetFloatValues());
+                foreach (Frame f in mFrames) floats.AddRange(f.GetFloatValues());
                 return floats;
             }
         }
-        [ConstructorParameters(new object[] { CurveType.Position })]
+
         public class PositionCurve : Curve
         {
-            public PositionCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type) { }
-            public PositionCurve(int apiVersion, EventHandler handler, PositionCurve basis) : base(apiVersion, handler, basis) { }
-            public PositionCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats) { }
+            public PositionCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type)
+            {
+            }
+
+            public PositionCurve(int apiVersion, EventHandler handler, PositionCurve basis) : base(apiVersion, handler, basis)
+            {
+            }
+
+            public PositionCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats)
+            {
+            }
         }
-        [ConstructorParameters(new object[] { CurveType.Orientation })]
+
         public class OrientationCurve : Curve
         {
-            public OrientationCurve(int apiVersion, EventHandler handler, OrientationCurve basis) : base(apiVersion, handler, basis) { }
-            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type) { }
-            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats) { }
+            public OrientationCurve(int apiVersion, EventHandler handler, OrientationCurve basis) : base(apiVersion, handler, basis)
+            {
+            }
+
+            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type) : base(apiVersion, handler, type)
+            {
+            }
+
+            public OrientationCurve(int apiVersion, EventHandler handler, CurveType type, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, type, s, info, indexedFloats)
+            {
+            }
         }
+
         public class CurveList : DependentList<Curve>
         {
-            public CurveList(EventHandler handler, IEnumerable<Curve> ilt) : base(handler, ilt) { }
+            public CurveList(EventHandler handler, IEnumerable<Curve> ilt) : base(handler, ilt)
+            {
+            }
 
-            public CurveList(EventHandler handler) : base(handler) { }
+            public CurveList(EventHandler handler) : base(handler)
+            {
+            }
 
             protected override Type GetElementType(params object[] fields)
             {
                 if (fields.Length == 1)
                 {
-                    if (typeof(CurveType).IsAssignableFrom(fields[0].GetType())) return Curve.GetCurveType((CurveType)fields[0]);
-                    if (typeof(Curve).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
-
+                    if (fields[0] is CurveType) return Curve.GetCurveType((CurveType) fields[0]);
+                    if (fields[0] is Curve) return fields[0].GetType();
                 }
                 return base.GetElementType(fields);
             }
 
             #region Unused
-            public override void Add() { throw new NotSupportedException(); }
+
+            public override void Add()
+            {
+                throw new NotSupportedException();
+            }
+
             protected override Curve CreateElement(Stream s)
             {
                 throw new NotSupportedException();
@@ -2227,16 +2676,21 @@ namespace s3piwrappers
             {
                 throw new NotSupportedException();
             }
+
             #endregion
         }
+
         public abstract class Frame : AHandlerElement,
-                                  IEquatable<Frame>
+                                      IEquatable<Frame>
         {
             protected float[] mData;
             protected UInt16 mFlags;
             protected UInt16 mFrameIndex;
 
-            protected Frame(int apiVersion, EventHandler handler) : base(apiVersion, handler) { mData = new float[Curve.GetFloatCount(DataType)]; }
+            protected Frame(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+            {
+                mData = new float[Curve.GetFloatCount(DataType)];
+            }
 
             protected Frame(int apiVersion, EventHandler handler, Frame basis)
                 : base(apiVersion, handler)
@@ -2246,7 +2700,11 @@ namespace s3piwrappers
                 mFlags = basis.mFlags;
             }
 
-            public Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler) { Parse(s, info, indexedFloats); }
+            public Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : this(apiVersion, handler)
+            {
+                Parse(s, info, indexedFloats);
+            }
+
             public abstract CurveDataType DataType { get; }
             protected abstract UInt64 ReadPacked(Stream stream);
             protected abstract void WritePacked(Stream stream, UInt64 packed);
@@ -2281,190 +2739,256 @@ namespace s3piwrappers
             }
 
             [ElementPriority(3)]
-            public float[] Data { get { return mData; } set { mData = value; } }
+            public float[] Data
+            {
+                get { return mData; }
+                set { mData = value; }
+            }
 
-            public string Value { get { return ValueBuilder; } }
+            public string Value
+            {
+                get { return ValueBuilder; }
+            }
 
-            public override List<string> ContentFields { get { return GetContentFields(0, GetType()); } }
+            public override List<string> ContentFields
+            {
+                get { return GetContentFields(0, GetType()); }
+            }
 
-            public override int RecommendedApiVersion { get { return 1; } }
+            public override int RecommendedApiVersion
+            {
+                get { return 1; }
+            }
 
             #region IEquatable<Frame> Members
 
             public bool Equals(Frame other)
             {
-                var a = GetFloatValues();
-                var b = other.GetFloatValues();
+                IEnumerable<float> a = GetFloatValues();
+                IEnumerable<float> b = other.GetFloatValues();
                 if (a.Count() != b.Count()) return false;
                 return !(from af in a from bf in b where af != bf select af).Any();
             }
 
             #endregion
+
             public static Type GetFrameType(CurveDataType dataType)
             {
                 switch (dataType)
                 {
-                    case CurveDataType.Float3:
-                        return typeof(Float3Frame);
-                    case CurveDataType.Float4:
-                        return typeof(Float4Frame);
-                    default: throw new NotSupportedException();
+                case CurveDataType.Float3:
+                    return typeof (Float3Frame);
+                case CurveDataType.Float4:
+                    return typeof (Float4Frame);
+                default:
+                    throw new NotSupportedException();
                 }
             }
 
 
             public void Parse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
             {
-                BinaryReader br = new BinaryReader(s);
+                var br = new BinaryReader(s);
                 mFrameIndex = br.ReadUInt16();
-                var flags = br.ReadUInt16();
-                mFlags = (UInt16)(flags >> 4);
+                ushort flags = br.ReadUInt16();
+                mFlags = (UInt16) (flags >> 4);
 
                 switch (info.Flags.Format)
                 {
-                    case CurveDataFormat.Indexed:
+                case CurveDataFormat.Indexed:
 
-                        for (int floatsRead = 0; floatsRead < Curve.GetFloatCount(DataType); floatsRead++)
+                    for (int floatsRead = 0; floatsRead < Curve.GetFloatCount(DataType); floatsRead++)
+                    {
+                        float val = indexedFloats[br.ReadUInt16()];
+                        if ((flags & 1 << floatsRead) != 0 ? true : false) val *= -1;
+                        mData[floatsRead] = Unpack(val, info.Offset, info.Scale);
+                    }
+                    break;
+                case CurveDataFormat.Packed:
+                    for (int packedRead = 0; packedRead < Curve.GetPackedCount(DataType); packedRead++)
+                    {
+                        ulong packed = ReadPacked(s);
+                        for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType)/Curve.GetPackedCount(DataType); packedIndex++)
                         {
-                            var val = indexedFloats[br.ReadUInt16()];
-                            if ((flags & 1 << floatsRead) != 0 ? true : false) val *= -1;
-                            mData[floatsRead] = Unpack(val, info.Offset, info.Scale);
-
+                            int floatIndex = packedIndex + packedRead;
+                            int bitsPerFloat = Curve.GetBitsPerFloat(DataType);
+                            var maxPackedVal = (ulong) (Math.Pow(2, bitsPerFloat) - 1);
+                            ulong mask = (maxPackedVal << (packedIndex*bitsPerFloat));
+                            float val = ((packed & mask) >> (packedIndex*bitsPerFloat))/(float) maxPackedVal;
+                            if ((flags & 1 << floatIndex) != 0 ? true : false) val *= -1;
+                            mData[floatIndex] = Unpack(val, info.Offset, info.Scale);
                         }
-                        break;
-                    case CurveDataFormat.Packed:
-                        for (int packedRead = 0; packedRead < Curve.GetPackedCount(DataType); packedRead++)
-                        {
-                            ulong packed = ReadPacked(s);
-                            for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType) / Curve.GetPackedCount(DataType); packedIndex++)
-                            {
-                                int floatIndex = packedIndex + packedRead;
-                                int bitsPerFloat = Curve.GetBitsPerFloat(DataType);
-                                ulong maxPackedVal = (ulong)(Math.Pow(2, bitsPerFloat) - 1);
-                                ulong mask = (maxPackedVal << (packedIndex * bitsPerFloat));
-                                float val = ((packed & mask) >> (packedIndex * bitsPerFloat)) / (float)maxPackedVal;
-                                if ((flags & 1 << floatIndex) != 0 ? true : false) val *= -1;
-                                mData[floatIndex] = Unpack(val, info.Offset, info.Scale);
-                            }
-                        }
-                        break;
+                    }
+                    break;
                 }
-
             }
+
             public static float Unpack(float packed, float offset, float scale)
             {
-                return (packed * scale) + offset;
+                return (packed*scale) + offset;
             }
+
             public static float Pack(float unpacked, float offset, float scale)
             {
-                return (unpacked - offset) / scale;
+                return (unpacked - offset)/scale;
             }
+
             public virtual void UnParse(Stream s, CurveDataInfo info, IList<float> indexedFloats)
             {
-                BinaryWriter bw = new BinaryWriter(s);
+                var bw = new BinaryWriter(s);
                 bw.Write(mFrameIndex);
-                var flags = mFlags << 4;
+                int flags = mFlags << 4;
                 UInt16[] indices = null;
                 ulong[] packedVals = null;
                 switch (info.Flags.Format)
                 {
-                    case CurveDataFormat.Indexed:
-                        indices = new ushort[Curve.GetFloatCount(DataType)];
-                        for (int i = 0; i < Curve.GetFloatCount(DataType); i++)
+                case CurveDataFormat.Indexed:
+                    indices = new ushort[Curve.GetFloatCount(DataType)];
+                    for (int i = 0; i < Curve.GetFloatCount(DataType); i++)
+                    {
+                        float packedIndex = Pack(mData[i], info.Offset, info.Scale);
+                        if (packedIndex < 0) flags |= (1 << i);
+                        packedIndex = Math.Abs(packedIndex);
+                        if (!indexedFloats.Contains(packedIndex)) indexedFloats.Add(packedIndex);
+                        indices[i] = (UInt16) indexedFloats.IndexOf(packedIndex);
+                    }
+                    break;
+                case CurveDataFormat.Packed:
+                    packedVals = new ulong[Curve.GetPackedCount(DataType)];
+                    for (int packedWritten = 0; packedWritten < packedVals.Length; packedWritten++)
+                    {
+                        ulong packed = 0;
+                        for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType)/packedVals.Length; packedIndex++)
                         {
-                            float packedIndex = Pack(mData[i], info.Offset, info.Scale);
-                            if (packedIndex < 0) flags |= (1 << i);
-                            packedIndex = Math.Abs(packedIndex);
-                            if (!indexedFloats.Contains(packedIndex)) indexedFloats.Add(packedIndex);
-                            indices[i] = (UInt16)indexedFloats.IndexOf(packedIndex);
+                            int floatIndex = packedWritten + packedIndex;
+                            double maxPackedVal = Math.Pow(2, Curve.GetBitsPerFloat(DataType)) - 1;
+                            float val = (mData[floatIndex] - info.Offset)/info.Scale;
+                            if (val < 0) flags |= (1 << floatIndex);
+                            val = Math.Abs(val);
+                            packed |= (ulong) Math.Floor(val*maxPackedVal) << (packedIndex*Curve.GetBitsPerFloat(DataType));
                         }
-                        break;
-                    case CurveDataFormat.Packed:
-                        packedVals = new ulong[Curve.GetPackedCount(DataType)];
-                        for (int packedWritten = 0; packedWritten < packedVals.Length; packedWritten++)
-                        {
-                            ulong packed = 0;
-                            for (int packedIndex = 0; packedIndex < Curve.GetFloatCount(DataType) / packedVals.Length; packedIndex++)
-                            {
-                                int floatIndex = packedWritten + packedIndex;
-                                double maxPackedVal = Math.Pow(2, Curve.GetBitsPerFloat(DataType)) - 1;
-                                float val = (mData[floatIndex] - info.Offset) / info.Scale;
-                                if (val < 0) flags |= (1 << floatIndex);
-                                val = Math.Abs(val);
-                                packed |= (ulong)Math.Floor(val * maxPackedVal) << (packedIndex * Curve.GetBitsPerFloat(DataType));
-
-                            }
-                            packedVals[packedWritten] = packed;
-                        }
-                        break;
+                        packedVals[packedWritten] = packed;
+                    }
+                    break;
                 }
-                bw.Write((UInt16)flags);
+                bw.Write((UInt16) flags);
                 switch (info.Flags.Format)
                 {
-                    case CurveDataFormat.Indexed:
-                        for (int i = 0; i < indices.Length; i++)
-                            bw.Write(indices[i]);
-                        break;
-                    case CurveDataFormat.Packed:
-                        for (int i = 0; i < packedVals.Length; i++)
-                            WritePacked(s, packedVals[i]);
-                        break;
+                case CurveDataFormat.Indexed:
+                    for (int i = 0; i < indices.Length; i++)
+                        bw.Write(indices[i]);
+                    break;
+                case CurveDataFormat.Packed:
+                    for (int i = 0; i < packedVals.Length; i++)
+                        WritePacked(s, packedVals[i]);
+                    break;
                 }
             }
 
-            public virtual IEnumerable<float> GetFloatValues() { return mData; }
-            public override AHandlerElement Clone(EventHandler handler) { return (AHandlerElement)Activator.CreateInstance(GetType(), new object[] { 0, handler, this }); }
+            public virtual IEnumerable<float> GetFloatValues()
+            {
+                return mData;
+            }
+
+            public override AHandlerElement Clone(EventHandler handler)
+            {
+                return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, this});
+            }
         }
-        [ConstructorParameters(new object[] { CurveDataType.Float3 })]
+
         public class Float3Frame : Frame,
                                    IEquatable<Float3Frame>
         {
-            public Float3Frame(int apiVersion, EventHandler handler, Float3Frame basis) : base(apiVersion, handler, basis) { }
-            public Float3Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler) { }
+            public Float3Frame(int apiVersion, EventHandler handler, Float3Frame basis) : base(apiVersion, handler, basis)
+            {
+            }
 
-            public Float3Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats) { }
+            public Float3Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler)
+            {
+            }
+
+            public Float3Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats)
+            {
+            }
+
             public override CurveDataType DataType
             {
                 get { return CurveDataType.Float3; }
             }
-            protected override ulong ReadPacked(Stream stream) { return new BinaryReader(stream).ReadUInt32(); }
-            protected override void WritePacked(Stream stream, ulong packed) { new BinaryWriter(stream).Write((UInt32)packed); }
+
+            protected override ulong ReadPacked(Stream stream)
+            {
+                return new BinaryReader(stream).ReadUInt32();
+            }
+
+            protected override void WritePacked(Stream stream, ulong packed)
+            {
+                new BinaryWriter(stream).Write((UInt32) packed);
+            }
 
             #region IEquatable<Float3Frame> Members
 
-            public bool Equals(Float3Frame other) { return base.Equals(other); }
+            public bool Equals(Float3Frame other)
+            {
+                return base.Equals(other);
+            }
 
             #endregion
         }
-        [ConstructorParameters(new object[] { CurveDataType.Float4 })]
+
         public class Float4Frame : Frame,
                                    IEquatable<Float4Frame>
         {
-            public Float4Frame(int apiVersion, EventHandler handler, Float4Frame basis) : base(apiVersion, handler, basis) { }
-            public Float4Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler) { }
+            public Float4Frame(int apiVersion, EventHandler handler, Float4Frame basis) : base(apiVersion, handler, basis)
+            {
+            }
 
-            public Float4Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats) { }
+            public Float4Frame(int apiVersion, EventHandler handler, CurveDataType type) : base(apiVersion, handler)
+            {
+            }
+
+            public Float4Frame(int apiVersion, EventHandler handler, Stream s, CurveDataInfo info, IList<float> indexedFloats) : base(apiVersion, handler, s, info, indexedFloats)
+            {
+            }
 
             public override CurveDataType DataType
             {
                 get { return CurveDataType.Float4; }
             }
-            protected override ulong ReadPacked(Stream stream) { return new BinaryReader(stream).ReadUInt16(); }
-            protected override void WritePacked(Stream stream, ulong packed) { new BinaryWriter(stream).Write((UInt16)packed); }
+
+            protected override ulong ReadPacked(Stream stream)
+            {
+                return new BinaryReader(stream).ReadUInt16();
+            }
+
+            protected override void WritePacked(Stream stream, ulong packed)
+            {
+                new BinaryWriter(stream).Write((UInt16) packed);
+            }
 
             #region IEquatable<Float4Frame> Members
 
-            public bool Equals(Float4Frame other) { return base.Equals(other); }
+            public bool Equals(Float4Frame other)
+            {
+                return base.Equals(other);
+            }
 
             #endregion
         }
+
         public class FrameList : DependentList<Frame>
         {
             private readonly CurveDataType mDataType;
 
-            public FrameList(EventHandler handler, CurveDataType type) : base(handler) { mDataType = type; }
+            public FrameList(EventHandler handler, CurveDataType type) : base(handler)
+            {
+                mDataType = type;
+            }
 
-            public FrameList(EventHandler handler, CurveDataType type, IEnumerable<Frame> ilt) : base(handler, ilt) { mDataType = type; }
+            public FrameList(EventHandler handler, CurveDataType type, IEnumerable<Frame> ilt) : base(handler, ilt)
+            {
+                mDataType = type;
+            }
 
             public FrameList(EventHandler handler, CurveDataType type, Stream s, CurveDataInfo info, IList<float> floats)
                 : base(handler)
@@ -2473,66 +2997,88 @@ namespace s3piwrappers
                 Parse(s, info, floats);
             }
 
-            public CurveDataType DataType { get { return mDataType; } }
+            public CurveDataType DataType
+            {
+                get { return mDataType; }
+            }
 
             private void Parse(Stream s, CurveDataInfo info, IList<float> floats)
             {
                 for (int i = 0; i < info.FrameCount; i++)
                 {
-                    ((IList<Frame>)this).Add(CreateElement(s, info, floats));
+                    ((IList<Frame>) this).Add(CreateElement(s, info, floats));
                 }
             }
 
             public void UnParse(Stream s, CurveDataInfo info, IList<float> floats)
             {
-                info.FrameDataOffset = (uint)s.Position;
+                info.FrameDataOffset = (uint) s.Position;
                 info.FrameCount = Count;
                 for (int i = 0; i < Count; i++)
                 {
                     this[i].UnParse(s, info, floats);
                 }
             }
+
             protected override Type GetElementType(params object[] fields)
             {
                 if (fields.Length > 0)
                 {
-                    if (typeof(Frame).IsAssignableFrom(fields[0].GetType())) return fields[0].GetType();
-                    if (typeof(CurveDataType).IsAssignableFrom(fields[0].GetType())) return Frame.GetFrameType(mDataType);
+                    if (fields[0] is Frame) return fields[0].GetType();
+                    if (fields[0] is CurveDataType) return Frame.GetFrameType(mDataType);
                 }
                 return base.GetElementType(fields);
             }
-            public override void Add() { Add(new object[] { mDataType }); }
+
+            public override void Add(Type t)
+            {
+                base.Add((Frame) Activator.CreateInstance(t, mDataType));
+            }
 
             protected virtual Frame CreateElement(Stream s, CurveDataInfo info, IList<float> floats)
             {
-                var ctor = Frame.GetFrameType(mDataType)
-                    .GetConstructor(new[] { typeof(int), typeof(EventHandler), typeof(Stream), typeof(CurveDataInfo), typeof(IList<float>) });
-                return (Frame)ctor.Invoke(new object[] { 0, handler, s, info, floats });
+                ConstructorInfo ctor = Frame.GetFrameType(mDataType)
+                    .GetConstructor(new[] {typeof (int), typeof (EventHandler), typeof (Stream), typeof (CurveDataInfo), typeof (IList<float>)});
+                return (Frame) ctor.Invoke(new object[] {0, handler, s, info, floats});
             }
 
-            protected virtual void WriteElement(Stream s, CurveDataInfo info, IList<float> floats, Frame element) { element.UnParse(s, info, floats); }
+            protected virtual void WriteElement(Stream s, CurveDataInfo info, IList<float> floats, Frame element)
+            {
+                element.UnParse(s, info, floats);
+            }
 
             #region Unused
 
-            protected override Frame CreateElement(Stream s) { throw new NotSupportedException(); }
+            protected override Frame CreateElement(Stream s)
+            {
+                throw new NotSupportedException();
+            }
 
-            protected override void WriteElement(Stream s, Frame element) { throw new NotSupportedException(); }
+            protected override void WriteElement(Stream s, Frame element)
+            {
+                throw new NotSupportedException();
+            }
 
             #endregion
         }
+
         public struct CurveDataFlags
         {
             private Byte mRaw;
-            public CurveDataFlags(byte raw) { mRaw = raw; }
+
+            public CurveDataFlags(byte raw)
+            {
+                mRaw = raw;
+            }
 
 
             public CurveDataType Type
             {
-                get { return (CurveDataType)((mRaw & 0x07) >> 0); }
+                get { return (CurveDataType) ((mRaw & 0x07) >> 0); }
                 set
                 {
                     mRaw &= 0x1F;
-                    mRaw |= (byte)((byte)value << 0);
+                    mRaw |= (byte) ((byte) value << 0);
                 }
             }
 
@@ -2542,27 +3088,33 @@ namespace s3piwrappers
                 set
                 {
                     mRaw &= 0xF7;
-                    mRaw |= (byte)((value ? 1 : 0) << 3);
+                    mRaw |= (byte) ((value ? 1 : 0) << 3);
                 }
             }
 
             public CurveDataFormat Format
             {
-                get { return (CurveDataFormat)((mRaw & 0xF0) >> 4); }
+                get { return (CurveDataFormat) ((mRaw & 0xF0) >> 4); }
                 set
                 {
                     mRaw &= 0x0F;
-                    mRaw |= (byte)(((byte)value) << 4);
+                    mRaw |= (byte) (((byte) value) << 4);
                 }
             }
 
-            public Byte Raw { get { return mRaw; } set { mRaw = value; } }
+            public Byte Raw
+            {
+                get { return mRaw; }
+                set { mRaw = value; }
+            }
         }
+
         public enum CurveDataFormat : byte
         {
             Indexed = 0x00,
             Packed = 0x01
         }
+
         public class CurveDataInfo
         {
             public CurveDataFlags Flags;
@@ -2573,12 +3125,14 @@ namespace s3piwrappers
             public UInt32 TrackKey;
             public CurveType Type;
         }
+
         public enum CurveDataType : byte
         {
             Float1 = 0x01,
             Float3 = 0x02,
             Float4 = 0x04
         }
+
         public enum CurveType
         {
             Position = 0x01,

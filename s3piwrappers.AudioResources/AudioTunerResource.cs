@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
-using System.ComponentModel;
 
 namespace s3piwrappers
 {
@@ -117,7 +115,6 @@ namespace s3piwrappers
 
         public class BlockList : DependentList<DataBlock>
         {
-
             public BlockList(EventHandler handler)
                 : base(handler)
             {
@@ -132,10 +129,12 @@ namespace s3piwrappers
                 : base(handler, s)
             {
             }
+
             protected override int ReadCount(Stream s)
             {
                 return new BinaryStreamWrapper(s).ReadInt32(ByteOrder.BigEndian);
             }
+
             protected override void WriteCount(Stream s, int count)
             {
                 new BinaryStreamWrapper(s).Write(count, ByteOrder.BigEndian);
@@ -146,33 +145,16 @@ namespace s3piwrappers
                 element.UnParse(s);
             }
 
-            public override void Add()
-            {
-                base.Add(new object[] { });
-            }
-
             protected override DataBlock CreateElement(Stream s)
             {
                 return new DataBlock(0, elementHandler, s);
-            }
-            protected override Type GetElementType(params object[] fields)
-            {
-                Type t = null;
-                var types = typeof(DataBlock).DeclaringType.GetNestedTypes();
-                foreach (var type in types)
-                {
-                    if (!type.IsAbstract && ((ConstructorParametersAttribute)type.GetCustomAttributes(typeof(ConstructorParametersAttribute), true)[0]).parameters[0] == fields[0])
-                    {
-                        return type;
-                    }
-                }
-                return base.GetElementType(fields);
             }
         }
 
         public class DataList : DependentList<TypedData>, IEquatable<DataList>
         {
             private readonly DataBlock mOwner;
+
             public DataList(EventHandler handler, DataBlock owner)
                 : base(handler)
             {
@@ -194,43 +176,25 @@ namespace s3piwrappers
             {
                 throw new NotImplementedException();
             }
+
             protected override Type GetElementType(params object[] fields)
             {
                 return DataBlock.GetTypedDataClass(mOwner.TypeCode);
             }
-            public override bool Add(params object[] fields)
-            {
-
-                if (fields.Length == 1 && fields[0] is TypedData)
-                {
-                    ((IList<TypedData>)this).Add((TypedData)fields[0]);
-                    return true;
-                }
-                else
-                {
-                    return base.Add(fields);
-                }
-
-            }
-            public override void Add()
-            {
-                Add(new object[] {});
-            }
 
             public bool Equals(DataList other)
             {
-                return Equals((AHandlerList<TypedData>)other);
+                return Equals((AHandlerList<TypedData>) other);
             }
         }
 
         public abstract class TypedData : AHandlerElement, IEquatable<TypedData>
         {
-            private object mData;
+            protected object mData;
 
             protected TypedData(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
-                
             }
 
             protected TypedData(int APIversion, EventHandler handler, Stream s)
@@ -238,6 +202,7 @@ namespace s3piwrappers
             {
                 Parse(s);
             }
+
             protected TypedData(int APIversion, EventHandler handler, object data)
                 : base(APIversion, handler)
             {
@@ -253,11 +218,20 @@ namespace s3piwrappers
             {
                 get { return GetContentFields(requestedApiVersion, GetType()); }
             }
+
             protected object Data_Internal
             {
                 get { return mData; }
-                set { if (mData != value) { mData = value; OnElementChanged(); } }
+                set
+                {
+                    if (mData != value)
+                    {
+                        mData = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             public abstract override AHandlerElement Clone(EventHandler handler);
             protected abstract void Parse(Stream s);
             public abstract void UnParse(Stream s);
@@ -278,7 +252,7 @@ namespace s3piwrappers
             protected TypedData(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
-                if(typeof(T).IsValueType)
+                if (typeof (T).IsValueType)
                 {
                     Data = default(T);
                 }
@@ -298,24 +272,39 @@ namespace s3piwrappers
 
             protected abstract override void Parse(Stream s);
             public abstract override void UnParse(Stream s);
+
             public T Data
             {
-                get { return (T)base.Data_Internal; }
+                get { return (T) base.Data_Internal; }
                 set { base.Data_Internal = value; }
             }
-            public String Value { get { return ValueBuilder; } }
 
+            public String Value
+            {
+                get { return ValueBuilder; }
+            }
         }
-        [TypeConverter(typeof(ExpandableObjectConverter))]
-        public class SoundKey :AHandlerElement, IEquatable<SoundKey>
+
+        [TypeConverter(typeof (ExpandableObjectConverter))]
+        public class SoundKey : AHandlerElement, IEquatable<SoundKey>
         {
             private UInt64 mInstance;
             private UInt32 mUnknown1;
             private UInt32 mUnknown2;
 
-            public SoundKey(int APIversion, EventHandler handler) : base(APIversion, handler) { }
-            public SoundKey(int APIversion, EventHandler handler, Stream stream) : base(APIversion, handler) { this.Parse(stream); }
-            public SoundKey(int APIversion, EventHandler handler, SoundKey basis) : this(APIversion, handler,basis.Instance,basis.Unknown1,basis.Unknown2) { }
+            public SoundKey(int APIversion, EventHandler handler) : base(APIversion, handler)
+            {
+            }
+
+            public SoundKey(int APIversion, EventHandler handler, Stream stream) : base(APIversion, handler)
+            {
+                Parse(stream);
+            }
+
+            public SoundKey(int APIversion, EventHandler handler, SoundKey basis) : this(APIversion, handler, basis.Instance, basis.Unknown1, basis.Unknown2)
+            {
+            }
+
             public SoundKey(int APIversion, EventHandler handler, ulong instance, uint unknown1, uint unknown2)
                 : this(APIversion, handler)
             {
@@ -323,28 +312,33 @@ namespace s3piwrappers
                 mUnknown1 = unknown1;
                 mUnknown2 = unknown2;
             }
+
             public UInt64 Instance
             {
                 get { return mInstance; }
-                set 
-                { 
+                set
+                {
                     if (mInstance != value)
                     {
-                        mInstance = value;OnElementChanged();
-                    } 
+                        mInstance = value;
+                        OnElementChanged();
+                    }
                 }
             }
 
             public UInt32 Unknown1
             {
                 get { return mUnknown1; }
-                set 
-                { 
-                    if (mUnknown1 != value){
-                        mUnknown1 = value; OnElementChanged();
-                    } 
+                set
+                {
+                    if (mUnknown1 != value)
+                    {
+                        mUnknown1 = value;
+                        OnElementChanged();
+                    }
                 }
             }
+
             public UInt32 Unknown2
             {
                 get { return mUnknown2; }
@@ -352,32 +346,38 @@ namespace s3piwrappers
                 {
                     if (mUnknown2 != value)
                     {
-                        mUnknown2 = value; OnElementChanged();
+                        mUnknown2 = value;
+                        OnElementChanged();
                     }
                 }
             }
+
             public string Value
             {
                 get { return ValueBuilder; }
             }
+
             private void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
-                this.mInstance = s.ReadUInt64();
-                this.mUnknown1 = s.ReadUInt32();
-                this.mUnknown2 = s.ReadUInt32();
+                mInstance = s.ReadUInt64();
+                mUnknown1 = s.ReadUInt32();
+                mUnknown2 = s.ReadUInt32();
             }
+
             public void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
-                s.Write((ulong)this.mInstance);
-                s.Write((uint)this.mUnknown1);
-                s.Write((uint)this.mUnknown2);
+                s.Write(mInstance);
+                s.Write(mUnknown1);
+                s.Write(mUnknown2);
             }
+
             public bool Equals(SoundKey other)
             {
                 return Instance.Equals(other.Instance) && Unknown1.Equals(other.Unknown1) && Unknown2.Equals(other.Unknown2);
             }
+
             public override string ToString()
             {
                 return String.Format("{0:X16}-{1:X8}-{2:X8}", Instance, Unknown1, Unknown2);
@@ -390,20 +390,21 @@ namespace s3piwrappers
 
             public override List<string> ContentFields
             {
-                get { return GetContentFields(requestedApiVersion,GetType()); }
+                get { return GetContentFields(requestedApiVersion, GetType()); }
             }
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new SoundKey(0,handler,this);
+                return new SoundKey(0, handler, this);
             }
         }
+
         public class SoundKeyData : TypedData<SoundKey>
         {
             public SoundKeyData(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
-                Data = new SoundKey(APIversion,handler);
+                mData = new SoundKey(APIversion, handler);
             }
 
             public SoundKeyData(int APIversion, EventHandler handler, Stream s)
@@ -418,12 +419,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new SoundKeyData(0, handler, this.Data);
+                return new SoundKeyData(0, handler, Data);
             }
 
             protected override void Parse(Stream stream)
             {
-                Data = new SoundKey(0,handler,stream);
+                mData = new SoundKey(0, handler, stream);
             }
 
             public override void UnParse(Stream stream)
@@ -457,7 +458,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream);
-                Data = s.ReadByte();
+                mData = s.ReadByte();
             }
 
             public override void UnParse(Stream stream)
@@ -492,7 +493,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                Data = s.ReadInt32();
+                mData = s.ReadInt32();
             }
 
             public override void UnParse(Stream stream)
@@ -527,7 +528,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                Data = s.ReadUInt32();
+                mData = s.ReadUInt32();
             }
 
             public override void UnParse(Stream stream)
@@ -562,7 +563,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                Data = s.ReadFloat();
+                mData = s.ReadFloat();
             }
 
             public override void UnParse(Stream stream)
@@ -598,7 +599,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream);
-                Data = s.ReadPascalString(32, Encoding.BigEndianUnicode, ByteOrder.BigEndian);
+                mData = s.ReadPascalString(32, Encoding.BigEndianUnicode, ByteOrder.BigEndian);
             }
 
             public override void UnParse(Stream stream)
@@ -635,7 +636,7 @@ namespace s3piwrappers
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream);
-                Data = s.ReadPascalString(32, Encoding.ASCII, ByteOrder.BigEndian);
+                mData = s.ReadPascalString(32, Encoding.ASCII, ByteOrder.BigEndian);
             }
 
             public override void UnParse(Stream stream)
@@ -644,6 +645,7 @@ namespace s3piwrappers
                 s.WritePascalString(Data, 32, Encoding.ASCII, ByteOrder.BigEndian);
             }
         }
+
         public enum DataType
         {
             Byte = 0x0001,
@@ -657,38 +659,63 @@ namespace s3piwrappers
 
         public class DataBlock : AHandlerElement, IEquatable<DataBlock>
         {
-            DataType mTypeCode;
-            ushort mRepCode;
+            private DataType mTypeCode;
+            private ushort mRepCode;
             private SoundProperty mId;
             private DataList mItems;
 
-            public DataBlock(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler) { Parse(s); }
-            public DataBlock(int APIversion, EventHandler handler) 
+            public DataBlock(int APIversion, EventHandler handler, Stream s) : base(APIversion, handler)
+            {
+                Parse(s);
+            }
+
+            public DataBlock(int APIversion, EventHandler handler)
                 : base(APIversion, handler)
             {
-                this.mItems  =new DataList(handler,this);
+                mItems = new DataList(handler, this);
             }
-            public DataBlock(int APIversion, EventHandler handler,DataBlock basis) : this(APIversion, handler,basis.TypeCode,basis.RepCode,basis.Id,basis.Items) { }
+
+            public DataBlock(int APIversion, EventHandler handler, DataBlock basis) : this(APIversion, handler, basis.TypeCode, basis.RepCode, basis.Id, basis.Items)
+            {
+            }
+
             public DataBlock(int APIversion, EventHandler handler, DataType typeCode, ushort repCode, SoundProperty id, IEnumerable<TypedData> items)
                 : this(APIversion, handler)
             {
                 mTypeCode = typeCode;
                 mRepCode = repCode;
                 mId = id;
-                mItems.AddRange(items.Select(x=> x.Clone(handler)).Cast<TypedData>());
+                mItems.AddRange(items.Select(x => x.Clone(handler)).Cast<TypedData>());
             }
+
             [ElementPriority(0)]
             public SoundProperty Id
             {
                 get { return mId; }
-                set { if (mId != value) { mId = value; OnElementChanged(); } }
+                set
+                {
+                    if (mId != value)
+                    {
+                        mId = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(1)]
             public ushort RepCode
             {
                 get { return mRepCode; }
-                set { if (mRepCode != value) { mRepCode = value; OnElementChanged(); } }
+                set
+                {
+                    if (mRepCode != value)
+                    {
+                        mRepCode = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(2)]
             public DataType TypeCode
             {
@@ -703,12 +730,22 @@ namespace s3piwrappers
                     }
                 }
             }
+
             [ElementPriority(4)]
             public DataList Items
             {
                 get { return mItems; }
-                set { mItems = value; if (mItems != value) { mItems = value; OnElementChanged(); } }
+                set
+                {
+                    mItems = value;
+                    if (mItems != value)
+                    {
+                        mItems = value;
+                        OnElementChanged();
+                    }
+                }
             }
+
             [ElementPriority(5)]
             public TypedData Data
             {
@@ -726,6 +763,7 @@ namespace s3piwrappers
                     mItems.Add(value);
                 }
             }
+
             [ElementPriority(3)]
             public Int32 ItemSize
             {
@@ -735,30 +773,26 @@ namespace s3piwrappers
                         return mRepCode;
                     switch (TypeCode)
                     {
-                        case DataType.ASCIIString:
-                        case DataType.UnicodeString:
-                        case DataType.SoundKey:
-                            return 16;
-                        default:
-                            return 4;
+                    case DataType.ASCIIString:
+                    case DataType.UnicodeString:
+                    case DataType.SoundKey:
+                        return 16;
+                    default:
+                        return 4;
                     }
                 }
             }
 
             public bool HasTypeData
             {
-                get
-                {
-                    return mRepCode != 0;
-                }
+                get { return mRepCode != 0; }
             }
+
             public bool IsList
             {
-                get
-                {
-                    return mRepCode == 0x9C;
-                }
+                get { return mRepCode == 0x9C; }
             }
+
             public string Value
             {
                 get { return ValueBuilder; }
@@ -769,70 +803,79 @@ namespace s3piwrappers
             {
                 var br = new BinaryStreamWrapper(s);
                 br.ByteOrder = ByteOrder.BigEndian;
-                mId = (SoundProperty)br.ReadUInt32();
+                mId = (SoundProperty) br.ReadUInt32();
 
-                mTypeCode = (DataType)br.ReadUInt16();
+                mTypeCode = (DataType) br.ReadUInt16();
                 mRepCode = br.ReadUInt16();
                 var data = new List<TypedData>();
                 if (!HasTypeData)
                 {
                     data.Add(ReadTypedData(0, handler, mTypeCode, s));
-
                 }
                 else
                 {
-                    var count = br.ReadInt32();
-                    var itemSize = br.ReadInt32();
-                    if (itemSize != this.ItemSize)
+                    int count = br.ReadInt32();
+                    int itemSize = br.ReadInt32();
+                    if (itemSize != ItemSize)
                         throw new InvalidDataException(String.Format("Bad item size: Expected {0}, but got {1}", ItemSize, itemSize));
                     for (int i = 0; i < count; i++)
                     {
                         data.Add(ReadTypedData(0, handler, mTypeCode, s));
                     }
                 }
-                this.mItems = new DataList(handler, data, this);
-
+                mItems = new DataList(handler, data, this);
             }
+
             public void UnParse(Stream s)
             {
                 var br = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
-                br.Write((UInt32)mId);
-                br.Write((ushort)mTypeCode);
+                br.Write((UInt32) mId);
+                br.Write((ushort) mTypeCode);
                 br.Write(mRepCode);
                 if (!HasTypeData && mItems.Count == 0)
                 {
-                    mItems.Add(new object[] { 0, handler });
+                    mItems.Add();
                 }
                 if (HasTypeData)
                 {
                     br.Write(mItems.Count);
-                    br.Write(this.ItemSize);
+                    br.Write(ItemSize);
                 }
-                foreach (var block in mItems)
+                foreach (TypedData block in mItems)
                 {
                     block.UnParse(s);
                 }
             }
+
             public static Type GetTypedDataClass(DataType typeCode)
             {
                 switch (typeCode)
                 {
-                    case DataType.Byte: return typeof(ByteData);
-                    case DataType.Int: return typeof(IntData);
-                    case DataType.UInt: return typeof(UIntData);
-                    case DataType.Float: return typeof(FloatData);
-                    case DataType.SoundKey: return typeof(SoundKeyData);
-                    case DataType.ASCIIString: return typeof(ASCIIStringData);
-                    case DataType.UnicodeString: return typeof(UnicodeStringData);
-                    default: throw new Exception("Unknown Data Type: " + typeCode.ToString());
+                case DataType.Byte:
+                    return typeof (ByteData);
+                case DataType.Int:
+                    return typeof (IntData);
+                case DataType.UInt:
+                    return typeof (UIntData);
+                case DataType.Float:
+                    return typeof (FloatData);
+                case DataType.SoundKey:
+                    return typeof (SoundKeyData);
+                case DataType.ASCIIString:
+                    return typeof (ASCIIStringData);
+                case DataType.UnicodeString:
+                    return typeof (UnicodeStringData);
+                default:
+                    throw new Exception("Unknown Data Type: " + typeCode.ToString());
                 }
-
             }
+
             public static TypedData ReadTypedData(int requestedApiVersion, EventHandler handler, DataType typeCode, Stream stream)
             {
                 Type t = GetTypedDataClass(typeCode);
-                return (TypedData)Activator.CreateInstance(t, requestedApiVersion, handler, stream);
+                return (TypedData) Activator.CreateInstance(t, requestedApiVersion, handler, stream);
             }
+
             public override int RecommendedApiVersion
             {
                 get { return kRecommendedApiVersion; }
@@ -842,7 +885,7 @@ namespace s3piwrappers
             {
                 get
                 {
-                    var fields = GetContentFields(0, GetType());
+                    List<string> fields = GetContentFields(0, GetType());
                     fields.Remove("HasTypeData");
                     fields.Remove("IsList");
                     if (!HasTypeData)
@@ -864,12 +907,12 @@ namespace s3piwrappers
 
             public override AHandlerElement Clone(EventHandler handler)
             {
-                return new DataBlock(0,handler,this);
+                return new DataBlock(0, handler, this);
             }
 
             public bool Equals(DataBlock other)
             {
-                return this.Id.Equals(other.Id);
+                return Id.Equals(other.Id);
             }
         }
 
@@ -880,31 +923,39 @@ namespace s3piwrappers
         }
 
         private BlockList mBlocks;
+
         public BlockList Blocks
         {
             get { return mBlocks; }
-            set { mBlocks = value; OnResourceChanged(this, EventArgs.Empty); }
+            set
+            {
+                mBlocks = value;
+                OnResourceChanged(this, EventArgs.Empty);
+            }
         }
 
         private void Parse(Stream s)
         {
-            Blocks = new BlockList(OnResourceChanged, s);
+            mBlocks = new BlockList(OnResourceChanged, s);
         }
+
         protected override Stream UnParse()
         {
             var stream = new MemoryStream();
             if (mBlocks == null)
                 mBlocks = new BlockList(OnResourceChanged);
             mBlocks.UnParse(stream);
-            stream.Flush();
+            var br = new BinaryWriter(stream);
             return stream;
         }
 
         private const Int32 kRecommendedApiVersion = 1;
+
         public override int RecommendedApiVersion
         {
             get { return kRecommendedApiVersion; }
         }
+
         public string Value
         {
             get { return ValueBuilder; }

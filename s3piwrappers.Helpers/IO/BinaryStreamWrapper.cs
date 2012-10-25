@@ -16,25 +16,15 @@ namespace s3piwrappers.Helpers.IO
         }
 
         private readonly Stream mStream;
-        private ByteOrder mByteOrder;
-        private Encoding mCharacterEncoding;
 
         public Stream BaseStream
         {
             get { return mStream; }
         }
 
-        public ByteOrder ByteOrder
-        {
-            get { return mByteOrder; }
-            set { mByteOrder = value; }
-        }
+        public ByteOrder ByteOrder { get; set; }
 
-        public Encoding CharacterEncoding
-        {
-            get { return mCharacterEncoding; }
-            set { mCharacterEncoding = value; }
-        }
+        public Encoding CharacterEncoding { get; set; }
 
         public BinaryStreamWrapper(Stream s) : this(s, defaultEncoding, defaultByteOrder)
         {
@@ -51,11 +41,11 @@ namespace s3piwrappers.Helpers.IO
         public BinaryStreamWrapper(Stream s, Encoding encoding, ByteOrder order)
         {
             mStream = s;
-            mCharacterEncoding = encoding;
-            mByteOrder = order;
+            CharacterEncoding = encoding;
+            ByteOrder = order;
         }
 
-        
+
         public Byte ReadByte()
         {
             return (Byte) BaseStream.ReadByte();
@@ -240,20 +230,20 @@ namespace s3piwrappers.Helpers.IO
         {
             switch (type)
             {
-                case StringType.ZeroDelimited:
-                    return ReadZDString(encoding, order);
-                case StringType.Pascal8:
-                    return ReadPascalString(8, encoding, order);
-                case StringType.Pascal16:
-                    return ReadPascalString(16, encoding, order);
-                case StringType.Pascal32:
-                    return ReadPascalString(32, encoding, order);
-                case StringType.Pascal64:
-                    return ReadPascalString(64, encoding, order);
-                case StringType.SevenBit:
-                    return Read7BitString(encoding, order);
-                default:
-                    throw new ArgumentException("Invalid string encoding", "type");
+            case StringType.ZeroDelimited:
+                return ReadZDString(encoding, order);
+            case StringType.Pascal8:
+                return ReadPascalString(8, encoding, order);
+            case StringType.Pascal16:
+                return ReadPascalString(16, encoding, order);
+            case StringType.Pascal32:
+                return ReadPascalString(32, encoding, order);
+            case StringType.Pascal64:
+                return ReadPascalString(64, encoding, order);
+            case StringType.SevenBit:
+                return Read7BitString(encoding, order);
+            default:
+                throw new ArgumentException("Invalid string encoding", "type");
             }
         }
 
@@ -261,7 +251,7 @@ namespace s3piwrappers.Helpers.IO
         {
             String str = String.Empty;
             int length = 0;
-            byte b = (byte) mStream.ReadByte();
+            var b = (byte) mStream.ReadByte();
             length += b%0x80;
             while ((b & 0x80) == 0x80)
             {
@@ -292,20 +282,20 @@ namespace s3piwrappers.Helpers.IO
             ulong len = 0;
             switch (size)
             {
-                case 8:
-                    len = (byte) mStream.ReadByte();
-                    break;
-                case 16:
-                    len = ReadUInt16(order);
-                    break;
-                case 32:
-                    len = ReadUInt32(order);
-                    break;
-                case 64:
-                    len = ReadUInt64(order);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid bit size for string length!");
+            case 8:
+                len = (byte) mStream.ReadByte();
+                break;
+            case 16:
+                len = ReadUInt16(order);
+                break;
+            case 32:
+                len = ReadUInt32(order);
+                break;
+            case 64:
+                len = ReadUInt64(order);
+                break;
+            default:
+                throw new ArgumentException("Invalid bit size for string length!");
             }
             for (ulong i = 0; i < len; i++)
             {
@@ -368,26 +358,24 @@ namespace s3piwrappers.Helpers.IO
 
         private byte[] GetBytes(int count, ByteOrder order)
         {
-            byte[] bytes = new byte[count];
+            var bytes = new byte[count];
             switch (order)
             {
-                case ByteOrder.LittleEndian:
-                    for (int i = 0; i < count; i++)
-                        bytes[i] = (byte) mStream.ReadByte();
-                    break;
-                case ByteOrder.BigEndian:
-                    for (int i = count; i > 0; i--)
-                        bytes[i - 1] = (byte) mStream.ReadByte();
-                    break;
-                default:
-                    throw new ArgumentException("Unsupported byte order: {0}", "order");
+            case ByteOrder.LittleEndian:
+                for (int i = 0; i < count; i++)
+                    bytes[i] = (byte) mStream.ReadByte();
+                break;
+            case ByteOrder.BigEndian:
+                for (int i = count; i > 0; i--)
+                    bytes[i - 1] = (byte) mStream.ReadByte();
+                break;
+            default:
+                throw new ArgumentException("Unsupported byte order: {0}", "order");
             }
             return bytes;
         }
 
-        
 
-        
         public void Write(Byte input)
         {
             mStream.WriteByte(input);
@@ -498,7 +486,7 @@ namespace s3piwrappers.Helpers.IO
             WriteChar(input, encoding, order);
         }
 
-        public void WriteString(String input,StringType type)
+        public void WriteString(String input, StringType type)
         {
             WriteString(input, type, CharacterEncoding, ByteOrder);
         }
@@ -517,26 +505,26 @@ namespace s3piwrappers.Helpers.IO
         {
             switch (type)
             {
-                case StringType.ZeroDelimited:
-                    WriteZDString(input, encoding, order);
-                    break;
-                case StringType.Pascal8:
-                    WritePascalString(input, 8, encoding, order);
-                    break;
-                case StringType.Pascal16:
-                    WritePascalString(input, 16, encoding, order);
-                    break;
-                case StringType.Pascal32:
-                    WritePascalString(input, 32, encoding, order);
-                    break;
-                case StringType.Pascal64:
-                    WritePascalString(input, 64, encoding, order);
-                    break;
-                case StringType.SevenBit:
-                    Write7BitString(input, encoding, order);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid string encoding", "type");
+            case StringType.ZeroDelimited:
+                WriteZDString(input, encoding, order);
+                break;
+            case StringType.Pascal8:
+                WritePascalString(input, 8, encoding, order);
+                break;
+            case StringType.Pascal16:
+                WritePascalString(input, 16, encoding, order);
+                break;
+            case StringType.Pascal32:
+                WritePascalString(input, 32, encoding, order);
+                break;
+            case StringType.Pascal64:
+                WritePascalString(input, 64, encoding, order);
+                break;
+            case StringType.SevenBit:
+                Write7BitString(input, encoding, order);
+                break;
+            default:
+                throw new ArgumentException("Invalid string encoding", "type");
             }
         }
 
@@ -559,26 +547,26 @@ namespace s3piwrappers.Helpers.IO
         {
             switch (type)
             {
-                case StringType.ZeroDelimited:
-                    WriteZDString(input, encoding, order);
-                    break;
-                case StringType.Pascal8:
-                    WritePascalString(input, 8, encoding, order);
-                    break;
-                case StringType.Pascal16:
-                    WritePascalString(input, 16, encoding, order);
-                    break;
-                case StringType.Pascal32:
-                    WritePascalString(input, 32, encoding, order);
-                    break;
-                case StringType.Pascal64:
-                    WritePascalString(input, 64, encoding, order);
-                    break;
-                case StringType.SevenBit:
-                    Write7BitString(input, encoding, order);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid string encoding", "type");
+            case StringType.ZeroDelimited:
+                WriteZDString(input, encoding, order);
+                break;
+            case StringType.Pascal8:
+                WritePascalString(input, 8, encoding, order);
+                break;
+            case StringType.Pascal16:
+                WritePascalString(input, 16, encoding, order);
+                break;
+            case StringType.Pascal32:
+                WritePascalString(input, 32, encoding, order);
+                break;
+            case StringType.Pascal64:
+                WritePascalString(input, 64, encoding, order);
+                break;
+            case StringType.SevenBit:
+                Write7BitString(input, encoding, order);
+                break;
+            default:
+                throw new ArgumentException("Invalid string encoding", "type");
             }
         }
 
@@ -591,7 +579,7 @@ namespace s3piwrappers.Helpers.IO
                 length %= 0x80;
             }
             Write((byte) length);
-            foreach (var c in input)
+            foreach (char c in input)
                 WriteChar(c, encoding, order);
         }
 
@@ -599,7 +587,7 @@ namespace s3piwrappers.Helpers.IO
         {
             if (!String.IsNullOrEmpty(input))
             {
-                foreach (var c in input)
+                foreach (char c in input)
                     WriteChar(c, encoding, order);
             }
             Write((byte) 0);
@@ -611,22 +599,22 @@ namespace s3piwrappers.Helpers.IO
             int len = input.Length;
             switch (size)
             {
-                case 8:
-                    Write((byte) len);
-                    break;
-                case 16:
-                    Write((UInt16) len,order);
-                    break;
-                case 32:
-                    Write((UInt32) len,order);
-                    break;
-                case 64:
-                    Write((UInt64) len,order);
-                    break;
-                default:
-                    throw new ArgumentException("Invalid bit size for string length!");
+            case 8:
+                Write((byte) len);
+                break;
+            case 16:
+                Write((UInt16) len, order);
+                break;
+            case 32:
+                Write((UInt32) len, order);
+                break;
+            case 64:
+                Write((UInt64) len, order);
+                break;
+            default:
+                throw new ArgumentException("Invalid bit size for string length!");
             }
-            foreach (var c in input)
+            foreach (char c in input)
                 WriteChar(c, encoding, order);
         }
 
@@ -641,20 +629,18 @@ namespace s3piwrappers.Helpers.IO
         {
             switch (order)
             {
-                case ByteOrder.LittleEndian:
-                    for (int i = 0; i < bytes.Length; i++)
-                        mStream.WriteByte(bytes[i]);
-                    break;
-                case ByteOrder.BigEndian:
-                    for (int i = bytes.Length; i > 0; i--)
-                        mStream.WriteByte(bytes[i - 1]);
-                    break;
-                default:
-                    throw new ArgumentException("Unsupported byte order: {0}", "order");
+            case ByteOrder.LittleEndian:
+                for (int i = 0; i < bytes.Length; i++)
+                    mStream.WriteByte(bytes[i]);
+                break;
+            case ByteOrder.BigEndian:
+                for (int i = bytes.Length; i > 0; i--)
+                    mStream.WriteByte(bytes[i - 1]);
+                break;
+            default:
+                throw new ArgumentException("Unsupported byte order: {0}", "order");
             }
             return bytes;
         }
-
-        
     }
 }

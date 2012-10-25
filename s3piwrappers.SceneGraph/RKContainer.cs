@@ -9,6 +9,7 @@ namespace s3piwrappers.SceneGraph
     public class RKContainer
     {
         #region Slurp and Set RK Fields
+
         public static bool IsLegalFieldName(string field)
         {
             char current;
@@ -19,7 +20,7 @@ namespace s3piwrappers.SceneGraph
                 if (current < '0') return false;
                 if (current < '9' && i == 0) return false;
                 if (current < 'A') return false;
-                current = (char)(current | ' ');
+                current = (char) (current | ' ');
                 if (current > 'z') return false;
             }
             return true;
@@ -28,18 +29,18 @@ namespace s3piwrappers.SceneGraph
         private static bool IsExcludedContentField(string field)
         {
             return field == "Value" ||
-                   field == "Stream" ||
-                   field == "AsBytes";
+                field == "Stream" ||
+                field == "AsBytes";
         }
 
         public static List<IResourceConnection> SlurpRKsFromIEnumerable(string absolutePath,
-            string path, AApiVersionedFields rootField, IEnumerable list,
-            List<RKContainer> containers, Predicate<IResourceKey> validate = null)
+                                                                        string path, AApiVersionedFields rootField, IEnumerable list,
+                                                                        List<RKContainer> containers, Predicate<IResourceKey> validate = null)
         {
             List<IResourceConnection> subKeys, keys = new List<IResourceConnection>();
             string elem, absoluteElem;
             int j = 0;
-            foreach (var e in list)
+            foreach (object e in list)
             {
                 elem = path + "[" + (j++) + "]";
                 absoluteElem = absolutePath + "[" + j + "]";
@@ -50,13 +51,13 @@ namespace s3piwrappers.SceneGraph
                 if (e is IEnumerable)
                 {
                     subKeys = SlurpRKsFromIEnumerable(absoluteElem, elem, rootField,
-                        e as IEnumerable, containers, validate);
+                                                      e as IEnumerable, containers, validate);
                     keys.AddRange(subKeys);
                 }
                 if (e is AApiVersionedFields)
                 {
                     subKeys = SlurpRKsFromField(absoluteElem, e as AApiVersionedFields,
-                        containers, validate);
+                                                containers, validate);
                     keys.AddRange(subKeys);
                 }
                 else if (e is TextReader)
@@ -79,20 +80,20 @@ namespace s3piwrappers.SceneGraph
         }
 
         /// <summary>
-        /// Recursively searches the given field and all its fields for 
-        /// <see cref="T:s3pi.Interfaces.IResource"/> instances,
-        /// and compiles them into a dictionary with the content field path
-        /// to access them from the given root field.
+        ///   Recursively searches the given field and all its fields for 
+        ///   <see cref="T:s3pi.Interfaces.IResource" /> instances,
+        ///   and compiles them into a dictionary with the content field path
+        ///   to access them from the given root field.
         /// </summary>
         public static List<IResourceConnection> SlurpRKsFromField(string absolutePath,
-            AApiVersionedFields rootField, List<RKContainer> containers,
-            Predicate<IResourceKey> validate = null)
+                                                                  AApiVersionedFields rootField, List<RKContainer> containers,
+                                                                  Predicate<IResourceKey> validate = null)
         {
             List<IResourceConnection> subKeys, keys = new List<IResourceConnection>();
 
             if (rootField is IResourceKey && (validate == null || validate(rootField as IResourceKey)))
                 keys.Add(new DefaultConnection(rootField as IResourceKey, rootField,
-                    ResourceDataActions.FindWrite, absolutePath));
+                                               ResourceDataActions.FindWrite, absolutePath));
 
             List<string> contentFields = rootField.ContentFields;
             TypedValue tv;
@@ -107,66 +108,72 @@ namespace s3piwrappers.SceneGraph
                 absoluteName = absolutePath + "." + contentField;
 
                 // string is enumerable but we want to treat it as a single value
-                if (typeof(string).IsAssignableFrom(tv.Type))
+                if (typeof (string).IsAssignableFrom(tv.Type))
                     continue;
 
-                else if (typeof(IEnumerable).IsAssignableFrom(tv.Type))
+                else if (typeof (IEnumerable).IsAssignableFrom(tv.Type))
                 {
                     subKeys = SlurpRKsFromIEnumerable(absoluteName, name, rootField,
-                        tv.Value as IEnumerable, containers, validate);
+                                                      tv.Value as IEnumerable, containers, validate);
                     keys.AddRange(subKeys);
                 }
-                else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                else if (typeof (AApiVersionedFields).IsAssignableFrom(tv.Type))
                 {
                     subKeys = SlurpRKsFromField(absoluteName,
-                        tv.Value as AApiVersionedFields, containers, validate);
+                                                tv.Value as AApiVersionedFields, containers, validate);
                     keys.AddRange(subKeys);
                 }
-                else if (typeof(TextReader).IsAssignableFrom(tv.Type))
+                else if (typeof (TextReader).IsAssignableFrom(tv.Type))
                 {
-                    TextRKContainer textHelper = new TextRKContainer(name, rootField,
-                        tv.Value as TextReader, absoluteName, validate);
+                    var textHelper = new TextRKContainer(name, rootField,
+                                                         tv.Value as TextReader, absoluteName, validate);
                     keys.AddRange(textHelper.Owners);
                 }
                 else if (tv.Value is IResourceKey && (validate == null || validate(tv.Value as IResourceKey)))
                 {
-                    keys.Add(new DefaultConnection(tv.Value as IResourceKey, rootField, 
-                        ResourceDataActions.FindWrite, name));
+                    keys.Add(new DefaultConnection(tv.Value as IResourceKey, rootField,
+                                                   ResourceDataActions.FindWrite, name));
                 }
             }
 
             return keys;
         }
 
-        /// <param name="rkContainer">The container of the new resource key data;
-        /// See remarks for currently supported types.</param>
-        /// <param name="fieldPath">The string path of content fields
-        /// and IEnumerable indices to follow to get to the Resource Key container
-        /// to set to the value of the given container.</param>
+        /// <param name="rkContainer"> The container of the new resource key data; See remarks for currently supported types. </param>
+        /// <param name="fieldPath"> The string path of content fields and IEnumerable indices to follow to get to the Resource Key container to set to the value of the given container. </param>
         /// <remarks>
-        /// Currently supported types for <paramref name="rkContainer"/>:
-        /// <list type="bullet">
-        /// <item><description>
-        /// <see cref="T:s3pi.Interfaces.IResourceKey"/></description></item>
-        /// <item><description>
-        /// <see cref="T:System.IO.TextReader"/></description></item>
-        /// <item><description>
-        /// <see cref="T:System.IO.BinaryReader"/></description></item>
-        /// </list>
-        /// WARNING: The latter two items should be used with care,
-        /// as they could result in an ArgumentException, 
-        /// TargetException, or TargetInvocationException
-        /// if the content field uses a derived type instead of the base type.
+        ///   Currently supported types for <paramref name="rkContainer" />:
+        ///   <list type="bullet">
+        ///     <item>
+        ///       <description>
+        ///         <see cref="T:s3pi.Interfaces.IResourceKey" />
+        ///       </description>
+        ///     </item>
+        ///     <item>
+        ///       <description>
+        ///         <see cref="T:System.IO.TextReader" />
+        ///       </description>
+        ///     </item>
+        ///     <item>
+        ///       <description>
+        ///         <see cref="T:System.IO.BinaryReader" />
+        ///       </description>
+        ///     </item>
+        ///   </list>
+        ///   WARNING: The latter two items should be used with care,
+        ///   as they could result in an ArgumentException, 
+        ///   TargetException, or TargetInvocationException
+        ///   if the content field uses a derived type instead of the base type.
         /// </remarks>
         public static bool SetRKInField(object rkContainer,
-            string fieldPath, AApiVersionedFields rootField)
+                                        string fieldPath, AApiVersionedFields rootField)
         {
-            string[] fieldNames = fieldPath.Split(new char[] { '.' },
-                StringSplitOptions.RemoveEmptyEntries);
-            IResourceKey newKey = rkContainer as IResourceKey;
+            string[] fieldNames = fieldPath.Split(new[] {'.'},
+                                                  StringSplitOptions.RemoveEmptyEntries);
+            var newKey = rkContainer as IResourceKey;
             if (fieldNames.Length == 1)
             {
-                IResourceKey rk = rootField as IResourceKey;
+                var rk = rootField as IResourceKey;
                 rk.ResourceType = newKey.ResourceType;
                 rk.ResourceGroup = newKey.ResourceGroup;
                 rk.Instance = newKey.Instance;
@@ -185,9 +192,9 @@ namespace s3piwrappers.SceneGraph
                 if (indexStrStart == -1)
                 {
                     tv = field[name];
-                    if (typeof(IResourceKey).IsAssignableFrom(tv.Type) && endOfPath)
+                    if (typeof (IResourceKey).IsAssignableFrom(tv.Type) && endOfPath)
                     {
-                        IResourceKey rk = (IResourceKey)tv.Value;
+                        var rk = (IResourceKey) tv.Value;
                         rk.ResourceType = newKey.ResourceType;
                         rk.ResourceGroup = newKey.ResourceGroup;
                         rk.Instance = newKey.Instance;
@@ -195,17 +202,17 @@ namespace s3piwrappers.SceneGraph
                             field[name] = new TypedValue(tv.Type, rk);
                         return true;
                     }
-                    else if (typeof(AApiVersionedFields).IsAssignableFrom(tv.Type))
+                    else if (typeof (AApiVersionedFields).IsAssignableFrom(tv.Type))
                     {
                         field = tv.Value as AApiVersionedFields;
                     }
-                    // TODO: Is there a danger of type mismatch?
-                    else if (typeof(TextReader).IsAssignableFrom(tv.Type)
+                        // TODO: Is there a danger of type mismatch?
+                    else if (typeof (TextReader).IsAssignableFrom(tv.Type)
                         && rkContainer is TextReader)
                     {
                         field[name] = new TypedValue(tv.Type, rkContainer);
                     }
-                    else if (typeof(BinaryReader).IsAssignableFrom(tv.Type)
+                    else if (typeof (BinaryReader).IsAssignableFrom(tv.Type)
                         && rkContainer is BinaryReader)
                     {
                         field[name] = new TypedValue(tv.Type, rkContainer);
@@ -229,7 +236,7 @@ namespace s3piwrappers.SceneGraph
                         elem = (list as IList)[index];
                         if (elem is IResourceKey && endOfPath)
                         {
-                            IResourceKey rk = (IResourceKey)elem;
+                            var rk = (IResourceKey) elem;
                             rk.ResourceType = newKey.ResourceType;
                             rk.ResourceGroup = newKey.ResourceGroup;
                             rk.Instance = newKey.Instance;
@@ -259,13 +266,13 @@ namespace s3piwrappers.SceneGraph
                     else // IEnumerable is last resort: value type & reader elements can't be changed
                     {
                         j = -1;
-                        foreach (var e in list as IEnumerable)
+                        foreach (object e in list as IEnumerable)
                         {
                             if (index == ++j)
                             {
                                 if (e is IResourceKey && endOfPath)
                                 {
-                                    IResourceKey rk = (IResourceKey)e;
+                                    var rk = (IResourceKey) e;
                                     rk.ResourceType = newKey.ResourceType;
                                     rk.ResourceGroup = newKey.ResourceGroup;
                                     rk.Instance = newKey.Instance;
@@ -288,6 +295,7 @@ namespace s3piwrappers.SceneGraph
             }
             return false;
         }
+
         #endregion
 
         protected string absolutePath;
@@ -297,22 +305,22 @@ namespace s3piwrappers.SceneGraph
 
         public string AbsolutePath
         {
-            get { return this.absolutePath; }
+            get { return absolutePath; }
         }
 
         public string ContentFieldPath
         {
-            get { return this.contentFieldPath; }
+            get { return contentFieldPath; }
         }
 
         public AApiVersionedFields RootField
         {
-            get { return this.rootField; }
+            get { return rootField; }
         }
 
         public virtual bool SetRK(IResourceKey oldKey, IResourceKey newKey)
         {
-            return SetRKInField(newKey, this.contentFieldPath, this.rootField);
+            return SetRKInField(newKey, contentFieldPath, rootField);
         }
 
         public virtual bool CommitChanges()
@@ -321,9 +329,9 @@ namespace s3piwrappers.SceneGraph
         }
 
         public RKContainer(string fieldPath, AApiVersionedFields rootField,
-            string absolutePath, Predicate<IResourceKey> validate)
+                           string absolutePath, Predicate<IResourceKey> validate)
         {
-            this.contentFieldPath = fieldPath;
+            contentFieldPath = fieldPath;
             this.rootField = rootField;
             this.absolutePath = absolutePath;
             this.validate = validate;

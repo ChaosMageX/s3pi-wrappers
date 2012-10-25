@@ -7,7 +7,7 @@ namespace s3piwrappers
     {
         public HairToneResourceHandler()
         {
-            Add(typeof(HairToneResource), new List<string>(new string[] { "0x03555BA8" }));
+            Add(typeof (HairToneResource), new List<string>(new[] {"0x03555BA8"}));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using s3pi.Extensions;
 using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph
@@ -11,28 +11,28 @@ namespace s3piwrappers.SceneGraph
 
         public uint ResourceType
         {
-            get { return this.resourceType; }
+            get { return resourceType; }
         }
 
         public override bool IsKinDDS
         {
-            get { return this.isKinDDS; }
+            get { return isKinDDS; }
         }
 
         public override bool IsKinThum
         {
-            get { return this.isKinThum; }
+            get { return isKinThum; }
         }
 
         public override bool IsKindred(IResourceKey parentKey, IResourceKey key)
         {
-            return key.ResourceType == this.resourceType && key.Instance == parentKey.Instance;
+            return key.ResourceType == resourceType && key.Instance == parentKey.Instance;
         }
 
         public override void CreateKindredRK(IResourceKey parentKey,
-            IResourceKey newParentKey, ref IResourceKey kindredKey)
+                                             IResourceKey newParentKey, ref IResourceKey kindredKey)
         {
-            kindredKey.ResourceType = this.resourceType;
+            kindredKey.ResourceType = resourceType;
             kindredKey.Instance = newParentKey.Instance;
         }
 
@@ -49,19 +49,19 @@ namespace s3piwrappers.SceneGraph
             {
                 try
                 {
-                    this.kinName = s3pi.Extensions.ExtList.Ext[resourceType][0];
+                    kinName = ExtList.Ext[resourceType][0];
                 }
                 catch
                 {
-                    this.kinName = string.Concat("0x", resourceType.ToString("X8"));
+                    kinName = string.Concat("0x", resourceType.ToString("X8"));
                 }
-                if (string.IsNullOrWhiteSpace(this.kinName))
+                if (string.IsNullOrWhiteSpace(kinName))
                 {
-                    this.kinName = string.Concat("0x", resourceType.ToString("X8"));
+                    kinName = string.Concat("0x", resourceType.ToString("X8"));
                 }
             }
-            this.isKinDDS = ResourceGraph.IsDDS(resourceType);
-            this.isKinThum = ResourceGraph.IsThum(resourceType);
+            isKinDDS = ResourceGraph.IsDDS(resourceType);
+            isKinThum = ResourceGraph.IsThum(resourceType);
         }
     }
 }

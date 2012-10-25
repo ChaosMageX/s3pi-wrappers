@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows;
 using s3piwrappers.RigEditor.ViewModels;
 
 namespace s3piwrappers.RigEditor
 {
-    class App
+    internal class App
     {
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             byte[] buffer = null;
             using (Stream s = File.OpenRead(args[0]))
@@ -28,12 +25,11 @@ namespace s3piwrappers.RigEditor
             if (viewModel.IsSaving)
             {
                 byte[] output = rig.AsBytes;
-                using (var s = File.Create(args[0]))
+                using (FileStream s = File.Create(args[0]))
                 {
                     s.Write(output, 0, output.Length);
                 }
             }
-            
         }
     }
 }

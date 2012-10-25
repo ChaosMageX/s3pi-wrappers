@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
@@ -260,7 +261,7 @@ namespace s3piwrappers.Effects
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mUint01);
             s.Read(out mDdsResource);
             s.Read(out mByte01);
@@ -284,7 +285,7 @@ namespace s3piwrappers.Effects
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mUint01);
             s.Write(mDdsResource);
             s.Write(mByte01);
@@ -306,11 +307,11 @@ namespace s3piwrappers.Effects
             if (mSection.Version >= 2) s.Write(mByte03); //version 2+
         }
 
-        public override System.Collections.Generic.List<string> ContentFields
+        public override List<string> ContentFields
         {
             get
             {
-                var fields = base.ContentFields;
+                List<string> fields = base.ContentFields;
                 if (mSection.Version < 2) fields.Remove("Byte03");
                 return fields;
             }

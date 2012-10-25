@@ -1,46 +1,46 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using s3pi.GenericRCOLResource;
 using s3piwrappers.Commands;
-using System;
 
 namespace s3piwrappers.Models
 {
     public class AreaViewModel : AbstractViewModel
     {
         private FootprintEditorViewModel mParent;
-        private FTPT.Area mArea;
-        private ObservableCollection<PointViewModel> mPoints;
+        private readonly FTPT.Area mArea;
+        private readonly ObservableCollection<PointViewModel> mPoints;
         private PointViewModel mSelectedPoint;
-        private ICommand mDeletePointCommand;
-        private ICommand mAddPointCommand;
+        private readonly ICommand mDeletePointCommand;
+        private readonly ICommand mAddPointCommand;
 
 
-        private AreaTypeAttributes mAreaTypeAttributes;
-        private SurfaceTypeAttributes mSurfaceTypeAttributes;
-        private SurfaceAttributes mSurfaceAttributes;
-        private IntersectionAttributes mIntersectionAttributes;
+        private readonly AreaTypeAttributes mAreaTypeAttributes;
+        private readonly SurfaceTypeAttributes mSurfaceTypeAttributes;
+        private readonly SurfaceAttributes mSurfaceAttributes;
+        private readonly IntersectionAttributes mIntersectionAttributes;
+
         public AreaViewModel(FootprintEditorViewModel parent, FTPT.Area area)
         {
-            this.mParent = parent;
-            this.mArea = area;
-            this.mAreaTypeAttributes = new AreaTypeAttributes(this.mArea);
-            this.mSurfaceTypeAttributes = new SurfaceTypeAttributes(this.mArea);
-            this.mSurfaceAttributes = new SurfaceAttributes(this.mArea);
-            this.mIntersectionAttributes = new IntersectionAttributes(this.mArea);
+            mParent = parent;
+            mArea = area;
+            mAreaTypeAttributes = new AreaTypeAttributes(mArea);
+            mSurfaceTypeAttributes = new SurfaceTypeAttributes(mArea);
+            mSurfaceAttributes = new SurfaceAttributes(mArea);
+            mIntersectionAttributes = new IntersectionAttributes(mArea);
 
-            this.mPoints = new ObservableCollection<PointViewModel>();
-            foreach (var pt in area.ClosedPolygon)
+            mPoints = new ObservableCollection<PointViewModel>();
+            foreach (FTPT.PolygonPoint pt in area.ClosedPolygon)
             {
-                this.Add(new PointViewModel(this, pt));
+                Add(new PointViewModel(this, pt));
             }
-            this.SelectedPoint = this.Points.FirstOrDefault();
-            this.mDeletePointCommand = new UserCommand<AreaViewModel>(x => x != null && x.SelectedPoint != null && x.Points.Contains(x.SelectedPoint), x => x.Remove(x.SelectedPoint));
-            
-            this.mAddPointCommand = new UserCommand<AreaViewModel>(x => x != null && true, x => x.Add());
-            
+            SelectedPoint = Points.FirstOrDefault();
+            mDeletePointCommand = new UserCommand<AreaViewModel>(x => x != null && x.SelectedPoint != null && x.Points.Contains(x.SelectedPoint), x => x.Remove(x.SelectedPoint));
+
+            mAddPointCommand = new UserCommand<AreaViewModel>(x => x != null && true, x => x.Add());
         }
 
         public IntersectionAttributes IntersectionAttributes
@@ -80,49 +80,66 @@ namespace s3piwrappers.Models
 
         public void Add()
         {
-            this.mArea.ClosedPolygon.Add();
-            var point = this.mArea.ClosedPolygon.Last();
-            point.X = this.OffsetX;
-            point.Z = this.OffsetZ;
+            mArea.ClosedPolygon.Add();
+            FTPT.PolygonPoint point = mArea.ClosedPolygon.Last();
+            point.X = OffsetX;
+            point.Z = OffsetZ;
             var vm = new PointViewModel(this, point);
-            this.Add(vm);
+            Add(vm);
         }
+
         public void Add(PointViewModel vm)
         {
             vm.PropertyChanged += OnPointChanged;
-            this.mPoints.Add(vm);
-            this.SelectedPoint = vm;
-            this.OnPropertyChanged("Points");
+            mPoints.Add(vm);
+            SelectedPoint = vm;
+            OnPropertyChanged("Points");
         }
+
         public void Remove(PointViewModel model)
         {
             model.PropertyChanged -= OnPointChanged;
-            this.mPoints.Remove(model);
-            this.SelectedPoint = this.mPoints.LastOrDefault();
-            this.OnPropertyChanged("Points");
+            mPoints.Remove(model);
+            SelectedPoint = mPoints.LastOrDefault();
+            OnPropertyChanged("Points");
         }
+
         private void OnPointChanged(object sender, PropertyChangedEventArgs e)
         {
             OnPropertyChanged("Points");
             OnPropertyChanged("OffsetZ");
             OnPropertyChanged("OffsetX");
-            
         }
+
         public Byte Priority
         {
             get { return mArea.Priority; }
-            set { mArea.Priority = value;OnPropertyChanged("Priority"); }
+            set
+            {
+                mArea.Priority = value;
+                OnPropertyChanged("Priority");
+            }
         }
+
         public uint Name
         {
             get { return mArea.Name; }
-            set { mArea.Name = value; OnPropertyChanged("Name"); OnPropertyChanged("Text"); }
+            set
+            {
+                mArea.Name = value;
+                OnPropertyChanged("Name");
+                OnPropertyChanged("Text");
+            }
         }
 
         public byte LevelOffset
         {
             get { return mArea.LevelOffset; }
-            set { mArea.LevelOffset = value; OnPropertyChanged("LevelOffset"); }
+            set
+            {
+                mArea.LevelOffset = value;
+                OnPropertyChanged("LevelOffset");
+            }
         }
 
         public float OffsetZ
@@ -130,8 +147,8 @@ namespace s3piwrappers.Models
             get { return mArea.ClosedPolygon.Any() ? mArea.ClosedPolygon.Min(x => x.Z) : 0f; }
             set
             {
-                var diff =value- this.OffsetZ ;
-                foreach (var pointViewModel in Points)
+                float diff = value - OffsetZ;
+                foreach (PointViewModel pointViewModel in Points)
                 {
                     pointViewModel.Z += diff;
                 }
@@ -145,8 +162,8 @@ namespace s3piwrappers.Models
             get { return mArea.ClosedPolygon.Any() ? mArea.ClosedPolygon.Min(x => x.X) : 0f; }
             set
             {
-                var diff = value - this.OffsetX ;
-                foreach (var pointViewModel in Points)
+                float diff = value - OffsetX;
+                foreach (PointViewModel pointViewModel in Points)
                 {
                     pointViewModel.X += diff;
                 }
@@ -154,14 +171,20 @@ namespace s3piwrappers.Models
                 OnPropertyChanged("Points");
             }
         }
+
         public string Text
         {
-            get { return string.Format("0x{0:X8}", this.Name); }
+            get { return string.Format("0x{0:X8}", Name); }
         }
+
         public PointViewModel SelectedPoint
         {
             get { return mSelectedPoint; }
-            set { mSelectedPoint = value; OnPropertyChanged("SelectedPoint"); }
+            set
+            {
+                mSelectedPoint = value;
+                OnPropertyChanged("SelectedPoint");
+            }
         }
 
         public ObservableCollection<PointViewModel> Points

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
@@ -309,7 +310,7 @@ namespace s3piwrappers
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mBlockType);
                 s.Read(out mInt01);
                 s.Read(out mShort01);
@@ -340,7 +341,7 @@ namespace s3piwrappers
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mBlockType);
                 s.Write(mInt01);
                 s.Write(mShort01);
@@ -369,11 +370,11 @@ namespace s3piwrappers
                 }
             }
 
-            public override System.Collections.Generic.List<string> ContentFields
+            public override List<string> ContentFields
             {
                 get
                 {
-                    var fields = base.ContentFields;
+                    List<string> fields = base.ContentFields;
                     if (mSection.Version < 2)
                     {
                         fields.Remove("Byte03");
@@ -573,7 +574,7 @@ namespace s3piwrappers
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mInt01);
             s.Read(out mInt02);
             s.Read(out mInt03);
@@ -591,7 +592,7 @@ namespace s3piwrappers
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mInt01);
             s.Write(mInt02);
             s.Write(mInt03);

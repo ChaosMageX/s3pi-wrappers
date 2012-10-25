@@ -1,13 +1,8 @@
-/*
- * Contribution from ChaosMageX
- */
-
 using System;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
 using s3piwrappers.SWB;
-using System.Collections.Generic;
 
 namespace s3piwrappers.Effects
 {
@@ -461,7 +456,7 @@ namespace s3piwrappers.Effects
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mInt01);
             s.Read(out mInt02);
             s.Read(out mInt03);
@@ -504,7 +499,7 @@ namespace s3piwrappers.Effects
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Write(mInt01);
             s.Write(mInt02);
             s.Write(mInt03);

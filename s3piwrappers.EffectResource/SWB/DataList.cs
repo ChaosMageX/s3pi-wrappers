@@ -27,7 +27,7 @@ namespace s3piwrappers.SWB
 
         protected override int ReadCount(Stream s)
         {
-            var c = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
+            int c = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
             return c;
         }
 
@@ -36,19 +36,19 @@ namespace s3piwrappers.SWB
             new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32) count);
         }
 
-        public override void Add()
-        {
-            base.Add(new object[] {});
-        }
-
         protected override TElement CreateElement(Stream s)
         {
-            return (TElement) Activator.CreateInstance(typeof (TElement), new object[] {0, elementHandler, s});
+            return (TElement) Activator.CreateInstance(typeof (TElement),0, elementHandler, s);
         }
 
         protected override void WriteElement(Stream s, TElement element)
         {
             element.UnParse(s);
+        }
+
+        public override void Add()
+        {
+            throw new NotImplementedException();
         }
     }
 }

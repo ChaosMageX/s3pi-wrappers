@@ -1,18 +1,20 @@
-﻿using System.Windows.Data;
-using System;
+﻿using System;
+using System.Globalization;
+using System.Windows.Data;
+
 namespace s3piwrappers.Converters
 {
     /// <summary>
-    /// Firetruck!
+    ///   Firetruck!
     /// </summary>
-    class DebugConverter : IValueConverter
+    internal class DebugConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return value;
         }

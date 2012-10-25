@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using s3piwrappers.SceneGraph.Managers;
 
 namespace s3piwrappers.SceneGraph
 {
@@ -19,7 +16,7 @@ namespace s3piwrappers.SceneGraph
 
         string[] Locale { get; }
 
-        string this[Managers.STBL.Lang lang] { get; set; }
+        string this[STBL.Lang lang] { get; set; }
 
         void Rehash();
 

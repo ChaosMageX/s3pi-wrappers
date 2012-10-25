@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Security.Cryptography;
+using s3piwrappers.SceneGraph.Managers;
 
 namespace s3piwrappers.SceneGraph
 {
@@ -12,71 +10,65 @@ namespace s3piwrappers.SceneGraph
         private readonly string originalHashKey;
         private ulong key;
         private string hashKey;
-        private string[] locale = new string[0x17];
+        private readonly string[] locale = new string[0x17];
 
         public string Name
         {
-            get { return this.name; }
+            get { return name; }
         }
 
         public ulong OriginalKey
         {
-            get { return this.originalKey; }
+            get { return originalKey; }
         }
 
         public ulong Key
         {
-            get { return this.key; }
+            get { return key; }
             set
             {
-                if (this.key != value)
+                if (key != value)
                 {
-                    this.key = value;
+                    key = value;
                 }
             }
         }
 
         public string OriginalHashKey
         {
-            get { return this.originalHashKey; }
+            get { return originalHashKey; }
         }
 
         public string HashKey
         {
-            get { return this.hashKey; }
+            get { return hashKey; }
             set
             {
-                if (this.hashKey != value)
+                if (hashKey != value)
                 {
-                    this.hashKey = value;
-                    this.Rehash();
+                    hashKey = value;
+                    Rehash();
                 }
             }
         }
 
         public void Rehash()
         {
-            if (!string.IsNullOrWhiteSpace(this.hashKey))
+            if (!string.IsNullOrWhiteSpace(hashKey))
             {
-                this.Key = System.Security.Cryptography.FNV64.GetHash(this.hashKey);
+                Key = FNV64.GetHash(hashKey);
             }
         }
 
         public string[] Locale
         {
-            get { return this.locale; }
+            get { return locale; }
         }
 
-        public string this[Managers.STBL.Lang lang]
+        public string this[STBL.Lang lang]
         {
-            get
-            {
-                return this.locale[(int)lang];
-            }
-            set
-            {
-                this.locale[(int)lang] = value;
-            }
+            get { return locale[(int) lang]; }
+            set { locale[(int) lang] = value; }
         }
 
         public abstract bool CommitChanges();
@@ -84,9 +76,9 @@ namespace s3piwrappers.SceneGraph
         public AResourceStblHandle(string name, ulong key, string hashKey = "")
         {
             this.name = name;
-            this.originalKey = key;
+            originalKey = key;
             this.key = key;
-            this.originalHashKey = hashKey;
+            originalHashKey = hashKey;
             this.hashKey = hashKey;
             // TODO: Use string table manager to try to fill in locale
         }

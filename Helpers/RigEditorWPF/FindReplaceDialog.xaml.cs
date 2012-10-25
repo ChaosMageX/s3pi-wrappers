@@ -1,15 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using s3piwrappers.RigEditor.Commands;
 
 namespace s3piwrappers.RigEditor
@@ -19,10 +10,12 @@ namespace s3piwrappers.RigEditor
         public String Find { get; set; }
         public String Replace { get; set; }
         public ICommand AcceptInputCommand { get; private set; }
-        public FindReplaceDialog(String title):this()
+
+        public FindReplaceDialog(String title) : this()
         {
             Title = title;
         }
+
         public FindReplaceDialog()
         {
             AcceptInputCommand = new UserCommand<FindReplaceDialog>(CanExecuteAcceptInput, ExecuteAcceptInput);
@@ -39,6 +32,5 @@ namespace s3piwrappers.RigEditor
             dialog.DialogResult = true;
             dialog.Close();
         }
-
     }
 }

@@ -25,7 +25,7 @@ namespace s3piwrappers.RigEditor.ViewModels
         private EulerAngle mRotation;
         private readonly ICommand mSetOppositeCommand;
 
-        public BoneViewModel(RigEditorViewModel rig,IHaveBones parent, RigResource.RigResource.Bone bone, BoneManager manager)
+        public BoneViewModel(RigEditorViewModel rig, IHaveBones parent, RigResource.RigResource.Bone bone, BoneManager manager)
         {
             if (rig == null) throw new ArgumentNullException("rig");
             if (bone == null) throw new ArgumentNullException("bone");
@@ -35,21 +35,22 @@ namespace s3piwrappers.RigEditor.ViewModels
             mParent = parent;
             mBone = bone;
             mManager = manager;
-            foreach (var b in manager.GetChildren(mBone))
+            foreach (RigResource.RigResource.Bone b in manager.GetChildren(mBone))
             {
-                mChildren.Add(new BoneViewModel(mRig,this, b, mManager));
+                mChildren.Add(new BoneViewModel(mRig, this, b, mManager));
             }
             mRotation = new EulerAngle(new Quaternion(bone.Orientation.A, bone.Orientation.B, bone.Orientation.C, bone.Orientation.D));
-            manager.BoneAdded += new BoneActionEventHandler(OnBoneAdded);
-            manager.BoneRemoved += new BoneActionEventHandler(OnBoneRemoved);
-            manager.BoneParentChanged += new BoneActionEventHandler(OnBoneParentChanged);
-            this.mSetOppositeCommand = new UserCommand<BoneViewModel>(x => true, ExecuteSetOpposite);
+            manager.BoneAdded += OnBoneAdded;
+            manager.BoneRemoved += OnBoneRemoved;
+            manager.BoneParentChanged += OnBoneParentChanged;
+            mSetOppositeCommand = new UserCommand<BoneViewModel>(x => true, ExecuteSetOpposite);
         }
+
         private static void ExecuteSetOpposite(BoneViewModel view)
         {
-            var choices = view.Manager.Bones.OrderBy(x=> x.Name);
+            IOrderedEnumerable<RigResource.RigResource.Bone> choices = view.Manager.Bones.OrderBy(x => x.Name);
             var dialog = new BoneSelectDialog(choices, "Select a New Opposite...");
-            var result = dialog.ShowDialog() ?? false;
+            bool result = dialog.ShowDialog() ?? false;
             if (result)
             {
                 view.Opposite = view.Manager.Bones.IndexOf(dialog.SelectedBone);
@@ -59,19 +60,20 @@ namespace s3piwrappers.RigEditor.ViewModels
 
         private void OnBoneParentChanged(BoneManager sender, BoneActionEventArgs e)
         {
-            var parent = sender.GetParent(e.Bone);
-            var child = mChildren.FirstOrDefault(x => x.Bone == e.Bone);
+            RigResource.RigResource.Bone parent = sender.GetParent(e.Bone);
+            BoneViewModel child = mChildren.FirstOrDefault(x => x.Bone == e.Bone);
             if (parent != null)
             {
-                if(parent.Equals(mBone) && child == null)
+                if (parent.Equals(mBone) && child == null)
                 {
-                    mChildren.Add(new BoneViewModel(mRig,this,e.Bone,sender));
+                    mChildren.Add(new BoneViewModel(mRig, this, e.Bone, sender));
                 }
                 if (child != null && !sender.GetParent(e.Bone).Equals(mBone))
                 {
                     mChildren.Remove(child);
                 }
-            } else
+            }
+            else
             {
                 if (child != null)
                     mChildren.Remove(child);
@@ -80,10 +82,10 @@ namespace s3piwrappers.RigEditor.ViewModels
 
         private void OnBoneRemoved(BoneManager sender, BoneActionEventArgs e)
         {
-            var parent = sender.GetParent(e.Bone);
-            if (parent !=null && parent.Equals(mBone))
+            RigResource.RigResource.Bone parent = sender.GetParent(e.Bone);
+            if (parent != null && parent.Equals(mBone))
             {
-                var child = mChildren.FirstOrDefault(x => x.Bone == e.Bone);
+                BoneViewModel child = mChildren.FirstOrDefault(x => x.Bone == e.Bone);
                 if (child != null)
                 {
                     mChildren.Remove(child);
@@ -93,65 +95,111 @@ namespace s3piwrappers.RigEditor.ViewModels
 
         private void OnBoneAdded(BoneManager sender, BoneActionEventArgs e)
         {
-            var parent = sender.GetParent(e.Bone);
-            if (parent !=null && parent.Equals(mBone))
+            RigResource.RigResource.Bone parent = sender.GetParent(e.Bone);
+            if (parent != null && parent.Equals(mBone))
             {
-                mChildren.Add(new BoneViewModel(mRig,this, e.Bone, sender));
+                mChildren.Add(new BoneViewModel(mRig, this, e.Bone, sender));
             }
         }
 
-        public bool HasChildren { get { return mChildren.Count > 0; } }
-        public BoneManager Manager { get { return mManager; } }
-        public IHaveBones Parent { get { return mParent; } }
-        public RigResource.RigResource.Bone Bone { get { return mBone; } }
-        public IList<BoneViewModel> Children { get { return mChildren; } }
-        public RigEditorViewModel Rig { get { return mRig; } }
+        public bool HasChildren
+        {
+            get { return mChildren.Count > 0; }
+        }
+
+        public BoneManager Manager
+        {
+            get { return mManager; }
+        }
+
+        public IHaveBones Parent
+        {
+            get { return mParent; }
+        }
+
+        public RigResource.RigResource.Bone Bone
+        {
+            get { return mBone; }
+        }
+
+        public IList<BoneViewModel> Children
+        {
+            get { return mChildren; }
+        }
+
+        public RigEditorViewModel Rig
+        {
+            get { return mRig; }
+        }
+
         public string Tag
         {
             get
             {
-                var bone = this;
-                var ix = bone.Manager.IndexOfBone(bone.Manager.Bones, bone.Bone);
-                var opposite = bone.Manager.Bones[(int)bone.Bone.OpposingBoneIndex];
-                var format = String.Format("(0x{1:X8}) {0}", bone.BoneName, bone.HashedName);
+                BoneViewModel bone = this;
+                int ix = bone.Manager.IndexOfBone(bone.Manager.Bones, bone.Bone);
+                RigResource.RigResource.Bone opposite = bone.Manager.Bones[bone.Bone.OpposingBoneIndex];
+                string format = String.Format("(0x{1:X8}) {0}", bone.BoneName, bone.HashedName);
                 return format;
             }
         }
+
         public ICommand SetOppositeCommand
         {
             get { return mSetOppositeCommand; }
         }
+
         public Int32 Opposite
         {
             get { return mBone.OpposingBoneIndex; }
-            set { mBone.OpposingBoneIndex = value; OnPropertyChanged("Opposite"); OnPropertyChanged("Tag"); OnPropertyChanged("OppositeName"); }
+            set
+            {
+                mBone.OpposingBoneIndex = value;
+                OnPropertyChanged("Opposite");
+                OnPropertyChanged("Tag");
+                OnPropertyChanged("OppositeName");
+            }
         }
+
         public String OppositeName
         {
             get { return Manager.Bones[Opposite].Name; }
         }
+
         public UInt32 Flags
         {
             get { return mBone.Unknown2; }
-            set { mBone.Unknown2 = value; OnPropertyChanged("Flags"); }
+            set
+            {
+                mBone.Unknown2 = value;
+                OnPropertyChanged("Flags");
+            }
         }
+
         public String BoneName
         {
             get { return mBone.Name; }
-            set 
-            { 
+            set
+            {
                 mBone.Name = value;
-                this.HashedName = FNV32.GetHash(mBone.Name);
-                OnPropertyChanged("BoneName"); OnPropertyChanged("Tag"); OnPropertyChanged("OppositeName");
-                
+                HashedName = FNV32.GetHash(mBone.Name);
+                OnPropertyChanged("BoneName");
+                OnPropertyChanged("Tag");
+                OnPropertyChanged("OppositeName");
             }
         }
+
         public UInt32 HashedName
         {
             get { return mBone.Hash; }
-            set { mBone.Hash = value; OnPropertyChanged("HashedName"); OnPropertyChanged("Tag"); }
+            set
+            {
+                mBone.Hash = value;
+                OnPropertyChanged("HashedName");
+                OnPropertyChanged("Tag");
+            }
         }
-      
+
         public float ScaleX
         {
             get { return mBone.Scaling.X; }
@@ -161,6 +209,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("ScaleX");
             }
         }
+
         public float ScaleY
         {
             get { return mBone.Scaling.Y; }
@@ -170,6 +219,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("ScaleY");
             }
         }
+
         public float ScaleZ
         {
             get { return mBone.Scaling.Z; }
@@ -190,6 +240,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("PositionX");
             }
         }
+
         public float PositionY
         {
             get { return mBone.Position.Y; }
@@ -199,6 +250,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("PositionY");
             }
         }
+
         public float PositionZ
         {
             get { return mBone.Position.Z; }
@@ -208,28 +260,38 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("PositionZ");
             }
         }
+
         private void SetEulers()
         {
             var q = new Quaternion(new Matrix(mRotation));
-            mBone.Orientation.A = (float)q.X;
-            mBone.Orientation.B = (float)q.Y;
-            mBone.Orientation.C = (float)q.Z;
-            mBone.Orientation.D = (float)q.W;
+            mBone.Orientation.A = (float) q.X;
+            mBone.Orientation.B = (float) q.Y;
+            mBone.Orientation.C = (float) q.Z;
+            mBone.Orientation.D = (float) q.W;
         }
+
         private static double RadToDeg(double rad)
         {
-            return (rad * 180f) / Math.PI;
+            return (rad*180f)/Math.PI;
         }
+
         private static double DegToRad(double deg)
         {
-            return (deg / 180f) * Math.PI;
+            return (deg/180f)*Math.PI;
         }
 
         public EulerAngle Rotation
         {
             get { return mRotation; }
-            set { mRotation = value; OnPropertyChanged("RotationX"); OnPropertyChanged("RotationY"); OnPropertyChanged("RotationZ"); }
+            set
+            {
+                mRotation = value;
+                OnPropertyChanged("RotationX");
+                OnPropertyChanged("RotationY");
+                OnPropertyChanged("RotationZ");
+            }
         }
+
         public double RotationX
         {
             get { return RadToDeg(mRotation.Roll); }
@@ -240,6 +302,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("RotationX");
             }
         }
+
         public double RotationY
         {
             get { return RadToDeg(mRotation.Yaw); }
@@ -250,6 +313,7 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("RotationY");
             }
         }
+
         public double RotationZ
         {
             get { return RadToDeg(mRotation.Pitch); }
@@ -260,10 +324,10 @@ namespace s3piwrappers.RigEditor.ViewModels
                 OnPropertyChanged("RotationZ");
             }
         }
+
         protected override void OnPropertyChanged(string propertyName)
         {
             base.OnPropertyChanged(propertyName);
         }
-
     }
 }

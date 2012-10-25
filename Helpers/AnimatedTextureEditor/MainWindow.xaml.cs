@@ -4,7 +4,7 @@ using s3piwrappers.AnimatedTextureEditor.ViewModels;
 namespace s3piwrappers.AnimatedTextureEditor
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///   Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -14,11 +14,11 @@ namespace s3piwrappers.AnimatedTextureEditor
         }
 
         private readonly AnimViewModel mViewModel;
-        internal MainWindow(AnimViewModel viewModel):this()
+
+        internal MainWindow(AnimViewModel viewModel) : this()
         {
             mViewModel = viewModel;
-            this.DataContext = mViewModel;
+            DataContext = mViewModel;
         }
-
     }
 }

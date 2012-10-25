@@ -1,22 +1,22 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace s3piwrappers.AnimatedTextureEditor.Validation
 {
-    class DecimalValidationRule : ValidationRule
+    internal class DecimalValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             try
             {
-                Double.Parse((String)value);
+                Double.Parse((String) value);
             }
             catch (Exception)
             {
                 return new ValidationResult(false, "*");
             }
             return new ValidationResult(true, null);
-
         }
     }
 }

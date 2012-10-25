@@ -7,24 +7,22 @@ using s3pi.Interfaces;
 namespace s3piwrappers.SceneGraph
 {
     /// <summary>
-    /// Responsible for associating ResourceType in the <see cref="IResourceKey"/> 
-    /// with a particular class (a "node") that can contain it
-    /// or the default resource node.
+    ///   Responsible for associating ResourceType in the <see cref="IResourceKey" /> 
+    ///   with a particular class (a "node") that can contain it
+    ///   or the default resource node.
     /// </summary>
     public static class ResourceNodeDealer
     {
         /// <summary>
-        /// Retrieve a resource node to contain the given resource, 
-        /// readying the appropriate node class or the default node class
+        ///   Retrieve a resource node to contain the given resource, 
+        ///   readying the appropriate node class or the default node class
         /// </summary>
-        /// <param name="resource">The resource to contain in a resource node</param>
-        /// <param name="resourceKey">The identifying key of the given resource,
-        /// which is used to find the right node to contain it</param>
-        /// <param name="AlwaysDefault">When true, indicates ResourceNodeDealer 
-        /// should always use the <see cref="DefaultNode"/> class</param>
-        /// <returns>A resource node containing the given resource</returns>
-        public static IResourceNode GetResource(IResource resource, IResourceKey resourceKey, 
-            bool AlwaysDefault = false)
+        /// <param name="resource"> The resource to contain in a resource node </param>
+        /// <param name="resourceKey"> The identifying key of the given resource, which is used to find the right node to contain it </param>
+        /// <param name="AlwaysDefault"> When true, indicates ResourceNodeDealer should always use the <see cref="DefaultNode" /> class </param>
+        /// <returns> A resource node containing the given resource </returns>
+        public static IResourceNode GetResource(IResource resource, IResourceKey resourceKey,
+                                                bool AlwaysDefault = false)
         {
             if (AlwaysDefault)
                 return new DefaultNode(resource, resourceKey);
@@ -33,19 +31,28 @@ namespace s3piwrappers.SceneGraph
         }
 
         /// <summary>
-        /// Retrieve the resource node classes known to ResourceNodeDealer.
+        ///   Retrieve the resource node classes known to ResourceNodeDealer.
         /// </summary>
-        public static KeyValuePair<uint, Type>[] TypeMap { get { return typeMap.ToArray(); } }
+        public static KeyValuePair<uint, Type>[] TypeMap
+        {
+            get { return typeMap.ToArray(); }
+        }
 
         /// <summary>
-        /// Access the list of resource node types on the "disabled" list.
+        ///   Access the list of resource node types on the "disabled" list.
         /// </summary>
-        /// <remarks>Updates to entries in the collection will be used next time a resource node is requested.
-        /// Existing instances of a disabled node type will not be invalidated and it will remain possible to
-        /// bypass ResourceNodeDealer and instantiate instances of the resource node class directly.</remarks>
-        public static List<KeyValuePair<uint, Type>> Disabled { get { return disabled; } }
+        /// <remarks>
+        ///   Updates to entries in the collection will be used next time a resource node is requested.
+        ///   Existing instances of a disabled node type will not be invalidated and it will remain possible to
+        ///   bypass ResourceNodeDealer and instantiate instances of the resource node class directly.
+        /// </remarks>
+        public static List<KeyValuePair<uint, Type>> Disabled
+        {
+            get { return disabled; }
+        }
 
         #region Implementation
+
         private sealed class KVPComparer : IComparer<KeyValuePair<uint, Type>>
         {
             public int Compare(KeyValuePair<uint, Type> x, KeyValuePair<uint, Type> y)
@@ -54,13 +61,13 @@ namespace s3piwrappers.SceneGraph
             }
         }
 
-        private static List<KeyValuePair<uint, Type>> typeMap;
+        private static readonly List<KeyValuePair<uint, Type>> typeMap;
 
-        private static List<KeyValuePair<uint, Type>> disabled = new List<KeyValuePair<uint,Type>>();
+        private static readonly List<KeyValuePair<uint, Type>> disabled = new List<KeyValuePair<uint, Type>>();
 
         static ResourceNodeDealer()
         {
-            string path, folder = Path.GetDirectoryName(typeof(ResourceNodeDealer).Assembly.Location);
+            string path, folder = Path.GetDirectoryName(typeof (ResourceNodeDealer).Assembly.Location);
             typeMap = new List<KeyValuePair<uint, Type>>();
             string[] dllPaths = Directory.GetFiles(folder, "*.dll");
             uint[] tids;
@@ -77,9 +84,9 @@ namespace s3piwrappers.SceneGraph
                     for (j = 0; j < types.Length; j++)
                     {
                         t = types[j];
-                        if (!t.IsSubclassOf(typeof(AResourceNodeHandler))) continue;
+                        if (!t.IsSubclassOf(typeof (AResourceNodeHandler))) continue;
 
-                        arnhs = (AResourceNodeHandler)t.GetConstructor(new Type[0]).Invoke(new object[0]);
+                        arnhs = (AResourceNodeHandler) t.GetConstructor(new Type[0]).Invoke(new object[0]);
 
                         if (arnhs == null) continue;
 
@@ -96,7 +103,9 @@ namespace s3piwrappers.SceneGraph
                         }
                     }
                 }
-                catch { }
+                catch
+                {
+                }
             }
             typeMap.Sort(new KVPComparer());
         }
@@ -129,9 +138,10 @@ namespace s3piwrappers.SceneGraph
                 return new DefaultNode(resource, resourceKey);
             }
 
-            return (IResourceNode)t.GetConstructor(new Type[] { typeof(IResource), typeof(IResourceKey), })
-                .Invoke(new object[] { resource, resourceKey });
+            return (IResourceNode) t.GetConstructor(new[] {typeof (IResource), typeof (IResourceKey),})
+                .Invoke(new object[] {resource, resourceKey});
         }
+
         #endregion
     }
 }

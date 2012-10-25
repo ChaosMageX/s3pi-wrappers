@@ -2,35 +2,33 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Shapes;
-using System.Diagnostics;
-using s3piwrappers.Models;
 using System.Windows.Media;
-using System.Windows.Threading;
-using System.Threading;
-using System.Linq;
+using System.Windows.Shapes;
+using s3piwrappers.Models;
 
 namespace s3piwrappers
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    ///   Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
         public const int kGridSize = 200;
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        private FootprintEditorViewModel viewModel;
+        private readonly FootprintEditorViewModel viewModel;
+
         public MainWindow(FootprintEditorViewModel vm)
             : this()
         {
-            this.viewModel = vm;
-            this.DataContext = this.viewModel;
-
+            viewModel = vm;
+            DataContext = viewModel;
         }
+
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
@@ -39,18 +37,18 @@ namespace s3piwrappers
             DrawGridLines();
             Register();
         }
-        void SetGrid(double x, double y)
-        {
-            Area_Scroller.ScrollToHorizontalOffset(x + (5000 - Area_Scroller.ActualWidth / 2));
-            Area_Scroller.ScrollToVerticalOffset(y + (5000 - Area_Scroller.ActualHeight / 2));
 
+        private void SetGrid(double x, double y)
+        {
+            Area_Scroller.ScrollToHorizontalOffset(x + (5000 - Area_Scroller.ActualWidth/2));
+            Area_Scroller.ScrollToVerticalOffset(y + (5000 - Area_Scroller.ActualHeight/2));
         }
 
         private static void Register()
         {
-            EventManager.RegisterClassHandler(typeof(TextBox), PreviewMouseLeftButtonDownEvent,
+            EventManager.RegisterClassHandler(typeof (TextBox), PreviewMouseLeftButtonDownEvent,
                                               new MouseButtonEventHandler(SelectivelyHandleMouseButton), true);
-            EventManager.RegisterClassHandler(typeof(TextBox), GotKeyboardFocusEvent,
+            EventManager.RegisterClassHandler(typeof (TextBox), GotKeyboardFocusEvent,
                                               new RoutedEventHandler(SelectAllText), true);
         }
 
@@ -76,9 +74,9 @@ namespace s3piwrappers
 
         private void DrawGridLines()
         {
-            var zmax = AreaCanvas.ActualHeight;
-            var xmax = AreaCanvas.ActualWidth;
-            var interval = kGridSize;
+            double zmax = AreaCanvas.ActualHeight;
+            double xmax = AreaCanvas.ActualWidth;
+            int interval = kGridSize;
             Line line;
             Brush stroke = Brushes.LightGreen;
             double strokeThickness = 1;
@@ -94,43 +92,38 @@ namespace s3piwrappers
                         Y2 = x,
                         Stroke = stroke,
                         StrokeThickness = strokeThickness
-
                     };
-                if (x == zmax / 2)
+                if (x == zmax/2)
                 {
                     line.Stroke = Brushes.DarkGreen;
-                    line.StrokeThickness = strokeThickness * 2;
+                    line.StrokeThickness = strokeThickness*2;
                 }
                 canvas.Children.Add(line);
-
             }
             for (double z = 0; z <= xmax; z += interval)
             {
                 line = new Line
-                {
-                    X1 = z,
-                    X2 = z,
-                    Y1 = 0,
-                    Y2 = zmax,
-                    Stroke = stroke,
-                    StrokeThickness = strokeThickness
-
-                };
-                if (z == xmax / 2)
+                    {
+                        X1 = z,
+                        X2 = z,
+                        Y1 = 0,
+                        Y2 = zmax,
+                        Stroke = stroke,
+                        StrokeThickness = strokeThickness
+                    };
+                if (z == xmax/2)
                 {
                     line.Stroke = Brushes.DarkGreen;
-                    line.StrokeThickness = strokeThickness * 2;
+                    line.StrokeThickness = strokeThickness*2;
                 }
                 canvas.Children.Add(line);
-
             }
-
         }
+
         private Shape draggedPoint;
 
         private void AreaCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
             if (e.OriginalSource is Ellipse)
             {
                 draggedPoint = e.OriginalSource as Shape;
@@ -139,27 +132,26 @@ namespace s3piwrappers
                 {
                     viewModel.SelectedArea.SelectedPoint = dc;
                 }
-
             }
         }
 
 
         private void AreaCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            var crs = e.GetPosition((IInputElement)AreaCanvas);
+            Point crs = e.GetPosition(AreaCanvas);
 
 
-            viewModel.CursorX = (crs.X - AreaCanvas.ActualWidth / 2) / kGridSize;
-            viewModel.CursorZ = (crs.Y - AreaCanvas.ActualHeight / 2) / kGridSize;
+            viewModel.CursorX = (crs.X - AreaCanvas.ActualWidth/2)/kGridSize;
+            viewModel.CursorZ = (crs.Y - AreaCanvas.ActualHeight/2)/kGridSize;
             if (draggedPoint != null)
             {
-                var pos = e.GetPosition((IInputElement)draggedPoint.Parent);
+                Point pos = e.GetPosition((IInputElement) draggedPoint.Parent);
                 double x = pos.X;
                 double y = pos.Y;
                 if (x < 0) x = 0;
                 if (y < 0) y = 0;
-                x -= draggedPoint.Width / 2;
-                y -= draggedPoint.Height / 2;
+                x -= draggedPoint.Width/2;
+                y -= draggedPoint.Height/2;
                 Canvas.SetLeft(draggedPoint, x);
                 Canvas.SetTop(draggedPoint, y);
             }
@@ -177,11 +169,9 @@ namespace s3piwrappers
 
         private void AreaCanvas_MouseLeave(object sender, MouseEventArgs e)
         {
-
             draggedPoint = null;
             viewModel.CursorX = null;
             viewModel.CursorZ = null;
-
         }
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -191,10 +181,9 @@ namespace s3piwrappers
                 var item = e.AddedItems[0] as AreaViewModel;
                 if (item != null)
                 {
-                    SetGrid(item.OffsetX * kGridSize, item.OffsetZ * kGridSize);
+                    SetGrid(item.OffsetX*kGridSize, item.OffsetZ*kGridSize);
                 }
             }
-
         }
 
         private void PointBox_MouseDown(object sender, MouseButtonEventArgs e)
@@ -202,10 +191,8 @@ namespace s3piwrappers
             var pnt = PointBox.SelectedItem as PointViewModel;
             if (pnt != null)
             {
-                SetGrid(pnt.X * kGridSize, pnt.Z * kGridSize);
+                SetGrid(pnt.X*kGridSize, pnt.Z*kGridSize);
             }
-
         }
-
     }
 }

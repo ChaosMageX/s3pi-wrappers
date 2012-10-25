@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace s3piwrappers.RigEditor.Validation
 {
-    class RequiredFieldValidationRule : ValidationRule
+    internal class RequiredFieldValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
-            return !String.IsNullOrEmpty(value.ToString())?  new ValidationResult(true, null): new ValidationResult(false, "Field cannot be blank.");
+            return !String.IsNullOrEmpty(value.ToString()) ? new ValidationResult(true, null) : new ValidationResult(false, "Field cannot be blank.");
         }
     }
 }

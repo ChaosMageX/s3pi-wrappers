@@ -7,7 +7,8 @@
             mBone = bone;
         }
 
-        private RigResource.RigResource.Bone mBone;
+        private readonly RigResource.RigResource.Bone mBone;
+
         public RigResource.RigResource.Bone Bone
         {
             get { return mBone; }

@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using meshExpImp.ModelBlocks;
 using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
-using System.Windows.Media.Imaging;
-using System.Diagnostics;
-using System.Security.Cryptography;
 using Vertex = meshExpImp.ModelBlocks.Vertex;
 
 namespace s3piwrappers.ModelViewer
 {
-
     public partial class MainWindow : Window
     {
-
-        class SceneGeostate
+        private class SceneGeostate
         {
             public SceneGeostate(SceneMesh owner, MLOD.GeometryState state, GeometryModel3D model)
             {
@@ -32,6 +30,7 @@ namespace s3piwrappers.ModelViewer
             public SceneMesh Owner { get; set; }
             public MLOD.GeometryState State { get; set; }
             public GeometryModel3D Model { get; set; }
+
             public override string ToString()
             {
                 if (State == null)
@@ -40,77 +39,81 @@ namespace s3piwrappers.ModelViewer
                 }
                 else
                 {
-                    var stateName = "0x" + State.Name.ToString("X8");
-                    if (MainWindow.GeostateDictionary.ContainsKey(State.Name))
+                    string stateName = "0x" + State.Name.ToString("X8");
+                    if (GeostateDictionary.ContainsKey(State.Name))
                     {
-                        stateName = MainWindow.GeostateDictionary[State.Name];
+                        stateName = GeostateDictionary[State.Name];
                     }
                     return stateName;
                 }
-
             }
         }
-        class SceneMesh
+
+        private class SceneMesh
         {
             public SceneMesh(GeometryModel3D model)
             {
-                this.Model = model;
-                this.States = new SceneGeostate[0];
+                Model = model;
+                States = new SceneGeostate[0];
             }
+
             public SceneGeostate[] States { get; set; }
             public SceneGeostate SelectedState { get; set; }
 
             public GeometryModel3D Model { get; set; }
-            public s3pi.GenericRCOLResource.MATD.ShaderType Shader { get; set; }
-
+            public ShaderType Shader { get; set; }
         }
-        class SceneMlodMesh : SceneMesh
+
+        private class SceneMlodMesh : SceneMesh
         {
             public SceneMlodMesh(MLOD.Mesh mesh, GeometryModel3D model)
                 : base(model)
             {
-                this.Mesh = mesh;
+                Mesh = mesh;
             }
 
             public MLOD.Mesh Mesh { get; set; }
+
             public override string ToString()
             {
-                var meshName = "0x" + Mesh.Name.ToString("X8");
-                if (MainWindow.MeshDictionary.ContainsKey(Mesh.Name))
+                string meshName = "0x" + Mesh.Name.ToString("X8");
+                if (MeshDictionary.ContainsKey(Mesh.Name))
                 {
-                    meshName = MainWindow.MeshDictionary[Mesh.Name];
+                    meshName = MeshDictionary[Mesh.Name];
                 }
                 return meshName;
             }
-
         }
-        class SceneGeomMesh : SceneMesh
+
+        private class SceneGeomMesh : SceneMesh
         {
             public SceneGeomMesh(GEOM mesh, GeometryModel3D model)
                 : base(model)
             {
-                this.Mesh = mesh;
+                Mesh = mesh;
             }
 
             public GEOM Mesh { get; set; }
+
             public override string ToString()
             {
                 return "GEOM Mesh";
             }
         }
 
-        private List<SceneMesh> mSceneMeshes;
+        private readonly List<SceneMesh> mSceneMeshes;
         private SceneMesh mSelectedMesh;
-        private GenericRCOLResource rcol;
-        private Material mHiddenMaterial = new DiffuseMaterial();
-        private MaterialGroup mNonSelectedMaterial = new MaterialGroup();
-        private MaterialGroup mSelectedMaterial = new MaterialGroup();
+        private readonly GenericRCOLResource rcol;
+        private readonly Material mHiddenMaterial = new DiffuseMaterial();
+        private readonly MaterialGroup mNonSelectedMaterial = new MaterialGroup();
+        private readonly MaterialGroup mSelectedMaterial = new MaterialGroup();
         private Material mXrayMaterial;
-        private Material mCheckerMaterial;
+        private readonly Material mCheckerMaterial;
         private Material mTexturedMaterial;
-        private MaterialGroup mGlassMaterial = new MaterialGroup();
-        private Material mShadowMapMaterial;
-        private ImageBrush mCheckerBrush;
+        private readonly MaterialGroup mGlassMaterial = new MaterialGroup();
+        private readonly Material mShadowMapMaterial;
+        private readonly ImageBrush mCheckerBrush;
+
         public String TextureSource
         {
             set
@@ -132,18 +135,16 @@ namespace s3piwrappers.ModelViewer
                     {
                         mTexturedMaterial = null;
                         MessageBox.Show("Unable to load texture " + value);
-
                     }
-
                 }
                 else
                 {
                     mTexturedMaterial = null;
                     rbTextured.Visibility = Visibility.Collapsed;
                 }
-
             }
         }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -157,16 +158,14 @@ namespace s3piwrappers.ModelViewer
 
 
             mCheckerBrush = new ImageBrush
-            {
-                Stretch = Stretch.Fill,
-                TileMode = TileMode.Tile,
-                ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
-                ViewportUnits = BrushMappingMode.Absolute
-                
+                {
+                    Stretch = Stretch.Fill,
+                    TileMode = TileMode.Tile,
+                    ViewboxUnits = BrushMappingMode.RelativeToBoundingBox,
+                    ViewportUnits = BrushMappingMode.Absolute
+                };
 
-            };
-
-            mCheckerBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "checkers.png")));
+            mCheckerBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof (MainWindow).Assembly.Location), "checkers.png")));
             mCheckerMaterial = new DiffuseMaterial(mCheckerBrush);
 
 
@@ -184,7 +183,7 @@ namespace s3piwrappers.ModelViewer
 
             try
             {
-                shadowBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof(MainWindow).Assembly.Location), "dropShadow.png")));
+                shadowBrush.ImageSource = new BitmapImage(new Uri(Path.Combine(Path.GetDirectoryName(typeof (MainWindow).Assembly.Location), "dropShadow.png")));
             }
             catch (Exception e)
             {
@@ -209,8 +208,8 @@ Rotate:
 1. RMB+Drag
 2. Arrow Keys
 ";
-
         }
+
         public MainWindow(Stream s)
             : this()
         {
@@ -218,16 +217,15 @@ Rotate:
             rbTextured.Visibility = Visibility.Collapsed;
             InitScene();
             rbSolid.IsChecked = true;
-
-
         }
+
         public static Dictionary<uint, string> GeostateDictionary;
         public static Dictionary<uint, string> MeshDictionary;
 
-        static Dictionary<uint, string> LoadDictionary(string name)
+        private static Dictionary<uint, string> LoadDictionary(string name)
         {
             var dict = new Dictionary<uint, string>();
-            var geostatePath = Path.Combine(Path.GetDirectoryName(typeof(App).Assembly.Location), name + ".txt");
+            string geostatePath = Path.Combine(Path.GetDirectoryName(typeof (App).Assembly.Location), name + ".txt");
             if (File.Exists(geostatePath))
             {
                 using (var sr = new StreamReader(File.OpenRead(geostatePath)))
@@ -244,36 +242,37 @@ Rotate:
             }
             return dict;
         }
-        void InitScene()
+
+        private void InitScene()
         {
             GeostatesPanel.Visibility = Visibility.Collapsed;
             GenericRCOLResource.ChunkEntry chunk = rcol.ChunkEntries.FirstOrDefault(x => x.RCOLBlock is MLOD);
 
-            var polyCount = 0;
-            var vertCount = 0;
+            int polyCount = 0;
+            int vertCount = 0;
 
 
             if (chunk != null)
             {
                 var mlod = chunk.RCOLBlock as MLOD;
-                foreach (var m in mlod.Meshes)
+                foreach (MLOD.Mesh m in mlod.Meshes)
                 {
                     vertCount += m.VertexCount;
                     polyCount += m.PrimitiveCount;
-                    var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
-                    var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
-                    var vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
-                    var material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
+                    var vbuf = (VBUF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
+                    var ibuf = (IBUF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
+                    VRTF vrtf = (VRTF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
+                    IRCOLBlock material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
 
-                    var matd = FindMainMATD(rcol, material);
+                    MATD matd = FindMainMATD(rcol, material);
 
-                    var uvscale = GetUvScales(matd);
+                    float[] uvscale = GetUvScales(matd);
                     if (uvscale != null)
                         Debug.WriteLine(string.Format("{0} - {1} - {2}", uvscale[0], uvscale[2], uvscale[2]));
                     else
                         Debug.WriteLine("No scales");
 
-                    var model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
+                    GeometryModel3D model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
 
                     var sceneMesh = new SceneMlodMesh(m, model);
                     if (matd != null)
@@ -281,25 +280,25 @@ Rotate:
                         sceneMesh.Shader = matd.Shader;
                         switch (matd.Shader)
                         {
-                            case MATD.ShaderType.ShadowMap:
-                            case MATD.ShaderType.DropShadow:
-                                break;
-                            default:
-                            var maskWidth = GetMATDParam<MATD.ElementInt>(matd, MATD.FieldType.MaskWidth);
-                            var maskHeight = GetMATDParam<MATD.ElementInt>(matd, MATD.FieldType.MaskHeight);
-                                if(maskWidth != null && maskHeight != null)
-                                {
-                                    float scalar = Math.Max(maskWidth.Data, maskHeight.Data);
-                                    mCheckerBrush.Transform = new ScaleTransform(maskHeight.Data / scalar, maskWidth.Data / scalar);
-                                }
-                                break;
+                        case ShaderType.ShadowMap:
+                        case ShaderType.DropShadow:
+                            break;
+                        default:
+                            var maskWidth = GetMATDParam<ElementInt>(matd, FieldType.MaskWidth);
+                            var maskHeight = GetMATDParam<ElementInt>(matd, FieldType.MaskHeight);
+                            if (maskWidth != null && maskHeight != null)
+                            {
+                                float scalar = Math.Max(maskWidth.Data, maskHeight.Data);
+                                mCheckerBrush.Transform = new ScaleTransform(maskHeight.Data/scalar, maskWidth.Data/scalar);
+                            }
+                            break;
                         }
                     }
-                    SceneGeostate[] sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
+                    var sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
                     for (int i = 0; i < sceneGeostates.Length; i++)
                     {
-                        var state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
-                                                   ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
+                        GeometryModel3D state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
+                                                          ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
                         mGroupMeshes.Children.Add(state);
                         sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
                     }
@@ -307,56 +306,53 @@ Rotate:
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }
-                
             }
             else
             {
-                var geomChunk = rcol.ChunkEntries.FirstOrDefault();
+                GenericRCOLResource.ChunkEntry geomChunk = rcol.ChunkEntries.FirstOrDefault();
                 var geom = new GEOM(0, null, geomChunk.RCOLBlock.Stream);
                 var verts = new List<Vertex>();
                 polyCount = geom.Faces.Count;
                 vertCount = geom.VertexData.Count;
-                foreach (var vd in geom.VertexData)
+                foreach (GEOM.VertexDataElement vd in geom.VertexData)
                 {
                     var v = new Vertex();
 
-                    var pos = (GEOM.PositionElement)vd.Vertex.FirstOrDefault(e => e is GEOM.PositionElement);
+                    var pos = (GEOM.PositionElement) vd.Vertex.FirstOrDefault(e => e is GEOM.PositionElement);
                     if (pos != null)
                     {
-                        v.Position = new[] { pos.X, pos.Y, pos.Z };
+                        v.Position = new[] {pos.X, pos.Y, pos.Z};
                     }
 
 
-                    var norm = (GEOM.NormalElement)vd.Vertex.FirstOrDefault(e => e is GEOM.NormalElement);
+                    var norm = (GEOM.NormalElement) vd.Vertex.FirstOrDefault(e => e is GEOM.NormalElement);
                     if (norm != null)
                     {
-                        v.Normal = new[] { norm.X, norm.Y, norm.Z };
+                        v.Normal = new[] {norm.X, norm.Y, norm.Z};
                     }
 
 
-                    var uv = (GEOM.UVElement)vd.Vertex.FirstOrDefault(e => e is GEOM.UVElement);
+                    var uv = (GEOM.UVElement) vd.Vertex.FirstOrDefault(e => e is GEOM.UVElement);
                     if (uv != null)
                     {
-                        v.UV = new float[][] { new[] { uv.U, uv.V } };
+                        v.UV = new[] {new[] {uv.U, uv.V}};
                     }
                     verts.Add(v);
-
                 }
                 var facepoints = new List<int>();
-                foreach (var face in geom.Faces)
+                foreach (GEOM.Face face in geom.Faces)
                 {
                     facepoints.Add(face.VertexDataIndex0);
                     facepoints.Add(face.VertexDataIndex1);
                     facepoints.Add(face.VertexDataIndex2);
                 }
 
-                var model = DrawModel(verts.ToArray(), facepoints.ToArray(), mNonSelectedMaterial);
+                GeometryModel3D model = DrawModel(verts.ToArray(), facepoints.ToArray(), mNonSelectedMaterial);
                 var sceneMesh = new SceneGeomMesh(geom, model);
                 mGroupMeshes.Children.Add(model);
                 mSceneMeshes.Add(sceneMesh);
-
             }
-            foreach (var s in mSceneMeshes)
+            foreach (SceneMesh s in mSceneMeshes)
             {
                 mMeshListView.Items.Add(s);
             }
@@ -364,10 +360,11 @@ Rotate:
             {
                 MeshesPanel.Visibility = Visibility.Collapsed;
             }
-            this.VertexCount.Text = String.Format("Vertices: {0}", vertCount);
-            this.PolygonCount.Text = String.Format("Polygons: {0}", polyCount);
+            VertexCount.Text = String.Format("Vertices: {0}", vertCount);
+            PolygonCount.Text = String.Format("Polygons: {0}", polyCount);
         }
-        static MATD FindMainMATD(GenericRCOLResource rcol, IRCOLBlock material)
+
+        private static MATD FindMainMATD(GenericRCOLResource rcol, IRCOLBlock material)
         {
             float[] scales = null;
             if (material == null) return null;
@@ -377,11 +374,10 @@ Rotate:
             }
             else if (material is MTST)
             {
-                MTST mtst = material as MTST;
+                var mtst = material as MTST;
                 try
                 {
                     material = GenericRCOLResource.ChunkReference.GetBlock(rcol, mtst.Index);
-
                 }
                 catch (NotImplementedException e)
                 {
@@ -392,7 +388,7 @@ Rotate:
 
                 if (material is MATD)
                 {
-                    MATD matd = (MATD)material;
+                    var matd = (MATD) material;
                     return matd;
                 }
             }
@@ -402,23 +398,25 @@ Rotate:
             }
 
             return null;
-
         }
-        static T GetMATDParam<T>(MATD matd, MATD.FieldType type) where T : class
+
+        private static T GetMATDParam<T>(MATD matd, FieldType type) where T : class
         {
             return matd == null ? null : (matd.Mtnf != null ? matd.Mtnf.SData : matd.Mtrl.SData).FirstOrDefault(x => x.Field == type) as T;
         }
-        static float[] GetUvScales(MATD matd)
+
+        private static float[] GetUvScales(MATD matd)
         {
-            var param = GetMATDParam<MATD.ElementFloat3>(matd, MATD.FieldType.UVScales);
-            return param != null ? new[] { param.Data0, param.Data1, param.Data2 } : new[] { 1f / short.MaxValue, 1f / short.MaxValue, 1f / short.MaxValue };
+            var param = GetMATDParam<ElementFloat3>(matd, FieldType.UVScales);
+            return param != null ? new[] {param.Data0, param.Data1, param.Data2} : new[] {1f/short.MaxValue, 1f/short.MaxValue, 1f/short.MaxValue};
         }
-        static GeometryModel3D DrawModel(meshExpImp.ModelBlocks.Vertex[] verts, Int32[] indices, Material material)
+
+        private static GeometryModel3D DrawModel(Vertex[] verts, Int32[] indices, Material material)
         {
-            MeshGeometry3D mesh = new MeshGeometry3D();
+            var mesh = new MeshGeometry3D();
             for (int k = 0; k < verts.Length; k++)
             {
-                meshExpImp.ModelBlocks.Vertex v = verts[k];
+                Vertex v = verts[k];
 
                 if (v.Position != null) mesh.Positions.Add(new Point3D(v.Position[0], -v.Position[2], v.Position[1]));
                 if (v.Normal != null) mesh.Normals.Add(new Vector3D(v.Normal[0], v.Normal[1], v.Normal[2]));
@@ -437,10 +435,8 @@ Rotate:
             SceneMesh m;
             if (e.AddedItems.Count > 0)
             {
-                m = (SceneMesh)e.AddedItems[0];
+                m = (SceneMesh) e.AddedItems[0];
                 mSelectedMesh = m;
-
-
             }
             else
             {
@@ -450,9 +446,8 @@ Rotate:
             GeostatesPanel.Visibility = m == null || m.States.Count() == 0 ? Visibility.Collapsed : Visibility.Visible;
             if (m != null)
             {
-
                 mStateListView.Items.Add(new SceneGeostate(m, null, null));
-                foreach (var s in m.States)
+                foreach (SceneGeostate s in m.States)
                 {
                     mStateListView.Items.Add(s);
                 }
@@ -464,47 +459,48 @@ Rotate:
             }
             UpdateMaterials();
         }
+
         private void UpdateMaterials()
         {
-            foreach (var sceneMesh in mSceneMeshes)
+            foreach (SceneMesh sceneMesh in mSceneMeshes)
             {
                 Material meshMaterial = null;
                 switch (mDrawMode)
                 {
-                    case "Solid":
-                        meshMaterial = mSelectedMesh == sceneMesh ? mSelectedMaterial : mNonSelectedMaterial;
+                case "Solid":
+                    meshMaterial = mSelectedMesh == sceneMesh ? mSelectedMaterial : mNonSelectedMaterial;
+                    break;
+                case "Textured":
+                    switch (sceneMesh.Shader)
+                    {
+                    case ShaderType.GlassForFences:
+                    case ShaderType.GlassForObjects:
+                    case ShaderType.GlassForObjectsTranslucent:
+                    case ShaderType.GlassForPortals:
+                    case ShaderType.GlassForRabbitHoles:
+                        meshMaterial = mGlassMaterial;
                         break;
-                    case "Textured":
-                        switch (sceneMesh.Shader)
-                        {
-                            case MATD.ShaderType.GlassForFences:
-                            case MATD.ShaderType.GlassForObjects:
-                            case MATD.ShaderType.GlassForObjectsTranslucent:
-                            case MATD.ShaderType.GlassForPortals:
-                            case MATD.ShaderType.GlassForRabbitHoles:
-                                meshMaterial = mGlassMaterial;
-                                break;
-                            case MATD.ShaderType.ShadowMap:
-                            case MATD.ShaderType.DropShadow:
-                                meshMaterial = mShadowMapMaterial;
-                                break;
-                            default:
-                                meshMaterial = mTexturedMaterial;
-                                break;
-                        }
+                    case ShaderType.ShadowMap:
+                    case ShaderType.DropShadow:
+                        meshMaterial = mShadowMapMaterial;
                         break;
-                    case "UV":
-                        switch (sceneMesh.Shader)
-                        {
-                            case MATD.ShaderType.ShadowMap:
-                            case MATD.ShaderType.DropShadow:
-                                meshMaterial = mShadowMapMaterial;
-                                break;
-                            default:
-                                meshMaterial = mCheckerMaterial;
-                                break;
-                        }
+                    default:
+                        meshMaterial = mTexturedMaterial;
                         break;
+                    }
+                    break;
+                case "UV":
+                    switch (sceneMesh.Shader)
+                    {
+                    case ShaderType.ShadowMap:
+                    case ShaderType.DropShadow:
+                        meshMaterial = mShadowMapMaterial;
+                        break;
+                    default:
+                        meshMaterial = mCheckerMaterial;
+                        break;
+                    }
+                    break;
                 }
                 if (sceneMesh.SelectedState != null && sceneMesh.SelectedState.Model != null)
                 {
@@ -515,7 +511,7 @@ Rotate:
                 {
                     sceneMesh.Model.Material = meshMaterial;
                 }
-                foreach (var sceneState in sceneMesh.States)
+                foreach (SceneGeostate sceneState in sceneMesh.States)
                 {
                     if (sceneState != sceneMesh.SelectedState)
                     {
@@ -523,27 +519,25 @@ Rotate:
                     }
                 }
             }
-
-
         }
+
         private void mStateListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count > 0)
             {
-                var s = (SceneGeostate)e.AddedItems[0];
+                var s = (SceneGeostate) e.AddedItems[0];
                 mSelectedMesh.SelectedState = s;
-
             }
             UpdateMaterials();
         }
 
         private string mDrawMode;
+
         private void RadioButton_Checked(object sender, RoutedEventArgs e)
         {
-            var rb = (RadioButton)sender;
+            var rb = (RadioButton) sender;
             mDrawMode = rb.Content.ToString();
             UpdateMaterials();
         }
-
     }
 }

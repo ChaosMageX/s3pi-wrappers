@@ -275,6 +275,11 @@ namespace s3piwrappers.EffectCloner.Swarm
             {
                 get { return false; }
             }
+
+            public void Add(Type instanceType)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #region Constant Values

@@ -1,47 +1,60 @@
-﻿using System.Linq;
-using s3pi.GenericRCOLResource;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
-using System.Windows;
-using s3piwrappers.Commands;
+using System.Linq;
 using System.Text;
-using System;
+using System.Windows;
+using System.Windows.Input;
 using Microsoft.Win32;
+using s3pi.GenericRCOLResource;
+using s3piwrappers.Commands;
 
 namespace s3piwrappers.Models
 {
     public class FootprintEditorViewModel : AbstractViewModel
     {
         private GenericRCOLResource mRcol;
-        private FTPT mFootprint;
-        private ObservableCollection<AreaViewModel> mFootprintAreas;
-        private ObservableCollection<AreaViewModel> mSlotAreas;
+        private readonly FTPT mFootprint;
+        private readonly ObservableCollection<AreaViewModel> mFootprintAreas;
+        private readonly ObservableCollection<AreaViewModel> mSlotAreas;
         private bool mIsSaving;
         private AreaViewModel mSelectedArea;
 
         private double? mCursorX;
+
         public double? CursorX
         {
             get { return mCursorX; }
-            set { mCursorX = value; OnPropertyChanged("CursorX"); OnPropertyChanged("StatusText"); }
+            set
+            {
+                mCursorX = value;
+                OnPropertyChanged("CursorX");
+                OnPropertyChanged("StatusText");
+            }
         }
 
         private double? mCursorZ;
+
         public double? CursorZ
         {
             get { return mCursorZ; }
             set
             {
-                mCursorZ = value; OnPropertyChanged("CursorZ");
+                mCursorZ = value;
+                OnPropertyChanged("CursorZ");
                 OnPropertyChanged("StatusText");
             }
         }
 
         private string mBackgroundImagePath;
+
         public string BackgroundImagePath
         {
             get { return mBackgroundImagePath; }
-            set { mBackgroundImagePath = value; OnPropertyChanged("BackgroundImagePath"); }
+            set
+            {
+                mBackgroundImagePath = value;
+                OnPropertyChanged("BackgroundImagePath");
+            }
         }
 
         public string StatusText
@@ -54,9 +67,9 @@ namespace s3piwrappers.Models
                     sb.AppendFormat("({0:0.00},{1:0.00})", CursorX, CursorZ);
                 }
                 return sb.ToString();
-
             }
         }
+
         private AreaViewModel mSelectedFootprint;
 
         private AreaViewModel mSelectedSlot;
@@ -92,10 +105,15 @@ namespace s3piwrappers.Models
         }
 
         private string mReferenceMesh;
+
         public String ReferenceMesh
         {
             get { return mReferenceMesh; }
-            set { mReferenceMesh = value; OnPropertyChanged("ReferenceMesh"); }
+            set
+            {
+                mReferenceMesh = value;
+                OnPropertyChanged("ReferenceMesh");
+            }
         }
 
         public ObservableCollection<AreaViewModel> SlotAreas
@@ -106,7 +124,12 @@ namespace s3piwrappers.Models
         public AreaViewModel SelectedArea
         {
             get { return mSelectedArea; }
-            set { mSelectedArea = value; OnPropertyChanged("SelectedArea"); OnPropertyChanged("SelectedArea"); }
+            set
+            {
+                mSelectedArea = value;
+                OnPropertyChanged("SelectedArea");
+                OnPropertyChanged("SelectedArea");
+            }
         }
 
         public ObservableCollection<AreaViewModel> FootprintAreas
@@ -114,7 +137,10 @@ namespace s3piwrappers.Models
             get { return mFootprintAreas; }
         }
 
-        public bool IsSaving { get { return mIsSaving; } }
+        public bool IsSaving
+        {
+            get { return mIsSaving; }
+        }
 
 
         public ICommand AddSlotCommand { get; private set; }
@@ -136,139 +162,144 @@ namespace s3piwrappers.Models
 
         public FootprintEditorViewModel(GenericRCOLResource rcol)
         {
-            this.mRcol = rcol;
-            this.mFootprint = rcol.ChunkEntries[0].RCOLBlock as FTPT;
-            this.mFootprintAreas = new ObservableCollection<AreaViewModel>(mFootprint.FootprintAreas.Select(x => new AreaViewModel(this, x)));
-            this.mSlotAreas = new ObservableCollection<AreaViewModel>(mFootprint.SlotAreas.Select(x => new AreaViewModel(this, x)));
+            mRcol = rcol;
+            mFootprint = rcol.ChunkEntries[0].RCOLBlock as FTPT;
+            mFootprintAreas = new ObservableCollection<AreaViewModel>(mFootprint.FootprintAreas.Select(x => new AreaViewModel(this, x)));
+            mSlotAreas = new ObservableCollection<AreaViewModel>(mFootprint.SlotAreas.Select(x => new AreaViewModel(this, x)));
 
-            this.AddSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null, x => x.AddSlotArea());
-            this.CloneSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckSlotArea(), x => x.CopySlotArea());
-            this.DeleteSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckSlotArea(), x => x.DeleteArea());
-
-
-
-            this.AddFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null, x => x.AddFootprintArea());
-            this.CloneFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckFootprintArea(), x => x.CopyFootprintArea());
-            this.DeleteFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckFootprintArea(), x => x.DeleteArea());
+            AddSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null, x => x.AddSlotArea());
+            CloneSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckSlotArea(), x => x.CopySlotArea());
+            DeleteSlotCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckSlotArea(), x => x.DeleteArea());
 
 
-            this.CommitCommand = new UserCommand<FootprintEditorViewModel>(x => true, y => { mIsSaving = true; Application.Current.Shutdown(); });
-            this.CancelCommand = new UserCommand<FootprintEditorViewModel>(x => true, y => { mIsSaving = false; Application.Current.Shutdown(); });
+            AddFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null, x => x.AddFootprintArea());
+            CloneFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckFootprintArea(), x => x.CopyFootprintArea());
+            DeleteFootprintCommand = new UserCommand<FootprintEditorViewModel>(x => x != null && x.CheckFootprintArea(), x => x.DeleteArea());
 
 
-            this.SetBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
+            CommitCommand = new UserCommand<FootprintEditorViewModel>(x => true, y =>
+                {
+                    mIsSaving = true;
+                    Application.Current.Shutdown();
+                });
+            CancelCommand = new UserCommand<FootprintEditorViewModel>(x => true, y =>
+                {
+                    mIsSaving = false;
+                    Application.Current.Shutdown();
+                });
+
+
+            SetBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
                 x => true,
                 y =>
-                {
-                    var d = new OpenFileDialog { CheckFileExists = true, Multiselect = false };
-                    if (d.ShowDialog() == true)
                     {
-                        this.BackgroundImagePath = d.FileName;
+                        var d = new OpenFileDialog {CheckFileExists = true, Multiselect = false};
+                        if (d.ShowDialog() == true)
+                        {
+                            BackgroundImagePath = d.FileName;
+                        }
                     }
-
-                }
                 );
-            this.ClearBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
+            ClearBackgroundImageCommand = new UserCommand<FootprintEditorViewModel>(
                 x => x != null && !String.IsNullOrEmpty(x.BackgroundImagePath),
                 y => y.BackgroundImagePath = null
-            );
-            this.SetReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
+                );
+            SetReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
                 x => true,
                 y =>
-                {
-                    var d = new OpenFileDialog { CheckFileExists = true, Multiselect = false };
-                    if (d.ShowDialog() == true)
                     {
-                        this.ReferenceMesh = d.FileName;
+                        var d = new OpenFileDialog {CheckFileExists = true, Multiselect = false};
+                        if (d.ShowDialog() == true)
+                        {
+                            ReferenceMesh = d.FileName;
+                        }
                     }
-
-                }
                 );
-            this.ClearReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
+            ClearReferenceMeshCommand = new UserCommand<FootprintEditorViewModel>(
                 x => x != null && !String.IsNullOrEmpty(x.ReferenceMesh),
                 y => y.ReferenceMesh = null
-            );
-            this.SelectedFootprint = this.FootprintAreas.FirstOrDefault();
-            if (this.SelectedArea == null)
+                );
+            SelectedFootprint = FootprintAreas.FirstOrDefault();
+            if (SelectedArea == null)
             {
-                this.SelectedSlot = this.SlotAreas.FirstOrDefault();
+                SelectedSlot = SlotAreas.FirstOrDefault();
             }
         }
 
 
         private void AddSlotArea()
         {
-            this.AddSlotArea(null);
+            AddSlotArea(null);
         }
+
         private void AddSlotArea(FTPT.Area area)
         {
-            area = this.NewArea(area);
-            this.mFootprint.SlotAreas.Add(area);
-            area = this.mFootprint.SlotAreas.Last();
+            area = NewArea(area);
+            mFootprint.SlotAreas.Add(area);
+            area = mFootprint.SlotAreas.Last();
             var vm = new AreaViewModel(this, area);
-            this.mSlotAreas.Add(vm);
-            this.SelectedArea = vm;
-
-
+            mSlotAreas.Add(vm);
+            SelectedArea = vm;
         }
 
         private void CopySlotArea()
         {
-            this.AddSlotArea(this.SelectedArea.Area);
+            AddSlotArea(SelectedArea.Area);
         }
 
 
         private bool CheckSlotArea()
         {
-            return this.mSelectedArea != null && this.mSlotAreas.Contains(this.mSelectedArea);
+            return mSelectedArea != null && mSlotAreas.Contains(mSelectedArea);
         }
 
 
         private bool CheckFootprintArea()
         {
-            return this.mSelectedArea != null && this.mFootprintAreas.Contains(this.mSelectedArea);
+            return mSelectedArea != null && mFootprintAreas.Contains(mSelectedArea);
         }
+
         private void DeleteArea()
         {
-            var area = this.SelectedArea;
-            this.mFootprint.SlotAreas.Remove(area.Area);
-            this.mFootprint.FootprintAreas.Remove(area.Area);
-            this.mSlotAreas.Remove(area);
-            this.mFootprintAreas.Remove(area);
+            AreaViewModel area = SelectedArea;
+            mFootprint.SlotAreas.Remove(area.Area);
+            mFootprint.FootprintAreas.Remove(area.Area);
+            mSlotAreas.Remove(area);
+            mFootprintAreas.Remove(area);
         }
 
         private void AddFootprintArea()
         {
-            this.AddFootprintArea(null);
+            AddFootprintArea(null);
         }
+
         private void AddFootprintArea(FTPT.Area area)
         {
-            area = this.NewArea(area);
-            this.mFootprint.FootprintAreas.Add(area);
-            area = this.mFootprint.FootprintAreas.Last();
+            area = NewArea(area);
+            mFootprint.FootprintAreas.Add(area);
+            area = mFootprint.FootprintAreas.Last();
             var vm = new AreaViewModel(this, area);
-            this.mFootprintAreas.Add(vm);
-            this.SelectedArea = vm;
-
-
+            mFootprintAreas.Add(vm);
+            SelectedArea = vm;
         }
+
         private void CopyFootprintArea()
         {
-            this.AddFootprintArea(this.SelectedArea.Area);
+            AddFootprintArea(SelectedArea.Area);
         }
+
         private FTPT.Area NewArea(FTPT.Area basis)
         {
             FTPT.Area area = null;
             if (basis == null)
             {
-                area = new FTPT.Area(0, null, this.mFootprint.Version);
+                area = new FTPT.Area(0, null, mFootprint.Version);
             }
             else
             {
-                area = new FTPT.Area(0, null, this.mFootprint.Version, basis.Name, basis.Priority, basis.AreaTypeFlags, basis.ClosedPolygon.Select(x => x.Clone(null)).Cast<FTPT.PolygonPoint>().ToList(), basis.AllowIntersectionFlags, basis.SurfaceTypeFlags, basis.SurfaceAttributeFlags, basis.LevelOffset, basis.Lower, basis.Upper);
+                area = new FTPT.Area(0, null, mFootprint.Version, basis.Name, basis.Priority, basis.AreaTypeFlags, basis.ClosedPolygon.Select(x => x.Clone(null)).Cast<FTPT.PolygonPoint>().ToList(), basis.AllowIntersectionFlags, basis.SurfaceTypeFlags, basis.SurfaceAttributeFlags, basis.LevelOffset, basis.Lower, basis.Upper);
             }
             return area;
-
         }
     }
 }

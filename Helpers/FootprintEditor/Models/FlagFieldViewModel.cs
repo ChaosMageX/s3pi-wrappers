@@ -9,13 +9,12 @@ namespace s3piwrappers.Models
         {
             return (Convert.ToUInt32(Actual) & Convert.ToUInt32(flag)) == Convert.ToUInt32(flag);
         }
+
         protected void Set<T>(T flag, bool val)
         {
-
             Actual = ((Convert.ToUInt32(Actual)) | (Convert.ToUInt32(flag)));
             if (!val)
                 Actual = ((Convert.ToUInt32(Actual)) ^ (Convert.ToUInt32(flag)));
-
         }
 
         protected abstract uint Actual { get; set; }

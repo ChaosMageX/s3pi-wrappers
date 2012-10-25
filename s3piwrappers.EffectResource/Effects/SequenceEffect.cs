@@ -82,7 +82,7 @@ namespace s3piwrappers.Effects
 
             protected override void Parse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Read(out mFloat01, ByteOrder.LittleEndian);
                 s.Read(out mFloat02, ByteOrder.LittleEndian);
                 s.Read(out mString01, StringType.ZeroDelimited);
@@ -91,7 +91,7 @@ namespace s3piwrappers.Effects
 
             public override void UnParse(Stream stream)
             {
-                BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 s.Write(mFloat01, ByteOrder.LittleEndian);
                 s.Write(mFloat02, ByteOrder.LittleEndian);
                 s.Write(mString01, StringType.ZeroDelimited);
@@ -133,14 +133,14 @@ namespace s3piwrappers.Effects
 
         protected override void Parse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mElements = new DataList<Element>(handler, stream);
             s.Read(out mInt01);
         }
 
         public override void UnParse(Stream stream)
         {
-            BinaryStreamWrapper s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mElements.UnParse(stream);
             s.Write(mInt01);
         }

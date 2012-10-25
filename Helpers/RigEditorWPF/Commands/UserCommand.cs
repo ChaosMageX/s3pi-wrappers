@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace s3piwrappers.RigEditor.Commands
 {
-    class UserCommand<T> : ICommand
+    internal class UserCommand<T> : ICommand
     {
         private readonly Predicate<T> mCanExecute;
         private readonly Action<T> mExecute;
@@ -17,7 +17,7 @@ namespace s3piwrappers.RigEditor.Commands
 
         public bool CanExecute(object parameter)
         {
-            return mCanExecute((T)parameter);
+            return mCanExecute((T) parameter);
         }
 
         public event EventHandler CanExecuteChanged
@@ -28,7 +28,7 @@ namespace s3piwrappers.RigEditor.Commands
 
         public void Execute(object parameter)
         {
-            mExecute((T)parameter);
+            mExecute((T) parameter);
         }
     }
 }

@@ -1,6 +1,6 @@
 using System;
+using System.Globalization;
 using System.Windows.Data;
-using System.Windows;
 
 namespace s3piwrappers.Converters
 {
@@ -10,15 +10,15 @@ namespace s3piwrappers.Converters
 
         public double Offset { get; set; }
 
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (((float)value) * Scale) + Offset;
+            return (((float) value)*Scale) + Offset;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var inc = (double)value - Offset;
-            inc = inc / Scale;
+            double inc = (double) value - Offset;
+            inc = inc/Scale;
             return inc;
         }
     }

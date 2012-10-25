@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 
@@ -29,7 +30,7 @@ namespace s3piwrappers.SWB
         {
             get
             {
-                MemoryStream s = new MemoryStream();
+                var s = new MemoryStream();
                 UnParse(s);
                 s.Position = 0L;
                 return new BinaryReader(s);
@@ -39,19 +40,29 @@ namespace s3piwrappers.SWB
                 if (value.BaseStream.CanSeek)
                 {
                     value.BaseStream.Position = 0L;
-                    this.Parse(value.BaseStream);
+                    Parse(value.BaseStream);
                 }
                 else
                 {
-                    MemoryStream s = new MemoryStream();
-                    byte[] buffer = new byte[0x100000];
+                    var s = new MemoryStream();
+                    var buffer = new byte[0x100000];
                     for (int i = value.BaseStream.Read(buffer, 0, buffer.Length); i > 0; i = value.BaseStream.Read(buffer, 0, buffer.Length))
                     {
                         s.Write(buffer, 0, i);
                     }
-                    this.Parse(s);
+                    Parse(s);
                 }
                 OnElementChanged();
+            }
+        }
+
+        protected override List<string> ValueBuilderFields
+        {
+            get
+            {
+                List<string> b = base.ValueBuilderFields;
+                b.Remove("Data");
+                return b;
             }
         }
 
@@ -59,7 +70,7 @@ namespace s3piwrappers.SWB
         {
             var s = new MemoryStream();
             UnParse(s);
-            return (AHandlerElement) Activator.CreateInstance(GetType(), new object[] {0, handler, s});
+            return (AHandlerElement) Activator.CreateInstance(GetType(), 0, handler, s);
         }
     }
 }

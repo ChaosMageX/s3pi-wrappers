@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace s3piwrappers.RigEditor.Validation
 {
-    class DecimalValidationRule :ValidationRule
+    internal class DecimalValidationRule : ValidationRule
     {
-        public override ValidationResult Validate(object value, System.Globalization.CultureInfo cultureInfo)
+        public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             double parameter = 0;
 
             try
             {
-                if (((string)value).Length > 0)
+                if (((string) value).Length > 0)
                 {
-                    parameter = Double.Parse((String)value);
+                    parameter = Double.Parse((String) value);
                 }
             }
             catch (Exception)
@@ -21,9 +22,8 @@ namespace s3piwrappers.RigEditor.Validation
                 return new ValidationResult(false, "*");
             }
 
-            
+
             return new ValidationResult(true, null);
-            
         }
     }
 }

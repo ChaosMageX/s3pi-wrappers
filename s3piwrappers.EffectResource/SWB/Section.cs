@@ -8,24 +8,25 @@ namespace s3piwrappers.SWB
     public abstract class Section : DataElement, ISection
     {
         protected ushort mVersion;
-        protected ushort mType;
         protected DataList<SectionData> mItems;
 
-        protected Section(int apiVersion, EventHandler handler, ushort type, ushort version)
-            : base(apiVersion, handler)
+        protected Section(int apiVersion, EventHandler handler) : this(apiVersion, handler, 0)
         {
-            mVersion = version;
-            mType = type;
         }
 
-        protected Section(int apiVersion, EventHandler handler, ushort type, ushort version, Stream s)
-            : this(apiVersion, handler, type, version)
+        protected Section(int apiVersion, EventHandler handler, ushort version) : base(apiVersion, handler)
+        {
+            mVersion = version;
+        }
+
+        protected Section(int apiVersion, EventHandler handler,ushort version, Stream s)
+            : this(apiVersion, handler,version)
         {
             Parse(s);
         }
 
         protected Section(int apiVersion, EventHandler handler, Section basis)
-            : this(apiVersion, handler, basis.mType, basis.mVersion)
+            : this(apiVersion, handler, basis.mVersion)
         {
             var s = new MemoryStream();
             basis.UnParse(s);
@@ -49,11 +50,7 @@ namespace s3piwrappers.SWB
         }
 
         [ElementPriority(1)]
-        public ushort Type
-        {
-            get { return mType; }
-            set { }
-        }
+        public abstract ushort Type { get; }
 
         [ElementPriority(3)]
         public DataList<SectionData> Items
@@ -75,14 +72,15 @@ namespace s3piwrappers.SWB
     public abstract class Section<T> : Section
         where T : SectionData, IEquatable<T>
     {
-        protected Section(int apiVersion, EventHandler handler, ushort type, ushort version)
-            : base(apiVersion, handler, type, version)
+        protected Section(int apiVersion, EventHandler handler, ushort version)
+            : base(apiVersion, handler, version)
         {
             mItems = new SectionDataList<T>(handler, this);
+            mVersion = version;
         }
 
-        protected Section(int apiVersion, EventHandler handler, ushort type, ushort version, Stream s)
-            : base(apiVersion, handler, type, version, s)
+        protected Section(int apiVersion, EventHandler handler, ushort version, Stream s)
+            : base(apiVersion, handler,version, s)
         {
         }
 
