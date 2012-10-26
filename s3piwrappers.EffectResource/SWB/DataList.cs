@@ -38,17 +38,12 @@ namespace s3piwrappers.SWB
 
         protected override TElement CreateElement(Stream s)
         {
-            return (TElement) Activator.CreateInstance(typeof (TElement),0, elementHandler, s);
+            return (TElement) Activator.CreateInstance(typeof (TElement), 0, elementHandler, s);
         }
 
         protected override void WriteElement(Stream s, TElement element)
         {
             element.UnParse(s);
-        }
-
-        public override void Add()
-        {
-            throw new NotImplementedException();
         }
     }
 }

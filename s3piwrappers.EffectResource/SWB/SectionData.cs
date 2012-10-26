@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace s3piwrappers.SWB
@@ -32,6 +33,16 @@ namespace s3piwrappers.SWB
         public ISection Section
         {
             get { return mSection; }
+        }
+
+        protected override List<string> ValueBuilderFields
+        {
+            get
+            {
+                List<string> vf = base.ValueBuilderFields;
+                vf.Remove("Section");
+                return vf;
+            }
         }
 
         protected override void Parse(Stream s)

@@ -19,7 +19,7 @@ namespace s3piwrappers.SWB
 
         protected virtual TSection CreateElement(UInt16 type, UInt16 version, Stream s)
         {
-            return (TSection) Activator.CreateInstance(GetSectionType(type), 0, handler,version, s);
+            return (TSection) Activator.CreateInstance(GetSectionType(type), 0, handler, version, s);
         }
 
         protected abstract Type GetSectionType(UInt16 id);

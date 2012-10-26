@@ -25,9 +25,17 @@ namespace s3piwrappers.SWB
             return (SectionData) Activator.CreateInstance(typeof (T), new object[] {0, handler, mSection, s});
         }
 
+        public override void Add()
+        {
+            if (typeof (T).IsAbstract)
+                throw new NotImplementedException();
+
+            Add(typeof (T));
+        }
+
         public override void Add(Type t)
         {
-            var instance = (SectionData) Activator.CreateInstance(t,0,handler, mSection);
+            var instance = (SectionData) Activator.CreateInstance(t, 0, handler, mSection);
             base.Add(instance);
         }
     }

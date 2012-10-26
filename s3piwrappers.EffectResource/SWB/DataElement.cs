@@ -36,13 +36,18 @@ namespace s3piwrappers.SWB
 
         public override AHandlerElement Clone(EventHandler handler)
         {
-            return (AHandlerElement) Activator.CreateInstance(GetType(),0, handler, this);
+            return (AHandlerElement) Activator.CreateInstance(GetType(), 0, handler, this);
         }
 
-//        public virtual string Value
-//        {
-//            get { return ValueBuilder; }
-//        }
+        public virtual string Value
+        {
+            get { return ValueBuilder; }
+        }
+
+        public override string ToString()
+        {
+            return GetType().Name;
+        }
 
         public override int RecommendedApiVersion
         {

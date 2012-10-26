@@ -60,9 +60,10 @@ namespace s3piwrappers
                     throw new NotSupportedException("Effect Section type 0x" + id.ToString("X4") + " is not supported.");
                 }
             }
-            public void Add(int type,int version)
+
+            public void Add(int type, int version)
             {
-                this.Add(GetSectionType((ushort)type));
+                Add(GetSectionType((ushort) type));
             }
 
             public override void Add()
@@ -79,8 +80,8 @@ namespace s3piwrappers
             {
             }
 
-            protected EffectSection(int apiVersion, EventHandler handler,ushort version, Stream s)
-                : base(apiVersion, handler,version, s)
+            protected EffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
+                : base(apiVersion, handler, version, s)
             {
             }
 
@@ -110,7 +111,7 @@ namespace s3piwrappers
             }
 
             protected EffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
-                : base(apiVersion, handler,version, s)
+                : base(apiVersion, handler, version, s)
             {
             }
 
@@ -273,7 +274,7 @@ namespace s3piwrappers
         public class CameraEffectSection : EffectSection<CameraEffect>
         {
             public CameraEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
-                : base(apiVersion, handler,version, s)
+                : base(apiVersion, handler, version, s)
             {
             }
 
@@ -592,9 +593,10 @@ namespace s3piwrappers
                     throw new NotSupportedException("Resource Section type 0x" + id.ToString("X4") + " is not supported.");
                 }
             }
+
             public void Add(int type, int version)
             {
-                this.Add(GetSectionType((ushort) type));
+                Add(GetSectionType((ushort) type));
             }
 
             public override void Add()
@@ -752,59 +754,47 @@ namespace s3piwrappers
                 OnResourceChanged(this, new EventArgs());
             }
         }
-        public EffectResource(int APIversion,Stream s) 
+
+        public EffectResource(int APIversion, Stream s)
             : base(APIversion, s)
         {
             if (stream == null)
             {
-                stream = UnParse(); 
+                stream = UnParse();
                 OnResourceChanged(this, new EventArgs());
-            } 
-            stream.Position = 0; 
+            }
+            stream.Position = 0;
             Parse(stream);
         }
 
-//        public EffectResource(int apiVersion, Stream s)
-//            : base(apiVersion, s)
-//        {
-//            if (base.stream == null)
-//            {
-//                base.stream = UnParse();
-//                OnResourceChanged(this, new EventArgs());
-//            }
-//            base.stream.Position = 0L;
-//            Parse(base.stream);
-//        }
-
-
-        public void Parse(Stream stream)
+        public void Parse(Stream inputStream)
         {
-            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var s = new BinaryStreamWrapper(inputStream, ByteOrder.BigEndian);
             mVersion = s.ReadUInt16();
-            mEffectSections = new EffectSectionList(OnResourceChanged, stream);
-            mResourceSections = new ResourceSectionList(OnResourceChanged, stream);
-            mVisualEffectSections = new VisualEffectSection(0, OnResourceChanged, s.ReadUInt16(), stream);
+            mEffectSections = new EffectSectionList(OnResourceChanged, inputStream);
+            mResourceSections = new ResourceSectionList(OnResourceChanged, inputStream);
+            mVisualEffectSections = new VisualEffectSection(0, OnResourceChanged, s.ReadUInt16(), inputStream);
             mReserved = s.ReadBytes(4);
-            mVisualEffectHandles = new VisualEffectHandleList(OnResourceChanged, stream);
+            mVisualEffectHandles = new VisualEffectHandleList(OnResourceChanged, inputStream);
         }
 
         protected override Stream UnParse()
         {
-            var stream = new MemoryStream();
-            var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+            var outputStream = new MemoryStream();
+            var s = new BinaryStreamWrapper(outputStream, ByteOrder.BigEndian);
             s.Write(mVersion);
             if (mEffectSections == null) mEffectSections = new EffectSectionList(OnResourceChanged);
-            mEffectSections.UnParse(stream);
+            mEffectSections.UnParse(outputStream);
             if (mResourceSections == null) mResourceSections = new ResourceSectionList(OnResourceChanged);
-            mResourceSections.UnParse(stream);
+            mResourceSections.UnParse(outputStream);
             if (mVisualEffectSections == null) mVisualEffectSections = new VisualEffectSection(0, OnResourceChanged, 2);
             s.Write(mVisualEffectSections.Version);
-            mVisualEffectSections.UnParse(stream);
+            mVisualEffectSections.UnParse(outputStream);
             if (mReserved == null) mReserved = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
             s.Write(mReserved);
             if (mVisualEffectHandles == null) mVisualEffectHandles = new VisualEffectHandleList(OnResourceChanged);
-            mVisualEffectHandles.UnParse(stream);
-            return stream;
+            mVisualEffectHandles.UnParse(outputStream);
+            return outputStream;
         }
 
         public string Value

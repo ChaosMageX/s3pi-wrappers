@@ -19,8 +19,8 @@ namespace s3piwrappers.SWB
             mVersion = version;
         }
 
-        protected Section(int apiVersion, EventHandler handler,ushort version, Stream s)
-            : this(apiVersion, handler,version)
+        protected Section(int apiVersion, EventHandler handler, ushort version, Stream s)
+            : this(apiVersion, handler, version)
         {
             Parse(s);
         }
@@ -80,7 +80,7 @@ namespace s3piwrappers.SWB
         }
 
         protected Section(int apiVersion, EventHandler handler, ushort version, Stream s)
-            : base(apiVersion, handler,version, s)
+            : base(apiVersion, handler, version, s)
         {
         }
 
