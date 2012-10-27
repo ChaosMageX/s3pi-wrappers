@@ -79,6 +79,10 @@ namespace s3piwrappers
                 : base(apiVersion, handler)
             {
             }
+            protected EffectSection(int apiVersion, EventHandler handler,ushort version)
+                : base(apiVersion, handler,version)
+            {
+            }
 
             protected EffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
                 : base(apiVersion, handler, version, s)
@@ -121,6 +125,10 @@ namespace s3piwrappers
             }
 
 
+            protected EffectSection(int apiVersion, EventHandler handler, ushort version) : base(apiVersion, handler, version)
+            {
+            }
+
             protected override void Parse(Stream s)
             {
                 mItems = new SectionDataList<T>(handler, this, s);
@@ -146,7 +154,7 @@ namespace s3piwrappers
             }
 
             public ParticleEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler,0x0004)
             {
             }
 
@@ -169,7 +177,7 @@ namespace s3piwrappers
             }
 
             public MetaparticleEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler,0x0001)
             {
             }
 
@@ -192,7 +200,7 @@ namespace s3piwrappers
             }
 
             public DecalEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler,0x0002)
             {
             }
 
@@ -215,7 +223,7 @@ namespace s3piwrappers
             }
 
             public SequenceEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler,0x0001)
             {
             }
 
@@ -238,7 +246,7 @@ namespace s3piwrappers
             }
 
             public SoundEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -261,7 +269,7 @@ namespace s3piwrappers
             }
 
             public ShakeEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -284,7 +292,7 @@ namespace s3piwrappers
             }
 
             public CameraEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -307,7 +315,7 @@ namespace s3piwrappers
             }
 
             public ModelEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -330,7 +338,7 @@ namespace s3piwrappers
             }
 
             public ScreenEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -353,7 +361,7 @@ namespace s3piwrappers
             }
 
             public GameEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -376,7 +384,7 @@ namespace s3piwrappers
             }
 
             public FastParticleEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -399,7 +407,7 @@ namespace s3piwrappers
             }
 
             public DistributeEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0001)
             {
             }
 
@@ -427,7 +435,7 @@ namespace s3piwrappers
             }
 
             public RibbonEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0002)
             {
             }
 
@@ -454,7 +462,7 @@ namespace s3piwrappers
             }
 
             public SpriteEffectSection(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
+                : base(apiVersion, handler, 0x0002)
             {
             }
 
