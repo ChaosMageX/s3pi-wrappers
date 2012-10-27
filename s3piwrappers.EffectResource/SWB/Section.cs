@@ -17,6 +17,7 @@ namespace s3piwrappers.SWB
         protected Section(int apiVersion, EventHandler handler, ushort version) : base(apiVersion, handler)
         {
             mVersion = version;
+            mItems = new DataList<SectionData>(handler);
         }
 
         protected Section(int apiVersion, EventHandler handler, ushort version, Stream s)
