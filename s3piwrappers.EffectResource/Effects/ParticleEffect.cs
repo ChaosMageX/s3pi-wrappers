@@ -135,6 +135,19 @@ namespace s3piwrappers.Effects
         //Version 4+
         private float mFloat48;
 
+        //Version 5+
+        private float mFloat49;
+
+        [ElementPriority(76)]
+        public float Float49
+        {
+            get { return mFloat49; }
+            set
+            {
+                mFloat49 = value;
+                OnElementChanged();
+            }
+        }
 
         [ElementPriority(75)]
         public float Float48
@@ -1062,6 +1075,9 @@ namespace s3piwrappers.Effects
 
             //Version 4+
             if (mSection.Version >= 0x0004 && stream.Position < stream.Length) s.Read(out mFloat48);
+
+            //Version 5+
+            if (mSection.Version >= 0x0005 && stream.Position < stream.Length) s.Read(out mFloat49);
         }
 
         public override void UnParse(Stream stream)
@@ -1161,6 +1177,9 @@ namespace s3piwrappers.Effects
 
             //Version 4+
             if (mSection.Version >= 0x0004) s.Write(mFloat48);
+
+            //Version 5+
+            if (mSection.Version >= 0x0004) s.Write(mFloat49);
         }
 
         public override List<string> ContentFields
