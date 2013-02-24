@@ -122,7 +122,18 @@ namespace s3piwrappers.ModelViewer
                 {
                     try
                     {
-                        var imgBrush = new ImageBrush(new BitmapImage(new Uri(value)));
+                        var bmp = new BitmapImage();
+                        var memstream = new MemoryStream();
+                        using (var fs = File.OpenRead(value))
+                        {
+                            byte[] buffer = new byte[fs.Length];
+                            fs.Read(buffer, 0, buffer.Length);
+                            memstream.Write(buffer,0, buffer.Length);
+                        }
+                        bmp.BeginInit();
+                        bmp.StreamSource = memstream;
+                        bmp.EndInit();
+                        var imgBrush = new ImageBrush(bmp);
                         mTexturedMaterial = new DiffuseMaterial(imgBrush);
                         imgBrush.Stretch = Stretch.Fill;
                         imgBrush.TileMode = TileMode.Tile;
@@ -210,10 +221,10 @@ Rotate:
 ";
         }
 
-        public MainWindow(Stream s)
+        public MainWindow(GenericRCOLResource s)
             : this()
         {
-            rcol = new GenericRCOLResource(0, s);
+            rcol = s;
             rbTextured.Visibility = Visibility.Collapsed;
             InitScene();
             rbSolid.IsChecked = true;
@@ -294,15 +305,23 @@ Rotate:
                             break;
                         }
                     }
-                    var sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
-                    for (int i = 0; i < sceneGeostates.Length; i++)
+                    try
                     {
-                        GeometryModel3D state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
-                                                          ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
-                        mGroupMeshes.Children.Add(state);
-                        sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
+                        var sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
+                        for (int i = 0; i < sceneGeostates.Length; i++)
+                        {
+                            GeometryModel3D state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
+                                                              ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
+                            mGroupMeshes.Children.Add(state);
+                            sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
+                        }
+                        sceneMesh.States = sceneGeostates;
                     }
-                    sceneMesh.States = sceneGeostates;
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Unable to load Geostates.  You may have some corrupted data: " + ex.ToString(),
+                                        "Unable to load Geostates...");
+                    }
                     mGroupMeshes.Children.Add(model);
                     mSceneMeshes.Add(sceneMesh);
                 }

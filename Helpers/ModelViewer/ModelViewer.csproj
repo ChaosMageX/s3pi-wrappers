@@ -166,6 +166,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\s3piwrappers.Helpers\s3piwrappers.Helpers.csproj">
+      <Project>{2d22735c-2cdc-4ffd-b503-02a3153faab0}</Project>
+      <Name>s3piwrappers.Helpers</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd $(OutDir)
