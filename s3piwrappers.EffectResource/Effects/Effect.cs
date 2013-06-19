@@ -41,6 +41,7 @@ namespace s3piwrappers.Effects
             private UInt16 mShort01;
             private UInt32 mInt02;
             private UInt64 mLong01;
+            private byte mByte05;
 
 
             protected override void Parse(Stream stream)
@@ -50,6 +51,7 @@ namespace s3piwrappers.Effects
                 s.Read(out mByte01);
                 s.Read(out mByte02);
                 if ((Byte02 & 0x80) == 0x80) s.Read(out mInt01);
+                if ((Byte02 & 0x40) == 0x40) s.Read(out mByte05);
                 s.Read(out mByte03);
                 s.Read(out mByte04);
                 s.Read(out mShort01);
@@ -64,6 +66,7 @@ namespace s3piwrappers.Effects
                 s.Write(Byte01);
                 s.Write(Byte02);
                 if ((Byte02 & 0x80) == 0x80) s.Write(Int01);
+                if ((Byte02 & 0x40) == 0x40) s.Write(mByte05);
                 s.Write(Byte03);
                 s.Write(Byte04);
                 s.Write(Short01);
@@ -166,6 +169,17 @@ namespace s3piwrappers.Effects
                 set
                 {
                     mLong01 = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(10)]
+            public byte Byte05
+            {
+                get { return mByte05; }
+                set
+                {
+                    mByte05 = value;
                     OnElementChanged();
                 }
             }
