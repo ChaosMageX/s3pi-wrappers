@@ -1,4 +1,7 @@
-﻿using s3pi.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph
 {
@@ -13,7 +16,7 @@ namespace s3piwrappers.SceneGraph
 
         public string AbsolutePath
         {
-            get { return absolutePath; }
+            get { return this.absolutePath; }
         }
 
         public IResourceKey OriginalChildKey
@@ -21,18 +24,18 @@ namespace s3piwrappers.SceneGraph
             get
             {
                 // Cloned to prevent accidentally changing the internal values
-                return new TGIBlock(0, null, originalChildKey);
+                return new TGIBlock(0, null, this.originalChildKey); 
             }
         }
 
         public bool IsChildDDS
         {
-            get { return isChildDDS; }
+            get { return this.isChildDDS; }
         }
 
         public bool IsChildThum
         {
-            get { return isChildThum; }
+            get { return this.isChildThum; }
         }
 
         /*public bool IsChildRCOLBlock
@@ -42,7 +45,7 @@ namespace s3piwrappers.SceneGraph
 
         public ResourceDataActions ChildDataActions
         {
-            get { return childDataActions; }
+            get { return this.childDataActions; }
         }
 
         public virtual bool AlwaysCreateChild
@@ -54,14 +57,14 @@ namespace s3piwrappers.SceneGraph
 
         public abstract bool SetParentReferenceRK(IResourceKey newKey);
 
-        public AResourceConnection(IResourceKey childKey, string path,
-                                   ResourceDataActions childActions)
+        public AResourceConnection(IResourceKey childKey, string path, 
+            ResourceDataActions childActions)
         {
-            absolutePath = path;
-            originalChildKey = childKey;
-            childDataActions = childActions;
-            isChildDDS = ResourceGraph.IsDDS(childKey.ResourceType);
-            isChildThum = ResourceGraph.IsThum(childKey.ResourceType);
+            this.absolutePath = path;
+            this.originalChildKey = childKey;
+            this.childDataActions = childActions;
+            this.isChildDDS = ResourceGraph.IsDDS(childKey.ResourceType);
+            this.isChildThum = ResourceGraph.IsThum(childKey.ResourceType);
         }
     }
 }

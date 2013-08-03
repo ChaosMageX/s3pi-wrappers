@@ -1,4 +1,8 @@
-﻿using s3pi.Interfaces;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph.Nodes
 {
@@ -11,12 +15,12 @@ namespace s3piwrappers.SceneGraph.Nodes
         {
             switch (base.originalKey.ResourceType)
             {
-            case _SPT_TID:
-                return "spt";
-            case SPT2_TID:
-                return "spt2";
-            default:
-                return base.GetContentPathRootName();
+                case _SPT_TID:
+                    return "spt";
+                case SPT2_TID:
+                    return "spt2";
+                default:
+                    return base.GetContentPathRootName();
             }
         }
 
@@ -24,15 +28,15 @@ namespace s3piwrappers.SceneGraph.Nodes
         {
             switch (base.originalKey.ResourceType)
             {
-            case _SPT_TID:
-                kinNames = new[] {"spt2"};
-                return new[] {SPT2_TID};
-            case SPT2_TID:
-                kinNames = new[] {"spt"};
-                return new[] {_SPT_TID};
-            default:
-                kinNames = null;
-                return null;
+                case _SPT_TID:
+                    kinNames = new string[] { "spt2" };
+                    return new uint[] { SPT2_TID };
+                case SPT2_TID:
+                    kinNames = new string[] { "spt" };
+                    return new uint[] { _SPT_TID };
+                default:
+                    kinNames = null;
+                    return null;
             }
         }
 

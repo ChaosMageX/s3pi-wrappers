@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
-using s3pi.GenericRCOLResource;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using s3pi.Interfaces;
+using s3pi.GenericRCOLResource;
 
 namespace s3piwrappers.SceneGraph.Nodes
 {
@@ -13,26 +16,26 @@ namespace s3piwrappers.SceneGraph.Nodes
         {
             switch (base.originalKey.ResourceType)
             {
-            case MODL_TID:
-                return "modl";
-            case MLOD_TID:
-                return "mlod";
-            default:
-                return base.GetContentPathRootName();
+                case MODL_TID:
+                    return "modl";
+                case MLOD_TID:
+                    return "mlod";
+                default:
+                    return base.GetContentPathRootName();
             }
         }
 
         private static bool IsWantedImage(FieldType fieldType)
         {
             return fieldType == FieldType.DiffuseMap ||
-                fieldType == FieldType.SpecularMap;
+                   fieldType == FieldType.SpecularMap;
         }
 
         private List<IResourceConnection> MATD_GetDiffuseSpecular()
         {
-            string rootStr = GetContentPathRootName();
-            var results = new List<IResourceConnection>();
-            var rcol = base.Resource as GenericRCOLResource;
+            string rootStr = this.GetContentPathRootName();
+            List<IResourceConnection> results = new List<IResourceConnection>();
+            GenericRCOLResource rcol = base.Resource as GenericRCOLResource;
             if (rcol == null)
                 return results;
             string absolutePath, absoluteName;
@@ -40,7 +43,7 @@ namespace s3piwrappers.SceneGraph.Nodes
                 ResourceGraph.PrintRKTag(base.originalKey, rootStr));
             for (int i = 0; i < rcol.ChunkEntries.Count; i++)
             {
-                var matd = rcol.ChunkEntries[i].RCOLBlock as MATD;
+                MATD matd = rcol.ChunkEntries[i].RCOLBlock as MATD;
                 if (matd == null) continue;
 
                 ShaderDataList sdataList;
@@ -57,27 +60,27 @@ namespace s3piwrappers.SceneGraph.Nodes
 
                 for (int j = 0; j < sdataList.Count; j++)
                 {
-                    var texRef = sdataList[i] as ElementTextureRef;
+                    ElementTextureRef texRef = sdataList[i] as ElementTextureRef;
                     if (texRef != null && IsWantedImage(texRef.Field))
                     {
                         TGIBlock tgiblock = rcol.Resources[texRef.Data.TGIBlockIndex];
                         if (ResourceGraph.IsDDS(tgiblock.ResourceType))
                         {
                             absoluteName = rootStr + ".Resources[" + texRef.Data.TGIBlockIndex + "]";
-                            results.Add(new DefaultConnection(tgiblock, tgiblock,
-                                                              ResourceDataActions.FindWrite, absoluteName));
+                            results.Add(new DefaultConnection(tgiblock, tgiblock, 
+                                ResourceDataActions.FindWrite, absoluteName));
                         }
                     }
                     else
                     {
-                        var texKey = sdataList[i] as ElementTextureKey;
+                        ElementTextureKey texKey = sdataList[i] as ElementTextureKey;
                         if (texKey != null && IsWantedImage(texKey.Field))
                         {
                             if (ResourceGraph.IsDDS(texKey.Data.ResourceType))
                             {
                                 absoluteName = absolutePath + j + "].Data";
-                                results.Add(new DefaultConnection(texKey.Data, texKey,
-                                                                  ResourceDataActions.FindWrite, absoluteName, rootStr + ".Data"));
+                                results.Add(new DefaultConnection(texKey.Data, texKey, 
+                                    ResourceDataActions.FindWrite, absoluteName, rootStr + ".Data"));
                             }
                         }
                     }

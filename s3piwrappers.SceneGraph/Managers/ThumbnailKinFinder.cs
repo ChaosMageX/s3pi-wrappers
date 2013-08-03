@@ -1,59 +1,60 @@
-﻿using System.Collections.Generic;
-using s3pi.Filetable;
+﻿using System;
+using System.Collections.Generic;
 using s3pi.Interfaces;
+using s3pi.Filetable;
 
 namespace s3piwrappers.SceneGraph.Managers
 {
     public class ThumbnailKinFinder : AResourceKinFinder
     {
-        private readonly bool isPNG;
-        private readonly ulong thumInstance;
-        private readonly uint thumType;
-        private readonly bool isCWAL;
+        private bool isPNG;
+        private ulong thumInstance = 0;
+        private uint thumType;
+        private bool isCWAL;
 
         public override bool IsKinThum
         {
-            get { return isCWAL || !isPNG; }
+            get { return this.isCWAL || !this.isPNG; }
         }
 
         public override bool IsKindred(IResourceKey parentKey, IResourceKey key)
         {
-            if (thumInstance != 0)
+            if (this.thumInstance != 0)
             {
-                return key.ResourceType == thumType
-                    && key.Instance == thumInstance
-                    && (!isCWAL || (key.ResourceGroup & 0x00FFFFFF) > 0);
+                return key.ResourceType == this.thumType
+                    && key.Instance == this.thumInstance
+                    && (!this.isCWAL || (key.ResourceGroup & 0x00FFFFFF) > 0);
             }
-            return key.ResourceType == thumType
+            return key.ResourceType == this.thumType
                 && key.Instance == parentKey.Instance
-                && (!isCWAL || (key.ResourceGroup & 0x00FFFFFF) > 0);
+                && (!this.isCWAL || (key.ResourceGroup & 0x00FFFFFF) > 0);
         }
 
         public override void CreateKindredRK(IResourceKey parentKey,
-                                             IResourceKey newParentKey, ref IResourceKey kindredKey)
+            IResourceKey newParentKey, ref IResourceKey kindredKey)
         {
-            kindredKey.ResourceType = thumType;
-            kindredKey.ResourceGroup = (uint) (isCWAL ? 1 : 0);
+            kindredKey.ResourceType = this.thumType;
+            kindredKey.ResourceGroup = (uint)(this.isCWAL ? 1 : 0);
             kindredKey.Instance = newParentKey.Instance;
         }
 
         public override IResourceNode CreateKin(IResource resource,
-                                                IResourceKey originalKey, object constraints)
+            IResourceKey originalKey, object constraints)
         {
             return new DefaultNode(resource, originalKey);
         }
 
         public override List<SpecificResource> FindKindredResources(IResourceKey parentKey)
         {
-            if (thumType == 0)
+            if (this.thumType == 0)
                 return null;
-            if (isCWAL)
+            if (this.isCWAL)
                 return ResourceGraph.SlurpKindredResources(parentKey, this);
 
-            var results = new List<SpecificResource>();
-            SpecificResource sr = THUM.getItem(isPNG,
-                                               thumInstance != 0 ? thumInstance : parentKey.Instance,
-                                               thumType);
+            List<SpecificResource> results = new List<SpecificResource>();
+            SpecificResource sr = THUM.getItem(this.isPNG,
+                this.thumInstance != 0 ? this.thumInstance : parentKey.Instance, 
+                this.thumType);
             if (sr != null && sr.Resource != null)
                 results.Add(sr);
             return results;
@@ -61,9 +62,9 @@ namespace s3piwrappers.SceneGraph.Managers
 
         private void CompleteKinName()
         {
-            if (isPNG)
+            if (this.isPNG)
                 base.kinName += "PNG";
-            else if (CatalogType.CatalogRoofPattern == (CatalogType) thumType)
+            else if (CatalogType.CatalogRoofPattern == (CatalogType)this.thumType)
                 base.kinName += "Icon";
             else
                 base.kinName += "Thumb";
@@ -72,32 +73,32 @@ namespace s3piwrappers.SceneGraph.Managers
         public ThumbnailKinFinder(uint parentType, THUM.THUMSize size, bool isPNGInstance)
             : base(size.ToString())
         {
-            isPNG = isPNGInstance;
-            thumType = THUM.getThumbType(parentType, size, isPNGInstance);
-            isCWAL = parentType == 0x515CA4CD;
-            CompleteKinName();
+            this.isPNG = isPNGInstance;
+            this.thumType = THUM.getThumbType(parentType, size, isPNGInstance);
+            this.isCWAL = parentType == 0x515CA4CD;
+            this.CompleteKinName();
         }
 
         public ThumbnailKinFinder(IResourceKey parentKey, IResource parent, THUM.THUMSize size)
             : base(size.ToString())
         {
-            isPNG = false;
+            this.isPNG = false;
             if (THUM.CType(parentKey) == CatalogType.ModularResource)
             {
-                thumType = 0;
+                this.thumType = 0;
             }
             else if (THUM.CType(parentKey) == CatalogType.CAS_Part)
             {
-                thumType = THUM.getThumbType(parentKey.ResourceType, size, false);
+                this.thumType = THUM.getThumbType(parentKey.ResourceType, size, false);
             }
             else
             {
-                thumInstance = (parent != null) ?
-                                                    (ulong) parent["CommonBlock.PngInstance"].Value : 0;
-                isPNG = thumInstance != 0;
-                thumType = THUM.getThumbType(parentKey.ResourceType, size, isPNG);
+                this.thumInstance = (parent != null) ?
+                    (ulong)parent["CommonBlock.PngInstance"].Value : 0;
+                this.isPNG = this.thumInstance != 0;
+                this.thumType = THUM.getThumbType(parentKey.ResourceType, size, this.isPNG);
             }
-            CompleteKinName();
+            this.CompleteKinName();
         }
     }
 }

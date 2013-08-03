@@ -4,129 +4,738 @@
         <name>DDSPanel</name>
     </assembly>
     <members>
-        <member name="M:System.Drawing.DdsSquish.CompressImage(System.Byte[],System.Int32,System.Int32,System.Drawing.DdsSquish.SquishFlags,System.Single[])">
+        <member name="T:System.Drawing.DdsFile">
             <summary>
-            Compresses an image in memory.
+            Represents an image encoded using one of the supported DDS mechanisms.
             </summary>
-            <param name="pixelInput">The pixels of the source.</param>
-            <param name="width">The width of the source image.</param>
-            <param name="height">The height of the source image.</param>
-            <param name="flags">Compression flags.</param>
-            <param name="metric">An optional perceptual metric.</param>
-            <returns>Byte array containing the compressed output.</returns>
             <remarks>
-            <para>
-            The source pixels should be presented as a contiguous array of width*height
-            rgba values, with each component as 1 byte each. In memory this should be:
-            <c>{ r1, g1, b1, a1, .... , rn, gn, bn, an }</c> for n = width*height
-            </para>
-            <para>
-            The <paramref name="flags"/> parameter should specify either <c>kDxt1</c>, <c>kDxt3</c> or <c>kDxt5</c> compression, 
-            however, DXT1 will be used by default if none is specified. When using DXT1 
-            compression, 8 bytes of storage are required for each compressed DXT block. 
-            DXT3 and DXT5 compression require 16 bytes of storage per block.
-            </para>
-            <para>
-            The <paramref name="flags"/> parameter can also specify a preferred colour compressor to use 
-            when fitting the RGB components of the data. Possible colour compressors 
-            are: <c>kColourClusterFit</c> (the default), <c>kColourRangeFit</c> (very fast, low 
-            quality) or <c>kColourIterativeClusterFit</c> (slowest, best quality).
-            </para>
-            <para>
-            When using <c>kColourClusterFit</c> or <c>kColourIterativeClusterFit</c>, an additional 
-            flag can be specified to weight the importance of each pixel by its alpha 
-            value. For images that are rendered using alpha blending, this can 
-            significantly increase the perceived quality.</para>
-            <para>
-            The <paramref name="metric"/> parameter can be used to weight the relative importance of each
-            colour channel, or pass NULL to use the default uniform weight of 
-            <c>{ 1.0f, 1.0f, 1.0f }</c>. This replaces the previous flag-based control that 
-            allowed either uniform or "perceptual" weights with the fixed values
-            <c>{ 0.2126f, 0.7152f, 0.0722f }</c>. If non-NULL, the metric should point to a 
-            contiguous array of 3 floats.
+            A &quot;DirectX Draw Surface&quot; stores compressed pixel data that is used when
+            rendering scenes.  The pixel data may be used for purposes other than purely display,
+            such as being used for masked operations on another DDS image.
+            <para>Note that this assembly depends on two unmanaged libraries:
+            <br/>squishinterface_Win32.dll - code for 32bit Windows systems.
+            <br/>squishinterface_x64.dll - code for 64bit Windows systems.
             </para>
             </remarks>
         </member>
-        <member name="M:System.Drawing.DdsSquish.DecompressImage(System.Byte[],System.Int32,System.Int32,System.Drawing.DdsSquish.SquishFlags)">
+        <member name="F:System.Drawing.DdsFile.fourccDXT1">
             <summary>
-            Decompresses an image in memory.
-            </summary>
-            <param name="blocks">The compressed DXT blocks.</param>
-            <param name="width">The width of the source image.</param>
-            <param name="height">The height of the source image.</param>
-            <param name="flags">Compression flags.</param>
-            <returns>Byte array containing the decompressed pixels.</returns>
-            <remarks>The decompressed pixels will be written as a contiguous array of width*height
-            16 rgba values, with each component as 1 byte each. In memory this is:
-            <code>{ r1, g1, b1, a1, .... , rn, gn, bn, an } for n = width*height</code>
-            The <paramref name="flags"/> parameter should specify either <c>kDxt1</c>, <c>kDxt3</c> or <c>kDxt5</c> compression, 
-            however, DXT1 will be used by default if none is specified. All other flags are ignored.</remarks>
-        </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt1">
-            <summary>
-            Use DXT1 compression.
+            DXT1 tag
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt3">
+        <member name="F:System.Drawing.DdsFile.fourccDXT3">
             <summary>
-            Use DXT3 compression.
+            DXT3 tag
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt5">
+        <member name="F:System.Drawing.DdsFile.fourccDXT5">
             <summary>
-            Use DXT5 compression.
+            DXT5 tag
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourClusterFit">
+        <member name="M:System.Drawing.DdsFile.Dispose">
             <summary>
-            Use a slow but high quality colour compressor (the default).
+            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourRangeFit">
+        <member name="M:System.Drawing.DdsFile.GetInfo(System.IO.Stream)">
             <summary>
-            Use a fast but low quality colour compressor.
+            Loads the header from a DDS image.
+            </summary>
+            <param name="input">A <see cref="T:System.IO.Stream"/> containing a DDS-encoded image.</param>
+            <exception cref="T:System.FormatException"><paramref name="input"/> does not contain a DDS-encoded image.</exception>
+            <remarks>
+            Once loaded, the following methods will return valid information about the image:
+            <list type="bullet">
+            <item><description>HasAlphaChannel</description></item>
+            <item><description>Size</description></item>
+            </list>
+            </remarks>
+        </member>
+        <member name="M:System.Drawing.DdsFile.Load(System.IO.Stream,System.Boolean)">
+            <summary>
+            Loads the data from an image encoded using one of the supported DDS mechanisms.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="input">A <see cref="T:System.IO.Stream"/> containing the DDS-encoded image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.Save(System.IO.Stream)">
+             <summary>
+             Saves the current image using one of the supported DDS mechanisms.
+             </summary>
+             <param name="output">A <see cref="T:System.IO.Stream"/> to receive the DDS-encoded image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Byte,System.Byte,System.Byte,System.Byte,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Creates an image of a single colour, specified by the byte parameters,
+            with the size given by the int parameters.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="r">Amount of red per pixel.</param>
+            <param name="g">Amount of green per pixel.</param>
+            <param name="b">Amount of blue per pixel.</param>
+            <param name="a">Amount of alpha per pixel.</param>
+            <param name="width">Width of image.</param>
+            <param name="height">Height of image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Color,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Creates an image of a single colour, specified by the <see cref="T:System.Drawing.Color"/> parameter,
+            with the size given by the int parameters.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="color"><see cref="T:System.Drawing.Color"/> of image.</param>
+            <param name="width">Width of image.</param>
+            <param name="height">Height of image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.UInt32,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Creates an image of a single colour, specified by the uint parameter
+            (low byte is "blue", then "green", then "red" then high byte is "alpha"),
+            with the size given by the int parameters.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="argb">Colour of image (low byte is "blue", then "green", then "red" then high byte is "alpha").</param>
+            <param name="width">Width of image.</param>
+            <param name="height">Height of image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.DdsFile,System.Boolean)">
+            <summary>
+            Creates an image from a given <see cref="T:DdsFile"/>.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="image"><see cref="T:DdsFile"/> to clone.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.DdsFile,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Creates an image from a given <see cref="T:DdsFile"/>, resized as requested.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="image"><see cref="T:DdsFile"/> to clone.</param>
+            <param name="width">Width of image.</param>
+            <param name="height">Height of image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Image,System.Boolean)">
+            <summary>
+            Creates an image from a given <see cref="T:Image"/>.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="image"><see cref="T:Image"/> from which to extract image pixels.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Bitmap,System.Boolean)">
+            <summary>
+            Creates an image from a given <see cref="T:Bitmap"/>.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="image"><see cref="T:Bitmap"/> from which to extract image pixels.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Bitmap,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Creates an image from a given <see cref="T:Bitmap"/>, resized as requested.
+            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
+            </summary>
+            <param name="image"><see cref="T:Bitmap"/> from which to extract image pixels.</param>
+            <param name="width">Width of image.</param>
+            <param name="height">Height of image.</param>
+            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.DdsFile)">
+            <summary>
+            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+            and loads this into the Alpha channel of the current image.
+            The image format will be changed to one supporting an 8-bit Alpha channel, if required.
+            </summary>
+            <param name="image"><see cref="T:System.Drawing.DdsFile"/> to extract greyscale data from for alpha channel.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.Image)">
+            <summary>
+            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+            and loads this into the Alpha channel of the current image.
+            </summary>
+            <param name="image"><see cref="T:Image"/> to extract greyscale data from for alpha channel.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.Bitmap)">
+            <summary>
+            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
+            and loads this into the Alpha channel of the current image.
+            The image format will be changed to one supporting an Alpha channel, if required.
+            </summary>
+            <param name="image"><see cref="T:System.Drawing.Bitmap"/> to extract greyscale data from for alpha channel.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.DeleteAlphaChannel">
+            <summary>
+            Set the image format to one without an alpha channel, clearing the alpha data.
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourMetricPerceptual">
+        <member name="M:System.Drawing.DdsFile.GetGreyscaleFromAlpha">
             <summary>
-            Use a perceptual metric for colour error (the default).
+            Get a greyscale image representing the alpha channel of the current image.
+            </summary>
+            <returns>A greyscale image representing the alpha channel of the current image.</returns>
+        </member>
+        <member name="M:System.Drawing.DdsFile.GetImage(System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Extract a <see cref="T:Image"/> representing the current image, subject to the filtering requested.
+            </summary>
+            <param name="red">When true, the red channel of the DDS contributes to the red pixels of the returned image.</param>
+            <param name="green">When true, the green channel of the DDS contributes to the green pixels of the returned image.</param>
+            <param name="blue">When true, the blue channel of the DDS contributes to the blue pixels of the returned image.</param>
+            <param name="alpha">When true, the alpha channel of the DDS contributes to the pixel transparency in the returned image.</param>
+            <param name="invert">When true, the alpha channel of the DDS is inverted.</param>
+            <returns>A <see cref="T:System.Drawing.Image"/> representation of the DDS encoded image in the loaded <see cref="T:System.IO.Stream"/>.</returns>
+            <seealso cref="M:System.Drawing.DdsFile.Load(System.IO.Stream,System.Boolean)"/>
+        </member>
+        <member name="M:System.Drawing.DdsFile.SetPixels(System.Func{System.UInt32,System.UInt32})">
+            <summary>
+            Apply a transformation function to the current image.
+            </summary>
+            <param name="transform">
+            A transformation function taking a current pixel value and returning a new value.
+            </param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.SetPixels(System.Func{System.Int32,System.Int32,System.UInt32,System.UInt32})">
+            <summary>
+            Apply a transformation function to the current image.
+            </summary>
+            <param name="transform">A transformation function taking
+            <c>x</c>, <c>y</c> and <c>pixel</c> parameters and
+            returning a new <c>pixel</c> value.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.DoAction(System.Action{System.Int32,System.Int32,System.UInt32})">
+            <summary>
+            Perform an action on each pixel in the current image.
+            </summary>
+            <param name="action">An action taking <c>x</c>, <c>y</c> and <c>pixel</c> parameters.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.Resize(System.Drawing.Size)">
+            <summary>
+            Get a new DdsFile of the given size based on the current image.
+            </summary>
+            <param name="size">The new size.</param>
+            <returns>A new DdsFile of the given size based on the current image.</returns>
+        </member>
+        <member name="M:System.Drawing.DdsFile.MaskedSetColour(System.Drawing.DdsFile,System.Nullable{System.UInt32},System.Nullable{System.UInt32},System.Nullable{System.UInt32},System.Nullable{System.UInt32})">
+            <summary>
+            Set the colour of the image based on the channels in the <paramref name="mask"/>.
+            </summary>
+            <param name="mask">The <see cref="T:System.IO.Stream"/> containing the DDS image to use as a mask.</param>
+            <param name="ch1Colour">(Nullable) ARGB colour to the image when the first channel of the mask is active.</param>
+            <param name="ch2Colour">(Nullable) ARGB colour to the image when the second channel of the mask is active.</param>
+            <param name="ch3Colour">(Nullable) ARGB colour to the image when the third channel of the mask is active.</param>
+            <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile)">
+            <summary>
+            Use the <paramref name="mask"/> to apply the DDS image supplied.
+            </summary>
+            <param name="mask">Determines to which areas each DDS image is applied.</param>
+            <param name="ch1DdsFile">DDS image applied to <paramref name="mask"/> channel 1 area.</param>
+            <param name="ch2DdsFile">DDS image applied to <paramref name="mask"/> channel 2 area.</param>
+            <param name="ch3DdsFile">DDS image applied to <paramref name="mask"/> channel 3 area.</param>
+            <param name="ch4DdsFile">DDS image applied to <paramref name="mask"/> channel 4 area.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.Image,System.Drawing.Image,System.Drawing.Image,System.Drawing.Image)">
+            <summary>
+            Use the <paramref name="mask"/> to apply the supplied images.
+            </summary>
+            <param name="mask">Determines to which areas each image is applied.</param>
+            <param name="ch1Image">Image applied to <paramref name="mask"/> channel 1 area.</param>
+            <param name="ch2Image">Image applied to <paramref name="mask"/> channel 2 area.</param>
+            <param name="ch3Image">Image applied to <paramref name="mask"/> channel 3 area.</param>
+            <param name="ch4Image">Image applied to <paramref name="mask"/> channel 4 area.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.Bitmap,System.Drawing.Bitmap,System.Drawing.Bitmap,System.Drawing.Bitmap)">
+            <summary>
+            Use the <paramref name="mask"/> to apply the supplied bitmaps.
+            </summary>
+            <param name="mask">Determines to which areas each image is applied.</param>
+            <param name="ch1Bitmap">Bitmap applied to <paramref name="mask"/> channel 1 area.</param>
+            <param name="ch2Bitmap">Bitmap applied to <paramref name="mask"/> channel 2 area.</param>
+            <param name="ch3Bitmap">Bitmap applied to <paramref name="mask"/> channel 3 area.</param>
+            <param name="ch4Bitmap">Bitmap applied to <paramref name="mask"/> channel 4 area.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.ClearMask">
+            <summary>
+            Clears a previously-applied HSVShift mask.
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourMetricUniform">
+        <member name="M:System.Drawing.DdsFile.MaskedHSVShift(System.Drawing.DdsFile,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift)">
             <summary>
-            Use a uniform metric for colour error.
+            Apply <see cref="P:System.Drawing.DdsFile.HSVShift"/> values to this DDS image based on the
+            channels in the <paramref name="mask"/>.
+            </summary>
+            <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
+            <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+            <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+            <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+            <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        </member>
+        <member name="M:System.Drawing.DdsFile.MaskedHSVShiftNoBlend(System.Drawing.DdsFile,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift)">
+            <summary>
+            Apply <see cref="P:System.Drawing.DdsFile.HSVShift"/> values to this DDS image based on the
+            channels in the <paramref name="mask"/>.
+            Each channel of the mask acts independently, in order "R", "G", "B", "A".
+            </summary>
+            <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
+            <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
+            <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
+            <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
+            <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
+        </member>
+        <member name="P:System.Drawing.DdsFile.ddsHeader">
+            <summary>
+            Header of the DDS image.
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kWeightColourByAlpha">
+        <member name="P:System.Drawing.DdsFile.HasAlphaChannel">
             <summary>
-            Weight the colour by alpha during cluster fit (disabled by default).
+            When true, indicates the DDS image is encoded with an alpha channel.
             </summary>
         </member>
-        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourIterativeClusterFit">
+        <member name="P:System.Drawing.DdsFile.AlphaDepth">
             <summary>
-            Use a very slow but very high quality colour compressor.
+            When UseDXT is true, the DXT compression mode.
+            Otherwise the number of bits per alpha pixel.
             </summary>
+            <exception cref="T:System.ArgumentException">
+            Thrown if an unsupported alpha depth is set.
+            </exception>
+        </member>
+        <member name="P:System.Drawing.DdsFile.UseDXT">
+            <summary>
+            If true, use DXT-type image compression for storage.
+            The exact format will depend on the <see cref="P:System.Drawing.DdsFile.AlphaDepth"/>.
+            Setting to false (from true) will default to A8B8G8R8 format.
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.UseLuminance">
+            <summary>
+            If true, treat the image as a luminance (plus alpha) map for storage.
+            Currently only A8L8, 16bit coding is supported.
+            Setting to false (from true) will default to A8B8G8R8 (non-DXT) format.
+            </summary>
+            <remarks>
+            Note that setting to true does not turn the image into a greyscale.
+            This only happens on saving the image (and will not affect the displayed values until they are read back in).
+            </remarks>
+        </member>
+        <member name="P:System.Drawing.DdsFile.Image">
+            <summary>
+            The current image.
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.Size">
+            <summary>
+            The image size.
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.HSVShift">
+            <summary>
+            The HSVShift applied to the current image, when supported.
+            </summary>
+            <seealso cref="P:System.Drawing.DdsFile.SupportsHSV"/>
+        </member>
+        <member name="P:System.Drawing.DdsFile.SupportsHSV">
+            <summary>
+            True if the image is prepared to process HSV requests.
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsFileFormat">
+            <summary>
+            Describes the DDS file format
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_DXT1">
+            <summary>
+            DXT1
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_DXT3">
+            <summary>
+            DXT3
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_DXT5">
+            <summary>
+            DXT5
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_A8R8G8B8">
+            <summary>
+            32bit A8R8G8B8
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_X8R8G8B8">
+            <summary>
+            32bit, top 8 ignored X8R8G8B8
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_A8B8G8R8">
+            <summary>
+            32bit A8B8G8R8
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_X8B8G8R8">
+            <summary>
+            32bit, top 8 ignored X8B8G8R8
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_A1R5G5B5">
+            <summary>
+            16bit A1R5G5B5
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_A4R4G4B4">
+            <summary>
+            16bit A4R4G4B4
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_R8G8B8">
+            <summary>
+            24bit R8G8B8
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_R5G6B5">
+            <summary>
+            16bit R5G6B5
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsFileFormat.DDS_FORMAT_A8L8">
+            <summary>
+            16bit Alpha/Luminance
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsPixelFormat">
+            <summary>
+            Pixel format
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_flags">
+            <summary>
+            Flags
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_fourCC">
+            <summary>
+            Four CC
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_rgbBitCount">
+            <summary>
+            Number of bits
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_rBitMask">
+            <summary>
+            Location in the pixel of the red channel bits
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_gBitMask">
+            <summary>
+            Location in the pixel of the green channel bits
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_bBitMask">
+            <summary>
+            Location in the pixel of the blue channel bits
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsPixelFormat.m_aBitMask">
+            <summary>
+            Location in the pixel of the alpha channel bits
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags">
+            <summary>
+            Pixel format flags
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_ALPHAPIXELS">
+            <summary>
+            Format supports alpha bit(s)
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_ALPHA">
+            <summary>
+            Format supports alpha value
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_FOURCC">
+            <summary>
+            Format supports FOURCC DXT identifier
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_RGB">
+            <summary>
+            Format supports RGB values
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_YUV">
+            <summary>
+            Format supports YUV values
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsPixelFormat.PixelFormatFlags.DDS_LUMINANCE">
+            <summary>
+            Format supports luminance value
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsHeader">
+            <summary>
+            Header of a DDS image
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_headerFlags">
+            <summary>
+            About the image header
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_height">
+            <summary>
+            Stores the height read
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_width">
+            <summary>
+            Stores the width read
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_pitchOrLinearSize">
+            <summary>
+            Stores the pitch or linear size read
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_depth">
+            <summary>
+            Stores the pixel depth read
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_mipMapCount">
+            <summary>
+            Stores the MIP map count read
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_pixelFormat">
+            <summary>
+            Pixel format
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_surfaceFlags">
+            <summary>
+            About the image
+            </summary>
+        </member>
+        <member name="P:System.Drawing.DdsFile.DdsHeader.m_cubemapFlags">
+            <summary>
+            About a cubemap image
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsHeader.HeaderFlags">
+            <summary>
+            About the image header
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_TEXTURE">
+            <summary>
+            Texture
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_MIPMAP">
+            <summary>
+            MIP map
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_VOLUME">
+            <summary>
+            Volume
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_PITCH">
+            <summary>
+            Uses pitch
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.HeaderFlags.DDS_HEADER_FLAGS_LINEARSIZE">
+            <summary>
+            Uses linear size
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsHeader.SurfaceFlags">
+            <summary>
+            About the image
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.SurfaceFlags.DDS_SURFACE_FLAGS_TEXTURE">
+            <summary>
+            Is a texture
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.SurfaceFlags.DDS_SURFACE_FLAGS_MIPMAP">
+            <summary>
+            Is a MIP map
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.SurfaceFlags.DDS_SURFACE_FLAGS_CUBEMAP">
+            <summary>
+            Is a cube map
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsHeader.CubemapFlags">
+            <summary>
+            About a cubemap image
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_POSITIVEX">
+            <summary>
+            Has +X face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_NEGATIVEX">
+            <summary>
+            Has -X face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_POSITIVEY">
+            <summary>
+            Has +Y face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_NEGATIVEY">
+            <summary>
+            Has -Y face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_POSITIVEZ">
+            <summary>
+            Has +Z face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_NEGATIVEZ">
+            <summary>
+            Has -Z face
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.CubemapFlags.DDS_CUBEMAP_ALLFACES">
+            <summary>
+            Has all faces
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.DdsHeader.VolumeFlags">
+            <summary>
+            About a volume image
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsFile.DdsHeader.VolumeFlags.DDS_FLAGS_VOLUME">
+            <summary>
+            Is a volume
+            </summary>
+        </member>
+        <member name="T:System.Drawing.DdsFile.Channel">
+            <summary>
+            Delegate to determine whether a channel of a given UInt32 ARGB format value is active.
+            </summary>
+            <param name="argb">The UInt32 ARGB format value.</param>
+            <returns>True if the channel is active, otherwise false.</returns>
+        </member>
+        <member name="T:System.Drawing.DdsFile.ARGBAt">
+            <summary>
+            Return the UInt32 ARGB format pixel value for a given X/Y coordinate.
+            </summary>
+            <param name="x">X coordinate.</param>
+            <param name="y">Y coordinate.</param>
+            <returns>A UInt32 ARGB format pixel value.</returns>
+        </member>
+        <member name="T:System.Drawing.ARGBToPixel">
+            <summary>
+            Convert a <see cref="T:Color"/> value into a UInt32 ARGB format pixel value.
+            </summary>
+            <param name="color">A <see cref="T:Color"/> value</param>
+            <returns>A UInt32 ARGB format pixel value.</returns>
+        </member>
+        <member name="T:System.Drawing.Extensions">
+            <summary>
+            Extensions for working with bitmap images.
+            </summary>
+        </member>
+        <member name="M:System.Drawing.Extensions.ToBitmap(System.UInt32[],System.Drawing.Size)">
+            <summary>
+            Convert an array of UInt32 ARGB elements into a <see cref="T:Bitmap"/>.
+            </summary>
+            <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
+            <param name="size">The size of the encoded image.</param>
+            <returns>The decoded image.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.ToBitmap(System.UInt32[],System.Int32,System.Int32)">
+            <summary>
+            Convert an array of UInt32 ARGB elements into a <see cref="T:Bitmap"/>.
+            </summary>
+            <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
+            <param name="width">The width of the encoded image.</param>
+            <param name="height">The height of the encoded image.</param>
+            <returns>The decoded bitmap image.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.ToARGBData(System.Drawing.Image)">
+            <summary>
+            Converts a <see cref="T:Image"/> into an array of UInt32 ARGB elements.
+            </summary>
+            <param name="image">The image to encode.</param>
+            <returns>An array of UInt32 ARGB elements.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.ToARGBData(System.Drawing.Bitmap)">
+            <summary>
+            Converts a <see cref="T:Bitmap"/> into an array of UInt32 ARGB elements.
+            </summary>
+            <param name="bitmap">The bitmap image to encode.</param>
+            <returns>An array of UInt32 ARGB elements.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.ToPixelData(System.Drawing.Bitmap,System.Drawing.ARGBToPixel)">
+            <summary>
+            Converts a <see cref="T:Bitmap"/> into a pixel data array,
+            using the provided encoder.
+            </summary>
+            <param name="bitmap">The bitmap image to encode.</param>
+            <param name="encoder">The method to invoke to encode bitmap <see cref="T:Color"/> pixels.</param>
+            <returns>An array of uint elements containing the encoded pixel data.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.A(System.UInt32)">
+            <summary>
+            Extract the alpha channel from an ARGB format UInt32 value.
+            </summary>
+            <param name="argb">An ARGB format UInt32 value.</param>
+            <returns>The alpha channel extracted.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.R(System.UInt32)">
+            <summary>
+            Extract the red channel from an ARGB format UInt32 value.
+            </summary>
+            <param name="argb">An ARGB format UInt32 value.</param>
+            <returns>The red channel extracted.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.G(System.UInt32)">
+            <summary>
+            Extract the green channel from an ARGB format UInt32 value.
+            </summary>
+            <param name="argb">An ARGB format UInt32 value.</param>
+            <returns>The green channel extracted.</returns>
+        </member>
+        <member name="M:System.Drawing.Extensions.B(System.UInt32)">
+            <summary>
+            Extract the blue channel from an ARGB format UInt32 value.
+            </summary>
+            <param name="argb">An ARGB format UInt32 value.</param>
+            <returns>The blue channel extracted.</returns>
         </member>
         <member name="T:System.Windows.Forms.DDSPanel">
             <summary>
             Displays and manipulates a DDS image
-            </summary>
-        </member>
-        <member name="F:System.Windows.Forms.DDSPanel.components">
-            <summary> 
-            Required designer variable.
-            </summary>
-        </member>
-        <member name="M:System.Windows.Forms.DDSPanel.Dispose(System.Boolean)">
-            <summary> 
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        </member>
-        <member name="M:System.Windows.Forms.DDSPanel.InitializeComponent">
-            <summary> 
-            Required method for Designer support - do not modify 
-            the contents of this method with the code editor.
             </summary>
         </member>
         <member name="M:System.Windows.Forms.DDSPanel.#ctor">
@@ -142,6 +751,22 @@
             <param name="stream"><see cref="T:System.IO.Stream"/> containing a DDS-encoded image.</param>
             <param name="imageSize">(out) Size of DDS image.</param>
             <param name="hasAlphaChannel">(out) True if DDS image has an alpha channel.</param>
+        </member>
+        <member name="M:System.Windows.Forms.DDSPanel.DDSInfo(System.IO.Stream,System.Drawing.Size@,System.Int32@)">
+            <summary>
+            Return the image size and an indication of presence of an alpha channel
+            for a DDS image in a stream.
+            </summary>
+            <param name="stream"><see cref="T:System.IO.Stream"/> containing a DDS-encoded image.</param>
+            <param name="imageSize">(out) Size of DDS image.</param>
+            <param name="alphaDepth">(out) The number of alpha channel bits per pixel.</param>
+        </member>
+        <member name="M:System.Windows.Forms.DDSPanel.DDSInfo(System.IO.Stream)">
+            <summary>
+            Return the header for a DDS image in a stream.
+            </summary>
+            <param name="stream"><see cref="T:System.IO.Stream"/> containing a DDS-encoded image.</param>
+            <returns>Contains the dds header information.</returns>
         </member>
         <member name="M:System.Windows.Forms.DDSPanel.DDSLoad(System.IO.Stream,System.Boolean)">
             <summary>
@@ -197,6 +822,12 @@
             <summary>
             Sets the DDSPanel to an unloaded state, freeing resources.
             </summary>
+        </member>
+        <member name="M:System.Windows.Forms.DDSPanel.GetDdsFile">
+            <summary>
+            Get a copy of the current DDS image as a <see cref="T:System.Drawing.DdsFile"/>.
+            </summary>
+            <returns>A new <see cref="T:System.Drawing.DdsFile"/> copy of the current DDS image.</returns>
         </member>
         <member name="M:System.Windows.Forms.DDSPanel.CreateImage(System.Nullable{System.UInt32},System.Drawing.Size,System.Boolean)">
             <summary>
@@ -438,6 +1069,23 @@
             <param name="ch3Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the third channel of the mask is active.</param>
             <param name="ch4Image">The <see cref="T:System.Drawing.Bitmap"/> to apply to the image when the fourth channel of the mask is active.</param>
         </member>
+        <member name="F:System.Windows.Forms.DDSPanel.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:System.Windows.Forms.DDSPanel.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:System.Windows.Forms.DDSPanel.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
         <member name="P:System.Windows.Forms.DDSPanel.Fit">
             <summary>
             When true, the image will resize to the control bounds.
@@ -522,6 +1170,30 @@
             When true, indicates the DDS image is encoded with an alpha channel.
             </summary>
         </member>
+        <member name="P:System.Windows.Forms.DDSPanel.AlphaDepth">
+            <summary>
+            The number of alpha channel bits per pixel in the encoded DDS image or the DXT compression mode.
+            </summary>
+        </member>
+        <member name="P:System.Windows.Forms.DDSPanel.UseDXT">
+            <summary>
+            If true, use DXT-type image compression for storage.  The mode will depend on the <see cref="P:System.Windows.Forms.DDSPanel.AlphaDepth"/>.
+            </summary>
+            <remarks>
+            Setting to false (from true) will default to A8B8G8R8 format.
+            </remarks>
+        </member>
+        <member name="P:System.Windows.Forms.DDSPanel.UseLuminance">
+            <summary>
+            If true, treat the image as a luminance (plus alpha) map for storage.
+            </summary>
+            <remarks>
+            Currently only A8L8, 16bit coding is supported.
+            Setting to false (from true) will default to A8B8G8R8 (non-DXT) format.
+            Setting to true does not turn the image into a greyscale.
+            This only happens on saving the image (and will not affect the displayed values until they are read back in).
+            </remarks>
+        </member>
         <member name="P:System.Windows.Forms.DDSPanel.MaskLoaded">
             <summary>
             Indicates that a Mask is currently loaded.
@@ -597,6 +1269,125 @@
             Activates channel 4 ("Alpha")
             </summary>
         </member>
+        <member name="M:System.Drawing.DdsSquish.CompressImage(System.Byte[],System.Int32,System.Int32,System.Drawing.DdsSquish.SquishFlags,System.Single[])">
+            <summary>
+            Compresses an image in memory.
+            </summary>
+            <param name="pixelInput">The pixels of the source.</param>
+            <param name="width">The width of the source image.</param>
+            <param name="height">The height of the source image.</param>
+            <param name="flags">Compression flags.</param>
+            <param name="metric">An optional perceptual metric.</param>
+            <returns>Byte array containing the compressed output.</returns>
+            <remarks>
+            <para>
+            The source pixels should be presented as a contiguous array of width*height
+            rgba values, with each component as 1 byte each. In memory this should be:
+            <c>{ r1, g1, b1, a1, .... , rn, gn, bn, an }</c> for n = width*height
+            </para>
+            <para>
+            The <paramref name="flags"/> parameter should specify either <c>kDxt1</c>, <c>kDxt3</c> or <c>kDxt5</c> compression, 
+            however, DXT1 will be used by default if none is specified. When using DXT1 
+            compression, 8 bytes of storage are required for each compressed DXT block. 
+            DXT3 and DXT5 compression require 16 bytes of storage per block.
+            </para>
+            <para>
+            The <paramref name="flags"/> parameter can also specify a preferred colour compressor to use 
+            when fitting the RGB components of the data. Possible colour compressors 
+            are: <c>kColourClusterFit</c> (the default), <c>kColourRangeFit</c> (very fast, low 
+            quality) or <c>kColourIterativeClusterFit</c> (slowest, best quality).
+            </para>
+            <para>
+            When using <c>kColourClusterFit</c> or <c>kColourIterativeClusterFit</c>, an additional 
+            flag can be specified to weight the importance of each pixel by its alpha 
+            value. For images that are rendered using alpha blending, this can 
+            significantly increase the perceived quality.</para>
+            <para>
+            The <paramref name="metric"/> parameter can be used to weight the relative importance of each
+            colour channel, or pass NULL to use the default uniform weight of 
+            <c>{ 1.0f, 1.0f, 1.0f }</c>. This replaces the previous flag-based control that 
+            allowed either uniform or "perceptual" weights with the fixed values
+            <c>{ 0.2126f, 0.7152f, 0.0722f }</c>. If non-NULL, the metric should point to a 
+            contiguous array of 3 floats.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:System.Drawing.DdsSquish.DecompressImage(System.Byte[],System.Int32,System.Int32,System.Drawing.DdsSquish.SquishFlags)">
+            <summary>
+            Decompresses an image in memory.
+            </summary>
+            <param name="blocks">The compressed DXT blocks.</param>
+            <param name="width">The width of the source image.</param>
+            <param name="height">The height of the source image.</param>
+            <param name="flags">Compression flags.</param>
+            <returns>Byte array containing the decompressed pixels.</returns>
+            <remarks>The decompressed pixels will be written as a contiguous array of width*height
+            16 rgba values, with each component as 1 byte each. In memory this is:
+            <code>{ r1, g1, b1, a1, .... , rn, gn, bn, an } for n = width*height</code>
+            The <paramref name="flags"/> parameter should specify either <c>kDxt1</c>, <c>kDxt3</c> or <c>kDxt5</c> compression, 
+            however, DXT1 will be used by default if none is specified. All other flags are ignored.</remarks>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt1">
+            <summary>
+            Use DXT1 compression.
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt3">
+            <summary>
+            Use DXT3 compression.
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kDxt5">
+            <summary>
+            Use DXT5 compression.
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourClusterFit">
+            <summary>
+            Use a slow but high quality colour compressor (the default).
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourRangeFit">
+            <summary>
+            Use a fast but low quality colour compressor.
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourMetricPerceptual">
+            <summary>
+            Use a perceptual metric for colour error (the default).
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourMetricUniform">
+            <summary>
+            Use a uniform metric for colour error.
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kWeightColourByAlpha">
+            <summary>
+            Weight the colour by alpha during cluster fit (disabled by default).
+            </summary>
+        </member>
+        <member name="F:System.Drawing.DdsSquish.SquishFlags.kColourIterativeClusterFit">
+            <summary>
+            Use a very slow but very high quality colour compressor.
+            </summary>
+        </member>
+        <member name="T:System.Windows.Forms.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:System.Windows.Forms.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:System.Windows.Forms.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
         <member name="T:System.Drawing.ColorHSVA">
             <summary>
             Implement ColorHSVA class and conversion to ColorRGBA
@@ -669,6 +1460,22 @@
             </summary>
             <returns>The hashcode for this instance.</returns>
         </member>
+        <member name="M:System.Drawing.ColorHSVA.op_Equality(System.Drawing.ColorHSVA,System.Drawing.ColorHSVA)">
+            <summary>
+            Determine whether two <see cref="T:ColorHSVA"/> objects have the same value.
+            </summary>
+            <param name="val1">First object.</param>
+            <param name="val2">Second object.</param>
+            <returns>True if the Equals method on <paramref name="val1"/> returns true when passed <paramref name="val2"/>.</returns>
+        </member>
+        <member name="M:System.Drawing.ColorHSVA.op_Inequality(System.Drawing.ColorHSVA,System.Drawing.ColorHSVA)">
+            <summary>
+            Determine whether two <see cref="T:ColorHSVA"/> objects do not have the same value.
+            </summary>
+            <param name="val1">First object.</param>
+            <param name="val2">Second object.</param>
+            <returns>True if the Equals method on <paramref name="val1"/> returns false when passed <paramref name="val2"/>.</returns>
+        </member>
         <member name="M:System.Drawing.ColorHSVA.HSVShift(System.Drawing.HSVShift)">
             <summary>
             Return the current <see cref="T:System.Drawing.ColorHSVA"/> adjusted by a given <see cref="M:System.Drawing.ColorHSVA.HSVShift(System.Drawing.HSVShift)"/> value.
@@ -724,6 +1531,22 @@
             </summary>
             <returns>The hashcode for this instance.</returns>
         </member>
+        <member name="M:System.Drawing.HSVShift.op_Equality(System.Drawing.HSVShift,System.Drawing.HSVShift)">
+            <summary>
+            Determine whether two <see cref="T:HSVShift"/> objects have the same value.
+            </summary>
+            <param name="val1">First object.</param>
+            <param name="val2">Second object.</param>
+            <returns>True if the Equals method on <paramref name="val1"/> returns true when passed <paramref name="val2"/>.</returns>
+        </member>
+        <member name="M:System.Drawing.HSVShift.op_Inequality(System.Drawing.HSVShift,System.Drawing.HSVShift)">
+            <summary>
+            Determine whether two <see cref="T:HSVShift"/> objects do not have the same value.
+            </summary>
+            <param name="val1">First object.</param>
+            <param name="val2">Second object.</param>
+            <returns>True if the Equals method on <paramref name="val1"/> returns false when passed <paramref name="val2"/>.</returns>
+        </member>
         <member name="P:System.Drawing.HSVShift.IsEmpty">
             <summary>
             True if this HSVShift is non-zero.
@@ -733,365 +1556,6 @@
             <summary>
             An empty HSVShift
             </summary>
-        </member>
-        <member name="T:System.Windows.Forms.Properties.Resources">
-            <summary>
-              A strongly-typed resource class, for looking up localized strings, etc.
-            </summary>
-        </member>
-        <member name="P:System.Windows.Forms.Properties.Resources.ResourceManager">
-            <summary>
-              Returns the cached ResourceManager instance used by this class.
-            </summary>
-        </member>
-        <member name="P:System.Windows.Forms.Properties.Resources.Culture">
-            <summary>
-              Overrides the current thread's CurrentUICulture property for all
-              resource lookups using this strongly typed resource class.
-            </summary>
-        </member>
-        <member name="T:System.Drawing.DdsFile">
-            <summary>
-            Represents an image encoded using one of the supported DDS mechanisms.
-            </summary>
-            <remarks>
-            A &quot;DirectX Draw Surface&quot; stores compressed pixel data that is used when
-            rendering scenes.  The pixel data may be used for purposes other than purely display,
-            such as being used for masked operations on another DDS image.
-            <para>Note that this assembly depends on two unmanaged libraries:
-            <br/>squishinterface_Win32.dll - code for 32bit Windows systems.
-            <br/>squishinterface_x64.dll - code for 64bit Windows systems.
-            </para>
-            </remarks>
-        </member>
-        <member name="M:System.Drawing.DdsFile.Dispose">
-            <summary>
-            Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-            </summary>
-        </member>
-        <member name="M:System.Drawing.DdsFile.GetInfo(System.IO.Stream)">
-            <summary>
-            Loads the header from a DDS image.
-            </summary>
-            <param name="input">A <see cref="T:System.IO.Stream"/> containing a DDS-encoded image.</param>
-            <exception cref="T:System.FormatException"><paramref name="input"/> does not contain a DDS-encoded image.</exception>
-            <remarks>
-            Once loaded, the following methods will return valid information about the image:
-            <list type="bullet">
-            <item><description>HasAlphaChannel</description></item>
-            <item><description>Size</description></item>
-            </list>
-            </remarks>
-        </member>
-        <member name="M:System.Drawing.DdsFile.Load(System.IO.Stream,System.Boolean)">
-            <summary>
-            Loads the data from an image encoded using one of the supported DDS mechanisms.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="input">A <see cref="T:System.IO.Stream"/> containing the DDS-encoded image.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.Save(System.IO.Stream)">
-             <summary>
-             Saves the current image using one of the supported DDS mechanisms.
-             </summary>
-             <param name="output">A <see cref="T:System.IO.Stream"/> to receive the DDS-encoded image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.Byte,System.Byte,System.Byte,System.Byte,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Creates an image of a single colour, specified by the byte parameters,
-            with the size given by the int parameters.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="r">Amount of red per pixel.</param>
-            <param name="g">Amount of green per pixel.</param>
-            <param name="b">Amount of blue per pixel.</param>
-            <param name="a">Amount of alpha per pixel.</param>
-            <param name="width">Width of image.</param>
-            <param name="height">Height of image.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Color,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Creates an image of a single colour, specified by the <see cref="T:System.Drawing.Color"/> parameter,
-            with the size given by the int parameters.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="color"><see cref="T:System.Drawing.Color"/> of image.</param>
-            <param name="width">Width of image.</param>
-            <param name="height">Height of image.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.UInt32,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Creates an image of a single colour, specified by the uint parameter
-            (low byte is "blue", then "green", then "red" then high byte is "alpha"),
-            with the size given by the int parameters.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="argb">Colour of image (low byte is "blue", then "green", then "red" then high byte is "alpha").</param>
-            <param name="width">Width of image.</param>
-            <param name="height">Height of image.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.DdsFile,System.Boolean)">
-            <summary>
-            Creates an image from a given <see cref="T:DdsFile"/>.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="image"><see cref="T:DdsFile"/> to clone.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Image,System.Boolean)">
-            <summary>
-            Creates an image from a given <see cref="T:Image"/>.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="image"><see cref="T:Image"/> from which to extract image pixel.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.CreateImage(System.Drawing.Bitmap,System.Boolean)">
-            <summary>
-            Creates an image from a given <see cref="T:System.Drawing.Bitmap"/>.
-            If <paramref name="supportHSV"/> is true, also creates an HSVa-encoded version of the image.
-            </summary>
-            <param name="image"><see cref="T:System.Drawing.Bitmap"/> from which to extract image pixel.</param>
-            <param name="supportHSV">When true, create an HSVa-encoded version of the image.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.DdsFile)">
-            <summary>
-            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
-            and loads this into the Alpha channel of the current image.
-            </summary>
-            <param name="image"><see cref="T:System.Drawing.DdsFile"/> to extract greyscale data from for alpha channel.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.Image)">
-            <summary>
-            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
-            and loads this into the Alpha channel of the current image.
-            </summary>
-            <param name="image"><see cref="T:Image"/> to extract greyscale data from for alpha channel.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.SetAlphaFromGreyscale(System.Drawing.Bitmap)">
-            <summary>
-            Converts the R, G and B channels of the supplied <paramref name="image"/> to greyscale
-            and loads this into the Alpha channel of the current image.
-            </summary>
-            <param name="image"><see cref="T:System.Drawing.Bitmap"/> to extract greyscale data from for alpha channel.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.GetGreyscaleFromAlpha">
-            <summary>
-            Get a greyscale image representing the alpha channel of the current image.
-            </summary>
-            <returns>A greyscale image representing the alpha channel of the current image.</returns>
-        </member>
-        <member name="M:System.Drawing.DdsFile.GetImage(System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
-            <summary>
-            Extract a <see cref="T:Image"/> representing the current image, subject to the filtering requested.
-            </summary>
-            <param name="red">When true, the red channel of the DDS contributes to the red pixels of the returned image.</param>
-            <param name="green">When true, the green channel of the DDS contributes to the green pixels of the returned image.</param>
-            <param name="blue">When true, the blue channel of the DDS contributes to the blue pixels of the returned image.</param>
-            <param name="alpha">When true, the alpha channel of the DDS contributes to the pixel transparency in the returned image.</param>
-            <param name="invert">When true, the alpha channel of the DDS is inverted.</param>
-            <returns>A <see cref="T:System.Drawing.Image"/> representation of the DDS encoded image in the loaded <see cref="T:System.IO.Stream"/>.</returns>
-            <seealso cref="M:System.Drawing.DdsFile.Load(System.IO.Stream,System.Boolean)"/>
-        </member>
-        <member name="M:System.Drawing.DdsFile.Resize(System.Drawing.Size)">
-            <summary>
-            Get a new DdsFile of the given size based on the current image.
-            </summary>
-            <param name="size">The new size.</param>
-            <returns>A new DdsFile of the given size based on the current image.</returns>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedSetColour(System.Drawing.DdsFile,System.Nullable{System.UInt32},System.Nullable{System.UInt32},System.Nullable{System.UInt32},System.Nullable{System.UInt32})">
-            <summary>
-            Set the colour of the image based on the channels in the <paramref name="mask"/>.
-            </summary>
-            <param name="mask">The <see cref="T:System.IO.Stream"/> containing the DDS image to use as a mask.</param>
-            <param name="ch1Colour">(Nullable) ARGB colour to the image when the first channel of the mask is active.</param>
-            <param name="ch2Colour">(Nullable) ARGB colour to the image when the second channel of the mask is active.</param>
-            <param name="ch3Colour">(Nullable) ARGB colour to the image when the third channel of the mask is active.</param>
-            <param name="ch4Colour">(Nullable) ARGB colour to the image when the fourth channel of the mask is active.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile,System.Drawing.DdsFile)">
-            <summary>
-            Use the <paramref name="mask"/> to apply the DDS image supplied.
-            </summary>
-            <param name="mask">Determines to which areas each DDS image is applied.</param>
-            <param name="ch1DdsFile">DDS image applied to <paramref name="mask"/> channel 1 area.</param>
-            <param name="ch2DdsFile">DDS image applied to <paramref name="mask"/> channel 2 area.</param>
-            <param name="ch3DdsFile">DDS image applied to <paramref name="mask"/> channel 3 area.</param>
-            <param name="ch4DdsFile">DDS image applied to <paramref name="mask"/> channel 4 area.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.Image,System.Drawing.Image,System.Drawing.Image,System.Drawing.Image)">
-            <summary>
-            Use the <paramref name="mask"/> to apply the supplied images.
-            </summary>
-            <param name="mask">Determines to which areas each image is applied.</param>
-            <param name="ch1Image">Image applied to <paramref name="mask"/> channel 1 area.</param>
-            <param name="ch2Image">Image applied to <paramref name="mask"/> channel 2 area.</param>
-            <param name="ch3Image">Image applied to <paramref name="mask"/> channel 3 area.</param>
-            <param name="ch4Image">Image applied to <paramref name="mask"/> channel 4 area.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedApplyImage(System.Drawing.DdsFile,System.Drawing.Bitmap,System.Drawing.Bitmap,System.Drawing.Bitmap,System.Drawing.Bitmap)">
-            <summary>
-            Use the <paramref name="mask"/> to apply the supplied bitmaps.
-            </summary>
-            <param name="mask">Determines to which areas each image is applied.</param>
-            <param name="ch1Bitmap">Bitmap applied to <paramref name="mask"/> channel 1 area.</param>
-            <param name="ch2Bitmap">Bitmap applied to <paramref name="mask"/> channel 2 area.</param>
-            <param name="ch3Bitmap">Bitmap applied to <paramref name="mask"/> channel 3 area.</param>
-            <param name="ch4Bitmap">Bitmap applied to <paramref name="mask"/> channel 4 area.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.ClearMask">
-            <summary>
-            Clears a previously-applied HSVShift mask.
-            </summary>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedHSVShift(System.Drawing.DdsFile,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift)">
-            <summary>
-            Apply <see cref="P:System.Drawing.DdsFile.HSVShift"/> values to this DDS image based on the
-            channels in the <paramref name="mask"/>.
-            </summary>
-            <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
-            <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
-            <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
-            <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
-            <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        </member>
-        <member name="M:System.Drawing.DdsFile.MaskedHSVShiftNoBlend(System.Drawing.DdsFile,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift,System.Drawing.HSVShift)">
-            <summary>
-            Apply <see cref="P:System.Drawing.DdsFile.HSVShift"/> values to this DDS image based on the
-            channels in the <paramref name="mask"/>.
-            Each channel of the mask acts independently, in order "R", "G", "B", "A".
-            </summary>
-            <param name="mask">A DDS image file, each colourway acting as a mask channel.</param>
-            <param name="ch1Shift">A shift to apply to the image when the first channel of the mask is active.</param>
-            <param name="ch2Shift">A shift to apply to the image when the second channel of the mask is active.</param>
-            <param name="ch3Shift">A shift to apply to the image when the third channel of the mask is active.</param>
-            <param name="ch4Shift">A shift to apply to the image when the fourth channel of the mask is active.</param>
-        </member>
-        <member name="P:System.Drawing.DdsFile.HasAlphaChannel">
-            <summary>
-            When true, indicates the DDS image is encoded with an alpha channel.
-            </summary>
-        </member>
-        <member name="P:System.Drawing.DdsFile.Image">
-            <summary>
-            The current image.
-            </summary>
-        </member>
-        <member name="P:System.Drawing.DdsFile.Size">
-            <summary>
-            The image size.
-            </summary>
-        </member>
-        <member name="P:System.Drawing.DdsFile.HSVShift">
-            <summary>
-            The HSVShift applied to the current image, when supported.
-            </summary>
-            <seealso cref="P:System.Drawing.DdsFile.SupportsHSV"/>
-        </member>
-        <member name="P:System.Drawing.DdsFile.SupportsHSV">
-            <summary>
-            True if the image is prepared to process HSV requests.
-            </summary>
-        </member>
-        <member name="T:System.Drawing.DdsFile.Channel">
-            <summary>
-            Delegate to determine whether a channel of a given UInt32 ARGB format value is active.
-            </summary>
-            <param name="argb">The UInt32 ARGB format value.</param>
-            <returns>True if the channel is active, otherwise false.</returns>
-        </member>
-        <member name="T:System.Drawing.DdsFile.ARGBAt">
-            <summary>
-            Return the UInt32 ARGB format pixel value for a given X/Y coordinate.
-            </summary>
-            <param name="x">X coordinate.</param>
-            <param name="y">Y coordinate.</param>
-            <returns>A UInt32 ARGB format pixel value.</returns>
-        </member>
-        <member name="T:System.Drawing.ARGBToPixel">
-            <summary>
-            Convert a <see cref="T:Color"/> value into a UInt32 ARGB format pixel value.
-            </summary>
-            <param name="color">A <see cref="T:Color"/> value</param>
-            <returns>A UInt32 ARGB format pixel value.</returns>
-        </member>
-        <member name="T:System.Drawing.Extensions">
-            <summary>
-            Extensions for working with bitmap images.
-            </summary>
-        </member>
-        <member name="M:System.Drawing.Extensions.ToBitmap(System.UInt32[],System.Drawing.Size)">
-            <summary>
-            Convert an array of UInt32 ARGB elements into a <see cref="T:Bitmap"/>.
-            </summary>
-            <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
-            <param name="size">The size of the encoded image.</param>
-            <returns>The decoded image.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.ToBitmap(System.UInt32[],System.Int32,System.Int32)">
-            <summary>
-            Convert an array of UInt32 ARGB elements into a <see cref="T:Bitmap"/>.
-            </summary>
-            <param name="argbData">The array of UInt32 ARGB elements to decode.</param>
-            <param name="width">The width of the encoded image.</param>
-            <param name="height">The height of the encoded image.</param>
-            <returns>The decoded bitmap image.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.ToARGBData(System.Drawing.Image)">
-            <summary>
-            Converts a <see cref="T:Image"/> into an array of UInt32 ARGB elements.
-            </summary>
-            <param name="image">The image to encode.</param>
-            <returns>An array of UInt32 ARGB elements.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.ToARGBData(System.Drawing.Bitmap)">
-            <summary>
-            Converts a <see cref="T:Bitmap"/> into an array of UInt32 ARGB elements.
-            </summary>
-            <param name="bitmap">The bitmap image to encode.</param>
-            <returns>An array of UInt32 ARGB elements.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.ToPixelData(System.Drawing.Bitmap,System.Drawing.ARGBToPixel)">
-            <summary>
-            Converts a <see cref="T:Bitmap"/> into a pixel data array,
-            using the provided encoder.
-            </summary>
-            <param name="bitmap">The bitmap image to encode.</param>
-            <param name="encoder">The method to invoke to encode bitmap <see cref="T:Color"/> pixels.</param>
-            <returns>An array of uint elements containing the encoded pixel data.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.A(System.UInt32)">
-            <summary>
-            Extract the alpha channel from an ARGB format UInt32 value.
-            </summary>
-            <param name="argb">An ARGB format UInt32 value.</param>
-            <returns>The alpha channel extracted.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.R(System.UInt32)">
-            <summary>
-            Extract the red channel from an ARGB format UInt32 value.
-            </summary>
-            <param name="argb">An ARGB format UInt32 value.</param>
-            <returns>The red channel extracted.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.G(System.UInt32)">
-            <summary>
-            Extract the green channel from an ARGB format UInt32 value.
-            </summary>
-            <param name="argb">An ARGB format UInt32 value.</param>
-            <returns>The green channel extracted.</returns>
-        </member>
-        <member name="M:System.Drawing.Extensions.B(System.UInt32)">
-            <summary>
-            Extract the blue channel from an ARGB format UInt32 value.
-            </summary>
-            <param name="argb">An ARGB format UInt32 value.</param>
-            <returns>The blue channel extracted.</returns>
         </member>
     </members>
 </doc>

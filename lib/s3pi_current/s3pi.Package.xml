@@ -9,33 +9,6 @@
             Internal -- used by Package to handle compression routines
             </summary>
         </member>
-        <member name="T:s3pi.Package.PackageIndex">
-            <summary>
-            Internal -- used by Package to manage the package index
-            </summary>
-        </member>
-        <member name="M:s3pi.Package.PackageIndex.Sort(System.String)">
-            <summary>
-            Sort the index by the given field
-            </summary>
-            <param name="index">Field to sort by</param>
-        </member>
-        <member name="P:s3pi.Package.PackageIndex.Item(System.UInt32,System.UInt32,System.UInt64)">
-            <summary>
-            Return the index entry with the matching TGI
-            </summary>
-            <param name="type">Entry type</param>
-            <param name="group">Entry group</param>
-            <param name="instance">Entry instance</param>
-            <returns>Matching entry</returns>
-        </member>
-        <member name="P:s3pi.Package.PackageIndex.Item(s3pi.Interfaces.IResourceKey)">
-            <summary>
-            Returns requested resource, ignoring EPFlags
-            </summary>
-            <param name="rk">Resource key to find</param>
-            <returns>Matching entry</returns>
-        </member>
         <member name="T:s3pi.Package.ResourceIndexEntry">
             <summary>
             Implementation of an index entry
@@ -64,21 +37,6 @@
         <member name="F:s3pi.Package.ResourceIndexEntry.indexEntry">
             <summary>
             The index entry data
-            </summary>
-        </member>
-        <member name="F:s3pi.Package.ResourceIndexEntry.ms">
-            <summary>
-            indexEntry as a (fixed size) memory stream
-            </summary>
-        </member>
-        <member name="F:s3pi.Package.ResourceIndexEntry.indexReader">
-            <summary>
-            Used to read from the indexEntry
-            </summary>
-        </member>
-        <member name="F:s3pi.Package.ResourceIndexEntry.indexWriter">
-            <summary>
-            Used to write to the indexEntry
             </summary>
         </member>
         <member name="F:s3pi.Package.ResourceIndexEntry.isDeleted">
@@ -212,6 +170,14 @@
             Initialise a new, empty package and return the IPackage reference
             </summary>
             <param name="APIversion">(unused)</param>
+            <returns>IPackage reference to an empty package</returns>
+        </member>
+        <member name="M:s3pi.Package.Package.NewPackage(System.Int32,System.Int32)">
+            <summary>
+            Initialise a new, empty package and return the IPackage reference
+            </summary>
+            <param name="APIversion">(unused)</param>
+            <param name="major">Major version for the DBPF package.</param>
             <returns>IPackage reference to an empty package</returns>
         </member>
         <member name="M:s3pi.Package.Package.OpenPackage(System.Int32,System.String)">
@@ -359,10 +325,12 @@
         </member>
         <member name="M:s3pi.Package.Package.GetResource(s3pi.Interfaces.IResourceIndexEntry)">
             <summary>
-            Used by WrapperDealer to get the data for a resource
+            Required internally by s3pi - <b>not</b> for use in user tools.
+            Please use <c>WrapperDealer.GetResource(int, IPackage, IResourceIndexEntry)</c> instead.
             </summary>
             <param name="rc">IResourceIndexEntry of resource</param>
             <returns>The resource data (uncompressed, if necessary)</returns>
+            <remarks>Used by WrapperDealer to get the data for a resource.</remarks>
         </member>
         <member name="P:s3pi.Package.Package.RecommendedApiVersion">
             <summary>
@@ -438,6 +406,33 @@
             <summary>
             Package index: the index
             </summary>
+        </member>
+        <member name="T:s3pi.Package.PackageIndex">
+            <summary>
+            Internal -- used by Package to manage the package index
+            </summary>
+        </member>
+        <member name="M:s3pi.Package.PackageIndex.Sort(System.String)">
+            <summary>
+            Sort the index by the given field
+            </summary>
+            <param name="index">Field to sort by</param>
+        </member>
+        <member name="P:s3pi.Package.PackageIndex.Item(System.UInt32,System.UInt32,System.UInt64)">
+            <summary>
+            Return the index entry with the matching TGI
+            </summary>
+            <param name="type">Entry type</param>
+            <param name="group">Entry group</param>
+            <param name="instance">Entry instance</param>
+            <returns>Matching entry</returns>
+        </member>
+        <member name="P:s3pi.Package.PackageIndex.Item(s3pi.Interfaces.IResourceKey)">
+            <summary>
+            Returns requested resource, ignoring EPFlags
+            </summary>
+            <param name="rk">Resource key to find</param>
+            <returns>Matching entry</returns>
         </member>
     </members>
 </doc>

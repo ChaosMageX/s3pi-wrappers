@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph
@@ -10,8 +13,8 @@ namespace s3piwrappers.SceneGraph
         public override IResourceNode CreateChild(IResource resource, object constraints)
         {
             if (base.childDataActions < ResourceDataActions.Find)
-                return ResourceNodeDealer.GetResource(rkContainer.RootField as ARCOLBlock,
-                                                      base.OriginalChildKey);
+                return ResourceNodeDealer.GetResource(this.rkContainer.RootField as ARCOLBlock,
+                    base.OriginalChildKey);
             else
                 return ResourceNodeDealer.GetResource(resource, base.OriginalChildKey);
         }
@@ -124,7 +127,7 @@ namespace s3piwrappers.SceneGraph
 
         public override bool SetParentReferenceRK(IResourceKey newKey)
         {
-            return rkContainer.SetRK(base.OriginalChildKey, newKey);
+            return this.rkContainer.SetRK(base.OriginalChildKey, newKey);
         }
 
         /*public override bool SetParentReferenceRK(IResourceKey newKey)
@@ -232,17 +235,17 @@ namespace s3piwrappers.SceneGraph
         }/**/
 
         public DefaultConnection(IResourceKey rk,
-                                 AApiVersionedFields rkField, ResourceDataActions childActions,
-                                 string absolutePath, string rkFieldPath = "root",
-                                 Predicate<IResourceKey> validate = null)
+            AApiVersionedFields rkField, ResourceDataActions childActions,
+            string absolutePath, string rkFieldPath = "root",
+            Predicate<IResourceKey> validate = null)
             : base(rk, absolutePath, childActions)
         {
-            rkContainer = new RKContainer(rkFieldPath, rkField, absolutePath, validate);
+            this.rkContainer = new RKContainer(rkFieldPath, rkField, absolutePath, validate);
         }
 
         public DefaultConnection(IResourceKey rk,
-                                 RKContainer rkContainer, ResourceDataActions childActions,
-                                 string absolutePath)
+            RKContainer rkContainer, ResourceDataActions childActions,
+            string absolutePath)
             : base(rk, absolutePath, childActions)
         {
             this.rkContainer = rkContainer;

@@ -1,4 +1,6 @@
-﻿namespace s3piwrappers.SceneGraph.Managers
+﻿using System;
+
+namespace s3piwrappers.SceneGraph.Managers
 {
     public enum CatalogType : uint
     {

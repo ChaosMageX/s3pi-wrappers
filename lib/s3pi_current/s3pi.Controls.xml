@@ -4,23 +4,6 @@
         <name>s3pi.Controls</name>
     </assembly>
     <members>
-        <member name="F:System.Windows.Forms.TGIBlockCombo.components">
-            <summary> 
-            Required designer variable.
-            </summary>
-        </member>
-        <member name="M:System.Windows.Forms.TGIBlockCombo.Dispose(System.Boolean)">
-            <summary> 
-            Clean up any resources being used.
-            </summary>
-            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        </member>
-        <member name="M:System.Windows.Forms.TGIBlockCombo.InitializeComponent">
-            <summary> 
-            Required method for Designer support - do not modify 
-            the contents of this method with the code editor.
-            </summary>
-        </member>
         <member name="F:System.Windows.Forms.ResourceTypeCombo.components">
             <summary> 
             Required designer variable.
@@ -33,6 +16,23 @@
             <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         </member>
         <member name="M:System.Windows.Forms.ResourceTypeCombo.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:System.Windows.Forms.TGIBlockCombo.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:System.Windows.Forms.TGIBlockCombo.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:System.Windows.Forms.TGIBlockCombo.InitializeComponent">
             <summary> 
             Required method for Designer support - do not modify 
             the contents of this method with the code editor.

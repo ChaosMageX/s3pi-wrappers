@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using s3pi.Interfaces;
 
 namespace s3piwrappers.SceneGraph
@@ -13,13 +15,13 @@ namespace s3piwrappers.SceneGraph
             get
             {
                 // Cloned to prevent accidentally changing the internal values
-                return new TGIBlock(0, null, originalKey);
+                return new TGIBlock(0, null, this.originalKey); 
             }
         }
 
         public IResource Resource
         {
-            get { return resource; }
+            get { return this.resource; }
         }
 
         public virtual bool SetRK(IResourceKey newKey, IResourceKey originalKey)

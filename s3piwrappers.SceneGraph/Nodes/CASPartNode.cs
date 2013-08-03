@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using s3pi.Interfaces;
 using s3piwrappers.SceneGraph.Managers;
 
@@ -6,7 +8,7 @@ namespace s3piwrappers.SceneGraph.Nodes
 {
     public class CASPartNode : CatalogNode
     {
-        public const uint CASP_TID = (uint) CatalogType.CAS_Part;
+        public const uint CASP_TID = (uint)CatalogType.CAS_Part;
 
         public CASPartNode(IResource resource, IResourceKey originalKey)
             : base(resource, originalKey)
@@ -17,10 +19,10 @@ namespace s3piwrappers.SceneGraph.Nodes
         {
             return key.ResourceType != 0x034AEECB //CASP
                 && base.isDeepClone || (
-                    key.ResourceType != 0x00B2D882 //_IMG
-                        && key.ResourceType != 0x0333406C //_XML
-                        && key.ResourceType != 0x8FFB80F6 //_DDS
-                    );
+                   key.ResourceType != 0x00B2D882 //_IMG
+                && key.ResourceType != 0x0333406C //_XML
+                && key.ResourceType != 0x8FFB80F6 //_DDS
+                );
         }
 
         public override List<IResourceConnection> SlurpConnections(object constraints)
@@ -38,22 +40,20 @@ namespace s3piwrappers.SceneGraph.Nodes
                     && key.Instance == parentKey.Instance;
             }
 
-            public override void CreateKindredRK(IResourceKey parentKey,
-                                                 IResourceKey newParentKey, ref IResourceKey kindredKey)
+            public override void CreateKindredRK(IResourceKey parentKey, 
+                IResourceKey newParentKey, ref IResourceKey kindredKey)
             {
                 kindredKey.ResourceType = XML_TID;
                 kindredKey.Instance = newParentKey.Instance;
             }
 
-            public override IResourceNode CreateKin(IResource resource,
-                                                    IResourceKey originalKey, object constraints)
+            public override IResourceNode CreateKin(IResource resource, 
+                IResourceKey originalKey, object constraints)
             {
                 return new CASPresetXmlNode(resource, originalKey);
             }
 
-            public PresetXmlKinHelper() : base("casp.PresetXML")
-            {
-            }
+            public PresetXmlKinHelper() : base("casp.PresetXML") { }
         }
 
         public override List<IResourceKinHelper> CreateKinHelpers(object constraints)

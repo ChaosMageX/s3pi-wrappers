@@ -268,62 +268,69 @@ Rotate:
                 var mlod = chunk.RCOLBlock as MLOD;
                 foreach (MLOD.Mesh m in mlod.Meshes)
                 {
-                    vertCount += m.VertexCount;
-                    polyCount += m.PrimitiveCount;
-                    var vbuf = (VBUF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
-                    var ibuf = (IBUF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
-                    VRTF vrtf = (VRTF) GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
-                    IRCOLBlock material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
-
-                    MATD matd = FindMainMATD(rcol, material);
-
-                    float[] uvscale = GetUvScales(matd);
-                    if (uvscale != null)
-                        Debug.WriteLine(string.Format("{0} - {1} - {2}", uvscale[0], uvscale[2], uvscale[2]));
-                    else
-                        Debug.WriteLine("No scales");
-
-                    GeometryModel3D model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
-
-                    var sceneMesh = new SceneMlodMesh(m, model);
-                    if (matd != null)
-                    {
-                        sceneMesh.Shader = matd.Shader;
-                        switch (matd.Shader)
-                        {
-                        case ShaderType.ShadowMap:
-                        case ShaderType.DropShadow:
-                            break;
-                        default:
-                            var maskWidth = GetMATDParam<ElementInt>(matd, FieldType.MaskWidth);
-                            var maskHeight = GetMATDParam<ElementInt>(matd, FieldType.MaskHeight);
-                            if (maskWidth != null && maskHeight != null)
-                            {
-                                float scalar = Math.Max(maskWidth.Data, maskHeight.Data);
-                                mCheckerBrush.Transform = new ScaleTransform(maskHeight.Data/scalar, maskWidth.Data/scalar);
-                            }
-                            break;
-                        }
-                    }
                     try
                     {
-                        var sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
-                        for (int i = 0; i < sceneGeostates.Length; i++)
+                        vertCount += m.VertexCount;
+                        polyCount += m.PrimitiveCount;
+                        var vbuf = (VBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexBufferIndex);
+                        var ibuf = (IBUF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.IndexBufferIndex);
+                        VRTF vrtf = (VRTF)GenericRCOLResource.ChunkReference.GetBlock(rcol, m.VertexFormatIndex) ?? VRTF.CreateDefaultForMesh(m);
+                        IRCOLBlock material = GenericRCOLResource.ChunkReference.GetBlock(rcol, m.MaterialIndex);
+
+                        MATD matd = FindMainMATD(rcol, material);
+
+                        float[] uvscale = GetUvScales(matd);
+                        if (uvscale != null)
+                            Debug.WriteLine(string.Format("{0} - {1} - {2}", uvscale[0], uvscale[2], uvscale[2]));
+                        else
+                            Debug.WriteLine("No scales");
+
+                        GeometryModel3D model = DrawModel(vbuf.GetVertices(m, vrtf, uvscale), ibuf.GetIndices(m), mNonSelectedMaterial);
+
+                        var sceneMesh = new SceneMlodMesh(m, model);
+                        if (matd != null)
                         {
-                            GeometryModel3D state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
-                                                              ibuf.GetIndices(m, vrtf, m.GeometryStates[i]), mHiddenMaterial);
-                            mGroupMeshes.Children.Add(state);
-                            sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
+                            sceneMesh.Shader = matd.Shader;
+                            switch (matd.Shader)
+                            {
+                                case ShaderType.ShadowMap:
+                                case ShaderType.DropShadow:
+                                    break;
+                                default:
+                                    var maskWidth = GetMATDParam<ElementInt>(matd, FieldType.MaskWidth);
+                                    var maskHeight = GetMATDParam<ElementInt>(matd, FieldType.MaskHeight);
+                                    if (maskWidth != null && maskHeight != null)
+                                    {
+                                        float scalar = Math.Max(maskWidth.Data, maskHeight.Data);
+                                        mCheckerBrush.Transform = new ScaleTransform(maskHeight.Data / scalar, maskWidth.Data / scalar);
+                                    }
+                                    break;
+                            }
                         }
-                        sceneMesh.States = sceneGeostates;
+                        try
+                        {
+                            var sceneGeostates = new SceneGeostate[m.GeometryStates.Count];
+                            for (int i = 0; i < sceneGeostates.Length; i++)
+                            {
+                                GeometryModel3D state = DrawModel(vbuf.GetVertices(m, vrtf, m.GeometryStates[i], uvscale),
+                                                                  ibuf.GetIndices(m, m.GeometryStates[i]), mHiddenMaterial);
+                                mGroupMeshes.Children.Add(state);
+                                sceneGeostates[i] = new SceneGeostate(sceneMesh, m.GeometryStates[i], state);
+                            }
+                            sceneMesh.States = sceneGeostates;
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Unable to load Geostates.  You may have some corrupted data: " + ex.ToString(),
+                                            "Unable to load Geostates...");
+                        }
+                        mGroupMeshes.Children.Add(model);
+                        mSceneMeshes.Add(sceneMesh);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Unable to load Geostates.  You may have some corrupted data: " + ex.ToString(),
-                                        "Unable to load Geostates...");
+                        MessageBox.Show( String.Format("Unable to load mesh id 0x{0:X8}",m.Name));
                     }
-                    mGroupMeshes.Children.Add(model);
-                    mSceneMeshes.Add(sceneMesh);
                 }
             }
             else

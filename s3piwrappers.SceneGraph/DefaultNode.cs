@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
-using s3pi.Extensions;
-using s3pi.GenericRCOLResource;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using s3pi.Interfaces;
+using s3pi.GenericRCOLResource;
 
 namespace s3piwrappers.SceneGraph
 {
@@ -13,10 +17,10 @@ namespace s3piwrappers.SceneGraph
         public override bool SetRK(IResourceKey newKey, IResourceKey originalKey)
         {
             bool success = true;
-            int i, count = kindredRCOLChunkKeys.Count;
+            int i, count = this.kindredRCOLChunkKeys.Count;
             for (i = 0; i < count; i++)
             {
-                kindredRCOLChunkKeys[i].Instance = newKey.Instance;
+                this.kindredRCOLChunkKeys[i].Instance = newKey.Instance;
             }
             return success && base.SetRK(newKey, originalKey);
         }
@@ -24,42 +28,41 @@ namespace s3piwrappers.SceneGraph
         public override bool CommitChanges()
         {
             bool success = true;
-            int i, count = rkContainers.Count;
+            int i, count = this.rkContainers.Count;
             for (i = 0; i < count; i++)
             {
-                if (!rkContainers[i].CommitChanges())
+                if (!this.rkContainers[i].CommitChanges())
                 {
                     success = false;
                     Diagnostics.Log("CommitChanges Failed for " +
-                        rkContainers[i].AbsolutePath);
+                        this.rkContainers[i].AbsolutePath);
                 }
             }
             return success && base.CommitChanges();
         }
 
         /// <summary>
-        ///   How a ChunkEntry's TGIBlock should be treated by the ResourceGraph
-        ///   when resource key re-numbering occurs.
+        /// How a ChunkEntry's TGIBlock should be treated by the ResourceGraph
+        /// when resource key re-numbering occurs.
         /// </summary>
         public enum ChunkEntryType
         {
             /// <summary>
-            ///   The ChunkEntry's TGIBlock should remain unchanged.
-            ///   Example: JAZZ graph chunks.
+            /// The ChunkEntry's TGIBlock should remain unchanged.
+            /// Example: JAZZ graph chunks.
             /// </summary>
             Internal,
-
             /// <summary>
-            ///   The ChunkEntry's Instance ID should be changed
-            ///   to match the Instance ID of its containing resource.
-            ///   Example: MLODs in MODLs.
+            /// The ChunkEntry's Instance ID should be changed
+            /// to match the Instance ID of its containing resource.
+            /// Example: MLODs in MODLs.
             /// </summary>
             Kindred, // Would this ever have to be expanded to make more complex changes?
             /// <summary>
-            ///   The ChunkEntry's TGIBlock is given a new unique Instance ID,
-            ///   as if it were a completely separate resource
-            ///   referenced by its containing resource.
-            ///   Example: MATDs in MODLs.
+            /// The ChunkEntry's TGIBlock is given a new unique Instance ID,
+            /// as if it were a completely separate resource
+            /// referenced by its containing resource.
+            /// Example: MATDs in MODLs.
             /// </summary>
             Unique
         }
@@ -68,7 +71,7 @@ namespace s3piwrappers.SceneGraph
         {
             if (chunkKey.Instance == 0)
                 return ChunkEntryType.Internal;
-            else if (chunkKey.Instance == originalKey.Instance)
+            else if (chunkKey.Instance == this.originalKey.Instance)
                 return ChunkEntryType.Kindred;
             else
                 return ChunkEntryType.Unique;
@@ -79,8 +82,8 @@ namespace s3piwrappers.SceneGraph
             try
             {
                 string key = string.Concat("0x", base.originalKey.ResourceType.ToString("X8"));
-                if (ExtList.Ext.ContainsKey(key))
-                    return ExtList.Ext[key][0].ToLowerInvariant();
+                if (s3pi.Extensions.ExtList.Ext.ContainsKey(key))
+                    return s3pi.Extensions.ExtList.Ext[key][0].ToLowerInvariant();
                 else
                     return "root";
             }
@@ -91,16 +94,15 @@ namespace s3piwrappers.SceneGraph
         }
 
         protected bool includeDDSes = true;
-
         protected virtual bool ICanSlurpRK(IResourceKey key)
         {
-            return includeDDSes || !ResourceGraph.IsDDS(key.ResourceType);
+            return this.includeDDSes || !ResourceGraph.IsDDS(key.ResourceType);
         }
 
         protected List<IResourceConnection> SlurpAllRKs()
         {
-            var results = new List<IResourceConnection>();
-            string rootStr = GetContentPathRootName();
+            List<IResourceConnection> results = new List<IResourceConnection>();
+            string rootStr = this.GetContentPathRootName();
             if (!RKContainer.IsLegalFieldName(rootStr))
             {
                 Diagnostics.Log("Illegal Root Field Name for "
@@ -111,15 +113,15 @@ namespace s3piwrappers.SceneGraph
             {
                 Diagnostics.Log("Slurping RCOL Resource RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
-                var rcol = base.resource as GenericRCOLResource;
+                GenericRCOLResource rcol = base.resource as GenericRCOLResource;
                 TGIBlock tgiBlock;
                 int i, count = rcol.Resources.Count;
                 for (i = 0; i < count; i++)
                 {
                     tgiBlock = rcol.Resources[i];
                     if (includeDDSes || !ResourceGraph.IsDDS(tgiBlock.ResourceType))
-                        results.Add(new DefaultConnection(tgiBlock, tgiBlock,
-                                                          ResourceDataActions.FindWrite, rootStr + ".Resources[" + i + "]"));
+                        results.Add(new DefaultConnection(tgiBlock, tgiBlock, 
+                            ResourceDataActions.FindWrite, rootStr + ".Resources[" + i + "]"));
                 }
                 Diagnostics.Log("Slurping RCOL ChunkEntry RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
@@ -133,19 +135,19 @@ namespace s3piwrappers.SceneGraph
                     tgiBlock = chunk.TGIBlock;
                     switch (GetChunkType(tgiBlock))
                     {
-                    case ChunkEntryType.Kindred:
-                        kindredRCOLChunkKeys.Add(tgiBlock);
-                        results.AddRange(RKContainer.SlurpRKsFromField(absolutePath,
-                                                                       chunk.RCOLBlock, rkContainers, ICanSlurpRK));
-                        break;
-                    case ChunkEntryType.Internal:
-                        results.AddRange(RKContainer.SlurpRKsFromField(absolutePath,
-                                                                       chunk.RCOLBlock, rkContainers, ICanSlurpRK));
-                        break;
-                    case ChunkEntryType.Unique:
-                        results.Add(new DefaultConnection(tgiBlock,
-                                                          chunk.RCOLBlock, ResourceDataActions.None, absolutePath));
-                        break;
+                        case ChunkEntryType.Kindred:
+                            this.kindredRCOLChunkKeys.Add(tgiBlock);
+                            results.AddRange(RKContainer.SlurpRKsFromField(absolutePath,
+                                chunk.RCOLBlock, this.rkContainers, this.ICanSlurpRK));
+                            break;
+                        case ChunkEntryType.Internal:
+                            results.AddRange(RKContainer.SlurpRKsFromField(absolutePath,
+                                chunk.RCOLBlock, this.rkContainers, this.ICanSlurpRK));
+                            break;
+                        case ChunkEntryType.Unique:
+                            results.Add(new DefaultConnection(tgiBlock,
+                                chunk.RCOLBlock, ResourceDataActions.None, absolutePath));
+                            break;
                     }
                 }
             }
@@ -154,8 +156,8 @@ namespace s3piwrappers.SceneGraph
                 Diagnostics.Log("Slurping RKs for "
                     + rootStr + ":" + ResourceGraph.PrintRK(base.originalKey));
                 results.AddRange(RKContainer.SlurpRKsFromField(rootStr,
-                                                               base.resource as AApiVersionedFields,
-                                                               rkContainers, ICanSlurpRK));
+                    base.resource as AApiVersionedFields,
+                    this.rkContainers, this.ICanSlurpRK));
             }
             return results;
         }
@@ -174,12 +176,12 @@ namespace s3piwrappers.SceneGraph
         public override List<IResourceKinHelper> CreateKinHelpers(object constraints)
         {
             string[] kinNames;
-            uint[] kin = GetKindredResourceTypes(out kinNames);
+            uint[] kin = this.GetKindredResourceTypes(out kinNames);
             if (kin == null || kin.Length == 0)
                 return base.CreateKinHelpers(constraints);
             int i, count = kin.Length;
             bool hasNames = (kinNames != null && kinNames.Length >= count);
-            var results = new List<IResourceKinHelper>(count);
+            List<IResourceKinHelper> results = new List<IResourceKinHelper>(count);
             for (i = 0; i < count; i++)
             {
                 results.Add(new DefaultKinHelper(kin[i], hasNames ? kinNames[i] : null));
