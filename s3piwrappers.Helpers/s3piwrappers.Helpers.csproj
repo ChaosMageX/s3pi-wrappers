@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;UNSAFE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -26,12 +26,19 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="s3pi.Extensions, Version=1307.6.1953.35809, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\s3pi_current\s3pi.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Filetable">
+      <HintPath>..\lib\s3pi_current\s3pi.Filetable.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.GenericRCOLResource">
       <HintPath>..\lib\s3pi_current\s3pi.GenericRCOLResource.dll</HintPath>
       <Private>False</Private>
@@ -42,14 +49,26 @@
     <Reference Include="s3pi.MeshChunks">
       <HintPath>..\lib\s3pi_current\s3pi.MeshChunks.dll</HintPath>
     </Reference>
+    <Reference Include="s3pi.NameMapResource">
+      <HintPath>..\lib\s3pi_current\s3pi.NameMapResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.Package">
+      <HintPath>..\lib\s3pi_current\s3pi.Package.dll</HintPath>
+    </Reference>
     <Reference Include="s3pi.RCOLChunks">
       <HintPath>..\lib\s3pi_current\s3pi.RCOLChunks.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.ScriptResource">
+      <HintPath>..\lib\s3pi_current\s3pi.ScriptResource.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.Settings">
       <HintPath>..\lib\s3pi_current\s3pi.Settings.dll</HintPath>
     </Reference>
     <Reference Include="s3pi.TxtcResource">
       <HintPath>..\lib\s3pi_current\s3pi.TxtcResource.dll</HintPath>
+    </Reference>
+    <Reference Include="s3pi.WrapperDealer">
+      <HintPath>..\lib\s3pi_current\s3pi.WrapperDealer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,19 +82,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cryptography\FNVCLIP.cs" />
     <Compile Include="Cryptography\FNVHash.cs" />
     <Compile Include="Cryptography\FNVSearchTable.cs" />
     <Compile Include="Cryptography\FNVUnhasher32.cs" />
     <Compile Include="Cryptography\FNVUnhasher64.cs" />
+    <Compile Include="INamedResourceIndexEntry.cs" />
     <Compile Include="IO\BinaryStreamWrapper.cs" />
     <Compile Include="IO\ByteOrder.cs" />
     <Compile Include="IO\DataType.cs" />
     <Compile Include="IO\IntSize.cs" />
     <Compile Include="IO\StringType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\KeyNameS3SA.cs" />
+    <Compile Include="Resources\FileTableExt.cs" />
+    <Compile Include="Resources\KeyNameMap.cs" />
+    <Compile Include="Resources\KeyNameReg.cs" />
+    <Compile Include="Resources\ResourceMgr.cs" />
+    <Compile Include="RK.cs" />
     <Compile Include="Windows\ProcessExtensions.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="..\lib\s3pi_current\GameFolders.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
