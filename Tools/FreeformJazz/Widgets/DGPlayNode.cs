@@ -60,6 +60,10 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public override void UpdateVisualization()
         {
+            if (this.mScene.StateView == null)
+            {
+                return;
+            }
             SizeF size;
             float w = 40;
             float h = 15;

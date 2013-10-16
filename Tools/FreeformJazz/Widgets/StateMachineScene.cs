@@ -11,7 +11,7 @@ using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
 {
-    public class StateMachineScene : AGraphNodeScene, IClusterNode
+    public class StateMachineScene : AGraphNodeScene, IClusterNode, IDisposable
     {
         private class StateGraphHider : GraphElement
         {
@@ -122,6 +122,14 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public StateMachineScene(StateMachine stateMachine, Control stateView)
         {
+            if (stateMachine == null)
+            {
+                throw new ArgumentNullException("stateMachine");
+            }
+            if (stateView == null)
+            {
+                throw new ArgumentNullException("stateView");
+            }
             this.mStateView = stateView;
             this.mStateMachine = stateMachine;
             this.mStateGraphHider = new StateGraphHider(this);
@@ -138,7 +146,39 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.bPendingLayout = false;
             this.mLayoutTimer = new Timer();
             this.mLayoutTimer.Interval = 1000 / 25;
-            this.mLayoutTimer.Tick += new EventHandler(OnLayoutTimerTick);
+            this.mLayoutTimer.Tick += 
+                new EventHandler(this.OnLayoutTimerTick);
+        }
+
+        public void Dispose()
+        {
+            if (this.mLayoutTimer != null)
+            {
+                if (this.mLayoutTimer.Enabled)
+                {
+                    if (this.mLayout != null)
+                    {
+                        this.StopLayout();
+                    }
+                    if (this.bPendingLayout)
+                    {
+                        this.bPendingLayout = false;
+                    }
+                    System.Threading.Thread.Sleep(1500 / 25);
+                    Application.DoEvents();
+                    this.mLayoutTimer.Stop();
+                }
+                this.mLayoutTimer.Tick -= 
+                    new EventHandler(this.OnLayoutTimerTick);
+                this.mLayoutTimer.Dispose();
+                this.mLayoutTimer = null;
+            }
+            if (this.mStateView != null)
+            {
+                this.RemoveView(this.mStateView);
+                this.mStateView.Dispose();
+                this.mStateView = null;
+            }
         }
 
         public void SetBoundingBox(RectangleF bbox)
@@ -210,7 +250,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mLayout != value)
                 {
-                    if (this.mLayout != null &&
+                    if (this.mLayout != null && 
+                        this.mLayoutTimer != null &&
                         this.mLayoutTimer.Enabled)
                     {
                         // Abort() stops this.mLayoutTimer on its next tick
@@ -242,12 +283,16 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public bool IsLayoutRunning
         {
-            get { return this.mLayoutTimer.Enabled; }
+            get 
+            { 
+                return this.mLayoutTimer != null && 
+                       this.mLayoutTimer.Enabled; 
+            }
         }
 
         public void StartLayout()
         {
-            if (!this.mLayoutTimer.Enabled)
+            if (this.mLayoutTimer != null && !this.mLayoutTimer.Enabled)
             {
                 this.mLayoutTimer.Start();
             }
@@ -255,7 +300,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public void StopLayout()
         {
-            if (this.mLayout != null && this.mLayoutTimer.Enabled)
+            if (this.mLayout != null && 
+                this.mLayoutTimer != null && this.mLayoutTimer.Enabled)
             {
                 // Abort() stops this.mLayoutTimer on its next tick
                 this.mLayout.Abort();
@@ -309,26 +355,29 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     }
                 }
                 RectangleF bbox = this.BoundingBox;
-                // Expand the view to accommodate the bounding box or
-                // expand the bounding box to match the view's size
-                Size size = this.mStateView.Size;
-                if (size.Width < bbox.Width)
+                if (this.mStateView != null)
                 {
-                    size.Width = (int)Math.Ceiling(bbox.Width);
+                    // Expand the view to accommodate the bounding box or
+                    // expand the bounding box to match the view's size
+                    Size size = this.mStateView.Size;
+                    if (size.Width < bbox.Width)
+                    {
+                        size.Width = (int)Math.Ceiling(bbox.Width);
+                    }
+                    else
+                    {
+                        bbox.Width = size.Width;
+                    }
+                    if (size.Height < bbox.Height)
+                    {
+                        size.Height = (int)Math.Ceiling(bbox.Height);
+                    }
+                    else
+                    {
+                        bbox.Height = size.Height;
+                    }
+                    this.mStateView.Size = size;
                 }
-                else
-                {
-                    bbox.Width = size.Width;
-                }
-                if (size.Height < bbox.Height)
-                {
-                    size.Height = (int)Math.Ceiling(bbox.Height);
-                }
-                else
-                {
-                    bbox.Height = size.Height;
-                }
-                this.mStateView.Size = size;
                 // Linearly drift the scene into alignment with its view
                 // pos = pos + 0.1 * (nPos - pos) = 0.9 * pos + 0.1 * nPos
                 // where nPos = -bbox.Location
@@ -347,7 +396,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     this.mStateGraphHider.BoundingBox = bbox;
                 }
                 // Check to see if the layout timer should continue running
-                if (!keep)
+                if (!keep && this.mLayoutTimer != null)
                 {
                     this.mLayoutTimer.Stop();
                 }
@@ -356,6 +405,10 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         protected override void OnNodeMovedByMouse(AGraphNode node)
         {
+            if (this.mStateView == null)
+            {
+                return;
+            }
             bool flag;
             Size size;
             int i, index;
@@ -1278,9 +1331,12 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 y1 += sGridSize;
             }
 #if DEBUG
-            Size size = this.mStateView.Size;
-            g.DrawString(string.Concat(bbox, "\n", size), 
-                sDebugFont, Brushes.Black, bbox);
+            if (this.mStateView != null)
+            {
+                Size size = this.mStateView.Size;
+                g.DrawString(string.Concat(bbox, "\n", size),
+                    sDebugFont, Brushes.Black, bbox);
+            }
 #endif
             g.SmoothingMode = sm;
         }

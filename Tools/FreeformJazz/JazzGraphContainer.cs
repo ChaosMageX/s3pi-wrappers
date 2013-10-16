@@ -140,7 +140,7 @@ namespace s3piwrappers.FreeformJazz
         public void OnTabSizeChanged(object sender, EventArgs e)
         {
             TabPage graphTab = sender as TabPage;
-            if (graphTab != null)
+            if (graphTab != null && this.Scene.StateView != null)
             {
                 bool needW = false;
                 bool needH = false;

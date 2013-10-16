@@ -379,8 +379,12 @@ namespace s3piwrappers.FreeformJazz
         {
             foreach (JazzGraphContainer jgc in this.mOpenGraphs)
             {
-                jgc.Scene.StateView.BackColor = StateMachineScene.BackColor;
-                jgc.Scene.StateView.Invalidate();
+                if (jgc.Scene.StateView != null)
+                {
+                    jgc.Scene.StateView.BackColor 
+                        = StateMachineScene.BackColor;
+                    jgc.Scene.StateView.Invalidate();
+                }
             }
         }
 
@@ -438,8 +442,12 @@ namespace s3piwrappers.FreeformJazz
                     stateEdge = stateGraph.EdgeAt(i);
                     stateEdge.Update();
                 }
-                jgc.Scene.StateView.BackColor = StateMachineScene.BackColor;
-                jgc.Scene.StateView.Invalidate();
+                if (jgc.Scene.StateView != null)
+                {
+                    jgc.Scene.StateView.BackColor 
+                        = StateMachineScene.BackColor;
+                    jgc.Scene.StateView.Invalidate();
+                }
             }
         }
 
@@ -2353,7 +2361,6 @@ namespace s3piwrappers.FreeformJazz
                 }
             }
             // Internally and visually close the jazz graph
-            jgc.Scene.StopLayout();
             jgc.Scene.StateNodeSelectionChanged -=
                 new EventHandler(this.Scene_StateNodeSelectionChanged);
             jgc.Scene.StateEdgeSelectionChanged -=
@@ -2377,7 +2384,7 @@ namespace s3piwrappers.FreeformJazz
             this.mOpenGraphs.RemoveAt(index);
             pages.RemoveAt(index);
             page.Controls.Clear();
-            jgc.Scene.StateView.Dispose();
+            jgc.Scene.Dispose();
             page.Dispose();
             if (this.mOpenGraphs.Count == 0)
             {
@@ -2427,7 +2434,6 @@ namespace s3piwrappers.FreeformJazz
             for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
             {
                 jgc = this.mOpenGraphs[i];
-                jgc.Scene.StopLayout();
                 jgc.Scene.StateNodeSelectionChanged -=
                     new EventHandler(this.Scene_StateNodeSelectionChanged);
                 jgc.Scene.StateEdgeSelectionChanged -=
@@ -2441,7 +2447,7 @@ namespace s3piwrappers.FreeformJazz
                 page = pages[i];
                 page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
                 page.Controls.Clear();
-                jgc.Scene.StateView.Dispose();
+                jgc.Scene.Dispose();
                 page.Dispose();
             }
             this.mOpenGraphs.Clear();
