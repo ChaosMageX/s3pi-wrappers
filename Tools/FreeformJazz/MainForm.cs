@@ -1009,6 +1009,16 @@ namespace s3piwrappers.FreeformJazz
                     // Initialize the opened jazz graph internally
                     jgc = new JazzGraphContainer(
                         this.mOpenGraphs.Count, jp, rie, view);
+                    if (jgc.Scene == null)
+                    {
+                        if (jp.Graphs.Count == 0)
+                        {
+                            this.CloseAndRemovePackage(jp);
+                        }
+                        view.Dispose();
+                        graphTab.Dispose();
+                        return;
+                    }
                     jgc.Scene.LayoutStateGraphOnNodeMoved
                         = this.layoutStateNodesToolStripMenuItem.Checked;
                     jgc.Scene.LayoutDecisionGraphOnNodeMoved
@@ -2363,8 +2373,12 @@ namespace s3piwrappers.FreeformJazz
                 jgc = this.mOpenGraphs[i];
                 jgc.Index--;
             }
+            jgc = this.mOpenGraphs[index];
             this.mOpenGraphs.RemoveAt(index);
             pages.RemoveAt(index);
+            page.Controls.Clear();
+            jgc.Scene.StateView.Dispose();
+            page.Dispose();
             if (this.mOpenGraphs.Count == 0)
             {
                 this.closeToolStripMenuItem.Enabled = false;
@@ -2426,6 +2440,9 @@ namespace s3piwrappers.FreeformJazz
                     new EventHandler(this.Scene_FocusedStateChanged);
                 page = pages[i];
                 page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
+                page.Controls.Clear();
+                jgc.Scene.StateView.Dispose();
+                page.Dispose();
             }
             this.mOpenGraphs.Clear();
             pages.Clear();

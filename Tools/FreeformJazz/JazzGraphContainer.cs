@@ -42,7 +42,12 @@ namespace s3piwrappers.FreeformJazz
             {
                 res = WrapperDealer.GetResource(0, jp.Package, rie);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                MainForm.ShowException(ex, 
+                    "Could not load JAZZ resource: " + this.Key + "\n", 
+                    MainForm.kName + ": Unable to load JAZZ resource");
+            }
             if (res != null)
             {
                 rcol = res as GenericRCOLResource;
