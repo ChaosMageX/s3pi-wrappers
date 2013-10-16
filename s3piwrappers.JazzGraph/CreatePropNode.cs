@@ -76,19 +76,14 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
-        public IResourceKey PropKey
+        public RK PropKey
         {
             get { return this.mPropKey; }
             set
             {
-                if (value == null)
+                if (!this.mPropKey.Equals(value))
                 {
-                    this.mPropKey = new RK();
-                }
-                else if (!this.mPropKey.Equals(value))
-                {
-                    this.mPropKey = new RK(value.ResourceType,
-                        value.ResourceGroup, value.Instance);
+                    this.mPropKey = value;
                 }
             }
         }

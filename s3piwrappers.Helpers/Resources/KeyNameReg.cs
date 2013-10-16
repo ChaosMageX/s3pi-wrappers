@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using s3pi.Filetable;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.Cryptography;
@@ -10,6 +8,26 @@ namespace s3piwrappers.Helpers.Resources
 {
     public static class KeyNameReg
     {
+        [Flags]
+        public enum KNM : byte
+        {
+            None = 0x00,
+            Imported = 0x01,
+            Current = 0x02,
+            CustomContent = 0x04,
+            GameCore = 0x08,
+            GameContent = 0x10,
+            DDSImages = 0x20,
+            Thumbnails = 0x40,
+            All = 0x7F
+        }
+
+        /// <summary>
+        /// Key Name Maps to include in searches 
+        /// for names, labels, and generic CLIPs.
+        /// </summary>
+        public static KNM IncludedKeyNameMaps = KNM.All;
+
         private static KeyNameMap sCurrntKNM = null;
         private static KeyNameMap sCustomKNM = null;
         private static KeyNameMap sGCoreKNM = null;
@@ -50,70 +68,6 @@ namespace s3piwrappers.Helpers.Resources
             //FileTable.Current = ppt;
         }
 
-        /*private static Dictionary<uint, string> sClip32Registry = null;
-
-        private static bool IsClip(IResourceIndexEntry rie)
-        {
-            return rie.ResourceType == 0x6b20c4f3;
-        }
-        private static readonly Predicate<IResourceIndexEntry> sIsClip
-            = new Predicate<IResourceIndexEntry>(IsClip);
-
-        public static bool BuildClip32Registry()
-        {
-            if (sClip32Registry == null)
-            {
-                if (sGContKNM == null)
-                {
-                    RefreshKeyNameMaps();
-                }
-                sClip32Registry = new Dictionary<uint, string>();
-                BuildClip32Registry(FileTable.GameContent);
-                return true;
-            }
-            return false;
-        }
-
-        private static void BuildClip32Registry(
-            List<PathPackageTuple> ppts)
-        {
-            if (ppts != null)
-            {
-                uint hash;
-                string name, n;
-                List<IResourceIndexEntry> rieList;
-                foreach (PathPackageTuple ppt in ppts)
-                {
-                    if (ppt != null && ppt.Package != null)
-                    {
-                        rieList = ppt.Package.FindAll(sIsClip);
-                        if (rieList != null && rieList.Count > 0)
-                        {
-                            foreach (IResourceIndexEntry rie in rieList)
-                            {
-                                if (TryFindName(rie.Instance, out name))
-                                {
-                                    hash = FNVHash.HashString32(name);
-                                    if (!TryFindName(hash, out n))
-                                    {
-                                        sClip32Registry[hash] = name;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void ClearClip32Registry()
-        {
-            if (sClip32Registry != null)
-            {
-                sClip32Registry = null;
-            }
-        }/* */
-
         public static bool HasName(uint hash)
         {
             string name;
@@ -122,9 +76,9 @@ namespace s3piwrappers.Helpers.Resources
 
         public static bool TryFindName(uint hash, out string name)
         {
+            name = null;
             if (hash == 0)
             {
-                name = null;
                 return true;
             }
             if (hash == FNVHash.TS3Offset32)
@@ -132,8 +86,48 @@ namespace s3piwrappers.Helpers.Resources
                 name = "";
                 return true;
             }
-            if (sCurrntKNM != null &&
+            if (IncludedKeyNameMaps == KNM.None)
+            {
+                return false;
+            }
+            if (sGCoreKNM == null)
+            {
+                RefreshKeyNameMaps();
+            }
+            if ((IncludedKeyNameMaps & KNM.Imported) != KNM.None &&
+                KeyNameMap.Imported.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Current) != KNM.None &&
+                sCurrntKNM != null &&
                 sCurrntKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.CustomContent) != KNM.None && 
+                sCustomKNM != null &&
+                sCustomKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameCore) != KNM.None &&
+                sGCoreKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameContent) != KNM.None &&
+                sGContKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.DDSImages) != KNM.None &&
+                sImageKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Thumbnails) != KNM.None &&
+                sThumbKNM.TryFindName(hash, out name))
             {
                 return true;
             }
@@ -141,47 +135,17 @@ namespace s3piwrappers.Helpers.Resources
                 sCurrntKNA.TryFindName(hash, out name))
             {
                 return true;
-            }/* */
-            if (sGCoreKNM == null)
-            {
-                RefreshKeyNameMaps();
             }
-            /*if (sClip32Registry != null &&
-                sClip32Registry.TryGetValue(hash, out name))
-            {
-                return true;
-            }/* */
-            if (sGCoreKNM.TryFindName(hash, out name))
+            if (sCustomKNA != null &&
+                sCustomKNA.TryFindName(hash, out name))
             {
                 return true;
             }
-            if (sGContKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sImageKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sThumbKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sCustomKNM != null &&
-                sCustomKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            /*if (sGCoreKNA.TryFindName(hash, out name))
+            if (sGCoreKNA.TryFindName(hash, out name))
             {
                 return true;
             }
             if (sGContKNA.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sCustomKNA != null &&
-                sCustomKNA.TryFindName(hash, out name))
             {
                 return true;
             }/* */
@@ -196,9 +160,9 @@ namespace s3piwrappers.Helpers.Resources
 
         public static bool TryFindName(ulong hash, out string name)
         {
+            name = null;
             if (hash == 0)
             {
-                name = null;
                 return true;
             }
             if (hash == FNVHash.TS3Offset64)
@@ -206,8 +170,48 @@ namespace s3piwrappers.Helpers.Resources
                 name = "";
                 return true;
             }
-            if (sCurrntKNM != null &&
+            if (IncludedKeyNameMaps == KNM.None)
+            {
+                return false;
+            }
+            if (sGCoreKNM == null)
+            {
+                RefreshKeyNameMaps();
+            }
+            if ((IncludedKeyNameMaps & KNM.Imported) != KNM.None &&
+                KeyNameMap.Imported.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Current) != KNM.None &&
+                sCurrntKNM != null &&
                 sCurrntKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.CustomContent) != KNM.None &&
+                sCustomKNM != null &&
+                sCustomKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameCore) != KNM.None &&
+                sGCoreKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameContent) != KNM.None &&
+                sGContKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.DDSImages) != KNM.None &&
+                sImageKNM.TryFindName(hash, out name))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Thumbnails) != KNM.None &&
+                sThumbKNM.TryFindName(hash, out name))
             {
                 return true;
             }
@@ -215,42 +219,17 @@ namespace s3piwrappers.Helpers.Resources
                 sCurrntKNA.TryFindName(hash, out name))
             {
                 return true;
-            }/* */
-            if (sGCoreKNM == null)
-            {
-                RefreshKeyNameMaps();
             }
-            if (sGCoreKNM.TryFindName(hash, out name))
+            if (sCustomKNA != null &&
+                sCustomKNA.TryFindName(hash, out name))
             {
                 return true;
             }
-            if (sGContKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sImageKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sThumbKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sCustomKNM != null &&
-                sCustomKNM.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            /*if (sGCoreKNA.TryFindName(hash, out name))
+            if (sGCoreKNA.TryFindName(hash, out name))
             {
                 return true;
             }
             if (sGContKNA.TryFindName(hash, out name))
-            {
-                return true;
-            }
-            if (sCustomKNA != null &&
-                sCustomKNA.TryFindName(hash, out name))
             {
                 return true;
             }/* */
@@ -265,33 +244,49 @@ namespace s3piwrappers.Helpers.Resources
 
         public static bool TryFindLabel(ulong hash, out string label)
         {
-            if (sCurrntKNM != null &&
-                sCurrntKNM.TryFindLabel(hash, out label))
+            label = null;
+            if (IncludedKeyNameMaps == KNM.None)
             {
-                return true;
+                return false;
             }
             if (sGCoreKNM == null)
             {
                 RefreshKeyNameMaps();
             }
-            if (sGCoreKNM.TryFindLabel(hash, out label))
+            if ((IncludedKeyNameMaps & KNM.Imported) != KNM.None &&
+                KeyNameMap.Imported.TryFindLabel(hash, out label))
             {
                 return true;
             }
-            if (sGContKNM.TryFindLabel(hash, out label))
+            if ((IncludedKeyNameMaps & KNM.Current) != KNM.None &&
+                sCurrntKNM != null &&
+                sCurrntKNM.TryFindLabel(hash, out label))
             {
                 return true;
             }
-            if (sImageKNM.TryFindLabel(hash, out label))
-            {
-                return true;
-            }
-            if (sThumbKNM.TryFindLabel(hash, out label))
-            {
-                return true;
-            }
-            if (sCustomKNM != null &&
+            if ((IncludedKeyNameMaps & KNM.CustomContent) != KNM.None &&
+                sCustomKNM != null &&
                 sCustomKNM.TryFindLabel(hash, out label))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameCore) != KNM.None &&
+                sGCoreKNM.TryFindLabel(hash, out label))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameContent) != KNM.None &&
+                sGContKNM.TryFindLabel(hash, out label))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.DDSImages) != KNM.None &&
+                sImageKNM.TryFindLabel(hash, out label))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Thumbnails) != KNM.None &&
+                sThumbKNM.TryFindLabel(hash, out label))
             {
                 return true;
             }
@@ -306,33 +301,49 @@ namespace s3piwrappers.Helpers.Resources
 
         public static bool TryFindNameOrLabel(ulong hash, out string str)
         {
-            if (sCurrntKNM != null &&
-                sCurrntKNM.TryFindNameOrLabel(hash, out str))
+            str = null;
+            if (IncludedKeyNameMaps == KNM.None)
             {
-                return true;
+                return false;
             }
             if (sGCoreKNM == null)
             {
                 RefreshKeyNameMaps();
             }
-            if (sGCoreKNM.TryFindNameOrLabel(hash, out str))
+            if ((IncludedKeyNameMaps & KNM.Imported) != KNM.None &&
+                KeyNameMap.Imported.TryFindNameOrLabel(hash, out str))
             {
                 return true;
             }
-            if (sGContKNM.TryFindNameOrLabel(hash, out str))
+            if ((IncludedKeyNameMaps & KNM.Current) != KNM.None &&
+                sCurrntKNM != null &&
+                sCurrntKNM.TryFindNameOrLabel(hash, out str))
             {
                 return true;
             }
-            if (sImageKNM.TryFindNameOrLabel(hash, out str))
-            {
-                return true;
-            }
-            if (sThumbKNM.TryFindNameOrLabel(hash, out str))
-            {
-                return true;
-            }
-            if (sCustomKNM != null &&
+            if ((IncludedKeyNameMaps & KNM.CustomContent) != KNM.None &&
+                sCustomKNM != null &&
                 sCustomKNM.TryFindNameOrLabel(hash, out str))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameCore) != KNM.None &&
+                sGCoreKNM.TryFindNameOrLabel(hash, out str))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameContent) != KNM.None &&
+                sGContKNM.TryFindNameOrLabel(hash, out str))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.DDSImages) != KNM.None &&
+                sImageKNM.TryFindNameOrLabel(hash, out str))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Thumbnails) != KNM.None &&
+                sThumbKNM.TryFindNameOrLabel(hash, out str))
             {
                 return true;
             }
@@ -348,9 +359,9 @@ namespace s3piwrappers.Helpers.Resources
         public static bool TryFindGenCLIP(
             ulong clipIID, out string clipName)
         {
+            clipName = null;
             if (clipIID == 0)
             {
-                clipName = null;
                 return true;
             }
             if (clipIID == (FNVHash.TS3Offset64 & 0x7FFFFFFFFFFFFFFF))
@@ -358,33 +369,48 @@ namespace s3piwrappers.Helpers.Resources
                 clipName = "";
                 return true;
             }
-            if (sCurrntKNM != null &&
-                sCurrntKNM.TryFindGenCLIP(clipIID, out clipName))
+            if (IncludedKeyNameMaps == KNM.None)
             {
-                return true;
+                return false;
             }
             if (sGCoreKNM == null)
             {
                 RefreshKeyNameMaps();
             }
-            if (sGCoreKNM.TryFindGenCLIP(clipIID, out clipName))
+            if ((IncludedKeyNameMaps & KNM.Imported) != KNM.None &&
+                KeyNameMap.Imported.TryFindGenCLIP(clipIID, out clipName))
             {
                 return true;
             }
-            if (sGContKNM.TryFindGenCLIP(clipIID, out clipName))
+            if ((IncludedKeyNameMaps & KNM.Current) != KNM.None &&
+                sCurrntKNM != null &&
+                sCurrntKNM.TryFindGenCLIP(clipIID, out clipName))
             {
                 return true;
             }
-            if (sImageKNM.TryFindGenCLIP(clipIID, out clipName))
-            {
-                return true;
-            }
-            if (sThumbKNM.TryFindGenCLIP(clipIID, out clipName))
-            {
-                return true;
-            }
-            if (sCustomKNM != null &&
+            if ((IncludedKeyNameMaps & KNM.CustomContent) != KNM.None &&
+                sCustomKNM != null &&
                 sCustomKNM.TryFindGenCLIP(clipIID, out clipName))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameCore) != KNM.None &&
+                sGCoreKNM.TryFindGenCLIP(clipIID, out clipName))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.GameContent) != KNM.None &&
+                sGContKNM.TryFindGenCLIP(clipIID, out clipName))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.DDSImages) != KNM.None &&
+                sImageKNM.TryFindGenCLIP(clipIID, out clipName))
+            {
+                return true;
+            }
+            if ((IncludedKeyNameMaps & KNM.Thumbnails) != KNM.None &&
+                sThumbKNM.TryFindGenCLIP(clipIID, out clipName))
             {
                 return true;
             }

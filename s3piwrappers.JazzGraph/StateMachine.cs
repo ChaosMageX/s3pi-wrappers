@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
@@ -19,7 +18,7 @@ namespace s3piwrappers.JazzGraph
         private uint mNameHash;
         private bool bNameIsHash;
         private List<ActorDefinition> mActorDefinitions;
-        private List<ParamDefinition> mParameterDefinitions;
+        private List<ParamDefinition> mParamDefinitions;
         private List<State> mStates;
         private NamespaceMap mNamespaceMap;
         private JazzStateMachine.Flags mFlags;
@@ -39,7 +38,7 @@ namespace s3piwrappers.JazzGraph
             this.mNameHash = name == null ? 0 : FNVHash.HashString32(name);
             this.bNameIsHash = name == null;
             this.mActorDefinitions = new List<ActorDefinition>();
-            this.mParameterDefinitions = new List<ParamDefinition>();
+            this.mParamDefinitions = new List<ParamDefinition>();
             this.mStates = new List<State>();
             this.mNamespaceMap = new NamespaceMap(this);
             this.mFlags = JazzStateMachine.Flags.Default;
@@ -79,8 +78,9 @@ namespace s3piwrappers.JazzGraph
             GenericRCOLResource.ChunkEntry ce;
             AChunkObject[] chunks = new AChunkObject[chunkEntries.Count];
             List<ActorDefinition> actorDefs = new List<ActorDefinition>();
-            List<ParamDefinition> paramDefs 
-                = new List<ParamDefinition>();
+            List<ParamDefinition> paramDefs = new List<ParamDefinition>();
+
+            #region Phase 1: Instantiate Chunks and Copy over value fields
             for (i = 0; i < chunkEntries.Count; i++)
             {
                 ce = chunkEntries[i];
@@ -91,10 +91,11 @@ namespace s3piwrappers.JazzGraph
                         JazzPlayAnimationNode jpan
                             = ce.RCOLBlock as JazzPlayAnimationNode;
                         PlayAnimationNode lan = new PlayAnimationNode();
-                        lan.ClipKey = jpan.ClipResource;
-                        lan.TrackMaskKey = jpan.TkmkResource;
-                        // TODO: Copy over slots
-                        lan.AdditiveClipKey = jpan.AdditiveClipResource;
+                        lan.ClipKey = new RK(jpan.ClipResource);
+                        lan.TrackMaskKey = new RK(jpan.TkmkResource);
+                        // lan.SlotSetup copied over later
+                        lan.AdditiveClipKey 
+                            = new RK(jpan.AdditiveClipResource);
                         lan.ClipPattern = jpan.Animation;
                         lan.AdditiveClipPattern = jpan.AdditiveAnimation;
                         lan.Flags = jpan.AnimationNodeFlags;
@@ -134,7 +135,7 @@ namespace s3piwrappers.JazzGraph
                         CreatePropNode cpn = new CreatePropNode();
                         // cpn.PropActor set later
                         // cpn.PropParameter set later
-                        cpn.PropKey = jcpn.PropResource;
+                        cpn.PropKey = new RK(jcpn.PropResource);
                         chunks[i] = cpn;
                         break;
                     case RandomNode.ResourceType:
@@ -247,6 +248,9 @@ namespace s3piwrappers.JazzGraph
             {
                 throw new Exception("RCOL does not contain a Jazz Graph");
             }
+            #endregion
+
+            #region Phase 2: Copy over fields referencing other chunks
             for (i = 0; i < chunkEntries.Count; i++)
             {
                 ce = chunkEntries[i];
@@ -408,7 +412,7 @@ namespace s3piwrappers.JazzGraph
                             index = jad.TGIBlockIndex;
                             ad = index < 0 ? null 
                                 : chunks[index + 1] as ActorDefinition;
-                            this.mActorDefinitions.Add(ad);
+                            this.AddActorDefinition(ad);
                         }
                         foreach (GenericRCOLResource.ChunkReference jpd
                             in jazzSM.PropertyDefinitionIndexes)
@@ -416,7 +420,7 @@ namespace s3piwrappers.JazzGraph
                             index = jpd.TGIBlockIndex;
                             pd = index < 0 ? null 
                                 : chunks[index + 1] as ParamDefinition;
-                            this.mParameterDefinitions.Add(pd);
+                            this.AddParameterDefinition(pd);
                         }
                         foreach (GenericRCOLResource.ChunkReference jst
                             in jazzSM.StateIndexes)
@@ -424,11 +428,14 @@ namespace s3piwrappers.JazzGraph
                             index = jst.TGIBlockIndex;
                             state = index < 0  ? null 
                                 : chunks[index + 1] as State;
-                            this.mStates.Add(state);
+                            this.AddState(state);
                         }
                         break;
                 }
             }
+            #endregion
+
+            #region Phase 3: Copy over animation slots and Find "Extras"
             for (i = 0; i < chunkEntries.Count; i++)
             {
                 ce = chunkEntries[i];
@@ -508,7 +515,7 @@ namespace s3piwrappers.JazzGraph
                         break;
                     case ParamDefinition.ResourceType:
                         pd = chunks[i] as ParamDefinition;
-                        index = this.mParameterDefinitions.IndexOf(pd);
+                        index = this.mParamDefinitions.IndexOf(pd);
                         if (index < 0)
                         {
                             this.mExtraParams.Add(pd);
@@ -524,37 +531,45 @@ namespace s3piwrappers.JazzGraph
                         break;
                 }
             }
-            List<IResourceKey> rks = this.SlurpReferencedRKs();
+            #endregion
+
+            #region Phase 4: Copy over Animation CLIP Namespace Map
+            RK rk;
+            List<RK> rks = this.SlurpReferencedRKs();
             List<uint> foldedClipInstances = new List<uint>(rks.Count);
-            foreach (IResourceKey rk in rks)
+            for (i = rks.Count - 1; i >= 0; i--)
             {
-                if (rk.ResourceType == 0x6b20c4f3)
+                rk = rks[i];
+                if (rk.TID == 0x6b20c4f3)
                 {
-                    hash = (uint)((rk.Instance >> 0x20) ^ (rk.Instance & 0xffffffffUL));
-                    if (!foldedClipInstances.Contains(hash))
-                    {
-                        foldedClipInstances.Add(hash);
-                    }
+                    hash = (uint)((rk.IID >> 0x20) ^ (rk.IID & 0xffffffff));
+                    foldedClipInstances.Add(hash);
+                }
+                else
+                {
+                    rks.RemoveAt(i);
                 }
             }
+            index = 0;
             Anim animation;
-            //string prevAnim, nextAnim;
-            List<Anim> animations = new List<Anim>(jazzSM.Animations.Count);
+            Anim[] animations = new Anim[jazzSM.Animations.Count];
             foreach (JazzStateMachine.Animation anim in jazzSM.Animations)
             {
                 hash = anim.NameHash;
                 if (!foldedClipInstances.Contains(hash))
                 {
                     animation = new Anim();
-                    animation.SourceFileHash = hash;
+                    animation.SrcFileHash = hash;
                     if (KeyNameReg.TryFindName(hash, out name))
                     {
-                        animation.SourceFileName = name;
+                        animation.SrcFileName = name;
+                        animation.SrcFileIsValid = true;
                     }
                     else
                     {
-                        animation.SourceFileName 
+                        animation.SrcFileName 
                             = KeyNameReg.UnhashName(hash);
+                        animation.SrcFileIsValid = false;
                     }
                     hash = anim.Actor1Hash;
                     if (KeyNameReg.TryFindName(hash, out name))
@@ -570,17 +585,16 @@ namespace s3piwrappers.JazzGraph
                     ad = null;
                     if (hash != 0)
                     {
-                        index = -1;
-                        for (i = actorDefs.Count - 1; 
-                             i >= 0 && index == -1; i--)
+                        j = -1;
+                        for (i = actorDefs.Count - 1; i >= 0 && j < 0; i--)
                         {
                             ad = actorDefs[i];
                             if (ad.NameHash == hash)
                             {
-                                index = i;
+                                j = i;
                             }
                         }
-                        if (index < 0)
+                        if (j < 0)
                         {
                             if (!KeyNameReg.TryFindName(hash, out name))
                                 name = KeyNameReg.UnhashName(hash);
@@ -590,108 +604,46 @@ namespace s3piwrappers.JazzGraph
                         }
                     }
                     animation.Actor = ad;
+                    animations[index++] = animation;
                 }
             }
-            /*prevAnim = null;
-            for (i = 0; i < animations.Count; i++)
-            {
-                animation = animations[i];
-                if (animation.SourceFileHash != 0 &&
-                    animation.SourceFileName == null)
-                {
-                    nextAnim = null;
-                    for (j = i + 1; 
-                         j < animations.Count && nextAnim == null; j++)
-                    {
-                        animation = animations[j];
-                        if (animation.SourceFileHash != 0 &&
-                            animation.SourceFileName != null)
-                        {
-                            nextAnim = animation.SourceFileName;
-                        }
-                    }
-                    animation = animations[i];
-                    hash = animation.SourceFileHash;
-                    if (nextAnim == null)
-                    {
-                        if (prevAnim == null)
-                        {
-                            animation.SourceFileName 
-                                = UnhashName(hash);
-                        }
-                        else
-                        {
-                            name = "";
-                            for (j = 0; j < prevAnim.Length; j++)
-                            {
-                                if (prevAnim[j] < 0xff)
-                                {
-                                    name += ASCIIHelper.GetNextVisualChar(prevAnim[j]);
-                                    break;
-                                }
-                                name += prevAnim[j];
-                            }
-                            if (j == prevAnim.Length)
-                            {
-                                name += "!";
-                            }
-                            animation.SourceFileName 
-                                = UnhashName(hash, name);
-                        }
-                    }
-                    else if (prevAnim == null)
-                    {
-                        animation.SourceFileName 
-                            = UnhashName(hash, "!");
-                    }
-                    else if (prevAnim.Equals(nextAnim))
-                    {
-                        animation.SourceFileName = prevAnim;
-                    }
-                    else
-                    {
-                        name = "";
-                        index = Math.Min(prevAnim.Length, nextAnim.Length);
-                        for (j = 0; j < index; j++)
-                        {
-                            if (prevAnim[j] != nextAnim[j])
-                            {
-                                break;
-                            }
-                            name += prevAnim[j];
-                        }
-                    }
-                    prevAnim = animation.SourceFileName;
-                }
-                else if (animation.SourceFileHash != 0 &&
-                         animation.SourceFileName != null)
-                {
-                    prevAnim = animation.SourceFileName;
-                }
-            }/* */
             ulong clipHash;
-            Dictionary<ulong, string> knm = new Dictionary<ulong, string>();
-            for (i = 0; i < animations.Count; i++)
+            Dictionary<ulong, string> keyNameMap 
+                = new Dictionary<ulong, string>();
+            for (i = index; i >= 0; i--)
             {
                 animation = animations[i];
                 this.mNamespaceMap.SetNamespaceMap(
-                    animation.SourceFileName,
-                    animation.Namespace, 
+                    animation.SrcFileName,
+                    animation.Namespace,
                     animation.Actor);
-                clipHash = FNVHash.HashString64(animation.SourceFileName);
-                if (!knm.TryGetValue(clipHash, out name) &&
-                    !KeyNameReg.TryFindName(clipHash, out name))
+                if (animation.SrcFileIsValid)
                 {
-                    knm[clipHash] = animation.SourceFileName;
+                    clipHash = FNVHash.HashString64(animation.SrcFileName);
+                    keyNameMap[clipHash] = animation.SrcFileName;
                 }
             }
-            this.mNamespaceMap.UpdateKeyToFilenameMap(knm);
+            // Update the Key to Filename Map of the Namespace Map
+            SortedDictionary<RK, string> k2fn 
+                = this.mNamespaceMap.KeyToFilenameMap;
+            k2fn.Clear();
+            for (i = rks.Count - 1; i >= 0; i--)
+            {
+                rk = rks[i];
+                if (keyNameMap.TryGetValue(rk.IID, out name) ||
+                    KeyNameReg.TryFindName(rk.IID, out name))
+                {
+                    k2fn[rk] = name;
+                }
+            }
+            #endregion
         }
 
         private class Anim
         {
-            public uint SourceFileHash;
-            public string SourceFileName;
+            public uint SrcFileHash;
+            public string SrcFileName;
+            public bool SrcFileIsValid;
             public string Namespace;
             public ActorDefinition Actor;
         }
@@ -703,7 +655,7 @@ namespace s3piwrappers.JazzGraph
         {
             this.mInstanceId = instanceId;
             GenericRCOLResource rcol = new GenericRCOLResource(0, null);
-            AChunkObject[] chunks = this.SlurpChunks();
+            AChunkObject[] chunks = this.FindAllChunks(false);
             GenericRCOLResource.ChunkEntryList chunkEntries
                 = rcol.ChunkEntries;
             for (int i = 0; i < chunks.Length; i++)
@@ -747,11 +699,11 @@ namespace s3piwrappers.JazzGraph
                 actorList.Add(ad == null ? NullCRef : ad.ChunkReference);
             }
 
-            this.mParameterDefinitions.Sort(
+            this.mParamDefinitions.Sort(
                 ParamDefinition.NameComparer.Instance);
             JazzChunk.ChunkReferenceList paramList
                 = jsm.PropertyDefinitionIndexes;
-            foreach (ParamDefinition pd in this.mParameterDefinitions)
+            foreach (ParamDefinition pd in this.mParamDefinitions)
             {
                 paramList.Add(pd == null ? NullCRef : pd.ChunkReference);
             }
@@ -764,17 +716,24 @@ namespace s3piwrappers.JazzGraph
                     state == null ? NullCRef : state.ChunkReference);
             }
 
-            ulong hash;
+            uint hash;
             string name;
+            ulong clipIID;
             NamespaceMap.AnimSource[] sources 
                 = this.mNamespaceMap.GetSourceToNamespaceToActorArray();
             for (int i = 0; i < sources.Length; i++)
             {
-                hash = FNVHash.HashString64(sources[i].FileName);
-                if (!nameMap.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
+                name = sources[i].FileName;
+                if (!name.StartsWith("0x") ||
+                    !uint.TryParse(name.Substring(2),
+                        System.Globalization.NumberStyles.HexNumber,
+                        null, out hash))
                 {
-                    nameMap[hash] = sources[i].FileName;
+                    clipIID = FNVHash.HashString64(name);
+                    if (!nameMap.ContainsKey(clipIID))
+                    {
+                        nameMap[clipIID] = name;
+                    }
                 }
             }
             this.mNamespaceMap.UpdateKeyToFilenameMap(nameMap);
@@ -788,10 +747,221 @@ namespace s3piwrappers.JazzGraph
             return new GenericRCOLResource.ChunkEntry(0, null, tgi, jsm);
         }
 
-        private AChunkObject[] SlurpChunks()
+        public void RefreshHashNames()
         {
-            uint hash;
-            //string name;
+            this.SlurpChunks();
+            string name;
+            if (this.bNameIsHash &&
+                KeyNameReg.TryFindName(this.mNameHash, out name))
+            {
+                this.mName = name;
+                this.bNameIsHash = false;
+            }
+            this.mNamespaceMap.RefreshHashNames();
+            foreach (ActorDefinition actor in this.mActorDefinitions)
+            {
+                if (actor.NameIsHash &&
+                    KeyNameReg.TryFindName(actor.NameHash, out name))
+                {
+                    actor.Name = name;
+                }
+            }
+            foreach (ActorDefinition actor2 in this.mExtraActors)
+            {
+                if (actor2.NameIsHash &&
+                    KeyNameReg.TryFindName(actor2.NameHash, out name))
+                {
+                    actor2.Name = name;
+                }
+            }
+            foreach (ParamDefinition param in this.mParamDefinitions)
+            {
+                if (param.NameIsHash &&
+                    KeyNameReg.TryFindName(param.NameHash, out name))
+                {
+                    param.Name = name;
+                }
+                if (param.DefaultIsHash &&
+                    KeyNameReg.TryFindName(param.DefaultHash, out name))
+                {
+                    param.DefaultValue = name;
+                }
+            }
+            foreach (ParamDefinition param2 in this.mExtraParams)
+            {
+                if (param2.NameIsHash &&
+                    KeyNameReg.TryFindName(param2.NameHash, out name))
+                {
+                    param2.Name = name;
+                }
+                if (param2.DefaultIsHash &&
+                    KeyNameReg.TryFindName(param2.DefaultHash, out name))
+                {
+                    param2.DefaultValue = name;
+                }
+            }
+            foreach (State state in this.mStates)
+            {
+                if (state.NameIsHash &&
+                    KeyNameReg.TryFindName(state.NameHash, out name))
+                {
+                    state.Name = name;
+                }
+            }
+            foreach (State state2 in this.mExtraStates)
+            {
+                if (state2.NameIsHash &&
+                    KeyNameReg.TryFindName(state2.NameHash, out name))
+                {
+                    state2.Name = name;
+                }
+            }
+            SelectOnParameterNode sopn;
+            foreach (DecisionGraphNode dgn in this.mDGNodes)
+            {
+                sopn = dgn as SelectOnParameterNode;
+                if (sopn != null)
+                {
+                    sopn.RefreshHashNames();
+                }
+            }
+            //this.mExtraActors.Clear();
+            //this.mExtraActors.AddRange(extraActors);
+            //this.mExtraParams.Clear();
+            //this.mExtraParams.AddRange(extraParams);
+            //this.mExtraStates.Clear();
+            //this.mExtraStates.AddRange(extraStates);
+        }
+
+        private AChunkObject[] FindAllChunks(bool refreshHashNames)
+        {
+            this.SlurpChunks();
+            string name;
+            int count = 1 + this.mDGNodes.Count + this.mDGs.Count
+                + this.mStates.Count + this.mExtraStates.Count
+                + this.mParamDefinitions.Count + this.mExtraParams.Count
+                + this.mActorDefinitions.Count + this.mExtraActors.Count;
+            AChunkObject[] chunks = new AChunkObject[count];
+
+            if (refreshHashNames)
+            {
+                if (this.bNameIsHash && 
+                    KeyNameReg.TryFindName(this.mNameHash, out name))
+                {
+                    this.mName = name;
+                    this.bNameIsHash = false;
+                }
+                this.mNamespaceMap.RefreshHashNames();
+            }
+            this.ChunkReference.TGIBlockIndex = -1;
+            chunks[0] = this;
+            count = 0;
+            foreach (ActorDefinition actor in this.mActorDefinitions)
+            {
+                if (refreshHashNames && actor.NameIsHash &&
+                    KeyNameReg.TryFindName(actor.NameHash, out name))
+                {
+                    actor.Name = name;
+                }
+                actor.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = actor;
+            }
+            foreach (ActorDefinition actor2 in this.mExtraActors)
+            {
+                if (refreshHashNames && actor2.NameIsHash &&
+                    KeyNameReg.TryFindName(actor2.NameHash, out name))
+                {
+                    actor2.Name = name;
+                }
+                actor2.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = actor2;
+            }
+            foreach (ParamDefinition param in this.mParamDefinitions)
+            {
+                if (refreshHashNames)
+                {
+                    if (param.NameIsHash &&
+                        KeyNameReg.TryFindName(param.NameHash, out name))
+                    {
+                        param.Name = name;
+                    }
+                    if (param.DefaultIsHash &&
+                        KeyNameReg.TryFindName(param.DefaultHash, out name))
+                    {
+                        param.DefaultValue = name;
+                    }
+                }
+                param.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = param;
+            }
+            foreach (ParamDefinition param2 in this.mExtraParams)
+            {
+                if (refreshHashNames)
+                {
+                    if (param2.NameIsHash &&
+                        KeyNameReg.TryFindName(param2.NameHash, out name))
+                    {
+                        param2.Name = name;
+                    }
+                    if (param2.DefaultIsHash &&
+                        KeyNameReg.TryFindName(param2.DefaultHash, out name))
+                    {
+                        param2.DefaultValue = name;
+                    }
+                }
+                param2.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = param2;
+            }
+            foreach (State state in this.mStates)
+            {
+                if (refreshHashNames && state.NameIsHash &&
+                    KeyNameReg.TryFindName(state.NameHash, out name))
+                {
+                    state.Name = name;
+                }
+                state.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = state;
+            }
+            foreach (State state2 in this.mExtraStates)
+            {
+                if (refreshHashNames && state2.NameIsHash &&
+                    KeyNameReg.TryFindName(state2.NameHash, out name))
+                {
+                    state2.Name = name;
+                }
+                state2.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = state2;
+            }
+            foreach (DecisionGraph dg in this.mDGs)
+            {
+                dg.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = dg;
+            }
+            SelectOnParameterNode sopn;
+            foreach (DecisionGraphNode dgn in this.mDGNodes)
+            {
+                if (refreshHashNames)
+                {
+                    sopn = dgn as SelectOnParameterNode;
+                    if (sopn != null)
+                    {
+                        sopn.RefreshHashNames();
+                    }
+                }
+                dgn.ChunkReference.TGIBlockIndex = count;
+                chunks[++count] = dgn;
+            }
+            //this.mExtraActors.Clear();
+            //this.mExtraActors.AddRange(extraActors);
+            //this.mExtraParams.Clear();
+            //this.mExtraParams.AddRange(extraParams);
+            //this.mExtraStates.Clear();
+            //this.mExtraStates.AddRange(extraStates);
+            return chunks;
+        }
+
+        private void SlurpChunks()
+        {
             int i, j, index;
             State state;
             State[] transitions;
@@ -807,6 +977,31 @@ namespace s3piwrappers.JazzGraph
             this.mDGs.Clear();
             this.mDGNodes.Clear();
             KeyNameReg.RefreshKeyNameMaps();
+
+            ActorDefinition ad;
+            NamespaceMap.AnimNamespace[] nss;
+            NamespaceMap.AnimSource[] sources
+                = this.mNamespaceMap.GetSourceToNamespaceToActorArray();
+            for (i = sources.Length - 1; i >= 0; i--)
+            {
+                nss = sources[i].Namespaces;
+                for (j = nss.Length; j >= 0; j--)
+                {
+                    ad = nss[j].Actor;
+                    if (ad != null)
+                    {
+                        index = this.mActorDefinitions.IndexOf(ad);
+                        if (index < 0)
+                        {
+                            index = this.mExtraActors.IndexOf(ad);
+                            if (index < 0)
+                            {
+                                this.mExtraActors.Add(ad);
+                            }
+                        }
+                    }
+                }
+            }
             // this.mStates.Count needs to be reread every iteration
             // because it could be expanded with slurped up States.
             for (j = 0; j < this.mStates.Count; j++)
@@ -829,7 +1024,6 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
                                 this.SlurpDGNodes(target);
                             }
                         }
@@ -843,14 +1037,13 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
                                 this.SlurpDGNodes(target);
                             }
                         }
                     }
                 }
                 transitions = state.Transitions;
-                for (i = 0; i < transitions.Length; i++)
+                for (i = transitions.Length - 1; i >= 0; i--)
                 {
                     state = transitions[i];
                     if (state != null)
@@ -889,7 +1082,7 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
+                                this.SlurpDGNodes(target);
                             }
                         }
                     }
@@ -902,13 +1095,13 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
+                                this.SlurpDGNodes(target);
                             }
                         }
                     }
                 }
                 transitions = state.Transitions;
-                for (i = 0; i < transitions.Length; i++)
+                for (i = transitions.Length - 1; i >= 0; i--)
                 {
                     state = transitions[i];
                     if (state != null)
@@ -925,119 +1118,11 @@ namespace s3piwrappers.JazzGraph
                     }
                 }
             }
-            index = 1 + this.mDGNodes.Count + this.mDGs.Count
-                + this.mStates.Count + this.mExtraStates.Count
-                + this.mParameterDefinitions.Count + this.mExtraParams.Count
-                + this.mActorDefinitions.Count + this.mExtraActors.Count;
-            AChunkObject[] chunks = new AChunkObject[index];
-
-            /*if (!KeyNameReg.Current.TryGetValue(this.mNameHash, out name) &&
-                !KeyNameReg.TryFindName(this.mNameHash, out name))
-            {
-                KeyNameReg.Current[this.mNameHash] = this.mName;
-            }/* */
-            this.ChunkReference.TGIBlockIndex = -1;
-            chunks[0] = this;
-            index = 0;
-            foreach (ActorDefinition actor in this.mActorDefinitions)
-            {
-                hash = actor.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = actor.Name;
-                }/* */
-                actor.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = actor;
-            }
-            foreach (ActorDefinition actor2 in this.mExtraActors)
-            {
-                hash = actor2.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = actor2.Name;
-                }/* */
-                actor2.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = actor2;
-            }
-            foreach (ParamDefinition param in this.mParameterDefinitions)
-            {
-                hash = param.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = param.Name;
-                }
-                hash = param.DefaultHash;
-                if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = param.DefaultValue;
-                }/* */
-                param.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = param;
-            }
-            foreach (ParamDefinition param2 in this.mExtraParams)
-            {
-                hash = param2.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = param2.Name;
-                }
-                hash = param2.DefaultHash;
-                if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = param2.DefaultValue;
-                }/* */
-                param2.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = param2;
-            }
-            foreach (State state3 in this.mStates)
-            {
-                hash = state3.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = state3.Name;
-                }/* */
-                state3.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = state3;
-            }
-            foreach (State state4 in this.mExtraStates)
-            {
-                hash = state4.NameHash;
-                /*if (!KeyNameReg.Current.TryGetValue(hash, out name) &&
-                    !KeyNameReg.TryFindName(hash, out name))
-                {
-                    KeyNameReg.Current[hash] = state4.Name;
-                }/* */
-                state4.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = state4;
-            }
-            foreach (DecisionGraph dg2 in this.mDGs)
-            {
-                dg2.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = dg2;
-            }
-            foreach (DecisionGraphNode dgn in this.mDGNodes)
-            {
-                dgn.ChunkReference.TGIBlockIndex = index;
-                chunks[++index] = dgn;
-            }
-            //this.mExtraActors.Clear();
-            //this.mExtraActors.AddRange(extraActors);
-            //this.mExtraParams.Clear();
-            //this.mExtraParams.AddRange(extraParams);
-            //this.mExtraStates.Clear();
-            //this.mExtraStates.AddRange(extraStates);
-            return chunks;
         }
 
         private void SlurpDGNodes(DecisionGraphNode node)
         {
+            this.mDGNodes.Add(node);
             int i, j;
             State state;
             DecisionGraphNode target;
@@ -1074,7 +1159,6 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
                                 this.SlurpDGNodes(target);
                             }
                         }
@@ -1096,7 +1180,6 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
                                 this.SlurpDGNodes(target);
                             }
                         }
@@ -1118,8 +1201,6 @@ namespace s3piwrappers.JazzGraph
             }
             else if (node is SelectOnParameterNode)
             {
-                //uint cHash;
-                //string cValue;
                 SelectOnParameterNode sopn = node as SelectOnParameterNode;
                 if (sopn.CaseCount > 0)
                 {
@@ -1133,23 +1214,15 @@ namespace s3piwrappers.JazzGraph
                             if (target != null &&
                                 !this.mDGNodes.Contains(target))
                             {
-                                this.mDGNodes.Add(target);
                                 this.SlurpDGNodes(target);
                             }
                         }
-                        /*cValue = cases[i].Value;
-                        cHash = FNVHash.HashString32(cValue);
-                        if (!KeyNameReg.Current.TryGetValue(cHash, out cValue) &&
-                            !KeyNameReg.TryFindName(cHash, out cValue))
-                        {
-                            KeyNameReg.Current[cHash] = cases[i].Value;
-                        }/* */
                     }
                 }
                 ParamDefinition param = sopn.Parameter;
                 if (param != null)
                 {
-                    i = this.mParameterDefinitions.IndexOf(param);
+                    i = this.mParamDefinitions.IndexOf(param);
                     if (i < 0)
                     {
                         i = this.mExtraParams.IndexOf(param);
@@ -1173,7 +1246,6 @@ namespace s3piwrappers.JazzGraph
                         if (target != null &&
                             !this.mDGNodes.Contains(target))
                         {
-                            this.mDGNodes.Add(target);
                             this.SlurpDGNodes(target);
                         }
                     }
@@ -1197,7 +1269,7 @@ namespace s3piwrappers.JazzGraph
                     ParamDefinition propParam = cpn.PropParameter;
                     if (propParam != null)
                     {
-                        i = this.mParameterDefinitions.IndexOf(propParam);
+                        i = this.mParamDefinitions.IndexOf(propParam);
                         if (i < 0)
                         {
                             i = this.mExtraParams.IndexOf(propParam);
@@ -1253,23 +1325,29 @@ namespace s3piwrappers.JazzGraph
                             for (i = 0; i < suffixes.Length; i++)
                             {
                                 ad = suffixes[i].Actor;
-                                j = this.mActorDefinitions.IndexOf(ad);
-                                if (j < 0)
+                                if (ad != null)
                                 {
-                                    j = this.mExtraActors.IndexOf(ad);
+                                    j = this.mActorDefinitions.IndexOf(ad);
                                     if (j < 0)
                                     {
-                                        this.mExtraActors.Add(ad);
+                                        j = this.mExtraActors.IndexOf(ad);
+                                        if (j < 0)
+                                        {
+                                            this.mExtraActors.Add(ad);
+                                        }
                                     }
                                 }
                                 pd = suffixes[i].Param;
-                                j = this.mParameterDefinitions.IndexOf(pd);
-                                if (j < 0)
+                                if (pd != null)
                                 {
-                                    j = this.mExtraParams.IndexOf(pd);
+                                    j = this.mParamDefinitions.IndexOf(pd);
                                     if (j < 0)
                                     {
-                                        this.mExtraParams.Add(pd);
+                                        j = this.mExtraParams.IndexOf(pd);
+                                        if (j < 0)
+                                        {
+                                            this.mExtraParams.Add(pd);
+                                        }
                                     }
                                 }
                             }
@@ -1279,15 +1357,27 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
-        public List<IResourceKey> SlurpReferencedRKs()
+        /// <summary>
+        /// Recursively finds all of the unique resource keys referenced by
+        /// every <see cref="DecisionGraphNode"/> instance in every state in
+        /// this state machine.
+        /// </summary>
+        /// <returns>A list of all unique resource keys referenced by nodes
+        /// in this state machine.</returns>
+        public List<RK> SlurpReferencedRKs()
         {
-            List<IResourceKey> rks = new List<IResourceKey>();
-            int i;
+            List<RK> rks = new List<RK>();
+            int i, j;
+            State state;
+            State[] transitions;
             DecisionGraph dg;
             DecisionGraphNode target;
             DecisionGraphNode[] targets;
-            foreach (State state in this.mStates)
+            this.mExtraStates.Clear();
+            this.mDGNodes.Clear();
+            for (j = 0; j < this.mStates.Count; j++)
             {
+                state = this.mStates[j];
                 dg = state.DecisionGraph;
                 if (dg != null)
                 {
@@ -1297,7 +1387,8 @@ namespace s3piwrappers.JazzGraph
                         for (i = 0; i < targets.Length; i++)
                         {
                             target = targets[i];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
@@ -1309,17 +1400,32 @@ namespace s3piwrappers.JazzGraph
                         for (i = 0; i < targets.Length; i++)
                         {
                             target = targets[i];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
                         }
                     }
                 }
+                transitions = state.Transitions;
+                for (i = transitions.Length - 1; i >= 0; i--)
+                {
+                    state = transitions[i];
+                    if (state != null)
+                    {
+                        if (!this.mStates.Contains(state) &&
+                            !this.mExtraStates.Contains(state))
+                        {
+                            this.mExtraStates.Add(state);
+                        }
+                    }
+                }
             }
-            foreach (State state2 in this.mExtraStates)
+            for (j = 0; j < this.mExtraStates.Count; j++)
             {
-                dg = state2.DecisionGraph;
+                state = this.mExtraStates[j];
+                dg = state.DecisionGraph;
                 if (dg != null)
                 {
                     if (dg.DecisionMakerCount > 0)
@@ -1328,7 +1434,8 @@ namespace s3piwrappers.JazzGraph
                         for (i = 0; i < targets.Length; i++)
                         {
                             target = targets[i];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
@@ -1340,10 +1447,24 @@ namespace s3piwrappers.JazzGraph
                         for (i = 0; i < targets.Length; i++)
                         {
                             target = targets[i];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
+                        }
+                    }
+                }
+                transitions = state.Transitions;
+                for (i = transitions.Length - 1; i >= 0; i--)
+                {
+                    state = transitions[i];
+                    if (state != null)
+                    {
+                        if (!this.mStates.Contains(state) &&
+                            !this.mExtraStates.Contains(state))
+                        {
+                            this.mExtraStates.Add(state);
                         }
                     }
                 }
@@ -1351,13 +1472,43 @@ namespace s3piwrappers.JazzGraph
             return rks;
         }
 
-        private void SlurpDGNodeRKs(DecisionGraphNode node, 
-            List<IResourceKey> rks)
+        /// <summary>
+        /// Recursively finds all of the unique resource keys referenced by
+        /// the given <paramref name="node"/> (if it is a 
+        /// <see cref="CreatePropNode"/> or <see cref="PlayAnimationNode"/>)
+        /// and by all of the <see cref="DecisionGraphNode"/> instances it 
+        /// references, and adds them to the given resource key list.
+        /// </summary>
+        /// <param name="node">The decision graph node to recursively search
+        /// for external resource key references.</param>
+        /// <param name="rks">The list of all unique resource keys referenced
+        /// by the given <paramref name="node"/> and every 
+        /// <see cref="DecisionGraphNode"/> instance it references.</param>
+        private void SlurpDGNodeRKs(DecisionGraphNode node, List<RK> rks)
         {
+            this.mDGNodes.Add(node);
             int i, j;
+            State state;
             DecisionGraphNode target;
-            DecisionGraphNode[] targets;
-            if (node is RandomNode)
+            DecisionGraphNode[] targets; 
+            if (node is NextStateNode)
+            {
+                NextStateNode nsn = node as NextStateNode;
+                state = nsn.NextState;
+                if (state != null)
+                {
+                    i = this.mStates.IndexOf(state);
+                    if (i < 0)
+                    {
+                        i = this.mExtraStates.IndexOf(state);
+                        if (i < 0)
+                        {
+                            this.mExtraStates.Add(state);
+                        }
+                    }
+                }
+            }
+            else if (node is RandomNode)
             {
                 RandomNode rand = node as RandomNode;
                 if (rand.SliceCount > 0)
@@ -1369,7 +1520,8 @@ namespace s3piwrappers.JazzGraph
                         for (j = 0; j < targets.Length; j++)
                         {
                             target = targets[j];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
@@ -1389,9 +1541,23 @@ namespace s3piwrappers.JazzGraph
                         for (j = 0; j < targets.Length; j++)
                         {
                             target = targets[j];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
+                            }
+                        }
+                        state = cases[i].Value;
+                        if (state != null)
+                        {
+                            j = this.mStates.IndexOf(state);
+                            if (j < 0)
+                            {
+                                j = this.mExtraStates.IndexOf(state);
+                                if (j < 0)
+                                {
+                                    this.mExtraStates.Add(state);
+                                }
                             }
                         }
                     }
@@ -1409,7 +1575,8 @@ namespace s3piwrappers.JazzGraph
                         for (j = 0; j < targets.Length; j++)
                         {
                             target = targets[j];
-                            if (target != null)
+                            if (target != null &&
+                                !this.mDGNodes.Contains(target))
                             {
                                 this.SlurpDGNodeRKs(target, rks);
                             }
@@ -1427,7 +1594,8 @@ namespace s3piwrappers.JazzGraph
                     for (i = 0; i < targets.Length; i++)
                     {
                         target = targets[i];
-                        if (target != null)
+                        if (target != null &&
+                            !this.mDGNodes.Contains(target))
                         {
                             this.SlurpDGNodeRKs(target, rks);
                         }
@@ -1436,7 +1604,7 @@ namespace s3piwrappers.JazzGraph
                 if (node is CreatePropNode)
                 {
                     CreatePropNode cpn = node as CreatePropNode;
-                    IResourceKey propKey = cpn.PropKey;
+                    RK propKey = cpn.PropKey;
                     if (!rks.Contains(propKey))
                     {
                         rks.Add(propKey);
@@ -1445,7 +1613,7 @@ namespace s3piwrappers.JazzGraph
                 else if (node is PlayAnimationNode)
                 {
                     PlayAnimationNode lan = node as PlayAnimationNode;
-                    IResourceKey key = lan.ClipKey;
+                    RK key = lan.ClipKey;
                     if (!rks.Contains(key))
                     {
                         rks.Add(key);
@@ -1537,33 +1705,33 @@ namespace s3piwrappers.JazzGraph
 
         public bool AddParameterDefinition(ParamDefinition param)
         {
-            if (this.mParameterDefinitions.Contains(param))
+            if (this.mParamDefinitions.Contains(param))
             {
                 return false;
             }
-            this.mParameterDefinitions.Add(param);
+            this.mParamDefinitions.Add(param);
             return true;
         }
 
         public bool RemoveParameterDefinition(ParamDefinition param)
         {
-            int index = this.mParameterDefinitions.IndexOf(param);
+            int index = this.mParamDefinitions.IndexOf(param);
             if (index < 0)
             {
                 return false;
             }
-            this.mParameterDefinitions.RemoveAt(index);
+            this.mParamDefinitions.RemoveAt(index);
             return true;
         }
 
         public int ParameterDefinitionCount
         {
-            get { return this.mParameterDefinitions.Count; }
+            get { return this.mParamDefinitions.Count; }
         }
 
         public ParamDefinition[] ParameterDefinitions
         {
-            get { return this.mParameterDefinitions.ToArray(); }
+            get { return this.mParamDefinitions.ToArray(); }
         }
 
         public bool AddState(State state)

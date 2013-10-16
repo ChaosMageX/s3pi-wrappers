@@ -102,14 +102,10 @@ namespace s3piwrappers.Helpers.Resources
                 this.mGenCLIPs = null;
                 return;
             }
-            GenCLIP gc;
-            ulong h, ch;
-            string s, cs;
             KNMPackage knmp;
             IResource resource;
             IDictionary<ulong, string> map;
             List<IResourceIndexEntry> rieList;
-            List<KeyValuePair<ulong, string>> names;
             List<KNMPackage> knmps = new List<KNMPackage>();
             foreach (PathPackageTuple ppt in ppts)
             {
@@ -143,179 +139,7 @@ namespace s3piwrappers.Helpers.Resources
                                 map = resource as IDictionary<ulong, string>;
                                 if (map != null && map.Count > 0)
                                 {
-                                    foreach (KeyValuePair<ulong, string> nm
-                                        in map)
-                                    {
-                                        h = nm.Key;
-                                        s = nm.Value;
-                                        if (FNVHash.HashString64(s) == h ||
-                                            FNVHash.HashString32(s) == h)
-                                        {
-                                            knmp.Names[h] = s;
-                                        }
-                                        else if (FNVCLIP.HashString(s) == h)
-                                        {
-                                            cs = FNVCLIP.GetGenericValue(s);
-                                            ch = FNVHash.HashString64(cs);
-                                            ch &= 0x7FFFFFFFFFFFFFFF;
-                                            knmp.Generics[ch] = cs;
-                                            if (!this.mGenCLIPs.TryGetValue(
-                                                ch, out gc))
-                                            {
-                                                gc = new GenCLIP(cs);
-                                                this.mGenCLIPs.Add(ch, gc);
-                                            }
-                                            gc.CLIPNames[h] 
-                                                = new CLIP(s, knmp.Path);
-                                        }
-                                        else
-                                        {
-                                            knmp.Labels[h] = s;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (knmp.Names.Count > 0)
-                        {
-                            names = new List<KeyValuePair<ulong, 
-                                string>>(knmp.Names);
-                            foreach (KeyValuePair<ulong, string> name
-                                in names)
-                            {
-                                s = name.Value;
-                                if (name.Key < 0x100000000)
-                                {
-                                    h = FNVHash.HashString64(s);
-                                    if (!knmp.Names.ContainsKey(h))
-                                        knmp.Names[h] = s;
-                                }
-                                else
-                                {
-                                    h = FNVHash.HashString32(s);
-                                    if (!knmp.Names.ContainsKey(h))
-                                        knmp.Names[h] = s;
-                                }
-                                cs = FNVCLIP.GetGenericValue(s);
-                                if (!string.Equals(s, cs,
-                                    StringComparison.OrdinalIgnoreCase))
-                                {
-                                    h = FNVHash.HashString32(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                    h = FNVHash.HashString64(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                }
-                            }
-                        }
-                        if (knmp.Generics.Count > 0)
-                        {
-                            foreach (KeyValuePair<ulong, string> gen
-                                in knmp.Generics)
-                            {
-                                s = gen.Value;
-                                h = FNVHash.HashString32(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                h = FNVHash.HashString64(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                cs = FNVCLIP.GetGenericValue(s);
-                                h = FNVHash.HashString32(cs);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = cs;
-                                }
-                                h = FNVHash.HashString64(cs);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = cs;
-                                }
-                                cs = string.Concat(cs, ".ma");
-                                h = FNVHash.HashString32(cs);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = cs;
-                                }
-                                h = FNVHash.HashString64(cs);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = cs;
-                                }
-                                s = string.Concat(s, ".ma");
-                                h = FNVHash.HashString32(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                h = FNVHash.HashString64(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                            }
-                        }
-                        if (knmp.Labels.Count > 0)
-                        {
-                            foreach (KeyValuePair<ulong, string> label 
-                                in knmp.Labels)
-                            {
-                                s = label.Value;
-                                h = FNVHash.HashString32(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                h = FNVHash.HashString64(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                cs = FNVCLIP.GetGenericValue(s);
-                                if (!string.Equals(s, cs, 
-                                    StringComparison.OrdinalIgnoreCase))
-                                {
-                                    h = FNVHash.HashString32(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                    h = FNVHash.HashString64(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                    cs = string.Concat(cs, ".ma");
-                                    h = FNVHash.HashString32(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                    h = FNVHash.HashString64(cs);
-                                    if (!knmp.Names.ContainsKey(h))
-                                    {
-                                        knmp.Names[h] = cs;
-                                    }
-                                }
-                                s = string.Concat(s, ".ma");
-                                h = FNVHash.HashString32(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
-                                }
-                                h = FNVHash.HashString64(s);
-                                if (!knmp.Names.ContainsKey(h))
-                                {
-                                    knmp.Names[h] = s;
+                                    this.FillKNMP(knmp, map);
                                 }
                             }
                         }
@@ -333,6 +157,228 @@ namespace s3piwrappers.Helpers.Resources
             else
             {
                 this.mKNMPackages = knmps.ToArray();
+            }
+        }
+
+        private void FillKNMP(KNMPackage knmp, IDictionary<ulong, string> map)
+        {
+            GenCLIP gc;
+            ulong h, ch;
+            string s, cs;
+            foreach (KeyValuePair<ulong, string> nm in map)
+            {
+                h = nm.Key;
+                s = nm.Value;
+                if (FNVHash.HashString64(s) == h ||
+                    FNVHash.HashString32(s) == h)
+                {
+                    knmp.Names[h] = s;
+                }
+                else if (FNVCLIP.HashString(s) == h)
+                {
+                    cs = FNVCLIP.GetGenericValue(s);
+                    ch = FNVHash.HashString64(cs) & 0x7FFFFFFFFFFFFFFF;
+                    knmp.Generics[ch] = cs;
+                    if (!this.mGenCLIPs.TryGetValue(ch, out gc))
+                    {
+                        gc = new GenCLIP(cs);
+                        this.mGenCLIPs.Add(ch, gc);
+                    }
+                    gc.CLIPNames[h] = new CLIP(s, knmp.Path);
+                }
+                else
+                {
+                    knmp.Labels[h] = s;
+                }
+            }
+            if (knmp.Names.Count > 0)
+            {
+                List<KeyValuePair<ulong, string>> names 
+                    = new List<KeyValuePair<ulong, string>>(knmp.Names);
+                foreach (KeyValuePair<ulong, string> name in names)
+                {
+                    s = name.Value;
+                    if (name.Key < 0x100000000)
+                    {
+                        h = FNVHash.HashString64(s);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = s;
+                        }
+                    }
+                    else
+                    {
+                        h = FNVHash.HashString32(s);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = s;
+                        }
+                    }
+                    cs = FNVCLIP.GetGenericValue(s);
+                    if (!string.Equals(s, cs,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        h = FNVHash.HashString32(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                        h = FNVHash.HashString64(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                    }
+                }
+            }
+            if (knmp.Generics.Count > 0)
+            {
+                foreach (KeyValuePair<ulong, string> gen in knmp.Generics)
+                {
+                    s = gen.Value;
+                    h = FNVHash.HashString32(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    h = FNVHash.HashString64(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    cs = FNVCLIP.GetGenericValue(s);
+                    h = FNVHash.HashString32(cs);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = cs;
+                    }
+                    h = FNVHash.HashString64(cs);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = cs;
+                    }
+                    cs = string.Concat(cs, ".ma");
+                    h = FNVHash.HashString32(cs);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = cs;
+                    }
+                    h = FNVHash.HashString64(cs);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = cs;
+                    }
+                    s = string.Concat(s, ".ma");
+                    h = FNVHash.HashString32(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    h = FNVHash.HashString64(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                }
+            }
+            if (knmp.Labels.Count > 0)
+            {
+                foreach (KeyValuePair<ulong, string> label in knmp.Labels)
+                {
+                    s = label.Value;
+                    h = FNVHash.HashString32(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    h = FNVHash.HashString64(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    cs = FNVCLIP.GetGenericValue(s);
+                    if (!string.Equals(s, cs,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        h = FNVHash.HashString32(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                        h = FNVHash.HashString64(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                        cs = string.Concat(cs, ".ma");
+                        h = FNVHash.HashString32(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                        h = FNVHash.HashString64(cs);
+                        if (!knmp.Names.ContainsKey(h))
+                        {
+                            knmp.Names[h] = cs;
+                        }
+                    }
+                    s = string.Concat(s, ".ma");
+                    h = FNVHash.HashString32(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                    h = FNVHash.HashString64(s);
+                    if (!knmp.Names.ContainsKey(h))
+                    {
+                        knmp.Names[h] = s;
+                    }
+                }
+            }
+        }
+
+        private void ImportKNM(string path, IDictionary<ulong, string> map)
+        {
+            int i = -1;
+            KNMPackage knmp = null;
+            if (this.mKNMPackages != null)
+            {
+                for (i = this.mKNMPackages.Length - 1; i >= 0; i--)
+                {
+                    knmp = this.mKNMPackages[i];
+                    if (path.Equals(knmp.Path))
+                    {
+                        break;
+                    }
+                }
+            }
+            if (this.mGenCLIPs == null)
+            {
+                this.mGenCLIPs = new Dictionary<ulong, GenCLIP>();
+            }
+            if (i < 0)
+            {
+                knmp = new KNMPackage(path);
+                this.FillKNMP(knmp, map);
+                if (knmp.Names.Count > 0)
+                {
+                    if (this.mKNMPackages == null)
+                    {
+                        this.mKNMPackages = new KNMPackage[] { knmp };
+                    }
+                    else
+                    {
+                        i = this.mKNMPackages.Length;
+                        KNMPackage[] pkgs = new KNMPackage[i + 1];
+                        Array.Copy(this.mKNMPackages, 0, pkgs, 0, i);
+                        pkgs[i] = knmp;
+                        this.mKNMPackages = pkgs;
+                    }
+                }
+            }
+            else
+            {
+                this.FillKNMP(knmp, map);
             }
         }
 
@@ -541,6 +587,22 @@ namespace s3piwrappers.Helpers.Resources
             clipName = null;
             packagePath = null;
             return false;
+        }
+
+        public static readonly KeyNameMap Imported 
+            = new KeyNameMap(null, null);
+
+        public static void ImportKeyNameMap(string path,
+            IDictionary<ulong, string> map)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException("path");
+            }
+            if (map != null)
+            {
+                Imported.ImportKNM(path, map);
+            }
         }
 
         private static KeyNameMap sCurrent = null;

@@ -150,6 +150,11 @@ namespace s3piwrappers.JazzGraph
             get { return this.mNameHash; }
         }
 
+        public bool NameIsHash
+        {
+            get { return this.bNameIsHash; }
+        }
+
         public JazzState.Flags Flags
         {
             get { return this.mFlags; }

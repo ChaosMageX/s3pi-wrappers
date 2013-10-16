@@ -32,19 +32,16 @@ namespace s3piwrappers.JazzGraph
                 = new JazzSelectOnParameterNode(0, null, s);
             jsopn.ParameterDefinitionIndex = this.mParameter == null
                 ? NullCRef : this.mParameter.ChunkReference;
-            if (this.CaseCount > 0)
+            if (this.mCases.Count > 0)
             {
                 int j;
-                Case c;
                 uint hash = 0;
-                Case[] cases = this.Cases;
                 JazzSelectOnParameterNode.Match match;
                 JazzSelectOnParameterNode.MatchList mList = jsopn.Matches;
                 JazzChunk.ChunkReferenceList dgi;
-                DecisionGraphNode[] targets;
-                for (int i = 0; i < cases.Length; i++)
+                List<DecisionGraphNode> targets;
+                foreach (CaseImpl c in this.mCases)
                 {
-                    c = cases[i];
                     match = new JazzSelectOnParameterNode.Match(0, null);
                     if (c.Value == null)
                     {
@@ -65,14 +62,36 @@ namespace s3piwrappers.JazzGraph
                     match.TestValue = hash;
                     dgi = match.DecisionGraphIndexes;
                     targets = c.Targets;
-                    for (j = 0; j < targets.Length; j++)
+                    for (j = 0; j < targets.Count; j++)
                     {
-                        dgi.Add(targets[i] == null 
-                            ? NullCRef : targets[i].ChunkReference);
+                        dgi.Add(targets[j] == null 
+                            ? NullCRef : targets[j].ChunkReference);
                     }
+                    mList.Add(match);
                 }
             }
             return new GenericRCOLResource.ChunkEntry(0, null, tgi, jsopn);
+        }
+
+        public void RefreshHashNames()
+        {
+            if (this.mCases.Count > 0)
+            {
+                uint hash;
+                string value;
+                foreach (CaseImpl c in this.mCases)
+                {
+                    value = c.Value;
+                    if (value != null && value.StartsWith("0x") &&
+                        uint.TryParse(value.Substring(2), 
+                            System.Globalization.NumberStyles.HexNumber, 
+                            null, out hash) &&
+                        KeyNameReg.TryFindName(hash, out value))
+                    {
+                        c.Value = value;
+                    }
+                }
+            }
         }
 
         public ParamDefinition Parameter

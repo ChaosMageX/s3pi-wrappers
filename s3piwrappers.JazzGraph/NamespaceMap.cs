@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
+using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Cryptography;
 using s3piwrappers.Helpers.Resources;
 
@@ -17,7 +16,7 @@ namespace s3piwrappers.JazzGraph
         /// </summary>
         private SortedDictionary<string, 
             SortedDictionary<string, ActorDefinition>> mSrcFile2Ns2Actor;
-        private SortedDictionary<IResourceKey, string> mKeyToFilenameMap;
+        private SortedDictionary<RK, string> mKeyToFilenameMap;
 
         public NamespaceMap(StateMachine stateMachine)
         {
@@ -29,7 +28,7 @@ namespace s3piwrappers.JazzGraph
 
             this.mSrcFile2Ns2Actor = new SortedDictionary<string, 
                 SortedDictionary<string, ActorDefinition>>();
-            this.mKeyToFilenameMap = new SortedDictionary<IResourceKey, string>();
+            this.mKeyToFilenameMap = new SortedDictionary<RK, string>();
         }
 
         public void SetNamespaceMap(string sourceFile, string nameSpace, 
@@ -144,7 +143,7 @@ namespace s3piwrappers.JazzGraph
             return sources;
         }
 
-        public SortedDictionary<IResourceKey, string> KeyToFilenameMap
+        public SortedDictionary<RK, string> KeyToFilenameMap
         {
             get { return this.mKeyToFilenameMap; }
         }
@@ -157,24 +156,57 @@ namespace s3piwrappers.JazzGraph
                 throw new ArgumentNullException("keyNameMap");
             }
             this.mKeyToFilenameMap.Clear();
-            IResourceKey rk;
-            List<IResourceKey> rks = this.mStateMachine.SlurpReferencedRKs();
-            for (int i = rks.Count - 1; i >= 0; i--)
-            {
-                rk = rks[i];
-                if (rk.ResourceType != 0x6b20c4f3)
-                {
-                    rks.RemoveAt(i);
-                }
-            }
             string name;
-            for (int i = 0; i < rks.Count; i++)
+            List<RK> rks = this.mStateMachine.SlurpReferencedRKs();
+            foreach (RK rk in rks)
             {
-                rk = rks[i];
-                if (keyNameMap.TryGetValue(rk.Instance, out name) ||
-                    KeyNameReg.TryFindName(rk.Instance, out name))
+                if (rk.TID == 0x6b20c4f3 && 
+                   (keyNameMap.TryGetValue(rk.IID, out name) ||
+                    KeyNameReg.TryFindName(rk.IID, out name)))
                 {
                     this.mKeyToFilenameMap[rk] = name;
+                }
+            }
+        }
+
+        public void RefreshHashNames()
+        {
+            uint hash;
+            string name;
+            SortedDictionary<string, ActorDefinition> nsd;
+            List<KeyValuePair<string, ActorDefinition>> nsl;
+            List<KeyValuePair<string,
+                SortedDictionary<string, ActorDefinition>>> sources
+                = new List<KeyValuePair<string, 
+                    SortedDictionary<string, ActorDefinition>>>(
+                        this.mSrcFile2Ns2Actor);
+            foreach (KeyValuePair<string,
+                SortedDictionary<string, ActorDefinition>> source in sources)
+            {
+                name = source.Key;
+                nsd = source.Value;
+                if (name.StartsWith("0x") &&
+                    uint.TryParse(name.Substring(2),
+                        System.Globalization.NumberStyles.HexNumber,
+                        null, out hash) && 
+                    KeyNameReg.TryFindName(hash, out name))
+                {
+                    this.mSrcFile2Ns2Actor.Remove(source.Key);
+                    this.mSrcFile2Ns2Actor.Add(name, nsd);
+                }
+                nsl = new List<KeyValuePair<string,ActorDefinition>>(nsd);
+                foreach (KeyValuePair<string, ActorDefinition> ns in nsl)
+                {
+                    name = ns.Key;
+                    if (name.StartsWith("0x") &&
+                        uint.TryParse(name.Substring(2),
+                            System.Globalization.NumberStyles.HexNumber,
+                            null, out hash) &&
+                        KeyNameReg.TryFindName(hash, out name))
+                    {
+                        nsd.Remove(ns.Key);
+                        nsd.Add(name, ns.Value);
+                    }
                 }
             }
         }
@@ -203,14 +235,14 @@ namespace s3piwrappers.JazzGraph
                         pair.Key, pair.Value, nameMap, exportAllNames));
                 }
             }
+            ulong iid;
             uint code;
             SortedDictionary<string, ActorDefinition> table;
-            foreach (KeyValuePair<IResourceKey, string> key 
-                in this.mKeyToFilenameMap)
+            foreach (KeyValuePair<RK, string> key in this.mKeyToFilenameMap)
             {
+                iid = key.Key.IID;
                 srcFile = key.Value;
-                code = (uint)((key.Key.Instance >> 0x20) 
-                     ^ (key.Key.Instance & 0xffffffffUL));
+                code = (uint)((iid >> 0x20) ^ (iid & 0xffffffff));
                 if (this.mSrcFile2Ns2Actor.TryGetValue(srcFile, out table))
                 {
                     foreach (KeyValuePair<string, ActorDefinition> pair 

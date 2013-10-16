@@ -112,36 +112,26 @@ namespace s3piwrappers.JazzGraph
             return new GenericRCOLResource.ChunkEntry(0, null, tgi, jpan);
         }
 
-        public IResourceKey ClipKey
+        public RK ClipKey
         {
             get { return this.mClipKey; }
             set
             {
-                if (value == null)
-                {
-                    this.mClipKey = new RK();
-                }
                 if (!this.mClipKey.Equals(value))
                 {
-                    this.mClipKey = new RK(value.ResourceType, 
-                        value.ResourceGroup, value.Instance);
+                    this.mClipKey = value;
                 }
             }
         }
 
-        public IResourceKey TrackMaskKey
+        public RK TrackMaskKey
         {
             get { return this.mTrackMaskKey; }
             set
             {
-                if (value == null)
-                {
-                    this.mTrackMaskKey = new RK();
-                }
                 if (!this.mTrackMaskKey.Equals(value))
                 {
-                    this.mTrackMaskKey = new RK(value.ResourceType,
-                        value.ResourceGroup, value.Instance);
+                    this.mTrackMaskKey = value;
                 }
             }
         }
@@ -151,19 +141,14 @@ namespace s3piwrappers.JazzGraph
             get { return this.mSlotSetup; }
         }
 
-        public IResourceKey AdditiveClipKey
+        public RK AdditiveClipKey
         {
             get { return this.mAdditiveClipKey; }
             set
             {
-                if (value == null)
-                {
-                    this.mAdditiveClipKey = new RK();
-                }
                 if (!this.mAdditiveClipKey.Equals(value))
                 {
-                    this.mAdditiveClipKey = new RK(value.ResourceType,
-                        value.ResourceGroup, value.Instance);
+                    this.mAdditiveClipKey = value;
                 }
             }
         }

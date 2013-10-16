@@ -274,8 +274,6 @@ namespace s3piwrappers.FreeformJazz
             }
         }
 
-        //private string mTitle = kName;
-        //private bool bHasCurrentPackage = false;
         private List<JazzPackage> mOpenPackages
             = new List<JazzPackage>();
         private List<JazzGraphContainer> mOpenGraphs
@@ -283,6 +281,7 @@ namespace s3piwrappers.FreeformJazz
 
         private OpenFileDialog mOpenPackageDialog;
         private OpenFileDialog mOpenJazzScriptDialog;
+        private OpenFileDialog mOpenKeyNameMapDialog;
         private SaveFileDialog mSavePackageDialog;
         private SaveFileDialog mSaveJazzScriptDialog;
         private SaveFileDialog mSaveKeyNameMapDialog;
@@ -303,6 +302,7 @@ namespace s3piwrappers.FreeformJazz
             this.mOpenPackageDialog = new OpenFileDialog();
             this.mOpenPackageDialog.AddExtension = true;
             this.mOpenPackageDialog.CheckFileExists = true;
+            this.mOpenPackageDialog.CheckPathExists = true;
             //this.mOpenPackageDialog.DefaultExt = ".package";
             this.mOpenPackageDialog.Filter = kJazzPackageDialogFilter;
             this.mOpenPackageDialog.ShowReadOnly = true;
@@ -311,10 +311,21 @@ namespace s3piwrappers.FreeformJazz
 
             this.mOpenJazzScriptDialog = new OpenFileDialog();
             this.mOpenJazzScriptDialog.AddExtension = true;
+            this.mOpenJazzScriptDialog.CheckFileExists = true;
+            this.mOpenJazzScriptDialog.CheckPathExists = true;
             //this.mOpenJazzScriptDialog.DefaultExt = GlobalManager.kJazzExt;
             this.mOpenJazzScriptDialog.Filter = kJazzScriptDialogFilter;
             this.mOpenJazzScriptDialog.SupportMultiDottedExtensions = true;
             this.mOpenJazzScriptDialog.Title = "Import Jazz Script";
+
+            this.mOpenKeyNameMapDialog = new OpenFileDialog();
+            this.mOpenKeyNameMapDialog.AddExtension = true;
+            this.mOpenKeyNameMapDialog.CheckFileExists = true;
+            this.mOpenKeyNameMapDialog.CheckPathExists = true;
+            //this.mOpenKeyNameMapDialog.DefaultExt = KeyNameMap.NameMapExt;
+            this.mOpenKeyNameMapDialog.Filter = kKeyNameMapDialogFilter;
+            this.mOpenKeyNameMapDialog.SupportMultiDottedExtensions = true;
+            this.mOpenKeyNameMapDialog.Title = "Import Key Name Map";
 
             this.mSavePackageDialog = new SaveFileDialog();
             this.mSavePackageDialog.AddExtension = true;
@@ -355,7 +366,7 @@ namespace s3piwrappers.FreeformJazz
                 string path = args[0];
                 if (path.EndsWith(GlobalManager.kJazzExt))
                 {
-                    this.ImportJazzGraph(path);
+                    this.ImportJazzGraphScript(path);
                 }
                 else
                 {
@@ -386,6 +397,10 @@ namespace s3piwrappers.FreeformJazz
             GraphForms.Algorithms.Digraph<StateNode, StateEdge> stateGraph;
             foreach (JazzGraphContainer jgc in this.mOpenGraphs)
             {
+                if (refreshDecisionGraphs)
+                {
+                    jgc.Scene.StateMachine.RefreshHashNames();
+                }
                 stateGraph = jgc.Scene.StateGraph;
                 for (i = stateGraph.NodeCount - 1; i >= 0; i--)
                 {
@@ -427,6 +442,8 @@ namespace s3piwrappers.FreeformJazz
                 jgc.Scene.StateView.Invalidate();
             }
         }
+
+        #region File Menu Event Handlers
 
         private void new_Click(object sender, EventArgs e)
         {
@@ -474,13 +491,23 @@ namespace s3piwrappers.FreeformJazz
             this.PackageAllJazzGraphsInto();
         }
 
-        private void exportSource_Click(object sender, EventArgs e)
+        private void importScript_Click(object sender, EventArgs e)
+        {
+            this.ImportJazzGraphScript(null);
+        }
+
+        private void importNameMap_Click(object sender, EventArgs e)
+        {
+            this.ImportKeyNameMap(null);
+        }
+
+        private void exportScript_Click(object sender, EventArgs e)
         {
             this.ExportJazzGraphScript(
                 this.jazzGraphTabControl.SelectedIndex, null);
         }
 
-        private void exportAllSource_Click(object sender, EventArgs e)
+        private void exportAllScripts_Click(object sender, EventArgs e)
         {
             this.ExportAllJazzGraphScripts();
         }
@@ -489,6 +516,7 @@ namespace s3piwrappers.FreeformJazz
         {
             this.Close();
         }
+        #endregion
 
         protected override void OnClosing(CancelEventArgs e)
         {
@@ -496,731 +524,7 @@ namespace s3piwrappers.FreeformJazz
             e.Cancel = !this.CloseAllJazzGraphs();
         }
 
-        /*private bool CreateNewPackage()
-        {
-            JazzPackage jp;
-            // If there is already a jazz package open, 
-            // try to commit any changes and close it.
-            if (this.bHasCurrentPackage)
-            {
-                if (!this.CloseCurrentPackage())
-                {
-                    jp = this.mOpenPackages[0];
-                    string cPath = jp.Path == null ? "*.package" : jp.Path;
-                    // Failed to close currently open jazz package
-                    CopyableMessageBox.Show(
-                        "Could not create a new empty package." +
-                        "\n\nCould not close the currently open " +
-                        "package:\n" + cPath,
-                        kName + ": Unable to Create New Package",
-                        CopyableMessageBoxButtons.OK,
-                        CopyableMessageBoxIcon.Error, 0);
-                    return false;
-                }
-            }
-            // Update the package part of the File Menu
-            this.saveToolStripMenuItem.Enabled = true;
-            this.saveAllToolStripMenuItem.Enabled = true;
-            this.closeToolStripMenuItem.Enabled = true;
-            // Update the jazz graph part of the File Menu
-            this.exportScriptStripMenuItem.Enabled = true;
-            this.packageAllIntoToolStripMenuItem.Enabled = true;
-            // Add the opened package internally
-            this.bHasCurrentPackage = true;
-            jp = new JazzPackage(null, Package.NewPackage(0), false);
-            this.mOpenPackages.Insert(0, jp);
-            // Add the opened package visually
-            this.Text = kName + ": [RW] *.package *";
-            return true;
-        }
-
-        private bool OpenPackage(string path, bool readOnly)
-        {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
-            {
-                return false;
-            }
-            int i;
-            path = Path.GetFullPath(path);
-            // Check if the package is already open
-            if (this.bHasCurrentPackage &&
-                path.Equals(this.mOpenPackages[0].Path))
-            {
-                // Inform user that they are attempting to
-                // open a jazz package that is already open
-                CopyableMessageBox.Show(
-                    "Could not open package:\n" + path +
-                    "\n\nIt is already open in this application", 
-                    kName + ": Unable to Open File",
-                    CopyableMessageBoxButtons.OK,
-                    CopyableMessageBoxIcon.Error, 0);
-                return false;
-            }
-            s3pi.Filetable.PathPackageTuple ppt;
-            try
-            {
-                ppt = new s3pi.Filetable.PathPackageTuple(path, !readOnly);
-            }
-            catch (InvalidDataException ide)
-            {
-                if (ide.Message.Contains("magic tag"))
-                {
-                    CopyableMessageBox.Show(
-                        "Could not open package:\n" + path +
-                        "\n\nThis file does not contain the expected " +
-                        "package identifier string tag in the header." +
-                        "\nThis could be because it is a protected " +
-                        "package (e.g. a Store item), a Sims3Pack or " +
-                        "some other random file.\n\n---\nError message:\n" +
-                        ide.Message, kName + ": Unable to Open File",
-                        CopyableMessageBoxButtons.OK,
-                        CopyableMessageBoxIcon.Error, 0);
-                }
-                else if (ide.Message.Contains("major version"))
-                {
-                    CopyableMessageBox.Show(
-                        "Could not open package:\n" + path +
-                        "\n\nThis file does not contain the expected " +
-                        "package major version number in the header." +
-                        "\nThis could be because it is a package for " +
-                        "The Sims 2 or Spore.\n\n---\nError message:\n" +
-                        ide.Message, kName + ": Unable to Open File",
-                        CopyableMessageBoxButtons.OK,
-                        CopyableMessageBoxIcon.Error, 0);
-                }
-                else
-                {
-                    ShowException(ide,
-                        "Could not open package:\n" + path + "\n",
-                        kName + ": Unable to Open File");
-                }
-                return false;
-            }
-            catch (UnauthorizedAccessException uae)
-            {
-                if (readOnly)
-                {
-                    ShowException(uae,
-                        "Could not open package:\n" + path + "\n",
-                        kName + ": Unable to Open File");
-                    return false;
-                }
-                else if (0 == CopyableMessageBox.Show(
-                    "Could not open package:\n" + path +
-                    "\n\nThe file could be write-protected, in which " +
-                    "case it might be possible to open it read-only." +
-                    "\n\n---\nError message:\n" + uae.Message,
-                    kName + ": Unable to Open File",
-                    CopyableMessageBoxIcon.Error,
-                    new string[] { "&Open read-only", "&Cancel" }, 1, 1))
-                {
-                    return OpenPackage(path, true);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (IOException ioe)
-            {
-                if (0 == CopyableMessageBox.Show(
-                    "Could not open package:\n" + path +
-                    "\n\nThere may be another process with exclusive " +
-                    "access to the file (e.g. The Sims 3). After exiting " +
-                    "the other process, you can retry opening the package." +
-                    "\n\n---\nError message:\n" + ioe.Message,
-                    kName + ": Unable to Open File",
-                    CopyableMessageBoxIcon.Error,
-                    new string[] { "&Retry", "&Cancel" }, 1, 1))
-                {
-                    return OpenPackage(path, readOnly);
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowException(ex,
-                    "Could not open package:\n" + path + "\n",
-                    kName + ": Unable to Open File");
-                return false;
-            }
-            // Check if the package even contains any jazz graphs
-            List<IResourceIndexEntry> rieList 
-                = ppt.Package.FindAll(sIsJazz);
-            if (rieList == null || rieList.Count == 0)
-            {
-                CopyableMessageBox.Show(
-                    "Could not open package:\n" + path +
-                    "\n\nIt does not contain any Jazz Graphs.",
-                    kName + ": Unable to Open File",
-                    CopyableMessageBoxButtons.OK,
-                    CopyableMessageBoxIcon.Error, 0);
-                Package.ClosePackage(0, ppt.Package);
-                return false;
-            }
-            // Check if the user is attempting to open a package
-            // that's already part of the readonly FileTable
-            ResourceMgr.ResPackage[] packages;
-            packages = GlobalManager.JazzManager.CustomContent;
-            if (packages != null && packages.Length > 0)
-            {
-                for (i = packages.Length - 1; i >= 0; i--)
-                {
-                    if (string.Equals(path, packages[i].Path))
-                    {
-                        CopyableMessageBox.Show(
-                            "Could not open package:\n" + path +
-                            "\n\nIt is already open as a read-only " +
-                            "Custom Content Jazz Package.",
-                            kName + ": Unable to Open File",
-                            CopyableMessageBoxButtons.OK,
-                            CopyableMessageBoxIcon.Error, 0);
-                        Package.ClosePackage(0, ppt.Package);
-                        return false;
-                    }
-                }
-            }
-            packages = GlobalManager.JazzManager.GameCore;
-            if (packages != null && packages.Length > 0)
-            {
-                for (i = packages.Length - 1; i >= 0; i--)
-                {
-                    if (string.Equals(path, packages[i].Path))
-                    {
-
-                        CopyableMessageBox.Show(
-                            "Could not open package:\n" + path +
-                            "\n\nIt is already open as a read-only " +
-                            "Game Core Jazz Package.",
-                            kName + ": Unable to Open File",
-                            CopyableMessageBoxButtons.OK,
-                            CopyableMessageBoxIcon.Error, 0);
-                        Package.ClosePackage(0, ppt.Package);
-                        return false;
-                    }
-                }
-            }
-            packages = GlobalManager.JazzManager.GameContent;
-            if (packages != null && packages.Length > 0)
-            {
-                for (i = packages.Length - 1; i >= 0; i--)
-                {
-                    if (string.Equals(path, packages[i].Path))
-                    {
-
-                        CopyableMessageBox.Show(
-                            "Could not open package:\n" + path +
-                            "\n\nIt is already open as a read-only " +
-                            "Game Content Jazz Package.",
-                            kName + ": Unable to Open File",
-                            CopyableMessageBoxButtons.OK,
-                            CopyableMessageBoxIcon.Error, 0);
-                        Package.ClosePackage(0, ppt.Package);
-                        return false;
-                    }
-                }
-            }
-            packages = GlobalManager.JazzManager.DDSImages;
-            if (packages != null && packages.Length > 0)
-            {
-                for (i = packages.Length - 1; i >= 0; i--)
-                {
-                    if (string.Equals(path, packages[i].Path))
-                    {
-                        CopyableMessageBox.Show(
-                            "Could not open package:\n" + path +
-                            "\n\nIt is already open as a read-only " +
-                            "DDS Image Jazz Package.",
-                            kName + ": Unable to Open File",
-                            CopyableMessageBoxButtons.OK,
-                            CopyableMessageBoxIcon.Error, 0);
-                        Package.ClosePackage(0, ppt.Package);
-                        return false;
-                    }
-                }
-            }
-            packages = GlobalManager.JazzManager.Thumbnails;
-            if (packages != null && packages.Length > 0)
-            {
-                for (i = packages.Length - 1; i >= 0; i--)
-                {
-                    if (string.Equals(path, packages[i].Path))
-                    {
-                        CopyableMessageBox.Show(
-                            "Could not open package:\n" + path +
-                            "\n\nIt is already open as a read-only " +
-                            "Thumbnail Jazz Package.",
-                            kName + ": Unable to Open File",
-                            CopyableMessageBoxButtons.OK,
-                            CopyableMessageBoxIcon.Error, 0);
-                        Package.ClosePackage(0, ppt.Package);
-                        return false;
-                    }
-                }
-            }
-            // If there is already a jazz package open, 
-            // try to commit any changes and close it.
-            if (this.bHasCurrentPackage)
-            {
-                if (!this.CloseCurrentPackage())
-                {
-                    JazzPackage jp = this.mOpenPackages[0];
-                    string cPath = jp.Path == null ? "*.package" : jp.Path;
-                    // Failed to close currently open jazz package
-                    CopyableMessageBox.Show(
-                        "Could not open package:\n" + path +
-                        "\n\nCould not close the currently open " +
-                        "package:\n" + cPath, 
-                        kName + ": Unable to Open File",
-                        CopyableMessageBoxButtons.OK,
-                        CopyableMessageBoxIcon.Error, 0);
-                    Package.ClosePackage(0, ppt.Package);
-                    return false;
-                }
-            }
-            // Reset FileTable.Current
-            s3pi.Filetable.FileTable.Current = ppt;
-            GlobalManager.RefreshCurrent();
-            // Update the package part of the File Menu
-            this.saveToolStripMenuItem.Enabled = false;
-            this.saveAllToolStripMenuItem.Enabled = true;
-            this.closeToolStripMenuItem.Enabled = true;
-            // Update the jazz graph part of the File Menu
-            this.exportScriptStripMenuItem.Enabled = !readOnly;
-            this.packageAllIntoToolStripMenuItem.Enabled = !readOnly;
-            // Add the opened package internally
-            this.bHasCurrentPackage = true;
-            this.mOpenPackages.Insert(0, 
-                new JazzPackage(path, ppt.Package, readOnly));
-            // Add the opened package visually
-            this.mTitle = CreateTitle(path, readOnly);
-            this.Text = this.mTitle;
-            return true;
-        }
-
-        private bool CloseCurrentPackage()
-        {
-            if (!this.bHasCurrentPackage)
-            {
-                return false;
-            }
-            if (this.ClosePackage(0))
-            {
-                // Reset FileTable.Current
-                if (s3pi.Filetable.FileTable.Current != null)
-                {
-                    s3pi.Filetable.FileTable.Current = null;
-                    GlobalManager.RefreshCurrent();
-                }
-                // Update the package part of the File menu
-                this.saveToolStripMenuItem.Enabled = false;
-                this.saveAllToolStripMenuItem.Enabled = false;
-                this.closeToolStripMenuItem.Enabled = false;
-                // Update the jazz graph part of the File menu
-                this.exportScriptStripMenuItem.Enabled = false;
-                this.packageAllIntoToolStripMenuItem.Enabled = false;
-                // Visually close the current package
-                this.Text = kName;
-                return true;
-            }
-            return false;
-        }
-
-        private DialogResult UnsavedGraphPrompt(
-            JazzGraphContainer jgc, bool saveAs)
-        {
-            string pName;
-            if (!saveAs)
-            {
-                pName = jgc.JP.Path == null
-                    ? "*.package" : Path.GetFileName(jgc.JP.Path);
-                return MessageBox.Show(jgc.Name + " has unsaved changes." +
-                    "\nWould you like to save these changes to its " + 
-                    "containing package file, " + pName + 
-                    ", before closing it?", kName + ": Save Jazz Graph",
-                    MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1);
-            }
-            else if (this.bHasCurrentPackage)
-            {
-                JazzPackage jp = this.mOpenPackages[0];
-                pName = jp.Path == null
-                    ? "*.package" : Path.GetFileName(jp.Path);
-                return MessageBox.Show(jgc.Name + " has unsaved changes." +
-                    "\nWould you like to save it as a new jazz graph in " +
-                    "the currently open package file, " + pName +
-                    ", before closing it?", kName + ": Save Jazz Graph As",
-                    MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1);
-            }
-            else
-            {
-                return MessageBox.Show(jgc.Name + " has unsaved changes." +
-                    "\nWould you like to create a new package file and " +
-                    "then save it as a new jazz graph in that new " + 
-                    "package file before closing it?", 
-                    kName + ": Save Jazz Graph As",
-                    MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button1);
-            }
-        }
-
-        private bool ClosePackage(int index)
-        {
-            int i;
-            JazzGraphContainer jgc;
-            JazzPackage jp = this.mOpenPackages[index];
-            TabControl.TabPageCollection pages = null;
-            if (jp.Graphs.Count > 0)
-            {
-                pages = this.jazzGraphTabControl.TabPages;
-            }
-            if (!jp.ReadOnly && jp.Graphs.Count > 0)
-            {
-                bool packageDirty = false;
-                bool[] writeToPackage = new bool[jp.Graphs.Count];
-                for (i = jp.Graphs.Count - 1; i >= 0; i--)
-                {
-                    jgc = jp.Graphs[i];
-                    // Prompt to commit any changes to
-                    // the jazz graph to the package
-                    if (jgc.SaveState != JazzSaveState.Saved)
-                    {
-                        switch (this.UnsavedGraphPrompt(jgc, false))
-                        {
-                            case DialogResult.Yes:
-                                writeToPackage[i] = true;
-                                packageDirty = true;
-                                break;
-                            case DialogResult.No:
-                                writeToPackage[i] = false;
-                                break;
-                            case DialogResult.Cancel:
-                                return false;
-                        }
-                    }
-                    else
-                    {
-                        writeToPackage[i] = false;
-                    }
-                }
-                if (packageDirty)
-                {
-                    // Prompt the user to create the package file on the 
-                    // hard drive if it does not already exist on it.
-                    if (jp.Path == null)
-                    {
-                        this.mSavePackageDialog.FileName = "";
-                        if (this.mSavePackageDialog.ShowDialog() !=
-                            DialogResult.OK)
-                        {
-                            return false;
-                        }
-                    }
-                    // Commit changes to the jazz graphs to local memory.
-                    TabPage page;
-                    for (i = jp.Graphs.Count - 1; i >= 0; i--)
-                    {
-                        if (writeToPackage[i])
-                        {
-                            jgc = jp.Graphs[i];
-                            if (jgc.SaveState != JazzSaveState.Committed)
-                            {
-                                jgc.SaveState = JazzSaveState.Committed;
-                                // Visually update the tab page to show that
-                                // changes its jazz graph have been committed
-                                page = pages[jgc.Index];
-                                page.Text = jgc.Name;//remove asterisk
-                            }
-                        }
-                    }
-                    // Write the jazz graphs and their collective
-                    // key name map to the package.
-                    ulong iid;
-                    StateMachine sm;
-                    GenericRCOLResource rcol;
-                    for (i = jp.Graphs.Count - 1; i >= 0; i--)
-                    {
-                        if (writeToPackage[i])
-                        {
-                            jgc = jp.Graphs[i];
-                            if (jgc.RIE == null)
-                            {
-                                iid = FNVHash.HashString64(jgc.Name);
-                                jp.KNMapRes[iid] = jgc.Name;
-                                sm = jgc.Scene.StateMachine;
-                                rcol = sm.ExportToResource(iid, 
-                                    jp.KNMapRes, false);
-                                jgc.RIE = jp.Package.AddResource(
-                                    new RK(GlobalManager.kJazzTID, 0, iid),
-                                    rcol.Stream, true);
-                            }
-                            else
-                            {
-                                iid = jgc.RIE.Instance;
-                                jp.KNMapRes[iid] = jgc.Name;
-                                sm = jgc.Scene.StateMachine;
-                                rcol = sm.ExportToResource(iid, 
-                                    jp.KNMapRes, false);
-                                jp.Package.ReplaceResource(jgc.RIE, rcol);
-                            }
-                            jgc.SaveState = JazzSaveState.Saved;
-                            page = pages[jgc.Index];
-                            Font f = page.Font;
-                            page.Font = new Font(
-                                f.FontFamily, f.Size, FontStyle.Bold);
-                        }
-                    }
-                    jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
-                    //this.FlushPackage(index, true);
-                }
-            }
-            // Internally and visually close all the jazz 
-            // graphs opened from the package
-            if (jp.Graphs.Count > 0)
-            {
-                for (i = jp.Graphs.Count - 1; i >= 0; i--)
-                {
-                    jgc = jp.Graphs[i];
-                    jgc.Scene.StopLayout();
-                    this.mOpenGraphs.RemoveAt(index);
-                    pages.RemoveAt(index);
-                }
-                for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
-                {
-                    jgc = this.mOpenGraphs[i];
-                    jgc.Index = i;
-                }
-                jp.Graphs.Clear();
-            }
-            // Internally close the package
-            if (this.bHasCurrentPackage && index == 0)
-            {
-                this.bHasCurrentPackage = false;
-            }
-            this.mOpenPackages.RemoveAt(index);
-            Package.ClosePackage(0, jp.Package);
-            return true;
-        }
-
-        private void FlushPackage(int index, bool closing)
-        {
-            JazzPackage jp = this.mOpenPackages[index];
-            NameMapResource.NameMapResource nmr;
-            if (jp.Path == null)
-            {
-                nmr = new NameMapResource.NameMapResource(0, null);
-                foreach (KeyValuePair<ulong, string> pair in sKeyNameMap)
-                {
-                    nmr.Add(pair.Key, pair.Value);
-                }
-                jp.Package.AddResource(
-                    new RK(KeyNameMap.NameMapTID, 0, 0),
-                    nmr.Stream, true);
-
-                jp.Path = Path.GetFullPath(
-                    this.mSavePackageDialog.FileName);
-                jp.Package.SaveAs(jp.Path);
-                if (this.bHasCurrentPackage && !closing && index == 0)
-                {
-                    Package.ClosePackage(0, jp.Package);
-                    s3pi.Filetable.PathPackageTuple ppt
-                        = new s3pi.Filetable.PathPackageTuple(jp.Path, true);
-                    jp.Package = ppt.Package;
-                    s3pi.Filetable.FileTable.Current = ppt;
-                    GlobalManager.ReloadCurrent();
-                    this.mTitle = CreateTitle(jp.Path, false);
-                    this.Text = this.mTitle;
-                }
-            }
-            else if (!jp.ReadOnly)
-            {
-                nmr = null;
-                IResourceIndexEntry rie = jp.Package.Find(sIsNameMap);
-                IResource res = null;
-                if (rie != null)
-                {
-                    try
-                    {
-                        res = WrapperDealer.GetResource(
-                            0, jp.Package, rie);
-                    }
-                    catch { }
-                }
-                if (res != null)
-                {
-                    nmr = res as NameMapResource.NameMapResource;
-                }
-                if (nmr == null)
-                {
-                    nmr = new NameMapResource.NameMapResource(0, null);
-                    foreach (KeyValuePair<ulong, string> pair in sKeyNameMap)
-                    {
-                        nmr.Add(pair.Key, pair.Value);
-                    }
-                    jp.Package.AddResource(
-                        new RK(KeyNameMap.NameMapTID, 0, 0),
-                        nmr.Stream, true);
-                }
-                else
-                {
-                    foreach (KeyValuePair<ulong, string> pair in sKeyNameMap)
-                    {
-                        if (!nmr.ContainsKey(pair.Key))
-                        {
-                            nmr.Add(pair.Key, pair.Value);
-                        }
-                    }
-                    jp.Package.ReplaceResource(rie, nmr);
-                }
-
-                jp.Package.SavePackage();
-                if (this.bHasCurrentPackage && !closing && index == 0)
-                {
-                    GlobalManager.ReloadCurrent();
-                    this.Text = this.mTitle;
-                }
-            }
-        }
-
-        private bool CloseJazzGraph2(int index)
-        {
-            JazzGraphContainer jgc = this.mOpenGraphs[index];
-            JazzPackage jp = jgc.JP;
-            TabControl.TabPageCollection pages
-                = this.jazzGraphTabControl.TabPages;
-            if (jgc.SaveState != JazzSaveState.Saved)
-            {
-                // Prompt to commit any changes to
-                // the jazz graph to the package
-                switch (this.UnsavedGraphPrompt(jgc, jp.ReadOnly))
-                {
-                    case DialogResult.Yes:
-                        // Write the jazz graph and its key name map
-                        // to its containing package.
-                        ulong iid;
-                        StateMachine sm;
-                        GenericRCOLResource rcol;
-                        if (!jp.ReadOnly)
-                        {
-                            // jazz graph's containing package is the current
-                            // package, so simply save it to the current 
-                            // package and then save the current package.
-                            if (jp.Path == null)
-                            {
-                                this.mSavePackageDialog.FileName = "";
-                                if (this.mSavePackageDialog.ShowDialog() !=
-                                    DialogResult.OK)
-                                {
-                                    return false;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (!this.bHasCurrentPackage || 
-                                this.mOpenPackages[0].Path == null)
-                            {
-                                this.mSavePackageDialog.FileName = "";
-                                if (this.mSavePackageDialog.ShowDialog() !=
-                                    DialogResult.OK)
-                                {
-                                    return false;
-                                }
-                            }
-                            if (!this.bHasCurrentPackage)
-                            {
-                                this.CreateNewPackage();
-                            }
-                        }
-                        if (jgc.RIE == null)
-                        {
-                            iid = FNVHash.HashString64(jgc.Name);
-                            jp.KNMapRes[iid] = jgc.Name;
-                            sm = jgc.Scene.StateMachine;
-                            rcol = sm.ExportToResource(iid, 
-                                jp.KNMapRes, false);
-                            jgc.RIE = jp.Package.AddResource(
-                                new RK(GlobalManager.kJazzTID, 0, iid),
-                                rcol.Stream, true);
-                        }
-                        else
-                        {
-                            iid = jgc.RIE.Instance;
-                            jp.KNMapRes[iid] = jgc.Name;
-                            sm = jgc.Scene.StateMachine;
-                            rcol = sm.ExportToResource(iid, 
-                                jp.KNMapRes, false);
-                            jp.Package.ReplaceResource(jgc.RIE, rcol);
-                        }
-                        jgc.SaveState = JazzSaveState.Saved;
-                        // Visually indicate that the jazz graph has
-                        // been written to its containing package.
-                        TabPage graphTab = pages[index];
-                        graphTab.Text = jgc.Name;//remove asterisk
-                        break;
-                    case DialogResult.No:
-                        break;
-                    case DialogResult.Cancel:
-                        return false;
-                }
-            }
-            int i;
-            // Internally and visually close the jazz graph
-            jgc.Scene.StopLayout();
-            jgc.Scene.StateNodeSelectionChanged -=
-                new EventHandler(Scene_StateNodeSelectionChanged);
-            jgc.Scene.StateEdgeSelectionChanged -=
-                new EventHandler(Scene_StateEdgeSelectionChanged);
-            jgc.Scene.DGNodeSelectionChanged -=
-                new EventHandler(Scene_DGNodeSelectionChanged);
-            jgc.Scene.DGEdgeSelectionChanged -=
-                new EventHandler(Scene_DGEdgeSelectionChanged);
-            jgc.Scene.FocusedStateChanged -=
-                new EventHandler(Scene_FocusedStateChanged);
-            TabPage page = pages[index];
-            page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
-            for (i = jp.Graphs.Count - 1; i >= 0; i--)
-            {
-                jgc = jp.Graphs[i];
-                if (jgc.Index == index)
-                {
-                    jp.Graphs.RemoveAt(i);
-                    break;
-                }
-            }
-            for (i = this.mOpenGraphs.Count - 1; i > index; i--)
-            {
-                jgc = this.mOpenGraphs[i];
-                jgc.Index--;
-            }
-            this.mOpenGraphs.RemoveAt(index);
-            pages.RemoveAt(index);
-            // Internally close the jazz graph's containing package
-            // if it has no open graphs and isn't the editable package
-            string path = jp.Path;
-            if (jp.Graphs.Count == 0)
-            {
-                for (i = this.mOpenPackages.Count - 1; i >= 0; i--)
-                {
-                    jp = this.mOpenPackages[i];
-                    if (string.Equals(path, jp.Path))
-                    {
-                        //this.FlushPackage(i, false);
-                        if (!this.bHasCurrentPackage || i != 0)
-                        {
-                            this.mOpenPackages.RemoveAt(i);
-                            Package.ClosePackage(0, jp.Package);
-                        }
-                        break;
-                    }
-                }
-            }
-            return true;
-        }/* */
+        #region Jazz Graph File Manipulation
 
         private bool CanModifyJazzGraph(int index)
         {
@@ -1550,7 +854,6 @@ namespace s3piwrappers.FreeformJazz
                 }
                 path = Path.GetFullPath(this.mOpenPackageDialog.FileName);
             }
-            int i;
             JazzPackage jp = this.OpenPackage(path,
                 this.mOpenPackageDialog.ReadOnlyChecked, true);
             if (jp == null)
@@ -1568,6 +871,7 @@ namespace s3piwrappers.FreeformJazz
                 }
                 return false;
             }
+            int i;
             for (i = pkgs.Length - 1; i >= 0; i--)
             {
                 pkg = pkgs[i];
@@ -1675,6 +979,7 @@ namespace s3piwrappers.FreeformJazz
                 this.mOpenPackages.Add(jp);
                 FileTableExt.Current.Add(ppt);
                 GlobalManager.RefreshCurrent();
+                this.RefreshJazzGraphs(true);
             }
             if (jgc == null)
             {
@@ -1750,7 +1055,43 @@ namespace s3piwrappers.FreeformJazz
             this.editToolStripMenuItem.Enabled = true;
         }
 
-        private bool ImportJazzGraph(string path)
+        private bool ImportKeyNameMap(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                this.mOpenKeyNameMapDialog.FileName = "";
+                this.mOpenKeyNameMapDialog.FilterIndex = 0;
+                if (this.mOpenKeyNameMapDialog.ShowDialog() !=
+                    DialogResult.OK)
+                {
+                    return false;
+                }
+                path = Path.GetFullPath(this.mOpenKeyNameMapDialog.FileName);
+            }
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+            FileStream fs;
+            NameMapResource.NameMapResource knm;
+            try
+            {
+                fs = new FileStream(path, FileMode.Open,
+                    FileAccess.Read, FileShare.ReadWrite);
+                knm = new NameMapResource.NameMapResource(0, fs);
+            }
+            catch (Exception ex)
+            {
+                ShowException(ex, "",
+                    kName + ": Unable to Import Key Name Map File");
+                return false;
+            }
+            KeyNameMap.ImportKeyNameMap(path, knm);
+            this.RefreshJazzGraphs(true);
+            return true;
+        }
+
+        private bool ImportJazzGraphScript(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -1762,6 +1103,10 @@ namespace s3piwrappers.FreeformJazz
                     return false;
                 }
                 path = Path.GetFullPath(this.mOpenJazzScriptDialog.FileName);
+            }
+            if (!File.Exists(path))
+            {
+                return false;
             }
             FileStream fs;
             GenericRCOLResource rcol = null;
@@ -2011,6 +1356,10 @@ namespace s3piwrappers.FreeformJazz
             }
         }
 
+        private static readonly KeyNameReg.KNM sGameKNMs 
+            = KeyNameReg.KNM.GameCore | KeyNameReg.KNM.GameContent 
+            | KeyNameReg.KNM.DDSImages | KeyNameReg.KNM.Thumbnails;
+
         private bool PackageJazzGraphInto(int index, string fileName)
         {
             if (fileName == null)
@@ -2063,13 +1412,16 @@ namespace s3piwrappers.FreeformJazz
                 if (jgc.SaveState != JazzSaveState.Saved)
                 {
                     jp = jgc.JP;
-                    if (jgc.NameIsValid())
+                    if (jgc.NameIsValid() && 
+                        !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                     {
                         jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                     }
                     StateMachine sm2 = jgc.Scene.StateMachine;
+                    KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
                     GenericRCOLResource rcol2 = sm2.ExportToResource(
                         jgc.Key.IID, jp.KNMapRes, sExportAllNames);
+                    KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
                     jp.Package.ReplaceResource(rie, rcol2);
                     jp.Package.SavePackage();
                     jgc.SaveState = JazzSaveState.Saved;
@@ -2190,13 +1542,15 @@ namespace s3piwrappers.FreeformJazz
             jgc.JP = jp;
             jgc.RIE = rie;
             jp.Graphs.Add(jgc);
-            if (jgc.NameIsValid())
+            if (jgc.NameIsValid() && !jp.KNMapRes.ContainsKey(jgc.Key.IID))
             {
                 jp.KNMapRes[jgc.Key.IID] = jgc.Name;
             }
             StateMachine sm = jgc.Scene.StateMachine;
+            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             GenericRCOLResource rcol = sm.ExportToResource(
                 jgc.Key.IID, jp.KNMapRes, sExportAllNames);
+            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
             jp.Package.ReplaceResource(rie, rcol);
             jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
             if (File.Exists(path))
@@ -2334,6 +1688,7 @@ namespace s3piwrappers.FreeformJazz
             GenericRCOLResource rcol;
             TabControl.TabPageCollection pages
                 = this.jazzGraphTabControl.TabPages;
+            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             for (i = toSave.Length - 1; i >= 0; i--)
             {
                 jgc = toSave[i] as JazzGraphContainer;
@@ -2347,7 +1702,8 @@ namespace s3piwrappers.FreeformJazz
                     if (jp.Path.Equals(jgc.JP.Path))
                     {
                         jgc.JP = jp;
-                        if (jgc.NameIsValid())
+                        if (jgc.NameIsValid() && 
+                            !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                         {
                             jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                         }
@@ -2364,7 +1720,8 @@ namespace s3piwrappers.FreeformJazz
                 else
                 {
                     jgc.JP = jp;
-                    if (jgc.NameIsValid())
+                    if (jgc.NameIsValid() && 
+                        !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                     {
                         jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                     }
@@ -2381,6 +1738,7 @@ namespace s3piwrappers.FreeformJazz
                 }
                 jgc.SaveState = JazzSaveState.Saved;
             }
+            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
             jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
             if (File.Exists(jp.Path))
             {
@@ -2475,8 +1833,10 @@ namespace s3piwrappers.FreeformJazz
                 knm[jgc.Key.IID] = jgc.Name;
             }
             StateMachine sm = jgc.Scene.StateMachine;
+            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             GenericRCOLResource rcol = sm.ExportToResource(
                 jgc.Key.IID, knm, sExportAllNames);
+            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
 
             FileStream fs = null;
             try
@@ -2595,6 +1955,7 @@ namespace s3piwrappers.FreeformJazz
             GenericRCOLResource rcol;
             NameMapResource.NameMapResource knm
                 = new NameMapResource.NameMapResource(0, null);
+            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             for (i = toExport.Length - 1; i >= 0; i--)
             {
                 jgc = toExport[i] as JazzGraphContainer;
@@ -2615,17 +1976,21 @@ namespace s3piwrappers.FreeformJazz
                 }
                 catch (Exception ex)
                 {
-                    ShowException(ex, "",
+                    ShowException(ex, "Could not export the jazz graph: " + 
+                        jgc.Name + "\nAs the jazz script file: \n" + path,
                         kName + ": Unable to Export Jazz Script");
-                    return false;
                 }
-                s = rcol.Stream;
-                s.Position = 0;
-                r = new BinaryReader(s);
-                w = new BinaryWriter(fs);
-                w.Write(r.ReadBytes((int)s.Length));
-                w.Close();
+                if (fs != null)
+                {
+                    s = rcol.Stream;
+                    s.Position = 0;
+                    r = new BinaryReader(s);
+                    w = new BinaryWriter(fs);
+                    w.Write(r.ReadBytes((int)s.Length));
+                    w.Close();
+                }
             }
+            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
             if (0 == CopyableMessageBox.Show("Would you also like to " +
                 "export a key name map file containing the names " +
                 "referenced within the exported jazz scripts?",
@@ -2699,13 +2064,16 @@ namespace s3piwrappers.FreeformJazz
             else
             {
                 JazzPackage jp = jgc.JP;
-                if (jgc.NameIsValid())
+                if (jgc.NameIsValid() && 
+                    !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                 {
                     jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                 }
                 StateMachine sm = jgc.Scene.StateMachine;
+                KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
                 GenericRCOLResource rcol = sm.ExportToResource(
                     jgc.Key.IID, jp.KNMapRes, sExportAllNames);
+                KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
                 jp.Package.ReplaceResource(jgc.RIE, rcol);
                 jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
                 jp.Package.SavePackage();
@@ -2832,6 +2200,7 @@ namespace s3piwrappers.FreeformJazz
             GenericRCOLResource rcol;
             TabControl.TabPageCollection pages
                 = this.jazzGraphTabControl.TabPages;
+            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             for (i = toSave.Length - 1; i >= 0; i--)
             {
                 jgc = toSave[i] as JazzGraphContainer;
@@ -2845,7 +2214,8 @@ namespace s3piwrappers.FreeformJazz
                     if (jp.Path.Equals(jgc.JP.Path))
                     {
                         jgc.JP = jp;
-                        if (jgc.NameIsValid())
+                        if (jgc.NameIsValid() && 
+                            !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                         {
                             jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                         }
@@ -2862,7 +2232,8 @@ namespace s3piwrappers.FreeformJazz
                 else
                 {
                     jgc.JP = jp;
-                    if (jgc.NameIsValid())
+                    if (jgc.NameIsValid() && 
+                        !jp.KNMapRes.ContainsKey(jgc.Key.IID))
                     {
                         jp.KNMapRes[jgc.Key.IID] = jgc.Name;
                     }
@@ -2879,6 +2250,7 @@ namespace s3piwrappers.FreeformJazz
                 }
                 jgc.SaveState = JazzSaveState.Saved;
             }
+            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
             jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
             if (File.Exists(jp.Path))
             {
@@ -3075,6 +2447,9 @@ namespace s3piwrappers.FreeformJazz
 
             return true;
         }
+        #endregion
+
+        #region Jazz Graph Scene Event Handlers
 
         private void Scene_FocusedStateChanged(object sender, EventArgs e)
         {
@@ -3156,6 +2531,9 @@ namespace s3piwrappers.FreeformJazz
                     = CheckState.Unchecked;
             }
         }
+        #endregion
+
+        #region Edit Menu Event Handlers
 
         private void undo_Click(object sender, EventArgs e)
         {
@@ -3226,6 +2604,9 @@ namespace s3piwrappers.FreeformJazz
                 jgc.Scene.ClearDGNodeSelection();
             }
         }
+        #endregion
+
+        #region State Graph Menu Event Handlers
 
         private void shuffleStateNodes_Click(object sender, EventArgs e)
         {
@@ -3286,6 +2667,9 @@ namespace s3piwrappers.FreeformJazz
         {
 
         }
+        #endregion
+
+        #region Decision Graph Menu Event Handlers
 
         private void shuffleDGNodes_Click(object sender, EventArgs e)
         {
@@ -3317,6 +2701,9 @@ namespace s3piwrappers.FreeformJazz
         {
 
         }
+        #endregion
+
+        #region Settings Menu Event Handlers
 
         private void layoutStateNodesCheckedChanged(
             object sender, EventArgs e)
@@ -3345,5 +2732,6 @@ namespace s3piwrappers.FreeformJazz
             {
             }
         }
+        #endregion
     }
 }

@@ -25,28 +25,26 @@ namespace s3piwrappers.JazzGraph
                 = new TGIBlock(0, null, "ITG", ResourceType, 0, 0);
             JazzSelectOnDestinationNode jsodn
                 = new JazzSelectOnDestinationNode(0, null, s);
-            if (this.CaseCount > 0)
+            if (this.mCases.Count > 0)
             {
                 int j;
-                Case c;
-                Case[] cases = this.Cases;
                 JazzSelectOnDestinationNode.Match match;
                 JazzSelectOnDestinationNode.MatchList mList = jsodn.Matches;
                 JazzChunk.ChunkReferenceList dgi;
-                DecisionGraphNode[] targets;
-                for (int i = 0; i < cases.Length; i++)
+                List<DecisionGraphNode> targets;
+                foreach (CaseImpl c in this.mCases)
                 {
-                    c = cases[i];
                     match = new JazzSelectOnDestinationNode.Match(0, null);
                     match.StateIndex = c.Value == null
                         ? NullCRef : c.Value.ChunkReference;
                     dgi = match.DecisionGraphIndexes;
                     targets = c.Targets;
-                    for (j = 0; j < targets.Length; j++)
+                    for (j = 0; j < targets.Count; j++)
                     {
-                        dgi.Add(targets[i] == null
-                            ? NullCRef : targets[i].ChunkReference);
+                        dgi.Add(targets[j] == null
+                            ? NullCRef : targets[j].ChunkReference);
                     }
+                    mList.Add(match);
                 }
             }
             return new GenericRCOLResource.ChunkEntry(0, null, tgi, jsodn);

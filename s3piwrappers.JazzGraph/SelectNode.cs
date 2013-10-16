@@ -19,7 +19,7 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
-        private class CaseImpl
+        protected class CaseImpl
         {
             public CaseType Value;
             public List<DecisionGraphNode> Targets;
@@ -31,7 +31,7 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
-        private List<CaseImpl> mCases;
+        protected List<CaseImpl> mCases;
 
         public SelectNode(uint nodeType, string nodeTag)
             : base(nodeType, nodeTag)
@@ -103,6 +103,10 @@ namespace s3piwrappers.JazzGraph
                 return false;
             }
             ci.Targets.RemoveAt(index);
+            if (ci.Targets.Count == 0)
+            {
+                this.mCases.RemoveAt(i);
+            }
             return true;
         }
 

@@ -122,6 +122,11 @@ namespace s3piwrappers.JazzGraph
             get { return this.mNameHash; }
         }
 
+        public bool NameIsHash
+        {
+            get { return this.bNameIsHash; }
+        }
+
         public string DefaultValue
         {
             get { return this.mDefaultValue; }
@@ -155,6 +160,11 @@ namespace s3piwrappers.JazzGraph
         public uint DefaultHash
         {
             get { return this.mDefaultHash; }
+        }
+
+        public bool DefaultIsHash
+        {
+            get { return this.bDefaultIsHash; }
         }
     }
 }
