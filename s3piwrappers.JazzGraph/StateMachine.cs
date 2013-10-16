@@ -610,7 +610,7 @@ namespace s3piwrappers.JazzGraph
             ulong clipHash;
             Dictionary<ulong, string> keyNameMap 
                 = new Dictionary<ulong, string>();
-            for (i = index; i >= 0; i--)
+            for (i = index - 1; i >= 0; i--)
             {
                 animation = animations[i];
                 this.mNamespaceMap.SetNamespaceMap(
