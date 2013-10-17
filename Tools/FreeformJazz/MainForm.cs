@@ -21,8 +21,10 @@ namespace s3piwrappers.FreeformJazz
     {
         public const string kName = "Freeform Jazz";
 
-        private const string kJazzPackageDialogFilter 
-            = "Sims 3 Packages (*.package)|*.package|All Files (*.*)|*.*";
+        public const string kPackageExt = ".package";
+
+        private static readonly string kJazzPackageDialogFilter;
+            //= "Sims 3 Packages (*.package)|*.package|All Files (*.*)|*.*";
         private static readonly string kJazzScriptDialogFilter;
             //= "Jazz Scripts (*.jazz)|*.jazz|All Files (*.*)|*.*";
         private static readonly string kKeyNameMapDialogFilter;
@@ -34,6 +36,9 @@ namespace s3piwrappers.FreeformJazz
 
         static MainForm()
         {
+            kJazzPackageDialogFilter = "Sims 3 Packages (*" +
+                kPackageExt + ")|*" + 
+                kPackageExt + "|All Files (*.*)|*.*";
             kJazzScriptDialogFilter = "Jazz Scripts (*" + 
                 GlobalManager.kJazzExt + ")|*" + 
                 GlobalManager.kJazzExt + "|All Files (*.*)|*.*";
@@ -44,7 +49,7 @@ namespace s3piwrappers.FreeformJazz
 
         public static void ShowException(Exception ex)
         {
-            ShowException(ex, "", "Program Exception");
+            ShowException(ex, "", kName + ": Program Exception");
         }
 
         public static void ShowException(Exception ex, 
@@ -55,19 +60,19 @@ namespace s3piwrappers.FreeformJazz
             {
                 builder.AppendLine(prefix);
             }
-            builder.Append("== START ==");
+            builder.AppendLine("== START ==");
             for (Exception e = ex; e != null; e = e.InnerException)
             {
-                builder.Append("\nSource: " + e.Source);
-                builder.Append("\nAssembly: " 
+                builder.AppendLine("Source: " + e.Source);
+                builder.AppendLine("Assembly: " 
                     + e.TargetSite.DeclaringType.Assembly.FullName);
-                builder.Append("\n" + e.Message);
+                builder.AppendLine(e.Message);
                 System.Diagnostics.StackTrace trace 
                     = new System.Diagnostics.StackTrace(ex, false);
-                builder.Append("\n" + trace);
-                builder.Append("\n-----");
+                builder.AppendLine(trace.ToString());
+                builder.AppendLine("-----");
             }
-            builder.Append("\n== END ==");
+            builder.Append("== END ==");
             CopyableMessageBox.Show(builder.ToString(), caption, 
                 CopyableMessageBoxButtons.OK,
                 CopyableMessageBoxIcon.Error, 0);
@@ -303,7 +308,7 @@ namespace s3piwrappers.FreeformJazz
             this.mOpenPackageDialog.AddExtension = true;
             this.mOpenPackageDialog.CheckFileExists = true;
             this.mOpenPackageDialog.CheckPathExists = true;
-            //this.mOpenPackageDialog.DefaultExt = ".package";
+            //this.mOpenPackageDialog.DefaultExt = kPackageExt;
             this.mOpenPackageDialog.Filter = kJazzPackageDialogFilter;
             this.mOpenPackageDialog.ShowReadOnly = true;
             this.mOpenPackageDialog.SupportMultiDottedExtensions = true;
@@ -329,7 +334,7 @@ namespace s3piwrappers.FreeformJazz
 
             this.mSavePackageDialog = new SaveFileDialog();
             this.mSavePackageDialog.AddExtension = true;
-            //this.mSavePackageDialog.DefaultExt = ".package";
+            //this.mSavePackageDialog.DefaultExt = kPackageExt;
             this.mSavePackageDialog.Filter = kJazzPackageDialogFilter;
             this.mSavePackageDialog.OverwritePrompt = true;
             this.mSavePackageDialog.SupportMultiDottedExtensions = true;
@@ -363,8 +368,8 @@ namespace s3piwrappers.FreeformJazz
         {
             if (args.Length > 0)
             {
-                string path = args[0];
-                if (path.EndsWith(GlobalManager.kJazzExt))
+                string path = Path.GetFullPath(args[0]);
+                if (path.EndsWith(GlobalManager.kJazzExt, true, null))
                 {
                     this.ImportJazzGraphScript(path);
                 }
@@ -470,7 +475,8 @@ namespace s3piwrappers.FreeformJazz
 
         private void close_Click(object sender, EventArgs e)
         {
-            this.CloseJazzGraph(this.jazzGraphTabControl.SelectedIndex);
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            this.CloseJazzGraph(index);
         }
 
         private void closeAll_Click(object sender, EventArgs e)
@@ -480,7 +486,8 @@ namespace s3piwrappers.FreeformJazz
 
         private void save_Click(object sender, EventArgs e)
         {
-            this.SaveJazzGraph(this.jazzGraphTabControl.SelectedIndex, true);
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            this.SaveJazzGraph(index, true);
         }
 
         private void saveAll_Click(object sender, EventArgs e)
@@ -490,8 +497,8 @@ namespace s3piwrappers.FreeformJazz
 
         private void packageInto_Click(object sender, EventArgs e)
         {
-            this.PackageJazzGraphInto(
-                this.jazzGraphTabControl.SelectedIndex, null);
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            this.PackageJazzGraphInto(index, null);
         }
 
         private void packageAllInto_Click(object sender, EventArgs e)
@@ -511,8 +518,8 @@ namespace s3piwrappers.FreeformJazz
 
         private void exportScript_Click(object sender, EventArgs e)
         {
-            this.ExportJazzGraphScript(
-                this.jazzGraphTabControl.SelectedIndex, null);
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            this.ExportJazzGraphScript(index, null);
         }
 
         private void exportAllScripts_Click(object sender, EventArgs e)
@@ -1157,7 +1164,7 @@ namespace s3piwrappers.FreeformJazz
                 }
                 else
                 {
-                    name = path.Substring(0, path.Length - 5);
+                    name = Path.GetFileNameWithoutExtension(path);
                 }
                 sm.Name = name;
             }
@@ -1292,7 +1299,7 @@ namespace s3piwrappers.FreeformJazz
             int i;
             JazzPackage jp = null;
             string path = Path.GetFullPath(this.mSavePackageDialog.FileName);
-            if (path.EndsWith(GlobalManager.kJazzExt))
+            if (path.EndsWith(GlobalManager.kJazzExt, true, null))
             {
                 switch (CopyableMessageBox.Show("Cannot save jazz " +
                     "graphs to the Sims 3 package: \n" + path +
@@ -1305,9 +1312,10 @@ namespace s3piwrappers.FreeformJazz
                     CopyableMessageBoxIcon.Error, 0))
                 {
                     case 0:// OK
-                        int ln = GlobalManager.kJazzExt.Length - 1;
+                        int ln = GlobalManager.kJazzExt.Length;
                         path = string.Concat(
-                            path.Substring(0, path.Length - ln), "package");
+                            path.Substring(0, path.Length - ln), 
+                            kPackageExt);
                         return this.OpenPackageForSaving(path);
                     case 1:// Cancel
                         return null;
@@ -1395,7 +1403,7 @@ namespace s3piwrappers.FreeformJazz
             }
             JazzGraphContainer jgc = this.mOpenGraphs[index];
             string path = Path.GetFullPath(this.mSavePackageDialog.FileName);
-            if (path.EndsWith(GlobalManager.kJazzExt))
+            if (path.EndsWith(GlobalManager.kJazzExt, true, null))
             {
                 switch (CopyableMessageBox.Show(
                     "Cannot save " + jgc.Name +
@@ -1410,9 +1418,10 @@ namespace s3piwrappers.FreeformJazz
                     sPackageScriptCancel, 0, 2))
                 {
                     case 0:// Package
-                        int ln = GlobalManager.kJazzExt.Length - 1;
+                        int ln = GlobalManager.kJazzExt.Length;
                         path = string.Concat(
-                            path.Substring(0, path.Length - ln), "package");
+                            path.Substring(0, path.Length - ln), 
+                            kPackageExt);
                         return this.PackageJazzGraphInto(index, path);
                     case 1:// Script
                         return this.ExportJazzGraphScript(index, path);
@@ -1820,12 +1829,12 @@ namespace s3piwrappers.FreeformJazz
             }
             string path = Path.GetFullPath(
                 this.mSaveJazzScriptDialog.FileName);
-            if (path.EndsWith(".package"))
+            if (path.EndsWith(kPackageExt, true, null))
             {
                 switch (CopyableMessageBox.Show(
                     "Cannot export " + jgc.Name +
-                    " as a jazz script file: \n" + path +
-                    "\n\nThe *.package extension cannot be used when " +
+                    " as a jazz script file: \n" + path + "\n\nThe *" + 
+                    kPackageExt + " extension cannot be used when " +
                     "exporting jazz graphs as scripts. Would you " +
                     "like to try exporting it as a jazz script again " + 
                     "or write it into the above Sims 3 package file " + 
@@ -1836,8 +1845,9 @@ namespace s3piwrappers.FreeformJazz
                     case 0:// Package
                         return this.PackageJazzGraphInto(index, path);
                     case 1:// Script
+                        int ln = kPackageExt.Length;
                         path = string.Concat(
-                            path.Substring(0, path.Length - 8), 
+                            path.Substring(0, path.Length - ln), 
                             GlobalManager.kJazzExt);
                         return this.ExportJazzGraphScript(index, path);
                     case 2:// Cancel
