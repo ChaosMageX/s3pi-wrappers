@@ -143,8 +143,7 @@ namespace s3piwrappers
             protected override void WriteElement(Stream s, DataBlock element)
             {
                 element.UnParse(s);
-            }
-
+            } 
             protected override DataBlock CreateElement(Stream s)
             {
                 return new DataBlock(0, elementHandler, s);
@@ -919,9 +918,15 @@ namespace s3piwrappers
         public AudioTunerResource(int APIversion, Stream s)
             : base(APIversion, s)
         {
-            Parse(s);
+            if (stream == null)
+            {
+                stream = UnParse();
+                OnResourceChanged(this, new EventArgs());
+            }
+            stream.Position = 0L;
+            Parse(stream);
         }
-
+        
         private BlockList mBlocks;
 
         public BlockList Blocks
