@@ -9,6 +9,7 @@ namespace s3piwrappers.SWB
     public class DataList<TElement> : DependentList<TElement>
         where TElement : DataElement, IEquatable<TElement>
     {
+        #region Constructors
         public DataList(EventHandler handler) : base(handler)
         {
         }
@@ -24,16 +25,19 @@ namespace s3piwrappers.SWB
         public DataList(EventHandler handler, IEnumerable<TElement> ilt) : base(handler, ilt)
         {
         }
+        #endregion
 
+        #region Data I/O
         protected override int ReadCount(Stream s)
         {
             int c = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadInt32();
+            if (c < 0) throw new InvalidDataException("Invalid Data List Count: " + c.ToString());
             return c;
         }
 
         protected override void WriteCount(Stream s, int count)
         {
-            new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((UInt32) count);
+            new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write((uint) count);
         }
 
         protected override TElement CreateElement(Stream s)
@@ -45,5 +49,6 @@ namespace s3piwrappers.SWB
         {
             element.UnParse(s);
         }
+        #endregion
     }
 }

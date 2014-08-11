@@ -9,16 +9,18 @@ using s3piwrappers.FreeformJazz.Widgets;
 using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Cryptography;
 using s3piwrappers.Helpers.Resources;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 using GraphForms;
 using GraphForms.Algorithms.Layout.ForceDirected;
 
 namespace s3piwrappers.FreeformJazz
 {
-    public class JazzGraphContainer : INamedResourceIndexEntry
+    public class JazzGraphContainer : INamedResourceIndexEntry, IDisposable
     {
         public int Index;
-        public string Name;
+        private string mName;
+        public UndoManager UndoRedo;
         public JazzSaveState SaveState;
 
         public RK Key;
@@ -27,10 +29,13 @@ namespace s3piwrappers.FreeformJazz
         public IResourceIndexEntry RIE;
         public StateMachineScene Scene;
 
+        private TabPage mPage;
+
         public JazzGraphContainer(int index, JazzPackage jp,
-            IResourceIndexEntry rie, Control view)
+            IResourceIndexEntry rie, Control view, TabPage page)
         {
             this.Index = index;
+            this.UndoRedo = new UndoManager();
             this.SaveState = JazzSaveState.Saved;
             this.Key = new RK(rie);
             this.Comp = rie.Compressed == 0xFFFF;
@@ -54,7 +59,7 @@ namespace s3piwrappers.FreeformJazz
                 if (rcol != null)
                 {
                     this.Scene = new StateMachineScene(
-                        new StateMachine(rcol), view);
+                        new StateMachine(rcol), view, this);
                     KKLayoutAlgorithm<StateNode, StateEdge> layout
                         = new KKLayoutAlgorithm<StateNode, StateEdge>(
                     this.Scene.StateGraph, this.Scene);
@@ -69,24 +74,33 @@ namespace s3piwrappers.FreeformJazz
                     this.Scene = null;
                 }
             }
-            if (!KeyNameReg.TryFindName(rie.Instance, out this.Name))
+            if (!KeyNameReg.TryFindName(rie.Instance, out this.mName))
             {
-                this.Name = "0x" + rie.Instance.ToString("X16");
+                this.mName = "0x" + rie.Instance.ToString("X16");
+            }
+            if (this.Scene != null)
+            {
+                this.mPage = page;
+                this.mPage.Controls.Add(view);
+                this.mPage.Text = this.mName;
+                this.mPage.SizeChanged +=
+                    new EventHandler(this.OnTabSizeChanged);
             }
         }
 
         public JazzGraphContainer(int index, string name, Control view)
         {
             this.Index = index;
-            this.Name = name ?? "";
+            this.mName = name ?? "";
+            this.UndoRedo = new UndoManager();
             this.SaveState = JazzSaveState.Dirty;
             ulong iid = 0;
-            if (!this.Name.StartsWith("0x") ||
-                !ulong.TryParse(this.Name.Substring(2),
+            if (!this.mName.StartsWith("0x") ||
+                !ulong.TryParse(this.mName.Substring(2),
                     System.Globalization.NumberStyles.HexNumber,
                     null, out iid))
             {
-                iid = FNVHash.HashString64(this.Name);
+                iid = FNVHash.HashString64(this.mName);
             }
             this.Key = new RK(GlobalManager.kJazzTID, 0, iid);
             this.Comp = true;
@@ -94,7 +108,7 @@ namespace s3piwrappers.FreeformJazz
             this.RIE = null;
 
             StateMachine sm = new StateMachine(name);
-            this.Scene = new StateMachineScene(sm, view);
+            this.Scene = new StateMachineScene(sm, view, this);
             KKLayoutAlgorithm<StateNode, StateEdge> layout
                 = new KKLayoutAlgorithm<StateNode, StateEdge>(
                     this.Scene.StateGraph, this.Scene);
@@ -106,18 +120,19 @@ namespace s3piwrappers.FreeformJazz
         }
 
         public JazzGraphContainer(int index,
-            StateMachine sm, Control view)
+            StateMachine sm, Control view, TabPage page)
         {
             this.Index = index;
-            this.Name = sm.Name;
+            this.mName = sm.Name;
+            this.UndoRedo = new UndoManager();
             this.SaveState = JazzSaveState.Dirty;
             this.Key = new RK(GlobalManager.kJazzTID, 0,
-                FNVHash.HashString64(this.Name));
+                FNVHash.HashString64(this.mName));
             this.Comp = true;
             this.JP = null;
             this.RIE = null;
 
-            this.Scene = new StateMachineScene(sm, view);
+            this.Scene = new StateMachineScene(sm, view, this);
             KKLayoutAlgorithm<StateNode, StateEdge> layout
                 = new KKLayoutAlgorithm<StateNode, StateEdge>(
                     this.Scene.StateGraph, this.Scene);
@@ -126,13 +141,129 @@ namespace s3piwrappers.FreeformJazz
             layout.ShuffleNodes();
             this.Scene.LayoutPaused = true;
             this.Scene.StartLayout();
+
+            this.mPage = page;
+            this.mPage.Controls.Add(view);
+            this.mPage.Text = this.mName + " *";
+            this.mPage.SizeChanged +=
+                new EventHandler(this.OnTabSizeChanged);
+        }
+
+        public void Dispose()
+        {
+            if (this.Scene != null)
+            {
+                this.mPage.SizeChanged -=
+                    new EventHandler(this.OnTabSizeChanged);
+                this.mPage.Controls.Clear();
+                this.Scene.Dispose();
+                this.mPage.Dispose();
+                this.Scene = null;
+                this.mPage = null;
+            }
+        }
+
+        private class NameCommand : Command
+        {
+            private JazzGraphContainer mContainer;
+            private string mOldName;
+            private string mNewName;
+            private bool bExtendable;
+
+            public NameCommand(JazzGraphContainer container, 
+                string newName, bool extendable)
+            {
+                this.mContainer = container;
+                this.mOldName = container.mName;
+                this.mNewName = newName;
+                this.bExtendable = extendable;
+                this.SetLabel();
+            }
+
+            private void SetLabel()
+            {
+                this.mLabel = "Change Jazz Graph Name from " +
+                    this.mOldName + " to " + this.mNewName;
+            }
+
+            public override bool Execute()
+            {
+                this.mContainer.mName = this.mNewName;
+                ulong iid = FNVHash.HashString64(this.mNewName);
+                this.mContainer.Key.IID = iid;
+                if (this.mContainer.RIE != null)
+                {
+                    this.mContainer.RIE.Instance = iid;
+                }
+                if (this.mContainer.Scene != null)
+                {
+                    this.mContainer.Scene.StateMachine.Name = this.mNewName;
+                }
+                return true;
+            }
+
+            public override void Undo()
+            {
+                this.mContainer.mName = this.mOldName;
+                ulong iid = FNVHash.HashString64(this.mOldName);
+                this.mContainer.Key.IID = iid;
+                if (this.mContainer.RIE != null)
+                {
+                    this.mContainer.RIE.Instance = iid;
+                }
+                if (this.mContainer.Scene != null)
+                {
+                    this.mContainer.Scene.StateMachine.Name = this.mOldName;
+                }
+            }
+
+            public override bool IsExtendable(Command possibleExtension)
+            {
+                if (!this.bExtendable)
+                {
+                    return false;
+                }
+                NameCommand nc = possibleExtension as NameCommand;
+                if (nc == null || nc.mContainer != this.mContainer || 
+                    nc.mNewName.Equals(this.mOldName))
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public override void Extend(Command possibleExtension)
+            {
+                NameCommand nc = possibleExtension as NameCommand;
+                this.mNewName = nc.mNewName;
+                this.SetLabel();
+            }
+        }
+
+        public string Name
+        {
+            get { return this.mName; }
+        }
+
+        public void SetName(string name, bool extend)
+        {
+            if (name == null)
+            {
+                name = "";
+            }
+            if (!this.mName.Equals(name))
+            {
+                this.UndoRedo.Submit(new NameCommand(this, name, extend));
+                this.SaveState = JazzSaveState.Dirty;
+                this.mPage.Text = this.mName + " *";
+            }
         }
 
         public bool NameIsValid()
         {
             ulong iid;
-            return this.Name != null && (!this.Name.StartsWith("0x") ||
-                !ulong.TryParse(this.Name.Substring(2),
+            return this.mName != null && (!this.mName.StartsWith("0x") ||
+                !ulong.TryParse(this.mName.Substring(2),
                     System.Globalization.NumberStyles.HexNumber,
                     null, out iid));
         }
@@ -204,20 +335,8 @@ namespace s3piwrappers.FreeformJazz
 
         string INamedResourceIndexEntry.ResourceName
         {
-            get { return this.Name; }
-            set
-            {
-                if (this.Name == null && value != null)
-                {
-                    this.Name = value;
-                    this.SaveState = JazzSaveState.Dirty;
-                }
-                else if (!this.Name.Equals(value))
-                {
-                    this.Name = value;
-                    this.SaveState = JazzSaveState.Dirty;
-                }
-            }
+            get { return this.mName; }
+            set { this.SetName(value, true); }
         }
 
         #region IResourceIndexEntry Members

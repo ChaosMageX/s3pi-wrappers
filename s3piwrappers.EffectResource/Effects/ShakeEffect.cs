@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class ShakeEffect : Effect, IEquatable<ShakeEffect>
     {
+        #region Constructor
         public ShakeEffect(int apiVersion, EventHandler handler, ShakeEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,126 +17,130 @@ namespace s3piwrappers.Effects
         public ShakeEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
+            mStrengthCurve = new DataList<FloatValue>(handler);
+            mFrequencyCurve = new DataList<FloatValue>(handler);
         }
 
-        public ShakeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public ShakeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
+        #region Attributes
+        private float mLifetime;
+        private float mFadeTime;
+        private DataList<FloatValue> mStrengthCurve;
+        private DataList<FloatValue> mFrequencyCurve;
+        private float mAspectRatio;
+        private byte mBaseTableType;
+        private float mFalloff;
+        #endregion
 
-        private float mFloat01;
-        private float mFloat02;
-        private DataList<FloatValue> mFloatList01;
-        private DataList<FloatValue> mFloatList02;
-        private float mFloat03;
-        private byte mByte01;
-        private float mFloat04;
-
-
+        #region Content Fields
         [ElementPriority(1)]
-        public float Float01
+        public float Lifetime
         {
-            get { return mFloat01; }
+            get { return mLifetime; }
             set
             {
-                mFloat01 = value;
+                mLifetime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public float Float02
+        public float FadeTime
         {
-            get { return mFloat02; }
+            get { return mFadeTime; }
             set
             {
-                mFloat02 = value;
+                mFadeTime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public DataList<FloatValue> FloatList01
+        public DataList<FloatValue> StrengthCurve
         {
-            get { return mFloatList01; }
+            get { return mStrengthCurve; }
             set
             {
-                mFloatList01 = value;
+                mStrengthCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public DataList<FloatValue> FloatList02
+        public DataList<FloatValue> FrequencyCurve
         {
-            get { return mFloatList02; }
+            get { return mFrequencyCurve; }
             set
             {
-                mFloatList02 = value;
+                mFrequencyCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public float Float03
+        public float AspectRatio
         {
-            get { return mFloat03; }
+            get { return mAspectRatio; }
             set
             {
-                mFloat03 = value;
+                mAspectRatio = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public byte Byte01
+        public byte BaseTableType
         {
-            get { return mByte01; }
+            get { return mBaseTableType; }
             set
             {
-                mByte01 = value;
+                mBaseTableType = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public float Float04
+        public float Falloff
         {
-            get { return mFloat04; }
+            get { return mFalloff; }
             set
             {
-                mFloat04 = value;
+                mFalloff = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mFloat01);
-            s.Read(out mFloat02);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat03);
-            s.Read(out mByte01);
-            s.Read(out mFloat04);
+            s.Read(out mLifetime);
+            s.Read(out mFadeTime);
+            mStrengthCurve = new DataList<FloatValue>(handler, stream);
+            mFrequencyCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mAspectRatio);
+            s.Read(out mBaseTableType);
+            s.Read(out mFalloff);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mFloat01);
-            s.Write(mFloat02);
-            mFloatList01.UnParse(stream);
-            mFloatList02.UnParse(stream);
-            s.Write(mFloat03);
-            s.Write(mByte01);
-            s.Write(mFloat04);
+            s.Write(mLifetime);
+            s.Write(mFadeTime);
+            mStrengthCurve.UnParse(stream);
+            mFrequencyCurve.UnParse(stream);
+            s.Write(mAspectRatio);
+            s.Write(mBaseTableType);
+            s.Write(mFalloff);
         }
-
+        #endregion
 
         public bool Equals(ShakeEffect other)
         {

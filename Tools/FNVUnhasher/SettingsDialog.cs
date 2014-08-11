@@ -12,6 +12,12 @@ namespace FNVUnhasher
 {
     public partial class SettingsDialog : Form
     {
+        private const string kAllAscii = "All ASCII";
+        private const string kAllPrint = "All Printable";
+        private const string kAlphaNum = "English Alphanumeric";
+        private const string kAlphabet = "English Alphabet";
+        private const string kNumeric  = "Numeric";
+
         private FNVSearchTable mSearchTable;
         private uint mFilter32;
         private ulong mFilter64;
@@ -37,11 +43,11 @@ namespace FNVUnhasher
             InitializeComponent();
             this.defSearchTablesCmb.Items.Clear();
             this.defSearchTablesCmb.Items.AddRange(new object[] {
-                "All ASCII",
-                "All Printable",
-                "English Alphanumeric",
-                "English Alphabet",
-                "Numeric" });
+                kAllAscii,
+                kAllPrint,
+                kAlphaNum,
+                kAlphabet,
+                kNumeric });
             this.mSearchTable = searchTable;
             this.mFilter32 = filter32;
             this.mFilter64 = filter64;
@@ -99,17 +105,31 @@ namespace FNVUnhasher
             string defSearchTableStr = this.defSearchTablesCmb.SelectedItem as string;
             if (defSearchTableStr == null)
                 return;
-            if (defSearchTableStr.Equals("All ASCII"))
-                this.mSearchTable = FNVSearchTable.AllASCII;
-            if (defSearchTableStr.Equals("All Printable"))
-                this.mSearchTable = FNVSearchTable.AllPrintable;
-            if (defSearchTableStr.Equals("English Alphanumeric"))
-                this.mSearchTable = FNVSearchTable.EnglishAlphanumeric;
-            if (defSearchTableStr.Equals("English Alphabet"))
-                this.mSearchTable = FNVSearchTable.EnglishAlphabet;
-            if (defSearchTableStr.Equals("Numeric"))
-                this.mSearchTable = FNVSearchTable.Numeric;
+            string prefix = this.mSearchTable.Prefix;
+            string suffix = this.mSearchTable.Suffix;
+            switch (defSearchTableStr)
+            {
+                case kAllAscii: 
+                    this.mSearchTable = FNVSearchTable.AllASCII;
+                    break;
+                case kAllPrint:
+                    this.mSearchTable = FNVSearchTable.AllPrintable;
+                    break;
+                case kAlphaNum:
+                    this.mSearchTable = FNVSearchTable.EnglishAlphanumeric;
+                    break;
+                case kAlphabet:
+                    this.mSearchTable = FNVSearchTable.EnglishAlphabet;
+                    break;
+                case kNumeric:
+                    this.mSearchTable = FNVSearchTable.Numeric;
+                    break;
+                default:
+                    throw new InvalidOperationException("Unknown FNV Search Table");
+            }
             this.searchTableOutputTxt.Text = this.mSearchTable.ToString();
+            this.mSearchTable.Prefix = prefix;
+            this.mSearchTable.Suffix = suffix;
         }
 
         private void addChars_Click(object sender, EventArgs e)

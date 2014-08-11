@@ -9,283 +9,252 @@ namespace s3piwrappers
 {
     public class VisualEffect : SectionData, IEquatable<VisualEffect>
     {
-        public class Index : SectionData, IEquatable<Index>
+        public class Description : SectionData, IEquatable<Description>
         {
-            private byte mBlockType;
-            private uint mInt01;
-            private ushort mShort01;
-            private float mFloat01;
-            private Matrix3x3Value mOrientation;
-            private Vector3ValueLE mPosition;
-            private byte mByte01;
-            private byte mByte02;
-            private DataList<Vector3Value> mVector3List01;
-            private float mFloat02 = 1f;
-            private float mFloat03 = 1f;
-            private float mFloat04 = 1f;
-            private float mFloat05 = 1f;
-            private float mFloat06 = 1f;
-            private float mFloat07 = 1f;
-            private float mFloat08;
-            private float mFloat09;
-            private ushort mShort02;
-            private ushort mShort03;
-            private float mFloat10;
-            private Int32 mBlockIndex;
+            #region Attributes
+            private byte mComponentType;
+            private uint mFlags;
+            private TransformElement mLocalXForm;
+            private byte mLODBegin;
+            private byte mLODEnd;
+            private DataList<LODScale> mLODScales;//originally DataList<Vector3Value>
+            private float mEmitScaleBegin = 1f;
+            private float mEmitScaleEnd = 1f;
+            private float mSizeScaleBegin = 1f;
+            private float mSizeScaleEnd = 1f;
+            private float mAlphaScaleBegin = 1f;
+            private float mAlphaScaleEnd = 1f;
+            private uint mAppFlags;//originally float
+            private uint mAppFlagsMask;//originally float
+            private ushort mSelectionGroup;
+            private ushort mSelectionChance;
+            private float mTimeScale;
+            private int mComponentIndex;
             private byte mByte03; //version 2+
             private byte mByte04; //version 2+
+            private DataList<FloatValue> mFloatList01;//version 3+
+            #endregion
 
-
-            public Index(int apiVersion, EventHandler handler, ISection section)
+            #region Constructors
+            public Description(int apiVersion, EventHandler handler, ISection section)
                 : base(apiVersion, handler, section)
             {
-                mOrientation = new Matrix3x3Value(0, handler);
-                mPosition = new Vector3ValueLE(0, handler);
-                mVector3List01 = new DataList<Vector3Value>(handler);
+                mLocalXForm = new TransformElement(apiVersion, handler);
+                mLODScales = new DataList<LODScale>(handler);
+                mFloatList01 = new DataList<FloatValue>(handler);
             }
 
-            public Index(int apiVersion, EventHandler handler, ISection section, Stream s)
+            public Description(int apiVersion, EventHandler handler, ISection section, Stream s)
                 : base(apiVersion, handler, section, s)
             {
             }
 
-            public Index(int apiVersion, EventHandler handler, SectionData basis)
+            public Description(int apiVersion, EventHandler handler, SectionData basis)
                 : base(apiVersion, handler, basis)
             {
             }
+            #endregion
 
+            #region Content Fields
             [ElementPriority(1)]
-            public byte BlockType
+            public byte ComponentType
             {
-                get { return mBlockType; }
+                get { return mComponentType; }
                 set
                 {
-                    mBlockType = value;
+                    mComponentType = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(2)]
-            public uint Int01
+            public uint Flags
             {
-                get { return mInt01; }
+                get { return mFlags; }
                 set
                 {
-                    mInt01 = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(2)]
-            public ushort Short01
-            {
-                get { return mShort01; }
-                set
-                {
-                    mShort01 = value;
+                    mFlags = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(3)]
-            public float Float01
+            public TransformElement LocalXForm
             {
-                get { return mFloat01; }
+                get { return mLocalXForm; }
                 set
                 {
-                    mFloat01 = value;
+                    mLocalXForm = new TransformElement(requestedApiVersion, handler, value);
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(4)]
-            public Matrix3x3Value Orientation
+            public byte LODBegin
             {
-                get { return mOrientation; }
+                get { return mLODBegin; }
                 set
                 {
-                    mOrientation = value;
+                    mLODBegin = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(5)]
-            public Vector3ValueLE Position
+            public byte LODEnd
             {
-                get { return mPosition; }
+                get { return mLODEnd; }
                 set
                 {
-                    mPosition = value;
+                    mLODEnd = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(6)]
-            public byte Byte01
+            public DataList<LODScale> LODScales
             {
-                get { return mByte01; }
+                get { return mLODScales; }
                 set
                 {
-                    mByte01 = value;
+                    mLODScales = new DataList<LODScale>(handler, value);
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(7)]
-            public byte Byte02
+            public float EmitScaleBegin
             {
-                get { return mByte02; }
+                get { return mEmitScaleBegin; }
                 set
                 {
-                    mByte02 = value;
+                    mEmitScaleBegin = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(8)]
-            public DataList<Vector3Value> Vector3List01
+            public float EmitScaleEnd
             {
-                get { return mVector3List01; }
+                get { return mEmitScaleEnd; }
                 set
                 {
-                    mVector3List01 = value;
+                    mEmitScaleEnd = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(9)]
-            public float Float02
+            public float SizeScaleBegin
             {
-                get { return mFloat02; }
+                get { return mSizeScaleBegin; }
                 set
                 {
-                    mFloat02 = value;
+                    mSizeScaleBegin = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(10)]
-            public float Float03
+            public float SizeScaleEnd
             {
-                get { return mFloat03; }
+                get { return mSizeScaleEnd; }
                 set
                 {
-                    mFloat03 = value;
+                    mSizeScaleEnd = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(11)]
-            public float Float04
+            public float AlphaScaleBegin
             {
-                get { return mFloat04; }
+                get { return mAlphaScaleBegin; }
                 set
                 {
-                    mFloat04 = value;
+                    mAlphaScaleBegin = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(12)]
-            public float Float05
+            public float AlphaScaleEnd
             {
-                get { return mFloat05; }
+                get { return mAlphaScaleEnd; }
                 set
                 {
-                    mFloat05 = value;
+                    mAlphaScaleEnd = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(13)]
-            public float Float06
+            public uint AppFlags
             {
-                get { return mFloat06; }
+                get { return mAppFlags; }
                 set
                 {
-                    mFloat06 = value;
+                    mAppFlags = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(14)]
-            public float Float07
+            public uint AppFlagsMask
             {
-                get { return mFloat07; }
+                get { return mAppFlagsMask; }
                 set
                 {
-                    mFloat07 = value;
+                    mAppFlagsMask = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(15)]
-            public float Float08
+            public ushort SelectionGroup
             {
-                get { return mFloat08; }
+                get { return mSelectionGroup; }
                 set
                 {
-                    mFloat08 = value;
+                    mSelectionGroup = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(16)]
-            public float Float09
+            public ushort SelectionChance
             {
-                get { return mFloat09; }
+                get { return mSelectionChance; }
                 set
                 {
-                    mFloat09 = value;
+                    mSelectionChance = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(17)]
-            public ushort Short02
+            public float TimeScale
             {
-                get { return mShort02; }
+                get { return mTimeScale; }
                 set
                 {
-                    mShort02 = value;
+                    mTimeScale = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(18)]
-            public ushort Short03
+            public int ComponentIndex
             {
-                get { return mShort03; }
+                get { return mComponentIndex; }
                 set
                 {
-                    mShort03 = value;
+                    mComponentIndex = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(19)]
-            public float Float10
-            {
-                get { return mFloat10; }
-                set
-                {
-                    mFloat10 = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(20)]
-            public Int32 BlockIndex
-            {
-                get { return mBlockIndex; }
-                set
-                {
-                    mBlockIndex = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(21)]
             public byte Byte03
             {
                 get { return mByte03; }
@@ -296,7 +265,7 @@ namespace s3piwrappers
                 }
             }
 
-            [ElementPriority(22)]
+            [ElementPriority(20)]
             public byte Byte04
             {
                 get { return mByte04; }
@@ -307,74 +276,97 @@ namespace s3piwrappers
                 }
             }
 
+            [ElementPriority(21)]
+            public DataList<FloatValue> FloatList01
+            {
+                get { return mFloatList01; }
+                set
+                {
+                    mFloatList01 = new DataList<FloatValue>(handler, value);
+                    OnElementChanged();
+                }
+            }
+            #endregion
 
+            #region Data I/O
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mBlockType);
-                s.Read(out mInt01);
-                s.Read(out mShort01);
-                s.Read(out mFloat01);
-                mOrientation = new Matrix3x3Value(0, handler, stream);
-                mPosition = new Vector3ValueLE(0, handler, stream);
-                s.Read(out mByte01);
-                s.Read(out mByte02);
-                mVector3List01 = new DataList<Vector3Value>(handler, stream);
-                s.Read(out mFloat02); //1.0
-                s.Read(out mFloat03); //1.0
-                s.Read(out mFloat04); //1.0
-                s.Read(out mFloat05); //1.0
-                s.Read(out mFloat06); //1.0
-                s.Read(out mFloat07); //1.0
-                s.Read(out mFloat08);
-                s.Read(out mFloat09);
-                s.Read(out mShort02);
-                s.Read(out mShort03);
-                s.Read(out mFloat10);
-                s.Read(out mBlockIndex);
+                s.Read(out mComponentType);
+                s.Read(out mFlags);
+                mLocalXForm = new TransformElement(requestedApiVersion, handler, stream);
+                s.Read(out mLODBegin);
+                s.Read(out mLODEnd);
+                mLODScales = new DataList<LODScale>(handler, stream);
+                s.Read(out mEmitScaleBegin); //1.0
+                s.Read(out mEmitScaleEnd); //1.0
+                s.Read(out mSizeScaleBegin); //1.0
+                s.Read(out mSizeScaleEnd); //1.0
+                s.Read(out mAlphaScaleBegin); //1.0
+                s.Read(out mAlphaScaleEnd); //1.0
+                s.Read(out mAppFlags);
+                s.Read(out mAppFlagsMask);
+                s.Read(out mSelectionGroup);
+                s.Read(out mSelectionChance);
+                s.Read(out mTimeScale);
+                s.Read(out mComponentIndex);
                 if (mSection.Version >= 2 && stream.Position < stream.Length)
                 {
                     s.Read(out mByte03); //version 2+
                     s.Read(out mByte04); //version 2+
+                }
+                if (mSection.Version >= 3 && stream.Position < stream.Length)
+                {
+                    mFloatList01 = new DataList<FloatValue>(handler, stream);//version 3+
+                }
+                else
+                {
+                    mFloatList01 = new DataList<FloatValue>(handler);
                 }
             }
 
             public override void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mBlockType);
-                s.Write(mInt01);
-                s.Write(mShort01);
-                s.Write(mFloat01);
-                mOrientation.UnParse(stream);
-                mPosition.UnParse(stream);
-                s.Write(mByte01);
-                s.Write(mByte02);
-                mVector3List01.UnParse(stream);
-                s.Write(mFloat02); //1.0
-                s.Write(mFloat03); //1.0
-                s.Write(mFloat04); //1.0
-                s.Write(mFloat05); //1.0
-                s.Write(mFloat06); //1.0
-                s.Write(mFloat07); //1.0
-                s.Write(mFloat08);
-                s.Write(mFloat09);
-                s.Write(mShort02);
-                s.Write(mShort03);
-                s.Write(mFloat10);
-                s.Write(mBlockIndex);
+                s.Write(mComponentType);
+                s.Write(mFlags);
+                mLocalXForm.UnParse(stream);
+                s.Write(mLODBegin);
+                s.Write(mLODEnd);
+                mLODScales.UnParse(stream);
+                s.Write(mEmitScaleBegin); //1.0
+                s.Write(mEmitScaleEnd); //1.0
+                s.Write(mSizeScaleBegin); //1.0
+                s.Write(mSizeScaleEnd); //1.0
+                s.Write(mAlphaScaleBegin); //1.0
+                s.Write(mAlphaScaleEnd); //1.0
+                s.Write(mAppFlags);
+                s.Write(mAppFlagsMask);
+                s.Write(mSelectionGroup);
+                s.Write(mSelectionChance);
+                s.Write(mTimeScale);
+                s.Write(mComponentIndex);
                 if (mSection.Version >= 2)
                 {
                     s.Write(mByte03); //version 2+
                     s.Write(mByte04); //version 2+
                 }
+                if (mSection.Version >= 3)
+                {
+                    mFloatList01.UnParse(stream);
+                }
             }
+            #endregion
 
             public override List<string> ContentFields
             {
                 get
                 {
                     List<string> fields = base.ContentFields;
+                    if (mSection.Version < 3)
+                    {
+                        fields.Remove("FloatList01");
+                    }
                     if (mSection.Version < 2)
                     {
                         fields.Remove("Byte03");
@@ -384,18 +376,107 @@ namespace s3piwrappers
                 }
             }
 
-            public bool Equals(Index other)
+            public bool Equals(Description other)
             {
                 return base.Equals(other);
             }
         }
 
+        public class LODScale : DataElement, IEquatable<LODScale>
+        {
+            #region Constructors
+            public LODScale(int apiVersion, EventHandler handler, LODScale basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
 
+            public LODScale(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler, s)
+            {
+            }
+
+            public LODScale(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+            }
+            #endregion
+
+            #region Attributes
+            private float mEmitScale;
+            private float mSizeScale;
+            private float mAlphaScale;
+            #endregion
+
+            #region Content Fields
+            [ElementPriority(1)]
+            public float EmitScale
+            {
+                get { return mEmitScale; }
+                set
+                {
+                    mEmitScale = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(2)]
+            public float SizeScale
+            {
+                get { return mSizeScale; }
+                set
+                {
+                    mSizeScale = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(3)]
+            public float AlphaScale
+            {
+                get { return mAlphaScale; }
+                set
+                {
+                    mAlphaScale = value;
+                    OnElementChanged();
+                }
+            }
+            #endregion
+
+            #region Data I/O
+            protected override void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Read(out mEmitScale);
+                s.Read(out mSizeScale);
+                s.Read(out mAlphaScale);
+            }
+
+            public override void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Write(mEmitScale);
+                s.Write(mSizeScale);
+                s.Write(mAlphaScale);
+            }
+            #endregion
+
+            public bool Equals(LODScale other)
+            {
+                /*return this.mEmitScale == other.mEmitScale 
+                    && this.mSizeScale == other.mSizeScale 
+                    && this.mAlphaScale == other.mAlphaScale;/* */
+                return base.Equals(other);
+            }
+        }
+
+        #region Constructors
         public VisualEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mItems = new SectionDataList<Index>(handler, mSection);
+            mScreenSizeRange = new Vector2ValueLE(apiVersion, handler);
+            mLODDistances = new DataList<FloatValue>(handler);
+            mExtendedLODWeights = new Vector3ValueLE(apiVersion, handler);
+            mDescriptions = new SectionDataList<Description>(handler, mSection);
         }
 
         public VisualEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
@@ -407,205 +488,168 @@ namespace s3piwrappers
             : base(apiVersion, handler, basis)
         {
         }
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt32 mInt02;
-        private UInt32 mInt03;
-        private float mFloat01; //LE
-        private float mFloat02; //LE
-        private UInt32 mInt04;
-        private byte mByte01;
-        private DataList<FloatValue> mFloatList01;
-        private float mFloat03; //LE
-        private float mFloat04; //LE
-        private float mFloat05; //LE
-        private UInt32 mInt05;
-        private SectionDataList<Index> mItems;
+        #region Attributes
+        private uint mFlags;
+        private uint mComponentAppFlagsMask;
+        private uint mNotifyMessageId;
+        private Vector2ValueLE mScreenSizeRange;
+        private float mCursorActiveDistance;//originally uint
+        private byte mCursorButton;
+        private DataList<FloatValue> mLODDistances;
+        private Vector3ValueLE mExtendedLODWeights;
+        private uint mSeed;
+        private SectionDataList<Description> mDescriptions;
+        #endregion
 
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public uint Int02
+        public uint ComponentAppFlagsMask
         {
-            get { return mInt02; }
+            get { return mComponentAppFlagsMask; }
             set
             {
-                mInt02 = value;
+                mComponentAppFlagsMask = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public uint Int03
+        public uint NotifyMessageId
         {
-            get { return mInt03; }
+            get { return mNotifyMessageId; }
             set
             {
-                mInt03 = value;
+                mNotifyMessageId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public float Float01
+        public Vector2ValueLE ScreenSizeRange
         {
-            get { return mFloat01; }
+            get { return mScreenSizeRange; }
             set
             {
-                mFloat01 = value;
+                mScreenSizeRange = new Vector2ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public float Float02
+        public float CursorActiveDistance
         {
-            get { return mFloat02; }
+            get { return mCursorActiveDistance; }
             set
             {
-                mFloat02 = value;
+                mCursorActiveDistance = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public uint Int04
+        public byte CursorButton
         {
-            get { return mInt04; }
+            get { return mCursorButton; }
             set
             {
-                mInt04 = value;
+                mCursorButton = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public byte Byte01
+        public DataList<FloatValue> LODDistances
         {
-            get { return mByte01; }
+            get { return mLODDistances; }
             set
             {
-                mByte01 = value;
+                mLODDistances = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public DataList<FloatValue> FloatList01
+        public Vector3ValueLE ExtendedLODWeights
         {
-            get { return mFloatList01; }
+            get { return mExtendedLODWeights; }
             set
             {
-                mFloatList01 = value;
+                mExtendedLODWeights = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public float Float03
+        public uint Seed
         {
-            get { return mFloat03; }
+            get { return mSeed; }
             set
             {
-                mFloat03 = value;
+                mSeed = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public float Float04
+        public SectionDataList<Description> Descriptions
         {
-            get { return mFloat04; }
+            get { return mDescriptions; }
             set
             {
-                mFloat04 = value;
+                mDescriptions = new SectionDataList<Description>(handler, mSection, value);
                 OnElementChanged();
             }
         }
-
-        [ElementPriority(11)]
-        public float Float05
-        {
-            get { return mFloat05; }
-            set
-            {
-                mFloat05 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(12)]
-        public uint Int05
-        {
-            get { return mInt05; }
-            set
-            {
-                mInt05 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(13)]
-        public SectionDataList<Index> Items
-        {
-            get { return mItems; }
-            set
-            {
-                mItems = value;
-                OnElementChanged();
-            }
-        }
-
+        #endregion
 
         public bool Equals(VisualEffect other)
         {
             return base.Equals(other);
         }
 
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mInt02);
-            s.Read(out mInt03);
-            s.Read(out mFloat01, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
-            s.Read(out mInt04);
-            s.Read(out mByte01);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat04, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat05, ByteOrder.LittleEndian); //LE
-            s.Read(out mInt05);
-            mItems = new SectionDataList<Index>(handler, mSection, stream);
+            s.Read(out mFlags);
+            s.Read(out mComponentAppFlagsMask);
+            s.Read(out mNotifyMessageId);
+            mScreenSizeRange = new Vector2ValueLE(requestedApiVersion, handler, stream);
+            s.Read(out mCursorActiveDistance);
+            s.Read(out mCursorButton);
+            mLODDistances = new DataList<FloatValue>(handler, stream);
+            mExtendedLODWeights = new Vector3ValueLE(requestedApiVersion, handler, stream);
+            s.Read(out mSeed);
+            mDescriptions = new SectionDataList<Description>(handler, mSection, stream);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
-            s.Write(mInt02);
-            s.Write(mInt03);
-            s.Write(mFloat01, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat02, ByteOrder.LittleEndian); //LE
-            s.Write(mInt04);
-            s.Write(mByte01);
-            mFloatList01.UnParse(stream);
-            s.Write(mFloat03, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat04, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat05, ByteOrder.LittleEndian); //LE
-            s.Write(mInt05);
-            mItems.UnParse(stream);
+            s.Write(mFlags);
+            s.Write(mComponentAppFlagsMask);
+            s.Write(mNotifyMessageId);
+            mScreenSizeRange.UnParse(stream);
+            s.Write(mCursorActiveDistance);
+            s.Write(mCursorButton);
+            mLODDistances.UnParse(stream);
+            mExtendedLODWeights.UnParse(stream);
+            s.Write(mSeed);
+            mDescriptions.UnParse(stream);
         }
+        #endregion
     }
 }

@@ -8,7 +8,7 @@ using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
 {
-    public class DGStopNode : DGMulticastNode
+    public class DGStopNode : DGAnimNode
     {
         private StopAnimationNode mStopNode;
 
@@ -19,8 +19,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private string mTextString;
 
-        public DGStopNode(StopAnimationNode san, StateMachineScene scene)
-            : base(san, scene)
+        public DGStopNode(StopAnimationNode san, StateNode state)
+            : base(san, state, false)
         {
             if (san == null)
             {

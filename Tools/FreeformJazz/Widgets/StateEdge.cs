@@ -11,7 +11,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
 {
     public class StateEdge : GraphElement, IGraphEdge<StateNode>, IUpdateable
     {
-        private static readonly float sArrowSize = 6;
+        public static readonly float sArrowSize = 6;
         private static readonly Pen sArrowPen;
 
         private static double sAngle = Math.PI * 10.0 / 180.0;
@@ -76,6 +76,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             sArrowPen.StartCap = LineCap.RoundAnchor;
             //sArrowPen.CustomEndCap = arrowHead;
             sArrowPen.EndCap = LineCap.Round;
+            sArrowPen.CustomEndCap = new AdjustableArrowCap(
+                sArrowSize, sArrowSize, true);
             sArrowPen.LineJoin = LineJoin.Round;
         }
 
@@ -92,7 +94,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private double mLength;
 
-        private Pen mArrowPen;
+        //private Pen mArrowPen;
 
         public StateEdge(StateNode srcNode, StateNode dstNode)
         {
@@ -113,12 +115,12 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
             this.mLength = 0;
 
-            this.mArrowPen = new Pen(Color.Black, 1);
+            /*this.mArrowPen = new Pen(Color.Black, 1);
             this.mArrowPen.StartCap = LineCap.RoundAnchor;
             this.mArrowPen.EndCap = LineCap.Round;
             this.mArrowPen.CustomEndCap = new AdjustableArrowCap(
                 sArrowSize, sArrowSize, true);
-            this.mArrowPen.LineJoin = LineJoin.Round;
+            this.mArrowPen.LineJoin = LineJoin.Round;/* */
 
             //this.IgnoreMouseEvents = true;
             this.Zvalue = -1;
@@ -166,6 +168,43 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public float Weight
         {
             get { return 1; }
+        }
+
+        public static RectangleF AddEdgePath(
+            StateNode srcNode, StateNode dstNode,
+            GraphElement owner, GraphicsPath path)
+        {
+            SizeF srcPt = srcNode.ItemTranslate(owner);
+            SizeF dstPt = dstNode.ItemTranslate(owner);
+
+            double dx = dstPt.Width - srcPt.Width;
+            double dy = dstPt.Height - srcPt.Height;
+
+            double length = Math.Sqrt(dx * dx + dy * dy);
+            dx = dx / length;
+            dy = dy / length;
+
+            double cos = Math.Cos(sAngle);
+            double sin = Math.Sin(sAngle);
+
+            double rad = srcNode.Radius;
+            float srcX = srcPt.Width + (float)(rad * (cos * dx - sin * dy));
+            float srcY = srcPt.Height + (float)(rad * (cos * dy + sin * dx));
+
+            rad = dstNode.Radius;
+            float dstX = dstPt.Width - (float)(rad * (cos * dx + sin * dy));
+            float dstY = dstPt.Height - (float)(rad * (cos * dy - sin * dx));
+
+            path.AddLine(srcX, srcY, dstX, dstY);
+
+            float extra = 1 + 2 * sArrowSize;
+
+            dx = Math.Abs(dstX - srcX) + extra;
+            dy = Math.Abs(dstY - srcY) + extra;
+            srcX = Math.Min(srcX, dstX) - extra / 2;
+            srcY = Math.Min(srcY, dstY) - extra / 2;
+
+            return new RectangleF(srcX, srcY, (float)dx, (float)dy);
         }
 
         public void Update()
@@ -248,9 +287,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
             try
             {
                 // Draw the line itself
-                this.mArrowPen.Color = this.bSelected 
+                sArrowPen.Color = this.bSelected 
                     ? sBorderSelectColor : sBorderNormalColor;
-                g.DrawLine(this.mArrowPen, 
+                g.DrawLine(sArrowPen, 
                     this.mSrcX, this.mSrcY, this.mDstX, this.mDstY);
 
                 // Draw the arrows

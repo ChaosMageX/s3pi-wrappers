@@ -8,6 +8,8 @@ using GraphForms;
 using GraphForms.Algorithms;
 using GraphForms.Algorithms.Layout;
 using GraphForms.Algorithms.Layout.Tree;
+using s3pi.GenericRCOLResource;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -139,7 +141,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
         private bool bMinimized;
 
         private DGNCluster mCluster;
-        private Digraph<DGNode, DGEdge> mDecisionGraph;
+        private DGRootNode mRootNode;
+        private Digraph<DGNode, DGEdge> mDGraph;
         private SimpleTreeLayoutAlgorithm<DGNode, DGEdge> mLayout;
 
         public StateNode(State state, StateMachineScene scene)
@@ -165,11 +168,11 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.DGLayoutRunning = true;
 
             this.mLayout = new SimpleTreeLayoutAlgorithm<DGNode, DGEdge>(
-                this.mDecisionGraph, this.mCluster);
+                this.mDGraph, this.mCluster);
             this.mLayout.Direction = LayoutDirection.LeftToRight;
             this.mLayout.LayerGap = 30;
             this.mLayout.RootFindingMethod = TreeRootFinding.UserDefined;
-            if (this.mDecisionGraph.NodeCount > 0)
+            if (this.mDGraph.NodeCount > 0)
             {
                 this.mLayout.AddRoot(0);
             }
@@ -181,20 +184,20 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private void InitDecisionGraph()
         {
-            this.mDecisionGraph = new Digraph<DGNode, DGEdge>();
+            this.mDGraph = new Digraph<DGNode, DGEdge>();
 
             DecisionGraph dg = this.mState.DecisionGraph;
             if (dg != null)
             {
                 int i;
                 DGNode dst;
-                DGEdge edge;
-                AnchorPoint ap;
+                //DGEdge edge;
+                //AnchorPoint ap;
                 DecisionGraphNode dgn;
                 DecisionGraphNode[] dgns;
-                DGRootNode root = new DGRootNode(dg, this.mScene);
-                this.mDecisionGraph.AddNode(root);
-                root.SetParent(this);
+                this.mRootNode = new DGRootNode(dg, this);
+                this.mDGraph.AddNode(this.mRootNode);
+                this.mRootNode.SetParent(this);
                 if (dg.DecisionMakerCount > 0)
                 {
                     dgns = dg.DecisionMakers;
@@ -204,7 +207,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         dgn = dgns[i];
                         if (dgn != null)
                         {
-                            dst = this.InitDGN(root, dgn);
+                            dst = this.InitDGN(this.mRootNode, dgn);
+                            dst.SetCategory(DGNode.DGFlag.DecisionMaker);
                             /*edge = new DGEdge(root, dst);
                             ap.Edges.Add(edge);
                             dst.EntryAnchor.Edges.Add(edge);
@@ -222,7 +226,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         dgn = dgns[i];
                         if (dgn != null)
                         {
-                            dst = this.InitDGN(root, dgn);
+                            dst = this.InitDGN(this.mRootNode, dgn);
+                            dst.SetCategory(DGNode.DGFlag.EntryPoint);
                             /*edge = new DGEdge(root, dst);
                             ap.Edges.Add(edge);
                             dst.EntryAnchor.Edges.Add(edge);
@@ -231,17 +236,59 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         }
                     }
                 }
-                ap = root.EntryAnchor;
-                for (i = this.mDecisionGraph.NodeCount - 1; i > 0; i--)
+                this.AddRootDGEdges();
+            }
+        }
+
+        public void AddRootDGEdges()
+        {
+            if (this.mRootNode == null)
+            {
+                DecisionGraph dg = this.mState.DecisionGraph;
+                if (dg != null)
                 {
-                    dst = this.mDecisionGraph.NodeAt(i);
-                    if (dst.EntryAnchor.Edges.Count == 0)
+                    this.mRootNode = new DGRootNode(dg, this);
+                    this.mDGraph.InsertNode(0, this.mRootNode);
+                    this.mRootNode.SetParent(this);
+                }
+            }
+            if (this.mRootNode != null)
+            {
+                DGNode node;
+                DGEdge edge;
+                List<DGEdge> edges = this.mRootNode.EntryAnchor.Edges;
+                for (int i = this.mDGraph.NodeCount - 1; i > 0; i--)
+                {
+                    node = this.mDGraph.NodeAt(i);
+                    if (node.EntryAnchor.Edges.Count == 0)
                     {
-                        edge = new DGEdge(root, dst);
-                        ap.Edges.Add(edge);
-                        dst.EntryAnchor.Edges.Add(edge);
-                        this.mDecisionGraph.AddEdge(edge);
+                        edge = new DGEdge(this.mRootNode, node, true);
+                        edges.Add(edge);
+                        node.EntryAnchor.Edges.Add(edge);
+                        this.mDGraph.AddEdge(edge);
                         edge.SetParent(this);
+                    }
+                }
+            }
+        }
+
+        public void RemoveRootDGEdges()
+        {
+            if (this.mRootNode != null)
+            {
+                DGNode node;
+                DGEdge edge;
+                List<DGEdge> edges = this.mRootNode.EntryAnchor.Edges;
+                for (int i = edges.Count - 1; i >= 0; i--)
+                {
+                    edge = edges[i];
+                    node = edge.DstNode;
+                    if (node.EntryAnchor.Edges.Count > 1)
+                    {
+                        edges.RemoveAt(i);
+                        node.EntryAnchor.Edges.Remove(edge);
+                        this.mDGraph.RemoveEdge(this.mRootNode, node);
+                        edge.SetParent(null);
                     }
                 }
             }
@@ -251,9 +298,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
         {
             int i;
             DGNode dst = null;
-            for (i = this.mDecisionGraph.NodeCount - 1; i >= 0; i--)
+            for (i = this.mDGraph.NodeCount - 1; i >= 0; i--)
             {
-                dst = this.mDecisionGraph.NodeAt(i);
+                dst = this.mDGraph.NodeAt(i);
                 if (dst.DGN == dgn)
                 {
                     break;
@@ -265,33 +312,34 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 DGEdge edge;
                 AnchorPoint ap;
                 DecisionGraphNode[] dgns;
+                DGMulticastNode dgmcn = null;
                 switch (dgn.ChunkType)
                 {
                     case NextStateNode.ResourceType:
                         NextStateNode nsn = dgn as NextStateNode;
-                        dst = new DGSnSnNode(nsn, this.mScene);
-                        this.mDecisionGraph.AddNode(dst);
+                        dst = new DGSnSnNode(nsn, this);
+                        this.mDGraph.AddNode(dst);
                         dst.SetParent(this);
                         break;
                     case RandomNode.ResourceType:
                         RandomNode rand = dgn as RandomNode;
-                        DGRandNode dgrn = new DGRandNode(rand, this.mScene);
-                        this.mDecisionGraph.AddNode(dgrn);
+                        DGRandNode dgrn = new DGRandNode(rand, this);
+                        this.mDGraph.AddNode(dgrn);
                         dgrn.SetParent(this);
-                        if (rand.SliceCount > 0)
+                        List<RandomNode.Slice> slices = rand.Slices;
+                        if (slices.Count > 0)
                         {
-                            RandomNode.Slice[] slices = rand.Slices;
-                            for (i = 0; i < slices.Length; i++)
+                            for (i = 0; i < slices.Count; i++)
                             {
                                 ap = dgrn.GetSliceAnchor(i);
-                                dgns = slices[i].Targets;
+                                dgns = slices[i].Targets.ToArray();
                                 for (j = 0; j < dgns.Length; j++)
                                 {
                                     dst = this.InitDGN(dgrn, dgns[j]);
-                                    edge = new DGEdge(dgrn, dst);
+                                    edge = new DGEdge(dgrn, dst, false);
                                     ap.Edges.Add(edge);
                                     dst.EntryAnchor.Edges.Add(edge);
-                                    this.mDecisionGraph.AddEdge(edge);
+                                    this.mDGraph.AddEdge(edge);
                                     edge.SetParent(this);
                                 }
                             }
@@ -302,8 +350,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         SelectOnDestinationNode sodn
                             = dgn as SelectOnDestinationNode;
                         DGSoDnNode dgsodn
-                            = new DGSoDnNode(sodn, this.mScene);
-                        this.mDecisionGraph.AddNode(dgsodn);
+                            = new DGSoDnNode(sodn, this);
+                        this.mDGraph.AddNode(dgsodn);
                         dgsodn.SetParent(this);
                         if (sodn.CaseCount > 0)
                         {
@@ -315,10 +363,10 @@ namespace s3piwrappers.FreeformJazz.Widgets
                                 for (j = 0; j < dgns.Length; j++)
                                 {
                                     dst = this.InitDGN(dgsodn, dgns[j]);
-                                    edge = new DGEdge(dgsodn, dst);
+                                    edge = new DGEdge(dgsodn, dst, false);
                                     ap.Edges.Add(edge);
                                     dst.EntryAnchor.Edges.Add(edge);
-                                    this.mDecisionGraph.AddEdge(edge);
+                                    this.mDGraph.AddEdge(edge);
                                     edge.SetParent(this);
                                 }
                             }
@@ -329,8 +377,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         SelectOnParameterNode sopn 
                             = dgn as SelectOnParameterNode;
                         DGSoPnNode dgsopn 
-                            = new DGSoPnNode(sopn, this.mScene);
-                        this.mDecisionGraph.AddNode(dgsopn);
+                            = new DGSoPnNode(sopn, this);
+                        this.mDGraph.AddNode(dgsopn);
                         dgsopn.SetParent(this);
                         if (sopn.CaseCount > 0)
                         {
@@ -342,10 +390,10 @@ namespace s3piwrappers.FreeformJazz.Widgets
                                 for (j = 0; j < dgns.Length; j++)
                                 {
                                     dst = this.InitDGN(dgsopn, dgns[j]);
-                                    edge = new DGEdge(dgsopn, dst);
+                                    edge = new DGEdge(dgsopn, dst, false);
                                     ap.Edges.Add(edge);
                                     dst.EntryAnchor.Edges.Add(edge);
-                                    this.mDecisionGraph.AddEdge(edge);
+                                    this.mDGraph.AddEdge(edge);
                                     edge.SetParent(this);
                                 }
                             }
@@ -354,88 +402,52 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         break;
                     case CreatePropNode.ResourceType:
                         CreatePropNode cpn = dgn as CreatePropNode;
-                        DGPropNode dgcpn = new DGPropNode(cpn, this.mScene);
-                        this.mDecisionGraph.AddNode(dgcpn);
+                        DGPropNode dgcpn = new DGPropNode(cpn, this);
+                        this.mDGraph.AddNode(dgcpn);
                         dgcpn.SetParent(this);
-                        if (cpn.TargetCount > 0)
-                        {
-                            ap = dgcpn.TargetAnchor;
-                            dgns = cpn.Targets;
-                            for (i = 0; i < dgns.Length; i++)
-                            {
-                                dst = this.InitDGN(dgcpn, dgns[i]);
-                                edge = new DGEdge(dgcpn, dst);
-                                ap.Edges.Add(edge);
-                                dst.EntryAnchor.Edges.Add(edge);
-                                this.mDecisionGraph.AddEdge(edge);
-                                edge.SetParent(this);
-                            }
-                        }
-                        dst = dgcpn;
+                        dgmcn = dgcpn;
                         break;
                     case ActorOperationNode.ResourceType:
                         ActorOperationNode aon = dgn as ActorOperationNode;
-                        DGAcOpNode dgaon = new DGAcOpNode(aon, this.mScene);
-                        this.mDecisionGraph.AddNode(dgaon);
+                        DGAcOpNode dgaon = new DGAcOpNode(aon, this);
+                        this.mDGraph.AddNode(dgaon);
                         dgaon.SetParent(this);
-                        if (aon.TargetCount > 0)
-                        {
-                            ap = dgaon.TargetAnchor;
-                            dgns = aon.Targets;
-                            for (i = 0; i < dgns.Length; i++)
-                            {
-                                dst = this.InitDGN(dgaon, dgns[i]);
-                                edge = new DGEdge(dgaon, dst);
-                                ap.Edges.Add(edge);
-                                dst.EntryAnchor.Edges.Add(edge);
-                                this.mDecisionGraph.AddEdge(edge);
-                                edge.SetParent(this);
-                            }
-                        }
-                        dst = dgaon;
+                        dgmcn = dgaon;
                         break;
                     case StopAnimationNode.ResourceType:
                         StopAnimationNode san = dgn as StopAnimationNode;
-                        DGStopNode dgsan = new DGStopNode(san, this.mScene);
-                        this.mDecisionGraph.AddNode(dgsan);
+                        DGStopNode dgsan = new DGStopNode(san, this);
+                        this.mDGraph.AddNode(dgsan);
                         dgsan.SetParent(this);
-                        if (san.TargetCount > 0)
-                        {
-                            ap = dgsan.TargetAnchor;
-                            dgns = san.Targets;
-                            for (i = 0; i < dgns.Length; i++)
-                            {
-                                dst = this.InitDGN(dgsan, dgns[i]);
-                                edge = new DGEdge(dgsan, dst);
-                                ap.Edges.Add(edge);
-                                dst.EntryAnchor.Edges.Add(edge);
-                                this.mDecisionGraph.AddEdge(edge);
-                                edge.SetParent(this);
-                            }
-                        }
-                        dst = dgsan;
+                        dgmcn = dgsan;
                         break;
                     case PlayAnimationNode.ResourceType:
                         PlayAnimationNode pan = dgn as PlayAnimationNode;
-                        DGPlayNode dgpan = new DGPlayNode(pan, this.mScene);
-                        this.mDecisionGraph.AddNode(dgpan);
+                        DGPlayNode dgpan = new DGPlayNode(pan, this);
+                        this.mDGraph.AddNode(dgpan);
                         dgpan.SetParent(this);
-                        if (pan.TargetCount > 0)
-                        {
-                            ap = dgpan.TargetAnchor;
-                            dgns = pan.Targets;
-                            for (i = 0; i < dgns.Length; i++)
-                            {
-                                dst = this.InitDGN(dgpan, dgns[i]);
-                                edge = new DGEdge(dgpan, dst);
-                                ap.Edges.Add(edge);
-                                dst.EntryAnchor.Edges.Add(edge);
-                                this.mDecisionGraph.AddEdge(edge);
-                                edge.SetParent(this);
-                            }
-                        }
-                        dst = dgpan;
+                        dgmcn = dgpan;
                         break;
+                }
+                if (dgmcn != null)
+                {
+                    MulticastDecisionGraphNode mcn 
+                        = dgn as MulticastDecisionGraphNode;
+                    if (mcn.TargetCount > 0)
+                    {
+                        ap = dgmcn.TargetAnchor;
+                        dgns = mcn.Targets;
+                        for (i = 0; i < dgns.Length; i++)
+                        {
+                            dst = this.InitDGN(dgmcn, dgns[i]);
+                            edge = new DGEdge(dgmcn, dst, false);
+                            ap.Edges.Add(edge);
+                            dst.EntryAnchor.Edges.Add(edge);
+                            this.mDGraph.AddEdge(edge);
+                            edge.SetParent(this);
+                        }
+                    }
+                    dst = dgmcn;
                 }
             }
             return dst;
@@ -446,9 +458,150 @@ namespace s3piwrappers.FreeformJazz.Widgets
             get { return this.mState; }
         }
 
+        public StateMachineScene Scene
+        {
+            get { return this.mScene; }
+        }
+
+        public DGRootNode RootNode
+        {
+            get { return this.mRootNode; }
+        }
+
+        public void UpdateRootNode(bool add)
+        {
+            this.mRootNode = null;
+            if (this.mDGraph.NodeCount > 0)
+            {
+                int i, count = this.mDGraph.NodeCount;
+                for (i = 0; i < count; i++)
+                {
+                    this.mRootNode = this.mDGraph.NodeAt(i) as DGRootNode;
+                    if (this.mRootNode != null)
+                    {
+                        break;
+                    }
+                }
+                if (this.mRootNode != null && i > 0)
+                {
+                    // TODO: Swap root node and this.mDGraph.NodeAt(0)
+                }
+            }
+            if (this.mRootNode == null && add)
+            {
+                DecisionGraph dg = this.mState.DecisionGraph;
+                if (dg != null)
+                {
+                    this.mRootNode = new DGRootNode(dg, this);
+                    this.mDGraph.InsertNode(0, this.mRootNode);
+                    this.mRootNode.SetParent(this);
+                }
+            }
+        }
+
         public Digraph<DGNode, DGEdge> DecisionGraph
         {
-            get { return this.mDecisionGraph; }
+            get { return this.mDGraph; }
+        }
+
+        private abstract class StatePropertyCommand<P>
+            : PropertyCommand<State, P>
+        {
+            private StateNode mSN;
+
+            public StatePropertyCommand(StateNode sn, 
+                string property, P newValue, bool extendable)
+                : base(sn.mState, property, newValue, extendable)
+            {
+                this.mSN = sn;
+                this.mLabel = "Set State Node ";
+            }
+
+            public override bool Execute()
+            {
+                bool flag = base.Execute();
+                if (flag)
+                {
+                    this.mSN.Invalidate();
+                }
+                return flag;
+            }
+
+            public override void Undo()
+            {
+                base.Undo();
+                this.mSN.Invalidate();
+            }
+        }
+
+        private class NameCommand : StatePropertyCommand<string>
+        {
+            public NameCommand(StateNode sn, 
+                string newValue, bool extendable)
+                : base(sn, "Name", newValue, extendable)
+            {
+                this.mLabel = this.mLabel + "Name";
+            }
+        }
+
+        private class FlagsCommand : StatePropertyCommand<JazzState.Flags>
+        {
+            public FlagsCommand(StateNode sn,
+                JazzState.Flags newValue, bool extendable)
+                : base(sn, "Flags", newValue, extendable)
+            {
+                this.mLabel = this.mLabel + "Flags";
+            }
+        }
+
+        private class AwarenessCommand
+            : StatePropertyCommand<JazzChunk.AwarenessLevel>
+        {
+            public AwarenessCommand(StateNode sn,
+                JazzChunk.AwarenessLevel newValue, bool extendable)
+                : base(sn, "AwarenessOverlayLevel", newValue, extendable)
+            {
+                this.mLabel = this.mLabel + "Awareness Overlay Level";
+            }
+        }
+
+        public string Name
+        {
+            get { return this.mState.Name; }
+            set
+            {
+                if (this.mState.Name != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new NameCommand(this, value, false));
+                }
+            }
+        }
+
+        public JazzState.Flags Flags
+        {
+            get { return this.mState.Flags; }
+            set
+            {
+                if (this.mState.Flags != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new FlagsCommand(this, value, false));
+                }
+            }
+        }
+
+        public JazzChunk.AwarenessLevel AwarenessOverlayLevel
+        {
+            get { return this.mState.AwarenessOverlayLevel; }
+            set
+            {
+                if (this.mState.AwarenessOverlayLevel != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new AwarenessCommand(this, value, false));
+                }
+            }
         }
 
         public bool DGLayoutRunning;
@@ -460,19 +613,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public bool AsyncDriftTowardsCenter()
         {
-            if (this.mDecisionGraph.NodeCount == 0)
+            if (this.mDGraph.NodeCount == 0)
             {
                 return false;
             }
             int i;
             // Calculate the net bounding box of all dg nodes
-            DGNode node = this.mDecisionGraph.NodeAt(0);
+            DGNode node = this.mDGraph.NodeAt(0);
             RectangleF nbox = node.ChildrenBoundingBox();
             nbox.Offset(node.X, node.Y);
             RectangleF bbox = nbox;
-            for (i = this.mDecisionGraph.NodeCount - 1; i >= 1; i--)
+            for (i = this.mDGraph.NodeCount - 1; i >= 1; i--)
             {
-                node = this.mDecisionGraph.NodeAt(i);
+                node = this.mDGraph.NodeAt(i);
                 if (!node.MouseGrabbed)
                 {
                     nbox = node.ChildrenBoundingBox();
@@ -516,9 +669,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 return false;
             }
             // Drift the net bounding box's center towards origin
-            for (i = this.mDecisionGraph.NodeCount - 1; i >= 0; i--)
+            for (i = this.mDGraph.NodeCount - 1; i >= 0; i--)
             {
-                node = this.mDecisionGraph.NodeAt(i);
+                node = this.mDGraph.NodeAt(i);
                 if (!node.MouseGrabbed)
                 {
                     node.SetPosition(node.X + 0.1f * dx, node.Y + 0.1f * dy);
@@ -530,6 +683,11 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public float Radius
         {
             get { return this.mRad; }
+        }
+
+        public float RadiusSquared
+        {
+            get { return this.mRadSquared; }
         }
 
         public void UpdateRadius()
@@ -570,15 +728,15 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     this.bInEditMode = value;
                     int i;
                     DGNode node;
-                    for (i = this.mDecisionGraph.NodeCount - 1; i >= 0; i--)
+                    for (i = this.mDGraph.NodeCount - 1; i >= 0; i--)
                     {
-                        node = this.mDecisionGraph.NodeAt(i);
+                        node = this.mDGraph.NodeAt(i);
                         node.InEditMode = value;
                     }
                     DGEdge edge;
-                    for (i = this.mDecisionGraph.EdgeCount - 1; i >= 0; i--)
+                    for (i = this.mDGraph.EdgeCount - 1; i >= 0; i--)
                     {
-                        edge = this.mDecisionGraph.EdgeAt(i);
+                        edge = this.mDGraph.EdgeAt(i);
                         edge.InEditMode = value;
                     }
                     this.Invalidate();
@@ -606,14 +764,14 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 DGNode node;
                 DGEdge edge;
                 bool visible = !minimized;
-                for (i = this.mDecisionGraph.NodeCount - 1; i >= 0; i--)
+                for (i = this.mDGraph.NodeCount - 1; i >= 0; i--)
                 {
-                    node = this.mDecisionGraph.NodeAt(i);
+                    node = this.mDGraph.NodeAt(i);
                     node.Visible = visible;
                 }
-                for (i = this.mDecisionGraph.EdgeCount - 1; i >= 0; i--)
+                for (i = this.mDGraph.EdgeCount - 1; i >= 0; i--)
                 {
-                    edge = this.mDecisionGraph.EdgeAt(i);
+                    edge = this.mDGraph.EdgeAt(i);
                     edge.Visible = visible;
                 }
             }
@@ -826,6 +984,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 FontFamily.GenericSansSerif, 10, FontStyle.Bold);
         }
 
+        private const Keys kSelectKey = Keys.Control;
+
         protected override bool OnMouseDown(GraphMouseEventArgs e)
         {
             bool flag = base.OnMouseDown(e);
@@ -834,14 +994,21 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 if (this.ClipsChildrenToShape)
                 {
                     this.mScene.SelectStateNode(this,
-                    (Control.ModifierKeys & Keys.Control) != Keys.Control);
+                        (Control.ModifierKeys & kSelectKey) != kSelectKey);
                 }
                 else
                 {
                     return false;
                 }
             }
+            this.mScene.OnStateNodePressed(this);
             return flag;
+        }
+
+        protected override bool OnMouseMove(GraphMouseEventArgs e)
+        {
+            this.mScene.OnStateNodeHovered(this);
+            return base.OnMouseMove(e);
         }
 
         protected override bool OnMouseDoubleClick(GraphMouseEventArgs e)
@@ -854,9 +1021,6 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 }
                 if (this.ClipsChildrenToShape)
                 {
-                    this.Zvalue = 2;
-                    this.ClipsChildrenToShape = false;
-                    this.InEditMode = true;
                     this.mScene.SetFocusedState(this);
                 }
                 else
@@ -1020,6 +1184,11 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public bool Equals(StateNode other)
         {
             return other != null && other.mState.Equals(this.mState);
+        }
+
+        internal void ConnectOrphanDGNodes()
+        {
+            throw new NotImplementedException();
         }
     }
 }

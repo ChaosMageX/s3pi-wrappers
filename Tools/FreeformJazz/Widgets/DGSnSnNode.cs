@@ -10,20 +10,47 @@ namespace s3piwrappers.FreeformJazz.Widgets
     public class DGSnSnNode : DGNode
     {
         private NextStateNode mNextStateNode;
+        private RefToState mNextState;
         
         private string mNextStateName;
         private GraphicsPath mBorderPath;
 
-        public DGSnSnNode(NextStateNode nsn, StateMachineScene scene)
-            : base(nsn, scene)
+        public DGSnSnNode(NextStateNode nsn, StateNode state)
+            : base(nsn, state)
         {
             if (nsn == null)
             {
                 throw new ArgumentNullException("nsn");
             }
             this.mNextStateNode = nsn;
-
+            this.mNextState = new RefToState(this.mScene, nsn.NextState);
             this.UpdateVisualization();
+        }
+
+        private class NextStateCommand : DGNodeRefPropertyCommand<
+            DGSnSnNode, NextStateNode, State>
+        {
+            public NextStateCommand(DGSnSnNode dgsn,
+                State newValue, bool extendable)
+                : base(dgsn, dgsn.mNextStateNode, dgsn.mNextState, 
+                "NextState", newValue, extendable)
+            {
+                this.mLabel = "Set Next State Node Reference";
+            }
+        }
+
+        public RefToState NextState
+        {
+            get { return this.mNextState; }
+            set
+            {
+                State state = value == null ? null : value.GetValue();
+                if (this.mNextStateNode.NextState != state)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new NextStateCommand(this, state, false));
+                }
+            }
         }
 
         private static Font sTextFont 

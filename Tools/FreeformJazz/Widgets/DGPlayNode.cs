@@ -11,11 +11,13 @@ using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
 {
-    public class DGPlayNode : DGMulticastNode
+    public class DGPlayNode : DGAnimNode
     {
         private static readonly RK sZeroKey = new RK();
 
         private PlayAnimationNode mPlayNode;
+
+        private SlotBuilder mSlotSetup;
 
         private GraphicsPath mBorderPath;
 
@@ -27,16 +29,161 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private string mTextString;
 
-        public DGPlayNode(PlayAnimationNode pan, StateMachineScene scene)
-            : base(pan, scene)
+        public DGPlayNode(PlayAnimationNode pan, StateNode state)
+            : base(pan, state, true)
         {
             if (pan == null)
             {
-                throw new ArgumentNullException("san");
+                throw new ArgumentNullException("pan");
             }
             this.mPlayNode = pan;
 
+            this.mSlotSetup = new SlotBuilder(this.mScene, pan.SlotSetup);
+
             this.UpdateVisualization();
+        }
+
+        private abstract class PlayNodePropertyCommand<P>
+            : DGNodePropertyCommand<DGPlayNode, PlayAnimationNode, P>
+        {
+            protected const string kLabelPrefix 
+                = "Set Play Animation Node ";
+
+            public PlayNodePropertyCommand(DGPlayNode dgpn, 
+                string property, P newValue, bool extendable)
+                : base(dgpn, dgpn.mPlayNode, 
+                    property, newValue, extendable)
+            {
+            }
+        }
+
+        private class ClipKeyCommand : PlayNodePropertyCommand<RK>
+        {
+            public ClipKeyCommand(DGPlayNode dgpn, 
+                RK newValue, bool extendable)
+                : base(dgpn, "ClipKey", newValue, extendable)
+            {
+                this.mLabel = kLabelPrefix + "Base Clip Key";
+            }
+        }
+
+        private class TrackMaskKeyCommand : PlayNodePropertyCommand<RK>
+        {
+            public TrackMaskKeyCommand(DGPlayNode dgpn,
+                RK newValue, bool extendable)
+                : base(dgpn, "TrackMaskKey", newValue, extendable)
+            {
+                this.mLabel = kLabelPrefix + "Track Mask Key";
+            }
+        }
+
+        private class AdditiveClipKeyCommand : PlayNodePropertyCommand<RK>
+        {
+            public AdditiveClipKeyCommand(DGPlayNode dgpn,
+                RK newValue, bool extendable)
+                : base(dgpn, "AdditiveClipKey", newValue, extendable)
+            {
+                this.mLabel = kLabelPrefix + "Additive Clip Key";
+            }
+        }
+
+        private class ClipPatternCommand : PlayNodePropertyCommand<string>
+        {
+            public ClipPatternCommand(DGPlayNode dgpn,
+                string newValue, bool extendable)
+                : base(dgpn, "ClipPattern", newValue, extendable)
+            {
+                this.mLabel = kLabelPrefix + "Base Clip Pattern";
+            }
+        }
+
+        private class AdditiveClipPatternCommand
+            : PlayNodePropertyCommand<string>
+        {
+            public AdditiveClipPatternCommand(DGPlayNode dgpn,
+                string newValue, bool extendable)
+                : base(dgpn, "AdditiveClipPattern", newValue, extendable)
+            {
+                this.mLabel = kLabelPrefix + "Additive Clip Pattern";
+            }
+        }
+
+        public RK ClipKey
+        {
+            get { return this.mPlayNode.ClipKey; }
+            set
+            {
+                if (!this.mPlayNode.ClipKey.Equals(value))
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new ClipKeyCommand(this, value, false));
+                }
+            }
+        }
+
+        public RK TrackMaskKey
+        {
+            get { return this.mPlayNode.TrackMaskKey; }
+            set
+            {
+                if (!this.mPlayNode.TrackMaskKey.Equals(value))
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new TrackMaskKeyCommand(this, value, false));
+                }
+            }
+        }
+
+        public SlotBuilder SlotSetup
+        {
+            get { return this.mSlotSetup; }
+            set
+            {
+                if (this.mSlotSetup != value)
+                {
+                    this.mSlotSetup = new SlotBuilder(
+                        this.mScene, this.mPlayNode.SlotSetup, value);
+                }
+            }
+        }
+
+        public RK AdditiveClipKey
+        {
+            get { return this.mPlayNode.AdditiveClipKey; }
+            set
+            {
+                if (!this.mPlayNode.AdditiveClipKey.Equals(value))
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new AdditiveClipKeyCommand(this, value, false));
+                }
+            }
+        }
+
+        public string ClipPattern
+        {
+            get { return this.mPlayNode.ClipPattern; }
+            set
+            {
+                if (this.mPlayNode.ClipPattern != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new ClipPatternCommand(this, value, false));
+                }
+            }
+        }
+
+        public string AdditiveClipPattern
+        {
+            get { return this.mPlayNode.AdditiveClipPattern; }
+            set
+            {
+                if (this.mPlayNode.AdditiveClipPattern != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new AdditiveClipPatternCommand(this, value, false));
+                }
+            }
         }
 
         private static Font sTextFont 

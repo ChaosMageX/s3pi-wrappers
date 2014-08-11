@@ -7,8 +7,8 @@ namespace s3piwrappers.SWB
     public abstract class ValueElement<T> : DataElement
         where T : struct
     {
-        protected ValueElement(int APIversion, EventHandler handler, ValueElement<T> basis)
-            : this(APIversion, handler, basis.mData)
+        protected ValueElement(int apiVersion, EventHandler handler, ValueElement<T> basis)
+            : this(apiVersion, handler, basis.mData)
         {
         }
 

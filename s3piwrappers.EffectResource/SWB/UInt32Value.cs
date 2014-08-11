@@ -30,7 +30,7 @@ namespace s3piwrappers.SWB
         }
 
         [ElementPriority(1)]
-        public UInt32 Data
+        public uint Data
         {
             get { return mData; }
             set

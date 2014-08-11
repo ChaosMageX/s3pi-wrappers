@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
 using s3pi.Interfaces;
+using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Resources;
 using s3piwrappers.JazzGraph;
 
@@ -12,6 +13,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
     public class DGPropNode : DGMulticastNode
     {
         private CreatePropNode mPropNode;
+        private RefToActor mPropActor;
+        private RefToParam mPropParam;
 
         private GraphicsPath mBorderPath;
 
@@ -21,16 +24,96 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private string mTextString;
 
-        public DGPropNode(CreatePropNode cpn, StateMachineScene scene)
-            : base(cpn, scene)
+        public DGPropNode(CreatePropNode cpn, StateNode state)
+            : base(cpn, state)
         {
             if (cpn == null)
             {
                 throw new ArgumentNullException("cpn");
             }
             this.mPropNode = cpn;
-
+            this.mPropActor = new RefToActor(this.mScene, cpn.PropActor);
+            this.mPropParam = new RefToParam(this.mScene, cpn.PropParam);
             this.UpdateVisualization();
+        }
+
+        private class PropActorCommand : DGNodeRefPropertyCommand<
+            DGPropNode, CreatePropNode, ActorDefinition>
+        {
+            public PropActorCommand(DGPropNode dgpn,
+                ActorDefinition newValue, bool extendable)
+                : base(dgpn, dgpn.mPropNode, dgpn.mPropActor, 
+                "PropActor", newValue, extendable)
+            {
+                this.mLabel = "Set Create Prop Node Actor";
+            }
+        }
+
+        private class PropParamCommand : DGNodeRefPropertyCommand<
+            DGPropNode, CreatePropNode, ParamDefinition>
+        {
+            public PropParamCommand(DGPropNode dgpn,
+                ParamDefinition newValue, bool extendable)
+                : base(dgpn, dgpn.mPropNode, dgpn.mPropParam,
+                "PropParameter", newValue, extendable)
+            {
+                this.mLabel = "Set Create Prop Node Parameter";
+            }
+        }
+
+        private class PropKeyCommand
+            : DGNodePropertyCommand<DGPropNode, CreatePropNode, RK>
+        {
+            public PropKeyCommand(DGPropNode dgpn,
+                RK newValue, bool extendable)
+                : base(dgpn, dgpn.mPropNode, 
+                    "PropKey", newValue, extendable)
+            {
+                this.mLabel = "Set Create Prop Node Prop Key";
+            }
+        }
+
+        public RefToActor PropActor
+        {
+            get { return this.mPropActor; }
+            set
+            {
+                ActorDefinition ad
+                    = value == null ? null : value.GetValue();
+                if (this.mPropNode.PropActor != ad)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new PropActorCommand(this, ad, false));
+                }
+            }
+        }
+
+        public RefToParam PropParam
+        {
+            get { return this.mPropParam; }
+            set
+            {
+                ParamDefinition pd
+                    = value == null ? null : value.GetValue();
+                if (this.mPropNode.PropParam != pd)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new PropParamCommand(this, pd, false));
+                }
+            }
+        }
+
+        public RK PropKey
+        {
+            get { return this.mPropNode.PropKey; }
+            set
+            {
+                if (!this.mPropNode.PropKey.Equals(value))
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new PropKeyCommand(this, value, false));
+                }
+            }
         }
 
         private static Font sTextFont 
@@ -72,7 +155,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             w = Math.Max(w, size.Width + 5);/* */
             sb.AppendLine(string.Concat("A: ", (ad == null ? "" : ad.Name)));
             
-            ParamDefinition pd = this.mPropNode.PropParameter;
+            ParamDefinition pd = this.mPropNode.PropParam;
             /*this.mParamString = "P: " + (pd == null ? "" : pd.Name);
             //w = Math.Max(w, kAGW * this.mParamString.Length + 4);
             size = g.MeasureString(this.mParamString, TextFont);

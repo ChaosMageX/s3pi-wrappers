@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class SequenceEffect : Effect, IEquatable<SequenceEffect>
     {
+        #region Constructors
         public SequenceEffect(int apiVersion, EventHandler handler, SequenceEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -19,83 +20,77 @@ namespace s3piwrappers.Effects
             mElements = new DataList<Element>(handler);
         }
 
-        public SequenceEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public SequenceEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
-
+        #endregion
 
         public class Element : DataElement, IEquatable<Element>
         {
+            #region Constructors
             public Element(int apiVersion, EventHandler handler) : base(apiVersion, handler)
             {
+                mTimeRange = new Vector2ValueLE(apiVersion, handler, 1.0f, 1.0f);
             }
 
             public Element(int apiVersion, EventHandler handler, Element basis)
                 : base(apiVersion, handler)
             {
-                mFloat01 = basis.Float01;
-                mFloat02 = basis.Float02;
-                mString01 = basis.mString01;
+                mTimeRange = new Vector2ValueLE(apiVersion, handler, basis.mTimeRange);
+                mEffectName = basis.mEffectName;
             }
-
+            
             public Element(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler)
             {
                 Parse(s);
             }
+            #endregion
 
-            private float mFloat01 = 1.0f;
-            private float mFloat02 = 1.0f;
-            private string mString01 = string.Empty;
+            #region Attributes
+            private Vector2ValueLE mTimeRange;
+            private string mEffectName = string.Empty;
+            #endregion
 
+            #region Content Fields
             [ElementPriority(1)]
-            public float Float01
+            public Vector2ValueLE TimeRange
             {
-                get { return mFloat01; }
+                get { return mTimeRange; }
                 set
                 {
-                    mFloat01 = value;
+                    mTimeRange = new Vector2ValueLE(requestedApiVersion, handler, value);
                     OnElementChanged();
                 }
             }
-
+            
             [ElementPriority(2)]
-            public float Float02
-            {
-                get { return mFloat02; }
-                set
-                {
-                    mFloat02 = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(3)]
             public string EffectName
             {
-                get { return mString01; }
+                get { return mEffectName; }
                 set
                 {
-                    mString01 = value;
+                    mEffectName = value ?? string.Empty;
                     OnElementChanged();
                 }
             }
+            #endregion
 
+            #region Data I/O
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mFloat01, ByteOrder.LittleEndian);
-                s.Read(out mFloat02, ByteOrder.LittleEndian);
-                s.Read(out mString01, StringType.ZeroDelimited);
+                mTimeRange = new Vector2ValueLE(requestedApiVersion, handler, stream);
+                s.Read(out mEffectName, StringType.ZeroDelimited);
             }
-
 
             public override void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mFloat01, ByteOrder.LittleEndian);
-                s.Write(mFloat02, ByteOrder.LittleEndian);
-                s.Write(mString01, StringType.ZeroDelimited);
+                mTimeRange.UnParse(stream);
+                s.Write(mEffectName, StringType.ZeroDelimited);
             }
+            #endregion
 
             public bool Equals(Element other)
             {
@@ -103,11 +98,12 @@ namespace s3piwrappers.Effects
             }
         }
 
-
+        #region Attributes
         private DataList<Element> mElements;
-        private UInt32 mInt01;
+        private uint mFlags;
+        #endregion
 
-
+        #region Content Fields
         [ElementPriority(1)]
         public DataList<Element> Elements
         {
@@ -120,31 +116,33 @@ namespace s3piwrappers.Effects
         }
 
         [ElementPriority(2)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mElements = new DataList<Element>(handler, stream);
-            s.Read(out mInt01);
+            s.Read(out mFlags);
+            //mFlags &= 0xF;
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             mElements.UnParse(stream);
-            s.Write(mInt01);
+            s.Write(mFlags);
         }
-
+        #endregion
 
         public bool Equals(SequenceEffect other)
         {

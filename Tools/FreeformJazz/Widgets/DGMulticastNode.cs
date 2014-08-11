@@ -125,8 +125,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
         protected readonly AnchorPoint mTargetAnchor;
 
         public DGMulticastNode(MulticastDecisionGraphNode mcdgn,
-            StateMachineScene scene)
-            : base(mcdgn, scene)
+            StateNode state)
+            : base(mcdgn, state)
         {
             this.mMcDgn = mcdgn;
             this.mTargetAnchor = new AnchorPoint(this, 1, 0);

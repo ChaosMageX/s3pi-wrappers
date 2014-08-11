@@ -9,6 +9,9 @@ namespace s3piwrappers.Effects
 {
     public class DecalEffect : Effect, IEquatable<DecalEffect>
     {
+        private static readonly bool isTheSims4 = false;
+
+        #region Constructors
         public DecalEffect(int apiVersion, EventHandler handler, DecalEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -17,46 +20,50 @@ namespace s3piwrappers.Effects
         public DecalEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mFloatList03 = new DataList<FloatValue>(handler);
-            mColourList01 = new DataList<ColourValue>(handler);
-            mFloatList04 = new DataList<FloatValue>(handler);
+            mRotationCurve = new DataList<FloatValue>(handler);
+            mSizeCurve = new DataList<FloatValue>(handler);
+            mAlphaCurve = new DataList<FloatValue>(handler);
+            mColorCurve = new DataList<ColorValue>(handler);
+            mAspectCurve = new DataList<FloatValue>(handler);
+            mTextureOffset = new Vector2ValueLE(apiVersion, handler);
         }
 
-        public DecalEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public DecalEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-
-        private UInt32 mUint01;
-        private UInt64 mDdsResource;
-        private Byte mByte01;
-        private float mFloat01;
-        private Byte mByte02;
-        private float mFloat02;
-        private DataList<FloatValue> mFloatList01;
-        private DataList<FloatValue> mFloatList02;
-        private DataList<FloatValue> mFloatList03;
-        private DataList<ColourValue> mColourList01;
-        private DataList<FloatValue> mFloatList04;
-        private float mFloat04;
-        private float mFloat05;
-        private float mFloat06;
-        private float mFloat07;
-        private float mFloat08; //LE
-        private float mFloat09; //LE
-        private UInt64 mLong01;
+        #region Attributes
+        private uint mFlags;
+        private ulong mDdsResource;
+        private byte mByte01;
+        private uint mInt01;//originally float
+        private byte mByte02;
+        private uint mInt02; //The Sims 4
+        private float mLifetime;
+        private DataList<FloatValue> mRotationCurve;
+        private DataList<FloatValue> mSizeCurve;
+        private DataList<FloatValue> mAlphaCurve;
+        private DataList<ColorValue> mColorCurve;
+        private DataList<FloatValue> mAspectCurve;
+        private float mAlphaVary;
+        private float mSizeVary;
+        private float mRotationVary;
+        private float mTextureRepeat;
+        private Vector2ValueLE mTextureOffset;
+        private ulong mEmitColorMapId;
         private byte mByte03; //version 2+
+        #endregion
 
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Uint02
+        public uint Flags
         {
-            get { return mUint01; }
+            get { return mFlags; }
             set
             {
-                mUint01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
@@ -84,12 +91,12 @@ namespace s3piwrappers.Effects
         }
 
         [ElementPriority(4)]
-        public float Float01
+        public uint Int01
         {
-            get { return mFloat01; }
+            get { return mInt01; }
             set
             {
-                mFloat01 = value;
+                mInt01 = value;
                 OnElementChanged();
             }
         }
@@ -106,148 +113,149 @@ namespace s3piwrappers.Effects
         }
 
         [ElementPriority(6)]
-        public float Float02
+        public uint Int02
         {
-            get { return mFloat02; }
+            get { return mInt02; }
             set
             {
-                mFloat02 = value;
-                OnElementChanged();
-            }
-        }
-
-        public DataList<FloatValue> FloatList01
-        {
-            get { return mFloatList01; }
-            set
-            {
-                mFloatList01 = value;
+                mInt02 = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public DataList<FloatValue> FloatList02
+        public float Lifetime
         {
-            get { return mFloatList02; }
+            get { return mLifetime; }
             set
             {
-                mFloatList02 = value;
+                mLifetime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public DataList<FloatValue> FloatList03
+        public DataList<FloatValue> RotationCurve
         {
-            get { return mFloatList03; }
+            get { return mRotationCurve; }
             set
             {
-                mFloatList03 = value;
+                mRotationCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public DataList<ColourValue> ColourList01
+        public DataList<FloatValue> SizeCurve
         {
-            get { return mColourList01; }
+            get { return mSizeCurve; }
             set
             {
-                mColourList01 = value;
+                mSizeCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public DataList<FloatValue> FloatList04
+        public DataList<FloatValue> AlphaCurve
         {
-            get { return mFloatList04; }
+            get { return mAlphaCurve; }
             set
             {
-                mFloatList04 = value;
+                mAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public float Float04
+        public DataList<ColorValue> ColorCurve
         {
-            get { return mFloat04; }
+            get { return mColorCurve; }
             set
             {
-                mFloat04 = value;
+                mColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public float Float05
+        public DataList<FloatValue> AspectCurve
         {
-            get { return mFloat05; }
+            get { return mAspectCurve; }
             set
             {
-                mFloat05 = value;
+                mAspectCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(13)]
-        public float Float06
+        public float AlphaVary
         {
-            get { return mFloat06; }
+            get { return mAlphaVary; }
             set
             {
-                mFloat06 = value;
+                mAlphaVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(14)]
-        public float Float07
+        public float SizeVary
         {
-            get { return mFloat07; }
+            get { return mSizeVary; }
             set
             {
-                mFloat07 = value;
+                mSizeVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(15)]
-        public float Float08
+        public float RotationVary
         {
-            get { return mFloat08; }
+            get { return mRotationVary; }
             set
             {
-                mFloat08 = value;
+                mRotationVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(16)]
-        public float Float09
+        public float TextureRepeat
         {
-            get { return mFloat09; }
+            get { return mTextureRepeat; }
             set
             {
-                mFloat09 = value;
+                mTextureRepeat = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(17)]
-        public ulong Long01
+        public Vector2ValueLE TextureOffset
         {
-            get { return mLong01; }
+            get { return mTextureOffset; }
             set
             {
-                mLong01 = value;
+                mTextureOffset = new Vector2ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(18)]
+        public ulong EmitColorMapId
+        {
+            get { return mEmitColorMapId; }
+            set
+            {
+                mEmitColorMapId = value;
+                OnElementChanged();
+            }
+        }
+
+        [ElementPriority(19)]
         public byte Byte03
         {
             get { return mByte03; }
@@ -257,61 +265,66 @@ namespace s3piwrappers.Effects
                 OnElementChanged();
             }
         }
+        #endregion
 
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mUint01);
+            s.Read(out mFlags);
+            //mFlags &= 0x7F;
+
             s.Read(out mDdsResource);
             s.Read(out mByte01);
-            s.Read(out mFloat01);
+            s.Read(out mInt01);
             s.Read(out mByte02);
-            s.Read(out mFloat02);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            mFloatList03 = new DataList<FloatValue>(handler, stream);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
-            mFloatList04 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat04);
-            s.Read(out mFloat05);
-            s.Read(out mFloat06);
-            s.Read(out mFloat07);
-            s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
-            s.Read(out mLong01);
+            if (isTheSims4) s.Read(out mInt02);
+            s.Read(out mLifetime);
+            mRotationCurve = new DataList<FloatValue>(handler, stream);
+            mSizeCurve = new DataList<FloatValue>(handler, stream);
+            mAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mColorCurve = new DataList<ColorValue>(handler, stream);
+            mAspectCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mAlphaVary);
+            s.Read(out mSizeVary);
+            s.Read(out mRotationVary);
+            s.Read(out mTextureRepeat);
+            mTextureOffset = new Vector2ValueLE(requestedApiVersion, handler, stream);
+            s.Read(out mEmitColorMapId);
             if (mSection.Version >= 2 && stream.Position < stream.Length) s.Read(out mByte03); //version 2+
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mUint01);
+            s.Write(mFlags);
             s.Write(mDdsResource);
             s.Write(mByte01);
-            s.Write(mFloat01);
+            s.Write(mInt01);
             s.Write(mByte02);
-            s.Write(mFloat02);
-            mFloatList01.UnParse(stream);
-            mFloatList02.UnParse(stream);
-            mFloatList03.UnParse(stream);
-            mColourList01.UnParse(stream);
-            mFloatList04.UnParse(stream);
-            s.Write(mFloat04);
-            s.Write(mFloat05);
-            s.Write(mFloat06);
-            s.Write(mFloat07);
-            s.Write(mFloat08, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat09, ByteOrder.LittleEndian); //LE
-            s.Write(mLong01);
+            if (isTheSims4) s.Write(mInt02);
+            s.Write(mLifetime);
+            mRotationCurve.UnParse(stream);
+            mSizeCurve.UnParse(stream);
+            mAlphaCurve.UnParse(stream);
+            mColorCurve.UnParse(stream);
+            mAspectCurve.UnParse(stream);
+            s.Write(mAlphaVary);
+            s.Write(mSizeVary);
+            s.Write(mRotationVary);
+            s.Write(mTextureRepeat);
+            mTextureOffset.UnParse(stream);
+            s.Write(mEmitColorMapId);
             if (mSection.Version >= 2) s.Write(mByte03); //version 2+
         }
+        #endregion
 
         public override List<string> ContentFields
         {
             get
             {
                 List<string> fields = base.ContentFields;
+                if (!isTheSims4) fields.Remove("Int02");
                 if (mSection.Version < 2) fields.Remove("Byte03");
                 return fields;
             }

@@ -30,14 +30,14 @@ namespace s3piwrappers.EffectCloner.Swarm
                 data.RequestedApiVersion, handler, section, s);
         }
 
-        public class StringHandleComparer : IComparer<VisualEffectHandle>
+        public class StringHandleComparer : IComparer<VisualEffectName>
         {
             public string Value;
             public StringHandleComparer(string value)
             {
                 this.Value = value;
             }
-            public int Compare(VisualEffectHandle x, VisualEffectHandle y)
+            public int Compare(VisualEffectName x, VisualEffectName y)
             {
                 if (x == null)
                     return (y == null) ? 0 : this.Value.CompareTo(y.EffectName);
@@ -51,10 +51,10 @@ namespace s3piwrappers.EffectCloner.Swarm
         {
             //VisualEffectHandle target = new VisualEffectHandle(0, null);
             //target.EffectName = CreateSafeEffectName(name);
-            return resource.VisualEffectHandles.BinarySearch(null, new StringHandleComparer(name));
+            return resource.VisualEffectNames.BinarySearch(null, new StringHandleComparer(name));
         }
 
-        public static VisualEffectHandle FindVisualEffectHandle(string name, EffectResource resource)
+        public static VisualEffectName FindVisualEffectHandle(string name, EffectResource resource)
         {
             string effectName = CreateSafeEffectName(name, true);
             int index = BinarySearchForEffectHandle(effectName, resource);
@@ -63,18 +63,18 @@ namespace s3piwrappers.EffectCloner.Swarm
                 //throw new Exception("Unable to find effect handle named " + effectName);
                 return null;
             }
-            return resource.VisualEffectHandles[index];
+            return resource.VisualEffectNames[index];
         }
 
         public static VisualEffect FindVisualEffect(string name, EffectResource resource)
         {
-            VisualEffectHandle handle = FindVisualEffectHandle(name, resource);
+            VisualEffectName handle = FindVisualEffectHandle(name, resource);
             if (handle == null)
                 return null;
             return resource.VisualEffectSections.Items[(int)handle.Index] as VisualEffect;
         }
 
-        public static VisualEffect FindVisualEffect(VisualEffectHandle handle, EffectResource resource)
+        public static VisualEffect FindVisualEffect(VisualEffectName handle, EffectResource resource)
         {
             return resource.VisualEffectSections.Items[(int)handle.Index] as VisualEffect;
         }
@@ -134,7 +134,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             return (VisualEffectType)0;
         }
 
-        public static E[] FindEffects<E>(VisualEffectHandle handle, 
+        public static E[] FindEffects<E>(VisualEffectName handle, 
             EffectResource resource) where E : Effect
         {
             VisualEffectType eType = GetEffectType<E>();
@@ -144,20 +144,20 @@ namespace s3piwrappers.EffectCloner.Swarm
             if (effectSection == null)
                 return null;
             VisualEffect visualEffect = FindVisualEffect(handle, resource);
-            int indexCount = visualEffect.Items.Count;
-            VisualEffect.Index veIndex;
+            int indexCount = visualEffect.Descriptions.Count;
+            VisualEffect.Description veIndex;
             for (int i = 0; i < indexCount; i++)
             {
-                veIndex = visualEffect.Items[i] as VisualEffect.Index;
-                if (veIndex.BlockType == bType)
+                veIndex = visualEffect.Descriptions[i] as VisualEffect.Description;
+                if (veIndex.ComponentType == bType)
                 {
-                    effects.Add(effectSection.Items[veIndex.BlockIndex] as E);
+                    effects.Add(effectSection.Items[veIndex.ComponentIndex] as E);
                 }
             }
             return effects.ToArray();
         }
 
-        public static string[] GetItemBStrings(VisualEffectHandle handle, EffectResource resource)
+        public static string[] GetSurfaceStrings(VisualEffectName handle, EffectResource resource)
         {
             byte pEffectType = (byte)VisualEffectType.Particle;
             byte mEffectType = (byte)VisualEffectType.Metaparticle;
@@ -166,55 +166,59 @@ namespace s3piwrappers.EffectCloner.Swarm
             EffectResource.EffectSection mEffects = FindEffectSection(VisualEffectType.Metaparticle, resource);
             EffectResource.EffectSection dEffects = FindEffectSection(VisualEffectType.Distribute, resource);
 
-            List<string> itemBstrings = new List<string>();
+            List<string> surfaceStrings = new List<string>();
+            DataList<Effect.Surface> surfaces;
             VisualEffect visualEffect = FindVisualEffect(handle, resource);
-            VisualEffect.Index index;
-            Effect.ItemB item;
-            int i, j, count, indexCount = visualEffect.Items.Count;
+            VisualEffect.Description index;
+            Effect.Surface surface;
+            int i, j, count, indexCount = visualEffect.Descriptions.Count;
             for (i = 0; i < indexCount; i++)
             {
-                index = visualEffect.Items[i] as VisualEffect.Index;
-                if (index.BlockType == pEffectType)
+                index = visualEffect.Descriptions[i] as VisualEffect.Description;
+                if (index.ComponentType == pEffectType)
                 {
-                    ParticleEffect particle = pEffects.Items[index.BlockIndex] as ParticleEffect;
-                    count = particle.ItemBList01.Count;
+                    ParticleEffect particle = pEffects.Items[index.ComponentIndex] as ParticleEffect;
+                    surfaces = particle.Surfaces;
+                    count = surfaces.Count;
                     for (j = 0; j < count; j++)
                     {
-                        item = particle.ItemBList01[j];
-                        if (!string.IsNullOrEmpty(item.String01))
-                            itemBstrings.Add(string.Format("{0:X4}(P).ItemBList01[{1}].String01:{2}", i, j, item.String01));
-                        if (!string.IsNullOrEmpty(item.String02))
-                            itemBstrings.Add(string.Format("{0:X4}(P).ItemBList01[{1}].String02:{2}", i, j, item.String02));
+                        surface = surfaces[j];
+                        if (!string.IsNullOrEmpty(surface.String01))
+                            surfaceStrings.Add(string.Format("{0:X4}(P).Surfaces[{1}].String01:{2}", i, j, surface.String01));
+                        if (!string.IsNullOrEmpty(surface.String02))
+                            surfaceStrings.Add(string.Format("{0:X4}(P).Surfaces[{1}].String02:{2}", i, j, surface.String02));
                     }
                 }
-                if (index.BlockType == mEffectType)
+                if (index.ComponentType == mEffectType)
                 {
-                    MetaparticleEffect metaparticle = mEffects.Items[index.BlockIndex] as MetaparticleEffect;
-                    count = metaparticle.ItemBList01.Count;
+                    MetaparticleEffect metaparticle = mEffects.Items[index.ComponentIndex] as MetaparticleEffect;
+                    surfaces = metaparticle.Surfaces;
+                    count = surfaces.Count;
                     for (j = 0; j < count; j++)
                     {
-                        item = metaparticle.ItemBList01[j];
-                        if (!string.IsNullOrEmpty(item.String01))
-                            itemBstrings.Add(string.Format("{0:X4}(M).ItemBList01[{1}].String01:{2}", i, j, item.String01));
-                        if (!string.IsNullOrEmpty(item.String02))
-                            itemBstrings.Add(string.Format("{0:X4}(M).ItemBList01[{1}].String02:{2}", i, j, item.String02));
+                        surface = metaparticle.Surfaces[j];
+                        if (!string.IsNullOrEmpty(surface.String01))
+                            surfaceStrings.Add(string.Format("{0:X4}(M).Surfaces[{1}].String01:{2}", i, j, surface.String01));
+                        if (!string.IsNullOrEmpty(surface.String02))
+                            surfaceStrings.Add(string.Format("{0:X4}(M).Surfaces[{1}].String02:{2}", i, j, surface.String02));
                     }
                 }
-                if (index.BlockType == dEffectType)
+                if (index.ComponentType == dEffectType)
                 {
-                    DistributeEffect distribute = dEffects.Items[index.BlockIndex] as DistributeEffect;
-                    count = distribute.ItemBList01.Count;
+                    DistributeEffect distribute = dEffects.Items[index.ComponentIndex] as DistributeEffect;
+                    surfaces = distribute.Surfaces;
+                    count = surfaces.Count;
                     for (j = 0; j < count; j++)
                     {
-                        item = distribute.ItemBList01[j];
-                        if (!string.IsNullOrEmpty(item.String01))
-                            itemBstrings.Add(string.Format("{0:X4}(D).ItemBList01[{1}].String01:{2}", i, j, item.String01));
-                        if (!string.IsNullOrEmpty(item.String02))
-                            itemBstrings.Add(string.Format("{0:X4}(D).ItemBList01[{1}].String02:{2}", i, j, item.String02));
+                        surface = surfaces[j];
+                        if (!string.IsNullOrEmpty(surface.String01))
+                            surfaceStrings.Add(string.Format("{0:X4}(D).Surfaces[{1}].String01:{2}", i, j, surface.String01));
+                        if (!string.IsNullOrEmpty(surface.String02))
+                            surfaceStrings.Add(string.Format("{0:X4}(D).Surfaces[{1}].String02:{2}", i, j, surface.String02));
                     }
                 }
             }
-            return itemBstrings.ToArray();
+            return surfaceStrings.ToArray();
         }
 
         public static void SetAllEffectReferences(string oldEffectName, string newEffectName, 
@@ -231,10 +235,10 @@ namespace s3piwrappers.EffectCloner.Swarm
                 for (i = 0; i < metaCount; i++)
                 {
                     metaEffect = metaSection.Items[i] as MetaparticleEffect;
-                    if (metaEffect.BaseEffectName.ToLowerInvariant() == oldEffectName)
-                        metaEffect.BaseEffectName = newEffectName;
-                    if (metaEffect.DeathEffectName.ToLowerInvariant() == oldEffectName)
-                        metaEffect.DeathEffectName = newEffectName;
+                    if (metaEffect.ComponentName.ToLowerInvariant() == oldEffectName)
+                        metaEffect.ComponentName = newEffectName;
+                    if (metaEffect.ComponentType.ToLowerInvariant() == oldEffectName)
+                        metaEffect.ComponentType = newEffectName;
                 }
             }
             EffectResource.EffectSection seqSection = FindEffectSection(VisualEffectType.Sequence, resource);
@@ -256,7 +260,7 @@ namespace s3piwrappers.EffectCloner.Swarm
 
         public static string[] GetEffectNameList(EffectResource resource)
         {
-            EffectResource.VisualEffectHandleList handleList = resource.VisualEffectHandles;
+            EffectResource.VisualEffectNameList handleList = resource.VisualEffectNames;
             int count = handleList.Count;
             string[] nameList = new string[count];
             for (int i = 0; i < count; i++)
@@ -266,7 +270,7 @@ namespace s3piwrappers.EffectCloner.Swarm
 
         public static void WriteEffectNameList(EffectResource resource, System.IO.TextWriter writer)
         {
-            EffectResource.VisualEffectHandleList handleList = resource.VisualEffectHandles;
+            EffectResource.VisualEffectNameList handleList = resource.VisualEffectNames;
             int count = handleList.Count;
             for (int i = 0; i < count; i++)
             {
@@ -509,7 +513,7 @@ namespace s3piwrappers.EffectCloner.Swarm
 
         public static SortedList<string, uint> GetEffectHandleList(EffectResource resource)
         {
-            EffectResource.VisualEffectHandleList handleList = resource.VisualEffectHandles;
+            EffectResource.VisualEffectNameList handleList = resource.VisualEffectNames;
             int count = handleList.Count;
             FixedDictionary<string, uint> fd = new FixedDictionary<string, uint>(count);
             for (int i = 0; i < count; i++)

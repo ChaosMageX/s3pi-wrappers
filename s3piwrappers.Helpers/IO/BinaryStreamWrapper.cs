@@ -16,15 +16,17 @@ namespace s3piwrappers.Helpers.IO
         }
 
         private readonly Stream mStream;
+        private ByteOrder mByteOrder;
+        private Encoding mCharEncoding;
 
         public Stream BaseStream
         {
             get { return mStream; }
         }
 
-        public ByteOrder ByteOrder { get; set; }
+        public ByteOrder ByteOrder { get { return mByteOrder; } set { mByteOrder = value; } }
 
-        public Encoding CharacterEncoding { get; set; }
+        public Encoding CharacterEncoding { get { return mCharEncoding; } set { mCharEncoding = value; } }
 
         public BinaryStreamWrapper(Stream s) : this(s, defaultEncoding, defaultByteOrder)
         {
@@ -41,59 +43,63 @@ namespace s3piwrappers.Helpers.IO
         public BinaryStreamWrapper(Stream s, Encoding encoding, ByteOrder order)
         {
             mStream = s;
-            CharacterEncoding = encoding;
-            ByteOrder = order;
+            mCharEncoding = encoding;
+            mByteOrder = order;
         }
 
+        public bool ReadBool8()
+        {
+            return mStream.ReadByte() > 0;
+        }
 
         public Byte ReadByte()
         {
-            return (Byte) BaseStream.ReadByte();
+            return (Byte) mStream.ReadByte();
         }
 
         public Char ReadChar()
         {
-            return ReadChar(CharacterEncoding, ByteOrder);
+            return ReadChar(mCharEncoding, mByteOrder);
         }
 
         public UInt16 ReadUInt16()
         {
-            return ReadUInt16(ByteOrder);
+            return ReadUInt16(mByteOrder);
         }
 
         public UInt32 ReadUInt32()
         {
-            return ReadUInt32(ByteOrder);
+            return ReadUInt32(mByteOrder);
         }
 
         public UInt64 ReadUInt64()
         {
-            return ReadUInt64(ByteOrder);
+            return ReadUInt64(mByteOrder);
         }
 
         public Int16 ReadInt16()
         {
-            return ReadInt16(ByteOrder);
+            return ReadInt16(mByteOrder);
         }
 
         public Int32 ReadInt32()
         {
-            return ReadInt32(ByteOrder);
+            return ReadInt32(mByteOrder);
         }
 
         public Int64 ReadInt64()
         {
-            return ReadInt64(ByteOrder);
+            return ReadInt64(mByteOrder);
         }
 
         public float ReadFloat()
         {
-            return ReadFloat(ByteOrder);
+            return ReadFloat(mByteOrder);
         }
 
         public double ReadDouble()
         {
-            return ReadDouble(ByteOrder);
+            return ReadDouble(mByteOrder);
         }
 
         public void Read(out Byte[] output, int count)
@@ -144,6 +150,11 @@ namespace s3piwrappers.Helpers.IO
         public void Read(out Byte[] output, int count, ByteOrder order)
         {
             output = GetBytes(count, order);
+        }
+
+        public void Read(out bool output)
+        {
+            output = mStream.ReadByte() > 0;
         }
 
         public void Read(out Byte output)
@@ -213,17 +224,17 @@ namespace s3piwrappers.Helpers.IO
 
         public String ReadString(StringType type)
         {
-            return ReadString(type, CharacterEncoding, ByteOrder);
+            return ReadString(type, mCharEncoding, mByteOrder);
         }
 
         public String ReadString(StringType type, ByteOrder order)
         {
-            return ReadString(type, CharacterEncoding, order);
+            return ReadString(type, mCharEncoding, order);
         }
 
         public String ReadString(StringType type, Encoding encoding)
         {
-            return ReadString(type, encoding, ByteOrder);
+            return ReadString(type, encoding, mByteOrder);
         }
 
         public String ReadString(StringType type, Encoding encoding, ByteOrder order)
@@ -375,6 +386,10 @@ namespace s3piwrappers.Helpers.IO
             return bytes;
         }
 
+        public void Write(bool input)
+        {
+            mStream.WriteByte((byte)(input ? 1 : 0));
+        }
 
         public void Write(Byte input)
         {
@@ -388,42 +403,42 @@ namespace s3piwrappers.Helpers.IO
 
         public void Write(UInt16 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(UInt32 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(UInt64 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(Int16 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(Int32 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(Int64 input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(float input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(double input)
         {
-            Write(input, ByteOrder);
+            Write(input, mByteOrder);
         }
 
         public void Write(UInt16 input, ByteOrder order)
@@ -468,17 +483,17 @@ namespace s3piwrappers.Helpers.IO
 
         public void Write(Char input)
         {
-            Write(input, CharacterEncoding, ByteOrder);
+            Write(input, mCharEncoding, mByteOrder);
         }
 
         public void Write(Char input, Encoding encoding)
         {
-            Write(input, encoding, ByteOrder);
+            Write(input, encoding, mByteOrder);
         }
 
         public void Write(Char input, ByteOrder order)
         {
-            Write(input, CharacterEncoding, order);
+            Write(input, mCharEncoding, order);
         }
 
         public void Write(Char input, Encoding encoding, ByteOrder order)
@@ -488,17 +503,17 @@ namespace s3piwrappers.Helpers.IO
 
         public void WriteString(String input, StringType type)
         {
-            WriteString(input, type, CharacterEncoding, ByteOrder);
+            WriteString(input, type, mCharEncoding, mByteOrder);
         }
 
         public void WriteString(String input, StringType type, ByteOrder order)
         {
-            WriteString(input, type, CharacterEncoding, order);
+            WriteString(input, type, mCharEncoding, order);
         }
 
         public void WriteString(String input, StringType type, Encoding encoding)
         {
-            WriteString(input, type, encoding, ByteOrder);
+            WriteString(input, type, encoding, mByteOrder);
         }
 
         public void WriteString(String input, StringType type, Encoding encoding, ByteOrder order)
@@ -530,17 +545,17 @@ namespace s3piwrappers.Helpers.IO
 
         public void Write(String input, StringType type)
         {
-            Write(input, type, CharacterEncoding, ByteOrder);
+            Write(input, type, mCharEncoding, mByteOrder);
         }
 
         public void Write(String input, StringType type, Encoding encoding)
         {
-            Write(input, type, encoding, ByteOrder);
+            Write(input, type, encoding, mByteOrder);
         }
 
         public void Write(String input, StringType type, ByteOrder order)
         {
-            Write(input, type, CharacterEncoding, order);
+            Write(input, type, mCharEncoding, order);
         }
 
         public void Write(String input, StringType type, Encoding encoding, ByteOrder order)

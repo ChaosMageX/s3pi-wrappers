@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
@@ -8,101 +9,145 @@ namespace s3piwrappers.Effects
 {
     public class SoundEffect : Effect, IEquatable<SoundEffect>
     {
+        private static readonly bool isTheSims4 = false;
+
+        #region Constructors
         public SoundEffect(int apiVersion, EventHandler handler, SoundEffect basis)
             : base(apiVersion, handler, basis)
         {
         }
 
-        public SoundEffect(int apiVersion, EventHandler handler, ISection section) : base(apiVersion, handler, section)
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section) 
+            : base(apiVersion, handler, section)
         {
         }
 
-        public SoundEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public SoundEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
+        #region Attributes
+        private uint mFlags;
+        private ulong mSoundId;
+        private float mLocationUpdateDelta = 0.25f;
+        private float mPlayTime;
+        private float mVolume;
+        private byte mByte01; //version 2; The Sims 4?
+        #endregion
 
-        private UInt32 mUint01;
-        private UInt64 mLong01;
-        private float mFloat01 = 0.25f;
-        private float mFloat02;
-        private float mFloat03;
-
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Uint01
+        public uint Flags
         {
-            get { return mUint01; }
+            get { return mFlags; }
             set
             {
-                mUint01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public ulong AudioResourceInstance
+        public ulong SoundId
         {
-            get { return mLong01; }
+            get { return mSoundId; }
             set
             {
-                mLong01 = value;
+                mSoundId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public float Float01
+        public float LocationUpdateDelta
         {
-            get { return mFloat01; }
+            get { return mLocationUpdateDelta; }
             set
             {
-                mFloat01 = value;
+                mLocationUpdateDelta = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public float Float02
+        public float PlayTime
         {
-            get { return mFloat02; }
+            get { return mPlayTime; }
             set
             {
-                mFloat02 = value;
+                mPlayTime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public float Float03
+        public float Volume
         {
-            get { return mFloat03; }
+            get { return mVolume; }
             set
             {
-                mFloat03 = value;
+                mVolume = value;
                 OnElementChanged();
             }
         }
 
+        [ElementPriority(6)]
+        public byte Byte01
+        {
+            get { return mByte01; }
+            set
+            {
+                mByte01 = value;
+                OnElementChanged();
+            }
+        }
+        #endregion
 
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mUint01);
-            s.Read(out mLong01);
-            s.Read(out mFloat01);
-            s.Read(out mFloat02);
-            s.Read(out mFloat03);
+            s.Read(out mFlags);
+            //mFlags &= 0xF;
+
+            s.Read(out mSoundId);
+            s.Read(out mLocationUpdateDelta);
+            s.Read(out mPlayTime);
+            s.Read(out mVolume);
+            if (isTheSims4 && mSection.Version >= 0x0002 && stream.Position < stream.Length)
+            {
+                s.Read(out mByte01);
+            }
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mUint01);
-            s.Write(mLong01);
-            s.Write(mFloat01);
-            s.Write(mFloat02);
-            s.Write(mFloat03);
+            s.Write(mFlags);
+            s.Write(mSoundId);
+            s.Write(mLocationUpdateDelta);
+            s.Write(mPlayTime);
+            s.Write(mVolume);
+            if (isTheSims4 && mSection.Version >= 0x0002)
+            {
+                s.Write(mByte01);
+            }
+        }
+        #endregion
+
+        public override List<string> ContentFields
+        {
+            get
+            {
+                List<string> fields = base.ContentFields;
+                if (!isTheSims4 || mSection.Version < 0x0002)
+                {
+                    fields.Remove("Byte01");
+                }
+                return fields;
+            }
         }
 
         public bool Equals(SoundEffect other)

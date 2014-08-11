@@ -6,20 +6,36 @@ using s3piwrappers.SWB.Structures;
 
 namespace s3piwrappers.SWB
 {
-    public class ColourValue : ValueElement<Colour>, IEquatable<ColourValue>
+    public class ColorValue : ValueElement<Color>, IEquatable<ColorValue>
     {
-        public ColourValue(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+        #region Constructors
+        public ColorValue(int apiVersion, EventHandler handler) 
+            : base(apiVersion, handler)
         {
         }
 
-        public ColourValue(int apiVersion, EventHandler handler, ColourValue basis) : base(apiVersion, handler, basis)
+        public ColorValue(int apiVersion, EventHandler handler, ColorValue basis) 
+            : base(apiVersion, handler, basis)
         {
         }
 
-        public ColourValue(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+        public ColorValue(int apiVersion, EventHandler handler, Color data)
+            : base(apiVersion, handler, data)
+        {
+        }/* */
+
+        public ColorValue(int apiVersion, EventHandler handler, float r, float g, float b)
+            : base(apiVersion, handler, new Color(r, g, b))
         {
         }
 
+        public ColorValue(int apiVersion, EventHandler handler, Stream s) 
+            : base(apiVersion, handler, s)
+        {
+        }
+        #endregion
+
+        #region Data I/O
         protected override void Parse(Stream s)
         {
             var sw = new BinaryStreamWrapper(s, ByteOrder.LittleEndian);
@@ -35,7 +51,9 @@ namespace s3piwrappers.SWB
             sw.Write(mData.G);
             sw.Write(mData.B);
         }
+        #endregion
 
+        #region Content Fields
         [ElementPriority(1)]
         public float R
         {
@@ -68,8 +86,9 @@ namespace s3piwrappers.SWB
                 OnElementChanged();
             }
         }
+        #endregion
 
-        public bool Equals(ColourValue other)
+        public bool Equals(ColorValue other)
         {
             return mData.Equals(other.mData);
         }

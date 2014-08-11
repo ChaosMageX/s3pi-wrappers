@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class ModelEffect : Effect, IEquatable<ModelEffect>
     {
+        #region Constructors
         public ModelEffect(int apiVersion, EventHandler handler, ModelEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,302 +17,274 @@ namespace s3piwrappers.Effects
         public ModelEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mItems = new DataList<Item>(handler);
+            mColor = new ColorValue(apiVersion, handler);
+            mAnimationCurves = new DataList<AnimationCurve>(handler);
         }
 
         public ModelEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        public class Item : DataElement, IEquatable<Item>
+        public class AnimationCurve : DataElement, IEquatable<AnimationCurve>
         {
-            public Item(int apiVersion, EventHandler handler, Item basis)
+            #region Constructors
+            public AnimationCurve(int apiVersion, EventHandler handler, AnimationCurve basis)
                 : base(apiVersion, handler, basis)
             {
             }
 
-            public Item(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
+            public AnimationCurve(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
             {
+                mLengthRange = new Vector2ValueLE(apiVersion, handler);
+                mCurve = new DataList<FloatValue>(handler);
             }
 
-            public Item(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler)
+            public AnimationCurve(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler)
             {
                 Parse(s);
             }
+            #endregion
 
-            private float mFloat01; //LE
-            private float mFloat02; //LE
-            private DataList<FloatValue> mFloatList01;
-            private UInt32 mInt01;
-            private UInt32 mInt02;
-            private Byte mByte01;
-            private Byte mByte02;
+            #region Attributes
+            private Vector2ValueLE mLengthRange;
+            private DataList<FloatValue> mCurve;
+            private float mCurveVary;//originally uint
+            private float mSpeedScale;//originally uint
+            private byte mChannelId;
+            private byte mMode;
+            #endregion
 
-
+            #region Content Fields
             [ElementPriority(1)]
-            public float Float01
+            public Vector2ValueLE LengthRange
             {
-                get { return mFloat01; }
+                get { return mLengthRange; }
                 set
                 {
-                    mFloat01 = value;
+                    mLengthRange = new Vector2ValueLE(requestedApiVersion, handler, value);
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(2)]
-            public float Float02
+            public DataList<FloatValue> Curve
             {
-                get { return mFloat02; }
+                get { return mCurve; }
                 set
                 {
-                    mFloat02 = value;
+                    mCurve = new DataList<FloatValue>(handler, value);
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(3)]
-            public DataList<FloatValue> FloatList01
+            public float CurveVary
             {
-                get { return mFloatList01; }
+                get { return mCurveVary; }
                 set
                 {
-                    mFloatList01 = value;
+                    mCurveVary = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(4)]
-            public uint Int01
+            public float SpeedScale
             {
-                get { return mInt01; }
+                get { return mSpeedScale; }
                 set
                 {
-                    mInt01 = value;
+                    mSpeedScale = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(5)]
-            public uint Int02
+            public byte ChannelId
             {
-                get { return mInt02; }
+                get { return mChannelId; }
                 set
                 {
-                    mInt02 = value;
+                    mChannelId = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(6)]
-            public byte Byte01
+            public byte Mode
             {
-                get { return mByte01; }
+                get { return mMode; }
                 set
                 {
-                    mByte01 = value;
+                    mMode = value;
                     OnElementChanged();
                 }
             }
+            #endregion
 
-            [ElementPriority(7)]
-            public byte Byte02
-            {
-                get { return mByte02; }
-                set
-                {
-                    mByte02 = value;
-                    OnElementChanged();
-                }
-            }
-
-
+            #region Data I/O
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mFloat01, ByteOrder.LittleEndian);
-                s.Read(out mFloat02, ByteOrder.LittleEndian);
-                mFloatList01 = new DataList<FloatValue>(handler, stream);
-                s.Read(out mInt01);
-                s.Read(out mInt02);
-                s.Read(out mByte01);
-                s.Read(out mByte02);
+                mLengthRange = new Vector2ValueLE(requestedApiVersion, handler, stream);
+                mCurve = new DataList<FloatValue>(handler, stream);
+                s.Read(out mCurveVary);
+                s.Read(out mSpeedScale);
+                s.Read(out mChannelId);
+                s.Read(out mMode);
             }
 
             public override void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mFloat01, ByteOrder.LittleEndian);
-                s.Write(mFloat02, ByteOrder.LittleEndian);
-                mFloatList01.UnParse(stream);
-                s.Write(mInt01);
-                s.Write(mInt02);
-                s.Write(mByte01);
-                s.Write(mByte02);
+                mLengthRange.UnParse(stream);
+                mCurve.UnParse(stream);
+                s.Write(mCurveVary);
+                s.Write(mSpeedScale);
+                s.Write(mChannelId);
+                s.Write(mMode);
             }
+            #endregion
 
-            public bool Equals(Item other)
+            public bool Equals(AnimationCurve other)
             {
                 return base.Equals(other);
             }
         }
 
+        #region Attributes
+        private uint mFlags;
+        private ulong mResourceId;
+        private float mSize;
+        private ColorValue mColor;
+        private float mAlpha;
+        private DataList<AnimationCurve> mAnimationCurves;
+        private ulong mMaterialId;
+        private byte mOverrideSet;
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt64 mLong01;
-        private float mFloat01;
-        private float mFloat02; //LE
-        private float mFloat03; //LE
-        private float mFloat04; //LE
-        private float mFloat05;
-        private DataList<Item> mItems;
-        private UInt64 mLong02;
-        private byte mByte01;
-
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public ulong Long01
+        public ulong ResourceId
         {
-            get { return mLong01; }
+            get { return mResourceId; }
             set
             {
-                mLong01 = value;
+                mResourceId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public float Float01
+        public float Size
         {
-            get { return mFloat01; }
+            get { return mSize; }
             set
             {
-                mFloat01 = value;
+                mSize = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public float Float02
+        public ColorValue Color
         {
-            get { return mFloat02; }
+            get { return mColor; }
             set
             {
-                mFloat02 = value;
+                mColor = new ColorValue(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public float Float03
+        public float Alpha
         {
-            get { return mFloat03; }
+            get { return mAlpha; }
             set
             {
-                mFloat03 = value;
+                mAlpha = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public float Float04
+        public DataList<AnimationCurve> AnimationCurves
         {
-            get { return mFloat04; }
+            get { return mAnimationCurves; }
             set
             {
-                mFloat04 = value;
+                mAnimationCurves = new DataList<AnimationCurve>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public float Float05
+        public ulong MaterialId
         {
-            get { return mFloat05; }
+            get { return mMaterialId; }
             set
             {
-                mFloat05 = value;
+                mMaterialId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public DataList<Item> Items
+        public byte OverrideSet
         {
-            get { return mItems; }
+            get { return mOverrideSet; }
             set
             {
-                mItems = value;
+                mOverrideSet = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
-        [ElementPriority(9)]
-        public ulong Long02
-        {
-            get { return mLong02; }
-            set
-            {
-                mLong02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(10)]
-        public byte Byte01
-        {
-            get { return mByte01; }
-            set
-            {
-                mByte01 = value;
-                OnElementChanged();
-            }
-        }
-
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mLong01);
-            s.Read(out mFloat01);
-            s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat04, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat05);
-            mItems = new DataList<Item>(handler, stream);
-            s.Read(out mLong02);
-            s.Read(out mByte01);
+            s.Read(out mFlags);
+            //mFlags &= 0x3;
+
+            s.Read(out mResourceId);
+            s.Read(out mSize);
+            mColor = new ColorValue(requestedApiVersion, handler, stream);
+            s.Read(out mAlpha);
+            mAnimationCurves = new DataList<AnimationCurve>(handler, stream);
+            s.Read(out mMaterialId);
+            s.Read(out mOverrideSet);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
-            s.Write(mLong01);
-            s.Write(mFloat01);
-            s.Write(mFloat02, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat03, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat04, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat05);
-            mItems.UnParse(stream);
-            s.Write(mLong02);
-            s.Write(mByte01);
+            s.Write(mFlags);
+            s.Write(mResourceId);
+            s.Write(mSize);
+            mColor.UnParse(stream);
+            s.Write(mAlpha);
+            mAnimationCurves.UnParse(stream);
+            s.Write(mMaterialId);
+            s.Write(mOverrideSet);
         }
-
+        #endregion
 
         public bool Equals(ModelEffect other)
         {

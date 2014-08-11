@@ -31,17 +31,14 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private DecisionGraph mDecisionGraph;
 
-        //private AnchorPoint mDecisionMakerAnchor;
-
-        public DGRootNode(DecisionGraph dg, StateMachineScene scene)
-            : base(null, scene)
+        public DGRootNode(DecisionGraph dg, StateNode state)
+            : base(null, state)
         {
             if (dg == null)
+            {
                 throw new ArgumentNullException("dg");
+            }
             this.mDecisionGraph = dg;
-
-            //this.mDecisionMakerAnchor = new AnchorPoint(this, -1, 0);
-            //this.mDecisionMakerAnchor.SetPosition(-sRad, 0);
 
             this.mEntryAnchor.SetPosition(sRad, 0);
             this.mEntryAnchor.SetDirection(1, 0);
@@ -55,17 +52,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.BoundingBox = new RectangleF(-r, -r, 2 * r, 2 * r);
         }
 
-        /*public AnchorPoint DecisionMakerAnchor
+        public DecisionGraph DecisionGraph
         {
-            get { return this.mDecisionMakerAnchor; }
-        }/* */
+            get { return this.mDecisionGraph; }
+        }
 
         public override AnchorPoint GetAnchorFor(DGEdge edge)
         {
-            /*if (this.mDecisionMakerAnchor.Edges.Contains(edge))
-            {
-                return this.mDecisionMakerAnchor;
-            }/* */
             if (this.mEntryAnchor.Edges.Contains(edge))
             {
                 return this.mEntryAnchor;

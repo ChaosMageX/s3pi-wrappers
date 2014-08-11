@@ -8,100 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class DistributeEffect : Effect, IEquatable<DistributeEffect>
     {
-        public class TransformElement : DataElement, IEquatable<TransformElement>
-        {
-            public TransformElement(int apiVersion, EventHandler handler, TransformElement basis)
-                : base(apiVersion, handler, basis)
-            {
-            }
-
-            public TransformElement(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
-            {
-            }
-
-            public TransformElement(int apiVersion, EventHandler handler)
-                : base(apiVersion, handler)
-            {
-                mOrientation = new Matrix3x3Value(0, handler);
-                mPosition = new Vector3ValueLE(0, handler);
-            }
-
-            private ushort mShort01;
-            private float mFloat01;
-            private Matrix3x3Value mOrientation;
-            private Vector3ValueLE mPosition;
-
-
-            [ElementPriority(1)]
-            public ushort Short01
-            {
-                get { return mShort01; }
-                set
-                {
-                    mShort01 = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(2)]
-            public float Float01
-            {
-                get { return mFloat01; }
-                set
-                {
-                    mFloat01 = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(3)]
-            public Matrix3x3Value Orientation
-            {
-                get { return mOrientation; }
-                set
-                {
-                    mOrientation = value;
-                    OnElementChanged();
-                }
-            }
-
-            [ElementPriority(4)]
-            public Vector3ValueLE Position
-            {
-                get { return mPosition; }
-                set
-                {
-                    mPosition = value;
-                    OnElementChanged();
-                }
-            }
-
-
-            protected override void Parse(Stream stream)
-            {
-                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mShort01);
-                s.Read(out mFloat01);
-                mOrientation = new Matrix3x3Value(0, handler, stream);
-                mPosition = new Vector3ValueLE(0, handler, stream);
-            }
-
-            public override void UnParse(Stream stream)
-            {
-                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mShort01);
-                s.Write(mFloat01);
-                mOrientation.UnParse(stream);
-                mPosition.UnParse(stream);
-            }
-
-            public bool Equals(TransformElement other)
-            {
-                return base.Equals(other);
-            }
-        }
-
-
+        #region Constructors
         public DistributeEffect(int apiVersion, EventHandler handler, DistributeEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -110,119 +17,121 @@ namespace s3piwrappers.Effects
         public DistributeEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mTransform = new TransformElement(0, handler);
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mFloatList03 = new DataList<FloatValue>(handler);
-            mFloatList04 = new DataList<FloatValue>(handler);
-            mColourList01 = new DataList<ColourValue>(handler);
-            mFloatList05 = new DataList<FloatValue>(handler);
-            mItemBList01 = new DataList<ItemB>(handler);
-            mResource = new ResourceReference(0, handler);
+            mPreTransform = new TransformElement(apiVersion, handler);
+            mSizeCurve = new DataList<FloatValue>(handler);
+            mPitchCurve = new DataList<FloatValue>(handler);
+            mRollCurve = new DataList<FloatValue>(handler);
+            mHeadingCurve = new DataList<FloatValue>(handler);
+            mColorCurve = new DataList<ColorValue>(handler);
+            mColorVary = new ColorValue(apiVersion, handler);
+            mAlphaCurve = new DataList<FloatValue>(handler);
+            mSurfaces = new DataList<Surface>(handler);
+            mAltitudeRange = new Vector2ValueLE(apiVersion, handler);
+            mDrawInfo = new ResourceReference(apiVersion, handler, section);
         }
 
-        public DistributeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public DistributeEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
+        #region Attributes
+        private uint mFlags;
+        private int mDensity;//originally uint
+        private string mComponentName = string.Empty;
+        private int mStart;//originally uint
+        private byte mSourceType;
+        private float mSourceSize;
+        private TransformElement mPreTransform;
+        private DataList<FloatValue> mSizeCurve;
+        private float mSizeVary;
+        private DataList<FloatValue> mPitchCurve;
+        private DataList<FloatValue> mRollCurve;
+        private DataList<FloatValue> mHeadingCurve;
+        private float mPitchVary;//originally uint
+        private float mRollVary;//originally uint
+        private float mHeadingVary;//originally uint
+        private float mPitchOffset;//originally uint
+        private float mRollOffset;//originally uint
+        private float mHeadingOffset;//originally uint
+        private DataList<ColorValue> mColorCurve;
+        private ColorValue mColorVary;
+        private DataList<FloatValue> mAlphaCurve;
+        private float mAlphaVary;//originally uint
+        private DataList<Surface> mSurfaces;
+        private ulong mEmitMapId;
+        private ulong mColorMapId;
+        private ulong mPinMapId;
+        private Vector2ValueLE mAltitudeRange;
+        private ResourceReference mDrawInfo;
+        private byte mOverrideSet;
+        private uint mMessageId;
+        #endregion
 
-        private uint mInt01;
-        private uint mInt02;
-        private string mString01;
-        private uint mInt03;
-        private byte mByte01;
-        private float mFloat01;
-        private TransformElement mTransform;
-        private DataList<FloatValue> mFloatList01;
-        private uint mInt04;
-        private DataList<FloatValue> mFloatList02;
-        private DataList<FloatValue> mFloatList03;
-        private DataList<FloatValue> mFloatList04;
-        private uint mInt05;
-        private uint mInt06;
-        private uint mInt07;
-        private uint mInt08;
-        private uint mInt09;
-        private uint mInt10;
-        private DataList<ColourValue> mColourList01;
-        private float mFloat02; //LE
-        private float mFloat03; //LE
-        private float mFloat04; //LE
-        private DataList<FloatValue> mFloatList05;
-        private uint mInt11;
-        private DataList<ItemB> mItemBList01;
-        private ulong mLong01;
-        private ulong mLong02;
-        private ulong mLong03;
-        private float mFloat05; //LE
-        private float mFloat06; //LE
-        private ResourceReference mResource;
-        private byte mByte02;
-        private uint mInt12;
-
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public uint Int02
+        public int Density
         {
-            get { return mInt02; }
+            get { return mDensity; }
             set
             {
-                mInt02 = value;
+                mDensity = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public string String01
+        public string ComponentName
         {
-            get { return mString01; }
+            get { return mComponentName; }
             set
             {
-                mString01 = value;
+                mComponentName = value ?? string.Empty;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public uint Int03
+        public int Start
         {
-            get { return mInt03; }
+            get { return mStart; }
             set
             {
-                mInt03 = value;
+                mStart = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public byte Byte01
+        public byte SourceType
         {
-            get { return mByte01; }
+            get { return mSourceType; }
             set
             {
-                mByte01 = value;
+                mSourceType = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public float Float01
+        public float SourceSize
         {
-            get { return mFloat01; }
+            get { return mSourceSize; }
             set
             {
-                mFloat01 = value;
+                mSourceSize = value;
                 OnElementChanged();
             }
         }
@@ -230,376 +139,341 @@ namespace s3piwrappers.Effects
         [ElementPriority(7)]
         public TransformElement Transform
         {
-            get { return mTransform; }
+            get { return mPreTransform; }
             set
             {
-                mTransform = value;
+                mPreTransform = new TransformElement(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public DataList<FloatValue> FloatList01
+        public DataList<FloatValue> SizeCurve
         {
-            get { return mFloatList01; }
+            get { return mSizeCurve; }
             set
             {
-                mFloatList01 = value;
+                mSizeCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public uint Int04
+        public float SizeVary
         {
-            get { return mInt04; }
+            get { return mSizeVary; }
             set
             {
-                mInt04 = value;
+                mSizeVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public DataList<FloatValue> FloatList02
+        public DataList<FloatValue> PitchCurve
         {
-            get { return mFloatList02; }
+            get { return mPitchCurve; }
             set
             {
-                mFloatList02 = value;
+                mPitchCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public DataList<FloatValue> FloatList03
+        public DataList<FloatValue> RollCurve
         {
-            get { return mFloatList03; }
+            get { return mRollCurve; }
             set
             {
-                mFloatList03 = value;
+                mRollCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public DataList<FloatValue> FloatList04
+        public DataList<FloatValue> HeadingCurve
         {
-            get { return mFloatList04; }
+            get { return mHeadingCurve; }
             set
             {
-                mFloatList04 = value;
+                mHeadingCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(13)]
-        public uint Int05
+        public float PitchVary
         {
-            get { return mInt05; }
+            get { return mPitchVary; }
             set
             {
-                mInt05 = value;
+                mPitchVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(14)]
-        public uint Int06
+        public float RollVary
         {
-            get { return mInt06; }
+            get { return mRollVary; }
             set
             {
-                mInt06 = value;
+                mRollVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(15)]
-        public uint Int07
+        public float HeadingVary
         {
-            get { return mInt07; }
+            get { return mHeadingVary; }
             set
             {
-                mInt07 = value;
+                mHeadingVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(16)]
-        public uint Int08
+        public float PitchOffset
         {
-            get { return mInt08; }
+            get { return mPitchOffset; }
             set
             {
-                mInt08 = value;
+                mPitchOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(17)]
-        public uint Int09
+        public float RollOffset
         {
-            get { return mInt09; }
+            get { return mRollOffset; }
             set
             {
-                mInt09 = value;
+                mRollOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(18)]
-        public uint Int10
+        public float HeadingOffset
         {
-            get { return mInt10; }
+            get { return mHeadingOffset; }
             set
             {
-                mInt10 = value;
+                mHeadingOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(19)]
-        public DataList<ColourValue> ColourList01
+        public DataList<ColorValue> ColorCurve
         {
-            get { return mColourList01; }
+            get { return mColorCurve; }
             set
             {
-                mColourList01 = value;
+                mColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(20)]
-        public float Float02
+        public ColorValue ColorVary
         {
-            get { return mFloat02; }
+            get { return mColorVary; }
             set
             {
-                mFloat02 = value;
+                mColorVary = new ColorValue(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(21)]
-        public float Float03
+        public DataList<FloatValue> AlphaCurve
         {
-            get { return mFloat03; }
+            get { return mAlphaCurve; }
             set
             {
-                mFloat03 = value;
+                mAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(22)]
-        public float Float04
+        public float AlphaVary
         {
-            get { return mFloat04; }
+            get { return mAlphaVary; }
             set
             {
-                mFloat04 = value;
+                mAlphaVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(23)]
-        public DataList<FloatValue> FloatList05
+        public DataList<Surface> Surfaces
         {
-            get { return mFloatList05; }
+            get { return mSurfaces; }
             set
             {
-                mFloatList05 = value;
+                mSurfaces = new DataList<Surface>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(24)]
-        public uint Int11
+        public ulong EmitMapId
         {
-            get { return mInt11; }
+            get { return mEmitMapId; }
             set
             {
-                mInt11 = value;
+                mEmitMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(25)]
-        public DataList<ItemB> ItemBList01
+        public ulong ColorMapId
         {
-            get { return mItemBList01; }
+            get { return mColorMapId; }
             set
             {
-                mItemBList01 = value;
+                mColorMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(26)]
-        public ulong Long01
+        public ulong PinMapId
         {
-            get { return mLong01; }
+            get { return mPinMapId; }
             set
             {
-                mLong01 = value;
+                mPinMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(27)]
-        public ulong Long02
+        public Vector2ValueLE AltitudeRange
         {
-            get { return mLong02; }
+            get { return mAltitudeRange; }
             set
             {
-                mLong02 = value;
+                mAltitudeRange = new Vector2ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(28)]
-        public ulong Long03
+        public ResourceReference DrawInfo
         {
-            get { return mLong03; }
+            get { return mDrawInfo; }
             set
             {
-                mLong03 = value;
+                mDrawInfo = new ResourceReference(requestedApiVersion, handler, mSection, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(29)]
-        public float Float05
+        public byte OverrideSet
         {
-            get { return mFloat05; }
+            get { return mOverrideSet; }
             set
             {
-                mFloat05 = value;
+                mOverrideSet = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(30)]
-        public float Float06
+        public uint MessageId
         {
-            get { return mFloat06; }
+            get { return mMessageId; }
             set
             {
-                mFloat06 = value;
+                mMessageId = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
-        [ElementPriority(31)]
-        public ResourceReference ResourceKey
-        {
-            get { return mResource; }
-            set
-            {
-                mResource = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(32)]
-        public byte Byte02
-        {
-            get { return mByte02; }
-            set
-            {
-                mByte02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(33)]
-        public uint Int12
-        {
-            get { return mInt12; }
-            set
-            {
-                mInt12 = value;
-                OnElementChanged();
-            }
-        }
-
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mInt02);
-            s.Read(out mString01, StringType.ZeroDelimited);
-            s.Read(out mInt03);
-            s.Read(out mByte01);
-            s.Read(out mFloat01);
-            mTransform = new TransformElement(0, handler, stream);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mInt04);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            mFloatList03 = new DataList<FloatValue>(handler, stream);
-            mFloatList04 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mInt05);
-            s.Read(out mInt06);
-            s.Read(out mInt07);
-            s.Read(out mInt08);
-            s.Read(out mInt09);
-            s.Read(out mInt10);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
-            s.Read(out mFloat02, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat03, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat04, ByteOrder.LittleEndian); //LE
-            mFloatList05 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mInt11);
-            mItemBList01 = new DataList<ItemB>(handler, stream);
-            s.Read(out mLong01);
-            s.Read(out mLong02);
-            s.Read(out mLong03);
-            s.Read(out mFloat05, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat06, ByteOrder.LittleEndian); //LE
-            mResource = new ResourceReference(0, handler, stream);
-            s.Read(out mByte02);
-            s.Read(out mInt12);
+            s.Read(out mFlags);
+            //mFlags &= 0x3FFF;
+
+            s.Read(out mDensity);
+            s.Read(out mComponentName, StringType.ZeroDelimited);
+            s.Read(out mStart);
+            s.Read(out mSourceType);
+            s.Read(out mSourceSize);
+            mPreTransform = new TransformElement(0, handler, stream);
+            mSizeCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mSizeVary);
+            mPitchCurve = new DataList<FloatValue>(handler, stream);
+            mRollCurve = new DataList<FloatValue>(handler, stream);
+            mHeadingCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mPitchVary);
+            s.Read(out mRollVary);
+            s.Read(out mHeadingVary);
+            s.Read(out mPitchOffset);
+            s.Read(out mRollOffset);
+            s.Read(out mHeadingOffset);
+            mColorCurve = new DataList<ColorValue>(handler, stream);
+            mColorVary = new ColorValue(requestedApiVersion, handler, stream);
+            mAlphaCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mAlphaVary);
+            mSurfaces = new DataList<Surface>(handler, stream);
+            s.Read(out mEmitMapId);
+            s.Read(out mColorMapId);
+            s.Read(out mPinMapId);
+            mAltitudeRange = new Vector2ValueLE(requestedApiVersion, handler, stream);
+            mDrawInfo = new ResourceReference(requestedApiVersion, handler, mSection, stream);
+            s.Read(out mOverrideSet);
+            s.Read(out mMessageId);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
-            s.Write(mInt02);
-            s.Write(mString01, StringType.ZeroDelimited);
-            s.Write(mInt03);
-            s.Write(mByte01);
-            s.Write(mFloat01);
-            mTransform.UnParse(stream);
-            mFloatList01.UnParse(stream);
-            s.Write(mInt04);
-            mFloatList02.UnParse(stream);
-            mFloatList03.UnParse(stream);
-            mFloatList04.UnParse(stream);
-            s.Write(mInt05);
-            s.Write(mInt06);
-            s.Write(mInt07);
-            s.Write(mInt08);
-            s.Write(mInt09);
-            s.Write(mInt10);
-            mColourList01.UnParse(stream);
-            s.Write(mFloat02, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat03, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat04, ByteOrder.LittleEndian); //LE
-            mFloatList05.UnParse(stream);
-            s.Write(mInt11);
-            mItemBList01.UnParse(stream);
-            s.Write(mLong01);
-            s.Write(mLong02);
-            s.Write(mLong03);
-            s.Write(mFloat05, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat06, ByteOrder.LittleEndian); //LE
-            mResource.UnParse(stream);
-            s.Write(mByte02);
-            s.Write(mInt12);
+            s.Write(mFlags);
+            s.Write(mDensity);
+            s.Write(mComponentName, StringType.ZeroDelimited);
+            s.Write(mStart);
+            s.Write(mSourceType);
+            s.Write(mSourceSize);
+            mPreTransform.UnParse(stream);
+            mSizeCurve.UnParse(stream);
+            s.Write(mSizeVary);
+            mPitchCurve.UnParse(stream);
+            mRollCurve.UnParse(stream);
+            mHeadingCurve.UnParse(stream);
+            s.Write(mPitchVary);
+            s.Write(mRollVary);
+            s.Write(mHeadingVary);
+            s.Write(mPitchOffset);
+            s.Write(mRollOffset);
+            s.Write(mHeadingOffset);
+            mColorCurve.UnParse(stream);
+            mColorVary.UnParse(stream);
+            mAlphaCurve.UnParse(stream);
+            s.Write(mAlphaVary);
+            mSurfaces.UnParse(stream);
+            s.Write(mEmitMapId);
+            s.Write(mColorMapId);
+            s.Write(mPinMapId);
+            mAltitudeRange.UnParse(stream);
+            mDrawInfo.UnParse(stream);
+            s.Write(mOverrideSet);
+            s.Write(mMessageId);
         }
+        #endregion
 
         public bool Equals(DistributeEffect other)
         {

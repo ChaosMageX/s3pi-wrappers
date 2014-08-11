@@ -7,7 +7,7 @@ using s3piwrappers.SWB;
 
 namespace s3piwrappers.EffectCloner.Swarm
 {
-    public class IndexBuilder : VisualEffect.Index
+    public class IndexBuilder : VisualEffect.Description
     {
         protected EffectBuilder mEffectBuilder;
 
@@ -34,7 +34,7 @@ namespace s3piwrappers.EffectCloner.Swarm
         [ElementPriority(1)]
         public VisualEffectType EffectType
         {
-            get { return (VisualEffectType)base.BlockType; }
+            get { return (VisualEffectType)base.ComponentType; }
             set
             {
                 /*byte blockType = (byte)value;
@@ -68,8 +68,8 @@ namespace s3piwrappers.EffectCloner.Swarm
             {
                 this.mEffectBuilder.RemoveIndex(this);
             }
-            this.mEffectBuilder = new EffectBuilder(this.EffectType, this.BlockIndex);
-            this.mEffectBuilder.Effect = source.GetEffect(this.EffectType, this.BlockIndex);
+            this.mEffectBuilder = new EffectBuilder(this.EffectType, this.ComponentIndex);
+            this.mEffectBuilder.Effect = source.GetEffect(this.EffectType, this.ComponentIndex);
             this.mEffectBuilder.AddIndex(this);
         }
 
@@ -83,8 +83,8 @@ namespace s3piwrappers.EffectCloner.Swarm
             }
             this.mEffectBuilder = builder;
             this.mEffectBuilder.AddIndex(this);
-            this.BlockType = (byte)this.mEffectBuilder.EffectType;
-            this.BlockIndex = this.mEffectBuilder.EffectIndex;
+            this.ComponentType = (byte)this.mEffectBuilder.EffectType;
+            this.ComponentIndex = this.mEffectBuilder.EffectIndex;
         }
     }
 }

@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class SpriteEffect : Effect, IEquatable<SpriteEffect>
     {
+        #region Constructors
         public SpriteEffect(int apiVersion, EventHandler handler, SpriteEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,36 +17,36 @@ namespace s3piwrappers.Effects
         public SpriteEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mResource = new ResourceReference(0, handler);
+            mResource = new ResourceReference(0, handler, section);
             mFloatList01 = new DataList<FloatValue>(handler);
+            mColorList01 = new DataList<ColorValue>(handler);
             mFloatList02 = new DataList<FloatValue>(handler);
-            mColourList01 = new DataList<ColourValue>(handler);
+            mVector01 = new Vector3ValueLE(apiVersion, handler);
+            mVector02 = new Vector3ValueLE(apiVersion, handler);
         }
 
         public SpriteEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt32 mInt02;
-        private UInt32 mInt03;
+        #region Attributes
+        private uint mFlags;
+        private uint mInt02;
+        private uint mInt03;
         private float mFloat01;
-        private UInt16 mShort01;
+        private ushort mShort01;
         private DataList<FloatValue> mFloatList01;
-        private DataList<ColourValue> mColourList01;
+        private DataList<ColorValue> mColorList01;
         private DataList<FloatValue> mFloatList02;
         private float mFloat02;
         private float mFloat03;
         private float mFloat04;
 
-        private float mFloat05; //LE
-        private float mFloat06; //LE
-        private float mFloat07; //LE
+        private Vector3ValueLE mVector01;
 
-        private float mFloat08; //LE
-        private float mFloat09; //LE
-        private float mFloat10; //LE
+        private Vector3ValueLE mVector02;
 
         private float mFloat11;
         private float mFloat12;
@@ -65,9 +66,10 @@ namespace s3piwrappers.Effects
         private float mFloat26;
         private ResourceReference mResource;
         private byte mByte01;
+        #endregion
 
-
-        [ElementPriority(35)]
+        #region Content Fields
+        [ElementPriority(31)]
         public byte Byte01
         {
             get { return mByte01; }
@@ -78,18 +80,18 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(34)]
+        [ElementPriority(30)]
         public ResourceReference Resource
         {
             get { return mResource; }
             set
             {
-                mResource = value;
+                mResource = new ResourceReference(requestedApiVersion, handler, mSection, value);
                 OnElementChanged();
             }
         }
 
-        [ElementPriority(33)]
+        [ElementPriority(29)]
         public float Float26
         {
             get { return mFloat26; }
@@ -102,7 +104,7 @@ namespace s3piwrappers.Effects
 
 /**/
 
-        [ElementPriority(32)]
+        [ElementPriority(28)]
         public float Float25
         {
             get { return mFloat25; }
@@ -113,7 +115,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(31)]
+        [ElementPriority(27)]
         public float Float24
         {
             get { return mFloat24; }
@@ -124,7 +126,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(30)]
+        [ElementPriority(26)]
         public float Float23
         {
             get { return mFloat23; }
@@ -135,7 +137,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(29)]
+        [ElementPriority(25)]
         public float Float22
         {
             get { return mFloat22; }
@@ -146,7 +148,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(28)]
+        [ElementPriority(24)]
         public float Float21
         {
             get { return mFloat21; }
@@ -157,7 +159,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(27)]
+        [ElementPriority(23)]
         public float Float20
         {
             get { return mFloat20; }
@@ -168,7 +170,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(26)]
+        [ElementPriority(22)]
         public float Float19
         {
             get { return mFloat19; }
@@ -179,7 +181,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(25)]
+        [ElementPriority(21)]
         public float Float18
         {
             get { return mFloat18; }
@@ -190,7 +192,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(24)]
+        [ElementPriority(20)]
         public float Float17
         {
             get { return mFloat17; }
@@ -201,7 +203,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(23)]
+        [ElementPriority(19)]
         public float Float16
         {
             get { return mFloat16; }
@@ -212,7 +214,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(22)]
+        [ElementPriority(18)]
         public float Float15
         {
             get { return mFloat15; }
@@ -223,7 +225,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(21)]
+        [ElementPriority(17)]
         public float Float14
         {
             get { return mFloat14; }
@@ -234,7 +236,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(20)]
+        [ElementPriority(16)]
         public float Float13
         {
             get { return mFloat13; }
@@ -245,7 +247,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(19)]
+        [ElementPriority(15)]
         public float Float12
         {
             get { return mFloat12; }
@@ -256,7 +258,7 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(18)]
+        [ElementPriority(14)]
         public float Float11
         {
             get { return mFloat11; }
@@ -267,68 +269,24 @@ namespace s3piwrappers.Effects
             }
         }
 
-        [ElementPriority(17)]
-        public float Float10
-        {
-            get { return mFloat10; }
-            set
-            {
-                mFloat10 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(16)]
-        public float Float09
-        {
-            get { return mFloat09; }
-            set
-            {
-                mFloat09 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(15)]
-        public float Float08
-        {
-            get { return mFloat08; }
-            set
-            {
-                mFloat08 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(14)]
-        public float Float07
-        {
-            get { return mFloat07; }
-            set
-            {
-                mFloat07 = value;
-                OnElementChanged();
-            }
-        }
-
         [ElementPriority(13)]
-        public float Float06
+        public Vector3ValueLE Vector02
         {
-            get { return mFloat06; }
+            get { return mVector02; }
             set
             {
-                mFloat06 = value;
+                mVector02 = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public float Float05
+        public Vector3ValueLE Vector01
         {
-            get { return mFloat05; }
+            get { return mVector01; }
             set
             {
-                mFloat05 = value;
+                mVector01 = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
@@ -372,18 +330,18 @@ namespace s3piwrappers.Effects
             get { return mFloatList02; }
             set
             {
-                mFloatList02 = value;
+                mFloatList02 = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public DataList<ColourValue> ColourList01
+        public DataList<ColorValue> ColourList01
         {
-            get { return mColourList01; }
+            get { return mColorList01; }
             set
             {
-                mColourList01 = value;
+                mColorList01 = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
@@ -394,7 +352,7 @@ namespace s3piwrappers.Effects
             get { return mFloatList01; }
             set
             {
-                mFloatList01 = value;
+                mFloatList01 = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
@@ -446,36 +404,34 @@ namespace s3piwrappers.Effects
         [ElementPriority(1)]
         public uint Int01
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
+            s.Read(out mFlags);
             s.Read(out mInt02);
             s.Read(out mInt03);
             s.Read(out mFloat01);
             s.Read(out mShort01);
             mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
+            mColorList01 = new DataList<ColorValue>(handler, stream);
             mFloatList02 = new DataList<FloatValue>(handler, stream);
             s.Read(out mFloat02);
             s.Read(out mFloat03);
             s.Read(out mFloat04);
 
-            s.Read(out mFloat05, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat06, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat07, ByteOrder.LittleEndian); //LE
+            mVector01 = new Vector3ValueLE(requestedApiVersion, handler, stream);
 
-            s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
+            mVector02 = new Vector3ValueLE(requestedApiVersion, handler, stream);
 
             s.Read(out mFloat11);
             s.Read(out mFloat12);
@@ -493,32 +449,28 @@ namespace s3piwrappers.Effects
             s.Read(out mFloat24);
             s.Read(out mFloat25);
             s.Read(out mFloat26);
-            mResource = new ResourceReference(0, handler, stream);
+            mResource = new ResourceReference(0, handler, mSection, stream);
             s.Read(out mByte01);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
+            s.Write(mFlags);
             s.Write(mInt02);
             s.Write(mInt03);
             s.Write(mFloat01);
             s.Write(mShort01);
             mFloatList01.UnParse(stream);
-            mColourList01.UnParse(stream);
+            mColorList01.UnParse(stream);
             mFloatList02.UnParse(stream);
             s.Write(mFloat02);
             s.Write(mFloat03);
             s.Write(mFloat04);
 
-            s.Write(mFloat05, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat06, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat07, ByteOrder.LittleEndian); //LE
+            mVector01.UnParse(stream);
 
-            s.Write(mFloat08, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat09, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat10, ByteOrder.LittleEndian); //LE
+            mVector02.UnParse(stream);
 
             s.Write(mFloat11);
             s.Write(mFloat12);
@@ -539,6 +491,7 @@ namespace s3piwrappers.Effects
             mResource.UnParse(stream);
             s.Write(mByte01);
         }
+        #endregion
 
         public bool Equals(SpriteEffect other)
         {

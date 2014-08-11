@@ -28,7 +28,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 for (int i = 0; i < this.mNodeCount; i++)
                 {
                     if (this.mNodes[i] == node)
+                    {
                         return i;
+                    }
                 }
                 if (this.mNodes.Length == this.mNodeCount)
                 {
@@ -39,6 +41,34 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
             this.mNodes[this.mNodeCount++] = node;
             return this.mNodeCount - 1;
+        }
+
+        public bool RemoveNode(AGraphNode node)
+        {
+            if (this.mNodeCount == 0)
+            {
+                return false;
+            }
+            int i;
+            for (i = 0; i < this.mNodeCount; i++)
+            {
+                if (this.mNodes[i] == node)
+                {
+                    break;
+                }
+            }
+            if (i == this.mNodeCount)
+            {
+                return false;
+            }
+            this.mNodeCount--;
+            if (i < this.mNodeCount)
+            {
+                Array.Copy(this.mNodes, i + 1, this.mNodes, i, 
+                    this.mNodeCount - i);
+            }
+            this.mNodes[this.mNodeCount] = null;
+            return true;
         }
 
         public int NodeCount

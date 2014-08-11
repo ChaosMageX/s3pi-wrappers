@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using System.Globalization;
 using s3pi.Interfaces;
 
 namespace s3piwrappers.Helpers
@@ -103,8 +103,157 @@ namespace s3piwrappers.Helpers
         public override string ToString()
         {
             return "0x" + this.TID.ToString("X8")
-                + ":0x" + this.GID.ToString("X8")
-                + ":0x" + this.IID.ToString("X16");
+                + "-0x" + this.GID.ToString("X8")
+                + "-0x" + this.IID.ToString("X16");
+        }
+
+        private static readonly NumberFormatInfo sNFI 
+            = NumberFormatInfo.CurrentInfo;
+
+        public static bool TryParseHex32(string s, out uint num)
+        {
+            num = 0;
+            if (s == null || s.Length == 0)
+            {
+                return false;
+            }
+            s = s.TrimStart();
+            if (s.Length == 0)
+            {
+                return false;
+            }
+            if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
+                uint.TryParse(s.Substring(2, s.Length - 2),
+                              NumberStyles.HexNumber, sNFI, out num))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool TryParseUInt32(string s, out uint num)
+        {
+            num = 0;
+            if (s == null || s.Length == 0)
+            {
+                return false;
+            }
+            s = s.TrimStart();
+            if (s.Length == 0)
+            {
+                return false;
+            }
+            if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return uint.TryParse(s.Substring(2, s.Length - 2),
+                                     NumberStyles.HexNumber, sNFI, out num);
+            }
+            return uint.TryParse(s, NumberStyles.Integer, sNFI, out num);
+        }
+
+        public static bool TryParseHex64(string s, out ulong num)
+        {
+            num = 0;
+            if (s == null || s.Length == 0)
+            {
+                return false;
+            }
+            s = s.TrimStart();
+            if (s.Length == 0)
+            {
+                return false;
+            }
+            if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase) &&
+                ulong.TryParse(s.Substring(2, s.Length - 2),
+                               NumberStyles.HexNumber, sNFI, out num))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool TryParseUInt64(string s, out ulong num)
+        {
+            num = 0;
+            if (s == null || s.Length == 0)
+            {
+                return false;
+            }
+            s = s.TrimStart();
+            if (s.Length == 0)
+            {
+                return false;
+            }
+            if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return ulong.TryParse(s.Substring(2, s.Length - 2),
+                                      NumberStyles.HexNumber, sNFI, out num);
+            }
+            return ulong.TryParse(s, NumberStyles.Integer, sNFI, out num);
+        }
+
+        public static bool TryParse(string s, out RK result)
+        {
+            result = new RK();
+            if (s == null || s.Length == 0)
+            {
+                return false;
+            }
+            // Two formats 0x{X8}-0x{X8}-0x{X16} and (key:){X8}:{X8}:{X16}
+            string[] tgi;
+            if (s.IndexOf("-", 0, s.Length,
+                          StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                tgi = s.Split(new char[] { '-' }, 0x7fffffff, 
+                              StringSplitOptions.None);
+            }
+            else
+            {
+                tgi = s.Split(new char[] { ':' }, 0x7fffffff,
+                              StringSplitOptions.None);
+            }
+            if (tgi.Length < 3)
+            {
+                return false;
+            }
+            int phase = 0;
+            for (int i = 0; i < tgi.Length && phase < 3; i++)
+            {
+                s = tgi[i].TrimStart();
+                if (s.Length == 0)
+                {
+                    continue;
+                }
+                if (s.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+                {
+                    s = s.Substring(2, s.Length - 2);
+                }
+                switch (phase)
+                {
+                    case 0:
+                        if (uint.TryParse(s, NumberStyles.HexNumber, 
+                                          sNFI, out result.TID))
+                        {
+                            phase++;
+                        }
+                        break;
+                    case 1:
+                        if (uint.TryParse(s, NumberStyles.HexNumber, 
+                                          sNFI, out result.GID))
+                        {
+                            phase++;
+                        }
+                        break;
+                    case 2:
+                        if (ulong.TryParse(s, NumberStyles.HexNumber, 
+                                           sNFI, out result.IID))
+                        {
+                            phase++;
+                        }
+                        break;
+                }
+            }
+            return phase == 3;
         }
     }
 }

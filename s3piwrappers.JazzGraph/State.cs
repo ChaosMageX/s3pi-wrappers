@@ -9,7 +9,7 @@ using s3piwrappers.Helpers.Resources;
 
 namespace s3piwrappers.JazzGraph
 {
-    public class State : AChunkObject
+    public class State : AChunkObject, IHasHashedName
     {
         public const uint ResourceType = 0x02EEDAFE;
         public const string ResourceTag = "S_St";
@@ -78,9 +78,12 @@ namespace s3piwrappers.JazzGraph
             js.Properties = this.mFlags;
             js.DecisionGraphIndex = this.mDecisionGraph == null
                 ? NullCRef : this.mDecisionGraph.ChunkReference;
-            this.mTransitions.Sort(NameComparer.Instance);
+
+            State[] transitions = this.mTransitions.ToArray();
+            Array.Sort(transitions, 0, transitions.Length, 
+                NameComparer.Instance);
             JazzChunk.ChunkReferenceList osi = js.OutboundStateIndexes;
-            foreach (State state in this.mTransitions)
+            foreach (State state in transitions)
             {
                 osi.Add(state == null ? NullCRef : state.ChunkReference);
             }

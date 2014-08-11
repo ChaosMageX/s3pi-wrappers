@@ -12,6 +12,8 @@ namespace s3piwrappers
 {
     public class EffectResource : AResource
     {
+        #region Effect Sections
+
         public class EffectSectionList : SectionList<EffectSection>
         {
             public EffectSectionList(EventHandler handler)
@@ -71,7 +73,6 @@ namespace s3piwrappers
                 throw new NotImplementedException();
             }
         }
-
 
         public abstract class EffectSection : Section, IEquatable<EffectSection>
         {
@@ -139,7 +140,6 @@ namespace s3piwrappers
                 mItems.UnParse(s);
             }
         }
-
 
         public class ParticleEffectSection : EffectSection<ParticleEffect>
         {
@@ -348,7 +348,7 @@ namespace s3piwrappers
             }
         }
 
-        public class GameEffectSection : EffectSection<DefaultEffect>
+        public class GameEffectSection : EffectSection<GameEffect>
         {
             public GameEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
                 : base(apiVersion, handler, version, s)
@@ -371,7 +371,7 @@ namespace s3piwrappers
             }
         }
 
-        public class FastParticleEffectSection : EffectSection<DefaultEffect>
+        public class FastParticleEffectSection : EffectSection<FastParticleEffect>
         {
             public FastParticleEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
                 : base(apiVersion, handler, version, s)
@@ -417,11 +417,6 @@ namespace s3piwrappers
             }
         }
 
-
-        /*
-         * Contribution from ChaosMageX
-         */
-
         public class RibbonEffectSection : EffectSection<RibbonEffect>
         {
             public RibbonEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
@@ -445,10 +440,6 @@ namespace s3piwrappers
             }
         }
 
-        /*
-         * Contribution from ChaosMageX
-         */
-
         public class SpriteEffectSection : EffectSection<SpriteEffect>
         {
             public SpriteEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
@@ -471,7 +462,10 @@ namespace s3piwrappers
                 get { return 0x000F; }
             }
         }
+        
+        #endregion
 
+        #region Resource Sections
 
         public abstract class ResourceSection : Section, IEquatable<ResourceSection>
         {
@@ -613,15 +607,16 @@ namespace s3piwrappers
             }
         }
 
+        #endregion
 
         public class VisualEffectSection : Section<VisualEffect>
         {
-            public VisualEffectSection(int apiVersion, EventHandler handler, UInt16 version)
+            public VisualEffectSection(int apiVersion, EventHandler handler, ushort version)
                 : base(apiVersion, handler, version)
             {
             }
 
-            public VisualEffectSection(int apiVersion, EventHandler handler, UInt16 version, Stream s)
+            public VisualEffectSection(int apiVersion, EventHandler handler, ushort version, Stream s)
                 : base(apiVersion, handler, version, s)
             {
             }
@@ -637,13 +632,14 @@ namespace s3piwrappers
             }
         }
 
-        public class VisualEffectHandleList : DependentList<VisualEffectHandle>
+        public class VisualEffectIdList : DependentList<VisualEffectId>
         {
-            public VisualEffectHandleList(EventHandler handler) : base(handler)
+            public VisualEffectIdList(EventHandler handler)
+                : base(handler)
             {
             }
 
-            public VisualEffectHandleList(EventHandler handler, Stream s)
+            public VisualEffectIdList(EventHandler handler, Stream s)
                 : base(handler)
             {
                 Parse(s);
@@ -655,7 +651,7 @@ namespace s3piwrappers
                 uint index = bw.ReadUInt32();
                 while (index != 0xFFFFFFFF)
                 {
-                    var item = new VisualEffectHandle(0, base.handler, s, index);
+                    var item = new VisualEffectId(0, base.handler, s, index);
                     index = bw.ReadUInt32();
                     base.Add(item);
                 }
@@ -664,20 +660,19 @@ namespace s3piwrappers
             public override void UnParse(Stream s)
             {
                 var w = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
-                foreach (VisualEffectHandle item in this)
+                foreach (VisualEffectId item in this)
                 {
-                    VisualEffectHandle handle = item;
-                    (item).UnParse(s);
+                    item.UnParse(s);
                 }
                 w.Write(0xFFFFFFFF);
             }
 
-            protected override VisualEffectHandle CreateElement(Stream s)
+            protected override VisualEffectId CreateElement(Stream s)
             {
                 throw new NotImplementedException();
             }
 
-            protected override void WriteElement(Stream s, VisualEffectHandle element)
+            protected override void WriteElement(Stream s, VisualEffectId element)
             {
                 throw new NotImplementedException();
             }
@@ -688,17 +683,66 @@ namespace s3piwrappers
             }
         }
 
+        public class VisualEffectNameList : DependentList<VisualEffectName>
+        {
+            public VisualEffectNameList(EventHandler handler) : base(handler)
+            {
+            }
 
-        private UInt16 mVersion = 0x00000002;
+            public VisualEffectNameList(EventHandler handler, Stream s)
+                : base(handler)
+            {
+                Parse(s);
+            }
+
+            protected override void Parse(Stream s)
+            {
+                var bw = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
+                uint index = bw.ReadUInt32();
+                while (index != 0xFFFFFFFF)
+                {
+                    var item = new VisualEffectName(0, base.handler, s, index);
+                    index = bw.ReadUInt32();
+                    base.Add(item);
+                }
+            }
+
+            public override void UnParse(Stream s)
+            {
+                var w = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
+                foreach (VisualEffectName item in this)
+                {
+                    item.UnParse(s);
+                }
+                w.Write(0xFFFFFFFF);
+            }
+
+            protected override VisualEffectName CreateElement(Stream s)
+            {
+                throw new NotImplementedException();
+            }
+
+            protected override void WriteElement(Stream s, VisualEffectName element)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Add()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private ushort mVersion = 0x00000002;
         private EffectSectionList mEffectSections;
         private ResourceSectionList mResourceSections;
         private VisualEffectSection mVisualEffectSections;
-        private byte[] mReserved;
-        private VisualEffectHandleList mVisualEffectHandles;
+        private VisualEffectIdList mVisualEffectIds;
+        private VisualEffectNameList mVisualEffectNames;
 
 
         [ElementPriority(1)]
-        public UInt16 Version
+        public ushort Version
         {
             get { return mVersion; }
             set
@@ -742,29 +786,29 @@ namespace s3piwrappers
         }
 
         [ElementPriority(5)]
-        public byte[] Reserved
+        public VisualEffectIdList VisualEffectIds
         {
-            get { return mReserved; }
+            get { return mVisualEffectIds; }
             set
             {
-                mReserved = value;
+                mVisualEffectIds = value;
                 OnResourceChanged(this, new EventArgs());
             }
         }
 
         [ElementPriority(6)]
-        public VisualEffectHandleList VisualEffectHandles
+        public VisualEffectNameList VisualEffectNames
         {
-            get { return mVisualEffectHandles; }
+            get { return mVisualEffectNames; }
             set
             {
-                mVisualEffectHandles = value;
+                mVisualEffectNames = value;
                 OnResourceChanged(this, new EventArgs());
             }
         }
 
-        public EffectResource(int APIversion, Stream s)
-            : base(APIversion, s)
+        public EffectResource(int apiVersion, Stream s)
+            : base(apiVersion, s)
         {
             if (stream == null)
             {
@@ -782,8 +826,8 @@ namespace s3piwrappers
             mEffectSections = new EffectSectionList(OnResourceChanged, inputStream);
             mResourceSections = new ResourceSectionList(OnResourceChanged, inputStream);
             mVisualEffectSections = new VisualEffectSection(0, OnResourceChanged, s.ReadUInt16(), inputStream);
-            mReserved = s.ReadBytes(4);
-            mVisualEffectHandles = new VisualEffectHandleList(OnResourceChanged, inputStream);
+            mVisualEffectIds = new VisualEffectIdList(OnResourceChanged, inputStream);
+            mVisualEffectNames = new VisualEffectNameList(OnResourceChanged, inputStream);
         }
 
         protected override Stream UnParse()
@@ -798,10 +842,10 @@ namespace s3piwrappers
             if (mVisualEffectSections == null) mVisualEffectSections = new VisualEffectSection(0, OnResourceChanged, 2);
             s.Write(mVisualEffectSections.Version);
             mVisualEffectSections.UnParse(outputStream);
-            if (mReserved == null) mReserved = new byte[] {0xFF, 0xFF, 0xFF, 0xFF};
-            s.Write(mReserved);
-            if (mVisualEffectHandles == null) mVisualEffectHandles = new VisualEffectHandleList(OnResourceChanged);
-            mVisualEffectHandles.UnParse(outputStream);
+            if (mVisualEffectIds == null) mVisualEffectIds = new VisualEffectIdList(OnResourceChanged);
+            mVisualEffectIds.UnParse(outputStream);
+            if (mVisualEffectNames == null) mVisualEffectNames = new VisualEffectNameList(OnResourceChanged);
+            mVisualEffectNames.UnParse(outputStream);
             return outputStream;
         }
 
@@ -810,9 +854,9 @@ namespace s3piwrappers
             get
             {
                 var sb = new StringBuilder();
-                for (int i = 0; i < mVisualEffectHandles.Count; i++)
+                for (int i = 0; i < mVisualEffectNames.Count; i++)
                 {
-                    VisualEffectHandle e = mVisualEffectHandles[i];
+                    VisualEffectName e = mVisualEffectNames[i];
                     sb.AppendFormat("[0x{2:X8}]:(0x{0:X8}):{1}\r\n", FNV32.GetHash(e.EffectName), e.EffectName, i);
                 }
                 return sb.ToString();

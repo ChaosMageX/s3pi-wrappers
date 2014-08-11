@@ -17,12 +17,12 @@ namespace s3piwrappers.SWB
             Parse(s);
         }
 
-        protected virtual TSection CreateElement(UInt16 type, UInt16 version, Stream s)
+        protected virtual TSection CreateElement(ushort type, ushort version, Stream s)
         {
             return (TSection) Activator.CreateInstance(GetSectionType(type), 0, handler, version, s);
         }
 
-        protected abstract Type GetSectionType(UInt16 id);
+        protected abstract Type GetSectionType(ushort id);
 
         protected override void Parse(Stream stream)
         {
@@ -30,7 +30,7 @@ namespace s3piwrappers.SWB
             ushort blockType = s.ReadUInt16();
             while (blockType != 0xFFFF)
             {
-                UInt16 blockVersion = s.ReadUInt16();
+                ushort blockVersion = s.ReadUInt16();
                 Type sectionType = GetSectionType(blockType);
                 TSection blocklist = CreateElement(blockType, blockVersion, stream);
                 base.Add(blocklist);

@@ -15,30 +15,41 @@ namespace s3piwrappers.FreeformJazz
 
         public readonly List<string> BannedNames = new List<string>();
 
+        public bool AllowHexNumberName = false;
+
         private RK mKey;
         private string mName;
+        private bool bNameIsValid;
         private SingleStringPrompt mPrompt;
         private EventHandler mOnTextChanged;
 
         private void ParseIID()
         {
             ulong iid = 0;
-            if (!this.mName.StartsWith("0x") ||
-                !ulong.TryParse(this.mName.Substring(2),
-                System.Globalization.NumberStyles.HexNumber, null, out iid))
+            if (this.mName.Length == 0)
             {
                 iid = FNVHash.HashString64(this.mName);
+                this.bNameIsValid = false;
+            }
+            else if (RK.TryParseHex64(this.mName, out iid))
+            {
+                this.bNameIsValid = this.AllowHexNumberName;
+            }
+            else
+            {
+                iid = FNVHash.HashString64(this.mName);
+                this.bNameIsValid = true;
             }
             this.mKey.IID = iid;
         }
 
         private void OnResponseTextChanged(object sender, EventArgs e)
         {
-            this.mName = this.mPrompt.Response;
+            this.mName = this.mPrompt.Response ?? "";
             this.ParseIID();
             this.mPrompt.Prompt = kPromptText + this.mKey;
-            this.mPrompt.OKEnabled = !string.IsNullOrEmpty(this.mName)
-                && !this.BannedNames.Contains(this.mName);
+            this.mPrompt.OKEnabled = this.bNameIsValid &&
+                !this.BannedNames.Contains(this.mName);
         }
 
         public JazzGraphNamePrompt()

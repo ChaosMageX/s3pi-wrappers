@@ -8,100 +8,249 @@ namespace s3piwrappers.Effects
 {
     public class ScreenEffect : Effect, IEquatable<ScreenEffect>
     {
-        public class Item : DataElement, IEquatable<Item>
+        public class Filter : DataElement, IEquatable<Filter>
         {
-            public Item(int APIversion, EventHandler handler, Item basis)
-                : base(APIversion, handler, basis)
+            #region Constructors
+            public Filter(int apiVersion, EventHandler handler, Filter basis)
+                : base(apiVersion, handler, basis)
             {
             }
 
-            public Item(int APIversion, EventHandler handler, Stream s)
-                : base(APIversion, handler, s)
+            public Filter(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler, s)
             {
             }
 
-            public Item(int APIversion, EventHandler handler)
-                : base(APIversion, handler)
+            public Filter(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
             {
-                mByteList01 = new DataList<ByteValue>(handler);
+                mParameters = new DataList<ByteValue>(handler);
             }
+            #endregion
 
-            private Byte mByte01;
-            private Byte mByte02;
-            private UInt64 mLong01;
-            private DataList<ByteValue> mByteList01;
+            #region Attributes
+            private byte mType;
+            private byte mDestination;
+            private ulong mSource;
+            private DataList<ByteValue> mParameters;
+            #endregion
 
-
+            #region Content Fields
             [ElementPriority(1)]
-            public byte Byte01
+            public byte Type
             {
-                get { return mByte01; }
+                get { return mType; }
                 set
                 {
-                    mByte01 = value;
+                    mType = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(2)]
-            public byte Byte02
+            public byte Destination
             {
-                get { return mByte02; }
+                get { return mDestination; }
                 set
                 {
-                    mByte02 = value;
+                    mDestination = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(3)]
-            public ulong Long01
+            public ulong Source
             {
-                get { return mLong01; }
+                get { return mSource; }
                 set
                 {
-                    mLong01 = value;
+                    mSource = value;
                     OnElementChanged();
                 }
             }
 
             [ElementPriority(4)]
-            public DataList<ByteValue> ByteList01
+            public DataList<ByteValue> Parameters
             {
-                get { return mByteList01; }
+                get { return mParameters; }
                 set
                 {
-                    mByteList01 = value;
+                    mParameters = value;
                     OnElementChanged();
                 }
             }
+            #endregion
 
-
+            #region Data I/O
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Read(out mByte01);
-                s.Read(out mByte02);
-                s.Read(out mLong01);
-                mByteList01 = new DataList<ByteValue>(handler, stream);
+                s.Read(out mType);
+                s.Read(out mDestination);
+                s.Read(out mSource);
+                mParameters = new DataList<ByteValue>(handler, stream);
             }
 
             public override void UnParse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-                s.Write(mByte01);
-                s.Write(mByte02);
-                s.Write(mLong01);
-                mByteList01.UnParse(stream);
+                s.Write(mType);
+                s.Write(mDestination);
+                s.Write(mSource);
+                mParameters.UnParse(stream);
             }
+            #endregion
 
-            public bool Equals(Item other)
+            public bool Equals(Filter other)
             {
                 return base.Equals(other);
             }
         }
 
+        public class FilterTempBuffer : DataElement, IEquatable<FilterTempBuffer>
+        {
+            #region Constructors
+            public FilterTempBuffer(int apiVersion, EventHandler handler, FilterTempBuffer basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
 
+            public FilterTempBuffer(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler, s)
+            {
+            }
+
+            public FilterTempBuffer(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+            }
+            #endregion
+
+            #region Attributes
+            private int mScreenRatio;
+            private int mSize;
+            #endregion
+
+            #region Content Fields
+            [ElementPriority(1)]
+            public int ScreenRatio
+            {
+                get { return mScreenRatio; }
+                set
+                {
+                    mScreenRatio = value;
+                    OnElementChanged();
+                }
+            }
+
+            [ElementPriority(2)]
+            public int Size
+            {
+                get { return mSize; }
+                set
+                {
+                    mSize = value;
+                    OnElementChanged();
+                }
+            }
+            #endregion
+
+            #region Data I/O
+            protected override void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Read(out mScreenRatio);
+                s.Read(out mSize);
+            }
+
+            public override void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                s.Write(mScreenRatio);
+                s.Write(mSize);
+            }
+            #endregion
+
+            public bool Equals(FilterTempBuffer other)
+            {
+                //return this.mScreenRatio == other.mScreenRatio && this.mSize == other.mSize;
+                return base.Equals(other);
+            }
+        }
+
+        public class ResourceId : DataElement, IEquatable<ResourceId>
+        {
+            #region Constructors
+            public ResourceId(int apiVersion, EventHandler handler, Filter basis)
+                : base(apiVersion, handler, basis)
+            {
+            }
+
+            public ResourceId(int apiVersion, EventHandler handler, Stream s)
+                : base(apiVersion, handler, s)
+            {
+            }
+
+            public ResourceId(int apiVersion, EventHandler handler)
+                : base(apiVersion, handler)
+            {
+            }
+            #endregion
+
+            private ulong mData;
+
+            [ElementPriority(1)]
+            public ulong Data
+            {
+                get { return mData; }
+                set
+                {
+                    mData = value;
+                    OnElementChanged();
+                }
+            }
+
+            #region Data I/O
+            private bool isTheSims4 = false;
+
+            protected override void Parse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                if (isTheSims4)
+                {
+                    s.Read(out mData);
+                }
+                else
+                {
+                    uint data;
+                    s.Read(out data);
+                    mData = data;
+                }
+            }
+
+            public override void UnParse(Stream stream)
+            {
+                var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
+                if (isTheSims4)
+                {
+                    s.Write(mData);
+                }
+                else
+                {
+                    uint data = (uint)(mData & 0xFFFFFFFF);
+                    s.Write(data);
+                }
+            }
+            #endregion
+
+            public bool Equals(ResourceId other)
+            {
+                //return this.mData = other.mData;
+                return base.Equals(other);
+            }
+        }
+
+        #region Constructors
         public ScreenEffect(int apiVersion, EventHandler handler, ScreenEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -110,257 +259,265 @@ namespace s3piwrappers.Effects
         public ScreenEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mColourList01 = new DataList<ColourValue>(handler);
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mItems = new DataList<Item>(handler);
-            mVector2List01 = new DataList<Vector2Value>(handler);
-            mIntList01 = new DataList<UInt32Value>(handler);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler);
-            mVector2List02 = new DataList<Vector2ValueLE>(handler);
-            mIntList02 = new DataList<UInt32Value>(handler);
+            mColorCurve = new DataList<ColorValue>(handler);
+            mStrengthCurve = new DataList<FloatValue>(handler);
+            mDistanceCurve = new DataList<FloatValue>(handler);
+            mFilters = new DataList<Filter>(handler);
+            mTemporaryBuffers = new DataList<FilterTempBuffer>(handler);
+            mFloatParameters = new DataList<FloatValue>(handler);
+            mVector3Parameters = new DataList<Vector3ValueLE>(handler);
+            mVector2Parameters = new DataList<Vector2ValueLE>(handler);
+            mResourceIdParameters = new DataList<ResourceId>(handler);
         }
 
-        public ScreenEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public ScreenEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        private Byte mByte01;
-        private UInt32 mInt01;
-        private DataList<ColourValue> mColourList01;
-        private DataList<FloatValue> mFloatList01;
-        private DataList<FloatValue> mFloatList02;
-        private float mFloat01;
-        private UInt32 mInt02;
-        private UInt32 mInt03;
-        private UInt32 mInt04;
-        private UInt64 mLong01;
-        private DataList<Item> mItems;
-        private DataList<Vector2Value> mVector2List01;
-        private DataList<UInt32Value> mIntList01;
-        private DataList<Vector3ValueLE> mVector3List01;
-        private DataList<Vector2ValueLE> mVector2List02;
-        private DataList<UInt32Value> mIntList02;
+        #region Attributes
+        private byte mMode;
+        private uint mFlags;
+        private DataList<ColorValue> mColorCurve;
+        private DataList<FloatValue> mStrengthCurve;
+        private DataList<FloatValue> mDistanceCurve;
+        private float mLifetime;
+        private float mDelay;
+        private float mFalloff;
+        private float mDistanceBase;
+        private ulong mTextureId;
+        private DataList<Filter> mFilters;
+        private DataList<FilterTempBuffer> mTemporaryBuffers;//originally DataList<Vector2Value>
+        private DataList<FloatValue> mFloatParameters;//originally DataList<UInt32Value>
+        private DataList<Vector3ValueLE> mVector3Parameters;
+        private DataList<Vector2ValueLE> mVector2Parameters;
+        private DataList<ResourceId> mResourceIdParameters;//originally DataList<UInt32Value>
+        #endregion
 
-
+        #region Content Fields
         [ElementPriority(1)]
-        public byte Byte01
+        public byte Mode
         {
-            get { return mByte01; }
+            get { return mMode; }
             set
             {
-                mByte01 = value;
+                mMode = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public DataList<ColourValue> ColourList01
+        public DataList<ColorValue> ColorCurve
         {
-            get { return mColourList01; }
+            get { return mColorCurve; }
             set
             {
-                mColourList01 = value;
+                mColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public DataList<FloatValue> FloatList01
+        public DataList<FloatValue> StrengthCurve
         {
-            get { return mFloatList01; }
+            get { return mStrengthCurve; }
             set
             {
-                mFloatList01 = value;
+                mStrengthCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public DataList<FloatValue> FloatList02
+        public DataList<FloatValue> DistanceCurve
         {
-            get { return mFloatList01; }
+            get { return mDistanceCurve; }
             set
             {
-                mFloatList01 = value;
+                mDistanceCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public float Float01
+        public float Lifetime
         {
-            get { return mFloat01; }
+            get { return mLifetime; }
             set
             {
-                mFloat01 = value;
+                mLifetime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public uint Int02
+        public float Delay
         {
-            get { return mInt02; }
+            get { return mDelay; }
             set
             {
-                mInt02 = value;
+                mDelay = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public uint Int03
+        public float Falloff
         {
-            get { return mInt03; }
+            get { return mFalloff; }
             set
             {
-                mInt03 = value;
+                mFalloff = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public uint Int04
+        public float DistanceBase
         {
-            get { return mInt04; }
+            get { return mDistanceBase; }
             set
             {
-                mInt04 = value;
+                mDistanceBase = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public ulong Long01
+        public ulong TextureId
         {
-            get { return mLong01; }
+            get { return mTextureId; }
             set
             {
-                mLong01 = value;
+                mTextureId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public DataList<Item> Items
+        public DataList<Filter> Items
         {
-            get { return mItems; }
+            get { return mFilters; }
             set
             {
-                mItems = value;
+                mFilters = new DataList<Filter>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public DataList<Vector2Value> Vector2List01
+        public DataList<FilterTempBuffer> TemporaryBuffers
         {
-            get { return mVector2List01; }
+            get { return mTemporaryBuffers; }
             set
             {
-                mVector2List01 = value;
+                mTemporaryBuffers = new DataList<FilterTempBuffer>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(13)]
-        public DataList<UInt32Value> IntList01
+        public DataList<FloatValue> FloatParameters
         {
-            get { return mIntList01; }
+            get { return mFloatParameters; }
             set
             {
-                mIntList01 = value;
+                mFloatParameters = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(14)]
-        public DataList<Vector3ValueLE> Vector3List01
+        public DataList<Vector3ValueLE> Vector3Parameters
         {
-            get { return mVector3List01; }
+            get { return mVector3Parameters; }
             set
             {
-                mVector3List01 = value;
+                mVector3Parameters = new DataList<Vector3ValueLE>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(15)]
-        public DataList<Vector2ValueLE> Vector2List02
+        public DataList<Vector2ValueLE> Vector2Parameters
         {
-            get { return mVector2List02; }
+            get { return mVector2Parameters; }
             set
             {
-                mVector2List02 = value;
+                mVector2Parameters = new DataList<Vector2ValueLE>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(16)]
-        public DataList<UInt32Value> IntList02
+        public DataList<ResourceId> ResourceIdParameters
         {
-            get { return mIntList02; }
+            get { return mResourceIdParameters; }
             set
             {
-                mIntList02 = value;
+                mResourceIdParameters = new DataList<ResourceId>(handler, value);
                 OnElementChanged();
             }
         }
+        #endregion
 
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mByte01);
-            s.Read(out mInt01);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat01);
-            s.Read(out mInt02);
-            s.Read(out mInt03);
-            s.Read(out mInt04);
-            s.Read(out mLong01);
-            mItems = new DataList<Item>(handler, stream);
-            mVector2List01 = new DataList<Vector2Value>(handler, stream);
-            mIntList01 = new DataList<UInt32Value>(handler, stream);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler, stream);
-            mVector2List02 = new DataList<Vector2ValueLE>(handler, stream);
-            mIntList02 = new DataList<UInt32Value>(handler, stream);
+            s.Read(out mMode);
+            s.Read(out mFlags);
+            //mFlags &= 0x3;
+
+            mColorCurve = new DataList<ColorValue>(handler, stream);
+            mStrengthCurve = new DataList<FloatValue>(handler, stream);
+            mDistanceCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mLifetime);
+            s.Read(out mDelay);
+            s.Read(out mFalloff);
+            s.Read(out mDistanceBase);
+            s.Read(out mTextureId);
+            mFilters = new DataList<Filter>(handler, stream);
+            mTemporaryBuffers = new DataList<FilterTempBuffer>(handler, stream);
+            mFloatParameters = new DataList<FloatValue>(handler, stream);
+            mVector3Parameters = new DataList<Vector3ValueLE>(handler, stream);
+            mVector2Parameters = new DataList<Vector2ValueLE>(handler, stream);
+            mResourceIdParameters = new DataList<ResourceId>(handler, stream);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mByte01);
-            s.Write(mInt01);
-            mColourList01.UnParse(stream);
-            mFloatList01.UnParse(stream);
-            mFloatList02.UnParse(stream);
-            s.Write(mFloat01);
-            s.Write(mInt02);
-            s.Write(mInt03);
-            s.Write(mInt04);
-            s.Write(mLong01);
-            mItems.UnParse(stream);
-            mVector2List01.UnParse(stream);
-            mIntList01.UnParse(stream);
-            mVector3List01.UnParse(stream);
-            mVector2List02.UnParse(stream);
-            mIntList02.UnParse(stream);
+            s.Write(mMode);
+            s.Write(mFlags);
+            mColorCurve.UnParse(stream);
+            mStrengthCurve.UnParse(stream);
+            mDistanceCurve.UnParse(stream);
+            s.Write(mLifetime);
+            s.Write(mDelay);
+            s.Write(mFalloff);
+            s.Write(mDistanceBase);
+            s.Write(mTextureId);
+            mFilters.UnParse(stream);
+            mTemporaryBuffers.UnParse(stream);
+            mFloatParameters.UnParse(stream);
+            mVector3Parameters.UnParse(stream);
+            mVector2Parameters.UnParse(stream);
+            mResourceIdParameters.UnParse(stream);
         }
+        #endregion
 
         public bool Equals(ScreenEffect other)
         {

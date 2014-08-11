@@ -18,8 +18,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
         private int mCaseCount;
         private float mMGH;
 
-        public DGSoDnNode(SelectOnDestinationNode sodn, StateMachineScene scene)
-            : base(sodn, scene)
+        public DGSoDnNode(SelectOnDestinationNode sodn, StateNode state)
+            : base(sodn, state)
         {
             if (sodn == null)
             {

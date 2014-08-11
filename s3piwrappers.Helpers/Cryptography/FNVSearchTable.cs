@@ -22,7 +22,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 this.table = table;
                 index = 0;
-                version = table._version;
+                version = table.mVersion;
                 current = '\0';
             }
 
@@ -32,9 +32,9 @@ namespace s3piwrappers.Helpers.Cryptography
 
             public bool MoveNext()
             {
-                if (version == table._version && index < table._size)
+                if (version == table.mVersion && index < table.mSize)
                 {
-                    current = (char) table._table[index];
+                    current = (char) table.mTable[index];
                     index++;
                     return true;
                 }
@@ -43,12 +43,12 @@ namespace s3piwrappers.Helpers.Cryptography
 
             private bool MoveNextRare()
             {
-                if (version != table._version)
+                if (version != table.mVersion)
                 {
                     throw new InvalidOperationException(
                         "Enumerator Version Mismatch");
                 }
-                index = table._size + 1;
+                index = table.mSize + 1;
                 current = '\0';
                 return false;
             }
@@ -62,7 +62,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 get
                 {
-                    if ((index == 0) || (index == (table._size + 1)))
+                    if ((index == 0) || (index == (table.mSize + 1)))
                     {
                         throw new InvalidOperationException();
                     }
@@ -72,7 +72,7 @@ namespace s3piwrappers.Helpers.Cryptography
 
             void IEnumerator.Reset()
             {
-                if (version != table._version)
+                if (version != table.mVersion)
                 {
                     throw new InvalidOperationException(
                         "Enumerator Version Mismatch");
@@ -175,24 +175,24 @@ namespace s3piwrappers.Helpers.Cryptography
 
         #region Fields And Properties
 
-        private int _size;
-        private readonly byte[] _table = new byte[256];
-        private int _version;
-        private object _syncRoot;
+        private int mSize;
+        private readonly byte[] mTable = new byte[256];
+        private int mVersion;
+        private object mSyncRoot;
 
         public int Count
         {
-            get { return _size; }
+            get { return mSize; }
         }
 
         public byte[] Table
         {
             get
             {
-                var result = new byte[_size];
-                if (_size > 0)
+                var result = new byte[mSize];
+                if (mSize > 0)
                 {
-                    Array.Copy(_table, 0, result, 0, _size);
+                    Array.Copy(mTable, 0, result, 0, mSize);
                 }
                 return result;
             }
@@ -200,10 +200,10 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public char[] ToCharArray()
         {
-            var results = new char[_size];
-            if (_size > 0)
+            var results = new char[mSize];
+            if (mSize > 0)
             {
-                Array.Copy(_table, 0, results, 0, _size);
+                Array.Copy(mTable, 0, results, 0, mSize);
             }
             return results;
         }
@@ -217,11 +217,11 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             get
             {
-                if (index < 0 || index >= _size)
+                if (index < 0 || index >= mSize)
                 {
                     throw new IndexOutOfRangeException();
                 }
-                return (char)_table[index];
+                return (char)mTable[index];
             }
         }
 
@@ -229,17 +229,18 @@ namespace s3piwrappers.Helpers.Cryptography
 
         #region Prefix And Suffix
 
-        private byte[] _prefix = new byte[0];
-        private int _prefixLength;
+        private byte[] mPrefix = new byte[0];
+        private string mPrefixStr = "";
+        private int mPrefixLength;
 
         public byte[] PrefixBytes
         {
             get
             {
-                var result = new byte[_prefixLength];
-                if (_prefixLength > 0)
+                var result = new byte[mPrefixLength];
+                if (mPrefixLength > 0)
                 {
-                    Array.Copy(_prefix, 0, result, 0, _prefixLength);
+                    Array.Copy(mPrefix, 0, result, 0, mPrefixLength);
                 }
                 return result;
             }
@@ -249,54 +250,58 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             get
             {
-                if (_prefixLength == 0)
+                /*if (mPrefixLength == 0)
                 {
                     return "";
                 }
-                var result = new char[_prefixLength];
-                Array.Copy(_prefix, 0, result, 0, _prefixLength);
-                return new string(result);
+                var result = new char[mPrefixLength];
+                Array.Copy(mPrefix, 0, result, 0, mPrefixLength);
+                return new string(result);/* */
+                return mPrefixStr;
             }
             set
             {
+                mPrefixStr = "";
                 if (value == null)
                 {
-                    _prefixLength = 0;
-                    _prefix = new byte[0];
+                    mPrefixLength = 0;
+                    mPrefix = new byte[0];
                 }
                 else
                 {
-                    _prefixLength = value.Length;
-                    _prefix = new byte[_prefixLength];
-                    if (_prefixLength > 0)
+                    mPrefixLength = value.Length;
+                    mPrefix = new byte[mPrefixLength];
+                    if (mPrefixLength > 0)
                     {
                         int realLength = 0;
-                        for (int i = 0; i < _prefixLength; i++)
+                        for (int i = 0; i < mPrefixLength; i++)
                         {
                             if (value[i] < 0xff)
                             {
-                                _prefix[i]
+                                mPrefix[i]
                                     = FNVHash.LCAlphabetConversion[value[i]];
+                                mPrefixStr += value[i];
                                 realLength++;
                             }
                         }
-                        _prefixLength = realLength;
+                        mPrefixLength = realLength;
                     }
                 }
             }
         }
 
-        private byte[] _suffix = new byte[0];
-        private int _suffixLength;
+        private byte[] mSuffix = new byte[0];
+        private string mSuffixStr = "";
+        private int mSuffixLength;
 
         public byte[] SuffixBytes
         {
             get
             {
-                var result = new byte[_suffixLength];
-                if (_suffixLength > 0)
+                var result = new byte[mSuffixLength];
+                if (mSuffixLength > 0)
                 {
-                    Array.Copy(_suffix, 0, result, 0, _suffixLength);
+                    Array.Copy(mSuffix, 0, result, 0, mSuffixLength);
                 }
                 return result;
             }
@@ -306,38 +311,41 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             get
             {
-                if (_suffixLength == 0)
+                /*if (mSuffixLength == 0)
                 {
                     return "";
                 }
-                var result = new char[_suffixLength];
-                Array.Copy(_suffix, 0, result, 0, _suffixLength);
-                return new string(result);
+                var result = new char[mSuffixLength];
+                Array.Copy(mSuffix, 0, result, 0, mSuffixLength);
+                return new string(result);/* */
+                return mSuffixStr;
             }
             set
             {
+                mSuffixStr = "";
                 if (value == null)
                 {
-                    _suffixLength = 0;
-                    _suffix = new byte[0];
+                    mSuffixLength = 0;
+                    mSuffix = new byte[0];
                 }
                 else
                 {
-                    _suffixLength = value.Length;
-                    _suffix = new byte[_suffixLength];
-                    if (_prefixLength > 0)
+                    mSuffixLength = value.Length;
+                    mSuffix = new byte[mSuffixLength];
+                    if (mSuffixLength > 0)
                     {
                         int realLength = 0;
-                        for (int i = 0; i < _suffixLength; i++)
+                        for (int i = 0; i < mSuffixLength; i++)
                         {
                             if (value[i] < 0xff)
                             {
-                                _suffix[i]
+                                mSuffix[i]
                                     = FNVHash.LCAlphabetConversion[value[i]];
+                                mSuffixStr += value[i];
                                 realLength++;
                             }
                         }
-                        _suffixLength = realLength;
+                        mSuffixLength = realLength;
                     }
                 }
             }
@@ -351,9 +359,9 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 throw new ArgumentNullException("chars");
             }
-            _size = chars.Length;
-            Array.Copy(chars, 0, _table, 0, _size);
-            Array.Sort(_table, 0, _size, null);
+            mSize = chars.Length;
+            Array.Copy(chars, 0, mTable, 0, mSize);
+            Array.Sort(mTable, 0, mSize, null);
         }
 
         public FNVSearchTable(char[] chars)
@@ -376,20 +384,20 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public int IndexOf(char value)
         {
-            if (value > 0xff || _size == 0)
+            if (value > 0xff || mSize == 0)
             {
                 return -1;
             }
             byte b = FNVHash.LCAlphabetConversion[value];
             int med;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (lo <= hi)
             {
                 med = lo + ((hi - lo) >> 1);
-                if (_table[med] == b)
+                if (mTable[med] == b)
                     return med;
-                if (_table[med] < b)
+                if (mTable[med] < b)
                     lo = med + 1;
                 else
                     hi = med - 1;
@@ -403,35 +411,35 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public bool AddChar(char value)
         {
-            if (value > 0xff || _size == 256)
+            if (value > 0xff || mSize == 256)
             {
                 return false;
             }
-            if (_size == 0)
+            if (mSize == 0)
             {
-                _table[0] = FNVHash.LCAlphabetConversion[value];
-                _size++;
-                _version++;
+                mTable[0] = FNVHash.LCAlphabetConversion[value];
+                mSize++;
+                mVersion++;
                 return true;
             }
             byte b = FNVHash.LCAlphabetConversion[value];
             int med;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (lo <= hi)
             {
                 med = lo + ((hi - lo) >> 1);
-                if (_table[med] == b)
+                if (mTable[med] == b)
                     return false;
-                if (_table[med] < b)
+                if (mTable[med] < b)
                     lo = med + 1;
                 else
                     hi = med - 1;
             }
-            Array.Copy(_table, lo, _table, lo + 1, _size - lo);
-            _table[lo] = b;
-            _size++;
-            _version++;
+            Array.Copy(mTable, lo, mTable, lo + 1, mSize - lo);
+            mTable[lo] = b;
+            mSize++;
+            mVersion++;
             return true;
         }
 
@@ -441,7 +449,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 throw new ArgumentNullException("values");
             }
-            if (_size == 256)
+            if (mSize == 256)
             {
                 return 0;
             }
@@ -460,7 +468,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 throw new ArgumentNullException("values");
             }
-            if (_size == 256)
+            if (mSize == 256)
             {
                 return 0;
             }
@@ -475,20 +483,20 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public bool RemoveChar(char value)
         {
-            if (value > 0xff || _size == 0)
+            if (value > 0xff || mSize == 0)
             {
                 return false;
             }
             byte b = FNVHash.LCAlphabetConversion[value];
             int med = -1;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (lo <= hi)
             {
                 med = lo + ((hi - lo) >> 1);
-                if (_table[med] == b)
+                if (mTable[med] == b)
                     break;
-                if (_table[med] < b)
+                if (mTable[med] < b)
                     lo = med + 1;
                 else
                     hi = med - 1;
@@ -497,10 +505,10 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 return false;
             }
-            _size--;
-            Array.Copy(_table, med + 1, _table, med, _size - med);
-            _table[_size] = 0;
-            _version++;
+            mSize--;
+            Array.Copy(mTable, med + 1, mTable, med, mSize - med);
+            mTable[mSize] = 0;
+            mVersion++;
             return true;
         }
 
@@ -510,7 +518,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 throw new ArgumentNullException("values");
             }
-            if (_size == 0)
+            if (mSize == 0)
             {
                 return 0;
             }
@@ -529,7 +537,7 @@ namespace s3piwrappers.Helpers.Cryptography
             {
                 throw new ArgumentNullException("values");
             }
-            if (_size == 0)
+            if (mSize == 0)
             {
                 return 0;
             }
@@ -544,40 +552,40 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public void RemoveCharAt(int index)
         {
-            if (index < 0 || index >= _size)
+            if (index < 0 || index >= mSize)
             {
                 throw new ArgumentOutOfRangeException("index");
             }
-            _size--;
-            Array.Copy(_table, index + 1, _table, index, _size - index);
-            _table[_size] = 0;
-            _version++;
+            mSize--;
+            Array.Copy(mTable, index + 1, mTable, index, mSize - index);
+            mTable[mSize] = 0;
+            mVersion++;
         }
 
         #endregion
 
         public char GetNextChar(char value)
         {
-            if (value > 0xff || _size == 0)
+            if (value > 0xff || mSize == 0)
             {
                 return value;
             }
             byte st, b = FNVHash.LCAlphabetConversion[value];
-            if (b < _table[0])
+            if (b < mTable[0])
             {
-                return (char)_table[0];
+                return (char)mTable[0];
             }
-            if (b >= _table[_size - 1])
+            if (b >= mTable[mSize - 1])
             {
                 return value;
             }
             int med;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (hi - lo > 1)
             {
                 med = lo + ((hi - lo) >> 1);
-                st = _table[med];
+                st = mTable[med];
                 if (b < st)
                     hi = med;
                 else if (b > st)
@@ -587,36 +595,36 @@ namespace s3piwrappers.Helpers.Cryptography
             }
             if (lo == hi)
             {
-                return (char)_table[hi + 1];
+                return (char)mTable[hi + 1];
             }
             else
             {
-                return (char)_table[hi];
+                return (char)mTable[hi];
             }
         }
 
         public char GetPrevChar(char value)
         {
-            if (value > 0xff || _size == 0)
+            if (value > 0xff || mSize == 0)
             {
                 return value;
             }
             byte st, b = FNVHash.LCAlphabetConversion[value];
-            if (b <= _table[0])
+            if (b <= mTable[0])
             {
                 return value;
             }
-            if (b > _table[_size - 1])
+            if (b > mTable[mSize - 1])
             {
-                return (char)_table[_size - 1];
+                return (char)mTable[mSize - 1];
             }
             int med;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (hi - lo > 1)
             {
                 med = lo + ((hi - lo) >> 1);
-                st = _table[med];
+                st = mTable[med];
                 if (b < st)
                     hi = med;
                 else if (b > st)
@@ -626,11 +634,11 @@ namespace s3piwrappers.Helpers.Cryptography
             }
             if (lo == hi)
             {
-                return (char)_table[lo - 1];
+                return (char)mTable[lo - 1];
             }
             else
             {
-                return (char)_table[lo];
+                return (char)mTable[lo];
             }
         }
 
@@ -643,30 +651,30 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public void Clear()
         {
-            if (_size > 0)
+            if (mSize > 0)
             {
-                Array.Clear(_table, 0, _size);
-                _size = 0;
+                Array.Clear(mTable, 0, mSize);
+                mSize = 0;
             }
-            _version++;
+            mVersion++;
         }
 
         public bool Contains(char item)
         {
-            if (item > 0xff || _size == 0)
+            if (item > 0xff || mSize == 0)
             {
                 return false;
             }
             byte b = FNVHash.LCAlphabetConversion[item];
             int med;
             int lo = 0;
-            int hi = _size - 1;
+            int hi = mSize - 1;
             while (lo <= hi)
             {
                 med = lo + ((hi - lo) >> 1);
-                if (_table[med] == b)
+                if (mTable[med] == b)
                     return true;
-                if (_table[med] < b)
+                if (mTable[med] < b)
                     lo = med + 1;
                 else
                     hi = med - 1;
@@ -676,7 +684,7 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public void CopyTo(char[] array, int arrayIndex)
         {
-            Array.Copy(_table, 0, array, arrayIndex, _size);
+            Array.Copy(mTable, 0, array, arrayIndex, mSize);
         }
 
         public bool IsReadOnly
@@ -705,7 +713,7 @@ namespace s3piwrappers.Helpers.Cryptography
 
         public void CopyTo(Array array, int index)
         {
-            Array.Copy(_table, 0, array, index, _size);
+            Array.Copy(mTable, 0, array, index, mSize);
         }
 
         public bool IsSynchronized
@@ -717,12 +725,12 @@ namespace s3piwrappers.Helpers.Cryptography
         {
             get
             {
-                if (_syncRoot == null)
+                if (mSyncRoot == null)
                 {
                     Interlocked.CompareExchange<object>(
-                        ref _syncRoot, new object(), null);
+                        ref mSyncRoot, new object(), null);
                 }
-                return _syncRoot;
+                return mSyncRoot;
             }
         }
 

@@ -9,7 +9,7 @@ using s3piwrappers.Helpers.Resources;
 
 namespace s3piwrappers.JazzGraph
 {
-    public class ParamDefinition : AChunkObject
+    public class ParamDefinition : AChunkObject, IHasHashedName
     {
         public const uint ResourceType = 0x02EEDB46;
         public const string ResourceTag = "S_PD";

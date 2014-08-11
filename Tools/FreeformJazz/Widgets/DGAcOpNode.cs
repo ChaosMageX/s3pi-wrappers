@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
 using s3pi.GenericRCOLResource;
+using s3piwrappers.Helpers;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -11,13 +12,14 @@ namespace s3piwrappers.FreeformJazz.Widgets
     public class DGAcOpNode : DGMulticastNode
     {
         private ActorOperationNode mAcOpNode;
+        private RefToActor mActor;
 
         private GraphicsPath mBorderPath;
 
         private string mTextString;
 
-        public DGAcOpNode(ActorOperationNode aon, StateMachineScene scene)
-            : base(aon, scene)
+        public DGAcOpNode(ActorOperationNode aon, StateNode state)
+            : base(aon, state)
         {
             if (aon == null)
             {
@@ -26,6 +28,113 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.mAcOpNode = aon;
 
             this.UpdateVisualization();
+        }
+
+        /*private class ActorCommand : JazzCommand
+        {
+            private DGAcOpNode mDGAN;
+            private ActorDefinition mOldVal;
+            private ActorDefinition mNewVal;
+            private bool bExtendable;
+
+            public ActorCommand(DGAcOpNode dgan,
+                ActorDefinition newValue, bool extendable)
+                : base(dgan.mScene.Container)
+            {
+                this.mDGAN = dgan;
+                this.mOldVal = dgan.mAcOpNode.Actor;
+                this.mNewVal = newValue;
+                this.bExtendable = extendable;
+                this.mLabel = "Set Actor Operation Node Actor";
+            }
+
+            public override bool Execute()
+            {
+                this.mDGAN.mAcOpNode.Actor = this.mNewVal;
+                this.mDGAN.mActor.SetValue(this.mNewVal);
+                this.mDGAN.UpdateVisualization();
+                return true;
+            }
+
+            public override void Undo()
+            {
+                this.mDGAN.mAcOpNode.Actor = this.mOldVal;
+                this.mDGAN.mActor.SetValue(this.mOldVal);
+                this.mDGAN.UpdateVisualization();
+            }
+
+            public override bool IsExtendable(Command possibleExt)
+            {
+                if (!this.bExtendable)
+                {
+                    return false;
+                }
+                ActorCommand ac = possibleExt as ActorCommand;
+                if (ac == null || ac.mContainer != this.mContainer ||
+                    ac.mDGAN != this.mDGAN || ac.mNewVal == this.mOldVal)
+                {
+                    return false;
+                }
+                return true;
+            }
+
+            public override void Extend(Command possibleExt)
+            {
+                ActorCommand ac = possibleExt as ActorCommand;
+                this.mNewVal = ac.mNewVal;
+            }
+        }/* */
+
+        private class ActorCommand : DGNodeRefPropertyCommand<
+            DGAcOpNode, ActorOperationNode, ActorDefinition>
+        {
+            public ActorCommand(DGAcOpNode dgan,
+                ActorDefinition newValue, bool extendable)
+                : base(dgan, dgan.mAcOpNode, dgan.mActor,
+                "Actor", newValue, extendable)
+            {
+                this.mLabel = "Set Actor Operation Node Actor";
+            }
+        }
+
+        private class OperandCommand
+            : DGNodePropertyCommand<DGAcOpNode, ActorOperationNode, bool>
+        {
+            public OperandCommand(DGAcOpNode dgan, 
+                bool newValue, bool extendable)
+                : base(dgan, dgan.mAcOpNode, 
+                "Operand", newValue, extendable)
+            {
+                this.mLabel = "Set Actor Operation Node Operand";
+            }
+        }
+
+        public RefToActor Actor
+        {
+            get { return this.mActor; }
+            set
+            {
+                ActorDefinition ad
+                    = value == null ? null : value.GetValue();
+                if (this.mAcOpNode.Actor != ad)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new ActorCommand(this, ad, false));
+                }
+            }
+        }
+
+        public bool Operand
+        {
+            get { return this.mAcOpNode.Operand; }
+            set
+            {
+                if (this.mAcOpNode.Operand != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new OperandCommand(this, value, false));
+                }
+            }
         }
 
         private static Font sTextFont 

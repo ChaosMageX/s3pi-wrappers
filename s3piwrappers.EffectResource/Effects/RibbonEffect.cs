@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers.IO;
@@ -8,6 +9,7 @@ namespace s3piwrappers.Effects
 {
     public class RibbonEffect : Effect, IEquatable<RibbonEffect>
     {
+        #region Constructors
         public RibbonEffect(int apiVersion, EventHandler handler, RibbonEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,475 +18,466 @@ namespace s3piwrappers.Effects
         public RibbonEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mResource = new ResourceReference(0, handler);
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mFloatList03 = new DataList<FloatValue>(handler);
-            mFloatList04 = new DataList<FloatValue>(handler);
-            mFloatList05 = new DataList<FloatValue>(handler);
-            mFloatList06 = new DataList<FloatValue>(handler);
-            mFloatList07 = new DataList<FloatValue>(handler);
-            mColourList01 = new DataList<ColourValue>(handler);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler);
-            mVector3List02 = new DataList<Vector3ValueLE>(handler);
+            mRibbonLifetime = new Vector2ValueLE(apiVersion, handler);
+            mOffsetCurve = new DataList<FloatValue>(handler);
+            mWidthCurve = new DataList<FloatValue>(handler);
+            mColorCurve = new DataList<ColorValue>(handler);
+            mAlphaCurve = new DataList<FloatValue>(handler);
+            mLengthColorCurve = new DataList<ColorValue>(handler);
+            mLengthAlphaCurve = new DataList<FloatValue>(handler);
+            mEdgeColorCurve = new DataList<ColorValue>(handler);
+            mEdgeAlphaCurve = new DataList<FloatValue>(handler);
+            mStartEdgeAlphaCurve = new DataList<FloatValue>(handler);
+            mEndEdgeAlphaCurve = new DataList<FloatValue>(handler);
+            mDrawInfo = new ResourceReference(apiVersion, handler, section);
+            mDirectionalForcesSum = new Vector3ValueLE(apiVersion, handler);
         }
 
         public RibbonEffect(int apiVersion, EventHandler handler, ISection section, Stream s)
             : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt32 mInt02;
-        private UInt32 mInt03;
-        private DataList<FloatValue> mFloatList01;
-        private DataList<FloatValue> mFloatList02;
-        private float mFloat01;
-        private float mFloat02;
-        private float mFloat03;
-        private DataList<ColourValue> mColourList01;
-        private DataList<FloatValue> mFloatList03;
-        private DataList<Vector3ValueLE> mVector3List01;
-        private DataList<FloatValue> mFloatList04;
-        private DataList<Vector3ValueLE> mVector3List02;
-        private DataList<FloatValue> mFloatList05;
-        private DataList<FloatValue> mFloatList06;
-        private DataList<FloatValue> mFloatList07;
-        private UInt32 mInt04;
-        private float mFloat04;
-        private ResourceReference mResource;
-        private UInt32 mInt05; //0xFFFFFFFF
-        private float mFloat05;
-        private float mFloat06;
-        private float mFloat07;
+        #region Attributes
+        private uint mFlags;
+        private Vector2ValueLE mRibbonLifetime;//originally uint,uint
+        private DataList<FloatValue> mOffsetCurve;
+        private DataList<FloatValue> mWidthCurve;
+        private float mTaper;
+        private float mFade;
+        private float mAlphaDecay;
+        private DataList<ColorValue> mColorCurve;
+        private DataList<FloatValue> mAlphaCurve;
+        private DataList<ColorValue> mLengthColorCurve;//originally DataList<Vector3ValueLE>
+        private DataList<FloatValue> mLengthAlphaCurve;
+        private DataList<ColorValue> mEdgeColorCurve;//originally DataList<Vector3ValueLE>
+        private DataList<FloatValue> mEdgeAlphaCurve;
+        private DataList<FloatValue> mStartEdgeAlphaCurve;
+        private DataList<FloatValue> mEndEdgeAlphaCurve;
+        private int mSegmentCount;//originally uint
+        private float mSegmentLength;
+        private ResourceReference mDrawInfo;
+        private int mTileUV; //0xFFFFFFFF; originally uint
+        private float mSlipCurveSpeed;
+        private float mSlipUVSpeed;
 
-        private float mFloat08; //LE
-        private float mFloat09; //LE
-        private float mFloat10; //LE
+        private float mUVRepeat; //Version 2+
 
-        private float mFloat11;
-        private float mFloat12;
-        private UInt64 mLong01; //0xFFFFFFFFFFFFFFFF
-        private UInt64 mLong02; //0xFFFFFFFFFFFFFFFF
-        private UInt32 mInt06; //0x00000000
+        private Vector3ValueLE mDirectionalForcesSum;
 
+        private float mWindStrength;
+        private float mGravityStrength;
+        private ulong mEmitColorMapId; //0xFFFFFFFFFFFFFFFF
+        private ulong mForceMapId; //0xFFFFFFFFFFFFFFFF
+        private float mMapRepulseStrength; //0.0f; originally uint
+        #endregion
 
-        [ElementPriority(31)]
-        public uint Int06
-        {
-            get { return mInt06; }
-            set
-            {
-                mInt06 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(30)]
-        public ulong Long02
-        {
-            get { return mLong02; }
-            set
-            {
-                mLong02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(29)]
-        public ulong Long01
-        {
-            get { return mLong01; }
-            set
-            {
-                mLong01 = value;
-                OnElementChanged();
-            }
-        }
-
+        #region Content Fields
         [ElementPriority(28)]
-        public float Float12
+        public float MapRepulseStrength
         {
-            get { return mFloat12; }
+            get { return mMapRepulseStrength; }
             set
             {
-                mFloat12 = value;
+                mMapRepulseStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(27)]
-        public float Float11
+        public ulong ForceMapId
         {
-            get { return mFloat11; }
+            get { return mForceMapId; }
             set
             {
-                mFloat11 = value;
+                mForceMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(26)]
-        public float Float10
+        public ulong EmitColorMapId
         {
-            get { return mFloat10; }
+            get { return mEmitColorMapId; }
             set
             {
-                mFloat10 = value;
+                mEmitColorMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(25)]
-        public float Float09
+        public float GravityStrength
         {
-            get { return mFloat09; }
+            get { return mGravityStrength; }
             set
             {
-                mFloat09 = value;
+                mGravityStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(24)]
-        public float Float08
+        public float WindStrength
         {
-            get { return mFloat08; }
+            get { return mWindStrength; }
             set
             {
-                mFloat08 = value;
+                mWindStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(23)]
-        public float Float07
+        public Vector3ValueLE DirectionalForcesSum
         {
-            get { return mFloat07; }
+            get { return mDirectionalForcesSum; }
             set
             {
-                mFloat07 = value;
+                mDirectionalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(22)]
-        public float Float06
+        public float UVRepeat
         {
-            get { return mFloat06; }
+            get { return mUVRepeat; }
             set
             {
-                mFloat06 = value;
+                mUVRepeat = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(21)]
-        public float Float05
+        public float SlipUVSpeed
         {
-            get { return mFloat05; }
+            get { return mSlipUVSpeed; }
             set
             {
-                mFloat05 = value;
+                mSlipUVSpeed = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(20)]
-        public uint Int05
+        public float SlipCurveSpeed
         {
-            get { return mInt05; }
+            get { return mSlipCurveSpeed; }
             set
             {
-                mInt05 = value;
+                mSlipCurveSpeed = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(19)]
-        public ResourceReference Resource
+        public int TileUV
         {
-            get { return mResource; }
+            get { return mTileUV; }
             set
             {
-                mResource = value;
+                mTileUV = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(18)]
-        public float Float04
+        public ResourceReference DrawInfo
         {
-            get { return mFloat04; }
+            get { return mDrawInfo; }
             set
             {
-                mFloat04 = value;
+                mDrawInfo = new ResourceReference(requestedApiVersion, handler, mSection, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(17)]
-        public uint Int04
+        public float SegmentLength
         {
-            get { return mInt04; }
+            get { return mSegmentLength; }
             set
             {
-                mInt04 = value;
+                mSegmentLength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(16)]
-        public DataList<FloatValue> FloatList07
+        public int SegmentCount
         {
-            get { return mFloatList07; }
+            get { return mSegmentCount; }
             set
             {
-                mFloatList07 = value;
+                mSegmentCount = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(15)]
-        public DataList<FloatValue> FloatList06
+        public DataList<FloatValue> EndEdgeAlphaCurve
         {
-            get { return mFloatList06; }
+            get { return mEndEdgeAlphaCurve; }
             set
             {
-                mFloatList06 = value;
+                mEndEdgeAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(14)]
-        public DataList<FloatValue> FloatList05
+        public DataList<FloatValue> StartEdgeAlphaCurve
         {
-            get { return mFloatList05; }
+            get { return mStartEdgeAlphaCurve; }
             set
             {
-                mFloatList05 = value;
+                mStartEdgeAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(13)]
-        public DataList<Vector3ValueLE> Vector3List02
+        public DataList<FloatValue> EdgeAlphaCurve
         {
-            get { return mVector3List02; }
+            get { return mEdgeAlphaCurve; }
             set
             {
-                mVector3List02 = value;
+                mEdgeAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public DataList<FloatValue> FloatList04
+        public DataList<ColorValue> EdgeColorCurve
         {
-            get { return mFloatList04; }
+            get { return mEdgeColorCurve; }
             set
             {
-                mFloatList04 = value;
+                mEdgeColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public DataList<Vector3ValueLE> Vector3List01
+        public DataList<FloatValue> LengthAlphaCurve
         {
-            get { return mVector3List01; }
+            get { return mLengthAlphaCurve; }
             set
             {
-                mVector3List01 = value;
+                mLengthAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public DataList<FloatValue> FloatList03
+        public DataList<ColorValue> LengthColorCurve
         {
-            get { return mFloatList03; }
+            get { return mLengthColorCurve; }
             set
             {
-                mFloatList03 = value;
+                mLengthColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public DataList<ColourValue> ColourList01
+        public DataList<FloatValue> AlphaCurve
         {
-            get { return mColourList01; }
+            get { return mAlphaCurve; }
             set
             {
-                mColourList01 = value;
+                mAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public float Float03
+        public DataList<ColorValue> ColorCurve
         {
-            get { return mFloat03; }
+            get { return mColorCurve; }
             set
             {
-                mFloat03 = value;
+                mColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public float Float02
+        public float AlphaDecay
         {
-            get { return mFloat02; }
+            get { return mAlphaDecay; }
             set
             {
-                mFloat02 = value;
+                mAlphaDecay = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public float Float01
+        public float Fade
         {
-            get { return mFloat01; }
+            get { return mFade; }
             set
             {
-                mFloat01 = value;
+                mFade = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public DataList<FloatValue> FloatList02
+        public float Taper
         {
-            get { return mFloatList02; }
+            get { return mTaper; }
             set
             {
-                mFloatList02 = value;
+                mTaper = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public DataList<FloatValue> FloatList01
+        public DataList<FloatValue> WidthCurve
         {
-            get { return mFloatList01; }
+            get { return mWidthCurve; }
             set
             {
-                mFloatList01 = value;
+                mWidthCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public uint Int03
+        public DataList<FloatValue> OffsetCurve
         {
-            get { return mInt03; }
+            get { return mOffsetCurve; }
             set
             {
-                mInt03 = value;
+                mOffsetCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public uint Int02
+        public Vector2ValueLE RibbonLifetime
         {
-            get { return mInt02; }
+            get { return mRibbonLifetime; }
             set
             {
-                mInt02 = value;
+                mRibbonLifetime = new Vector2ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(1)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
+        public override List<string> ContentFields
+        {
+            get
+            {
+                List<string> fields = base.ContentFields;
+                if (mSection.Version < 0x0002) fields.Remove("UVRepeat");
+                return fields;
+            }
+        }
+
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mInt02);
-            s.Read(out mInt03);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat01);
-            s.Read(out mFloat02);
-            s.Read(out mFloat03);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
-            mFloatList03 = new DataList<FloatValue>(handler, stream);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler, stream);
-            mFloatList04 = new DataList<FloatValue>(handler, stream);
-            mVector3List02 = new DataList<Vector3ValueLE>(handler, stream);
-            mFloatList05 = new DataList<FloatValue>(handler, stream);
-            mFloatList06 = new DataList<FloatValue>(handler, stream);
-            mFloatList07 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mInt04);
-            s.Read(out mFloat04);
-            mResource = new ResourceReference(0, handler, stream);
-            s.Read(out mInt05);
-            s.Read(out mFloat05);
-            s.Read(out mFloat06);
-            s.Read(out mFloat07);
+            s.Read(out mFlags);
+            //mFlags &= 0x3FFF;
 
-            s.Read(out mFloat08, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat09, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
+            mRibbonLifetime = new Vector2ValueLE(requestedApiVersion, handler, stream);
+            mOffsetCurve = new DataList<FloatValue>(handler, stream);
+            mWidthCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mTaper);
+            s.Read(out mFade);
+            s.Read(out mAlphaDecay);
+            mColorCurve = new DataList<ColorValue>(handler, stream);
+            mAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mLengthColorCurve = new DataList<ColorValue>(handler, stream);
+            mLengthAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mEdgeColorCurve = new DataList<ColorValue>(handler, stream);
+            mEdgeAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mStartEdgeAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mEndEdgeAlphaCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mSegmentCount);
+            s.Read(out mSegmentLength);
+            mDrawInfo = new ResourceReference(requestedApiVersion, handler, mSection, stream);
+            s.Read(out mTileUV);
+            s.Read(out mSlipCurveSpeed);
+            s.Read(out mSlipUVSpeed);
 
-            s.Read(out mFloat11);
-            s.Read(out mFloat12);
-            s.Read(out mLong01);
-            s.Read(out mLong02);
-            s.Read(out mInt06);
+            if (mSection.Version >= 0x0002)
+            {
+                s.Read(out mUVRepeat);
+            }
+            else
+            {
+                mUVRepeat = 1.0f;
+            }
+
+            mDirectionalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, stream);
+
+            s.Read(out mWindStrength);
+            s.Read(out mGravityStrength);
+            s.Read(out mEmitColorMapId);
+            s.Read(out mForceMapId);
+            s.Read(out mMapRepulseStrength);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
-            s.Write(mInt02);
-            s.Write(mInt03);
-            mFloatList01.UnParse(stream);
-            mFloatList02.UnParse(stream);
-            s.Write(mFloat01);
-            s.Write(mFloat02);
-            s.Write(mFloat03);
-            mColourList01.UnParse(stream);
-            mFloatList03.UnParse(stream);
-            mVector3List01.UnParse(stream);
-            mFloatList04.UnParse(stream);
-            mVector3List02.UnParse(stream);
-            mFloatList05.UnParse(stream);
-            mFloatList06.UnParse(stream);
-            mFloatList07.UnParse(stream);
-            s.Write(mInt04);
-            s.Write(mFloat04);
-            mResource.UnParse(stream);
-            s.Write(mInt05);
-            s.Write(mFloat05);
-            s.Write(mFloat06);
-            s.Write(mFloat07);
+            s.Write(mFlags);
+            mRibbonLifetime.UnParse(stream);
+            mOffsetCurve.UnParse(stream);
+            mWidthCurve.UnParse(stream);
+            s.Write(mTaper);
+            s.Write(mFade);
+            s.Write(mAlphaDecay);
+            mColorCurve.UnParse(stream);
+            mAlphaCurve.UnParse(stream);
+            mLengthColorCurve.UnParse(stream);
+            mLengthAlphaCurve.UnParse(stream);
+            mEdgeColorCurve.UnParse(stream);
+            mEdgeAlphaCurve.UnParse(stream);
+            mStartEdgeAlphaCurve.UnParse(stream);
+            mEndEdgeAlphaCurve.UnParse(stream);
+            s.Write(mSegmentCount);
+            s.Write(mSegmentLength);
+            mDrawInfo.UnParse(stream);
+            s.Write(mTileUV);
+            s.Write(mSlipCurveSpeed);
+            s.Write(mSlipUVSpeed);
 
-            s.Write(mFloat08, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat09, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat10, ByteOrder.LittleEndian); //LE
+            if (mSection.Version >= 0x0002)
+            {
+                s.Write(mUVRepeat);
+            }
 
-            s.Write(mFloat11);
-            s.Write(mFloat12);
-            s.Write(mLong01);
-            s.Write(mLong02);
-            s.Write(mInt06);
+            mDirectionalForcesSum.UnParse(stream);
+
+            s.Write(mWindStrength);
+            s.Write(mGravityStrength);
+            s.Write(mEmitColorMapId);
+            s.Write(mForceMapId);
+            s.Write(mMapRepulseStrength);
         }
+        #endregion
 
         public bool Equals(RibbonEffect other)
         {

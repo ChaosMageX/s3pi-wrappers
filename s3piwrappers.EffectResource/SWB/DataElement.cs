@@ -7,7 +7,8 @@ namespace s3piwrappers.SWB
 {
     public abstract class DataElement : AHandlerElement
     {
-        protected DataElement(int APIversion, EventHandler handler, DataElement basis) : base(APIversion, handler)
+        protected DataElement(int apiVersion, EventHandler handler, DataElement basis) 
+            : base(apiVersion, handler)
         {
             var ms = new MemoryStream();
             basis.UnParse(ms);

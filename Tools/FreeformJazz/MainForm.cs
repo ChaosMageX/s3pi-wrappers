@@ -13,6 +13,7 @@ using s3piwrappers.CustomForms;
 using s3piwrappers.FreeformJazz.Widgets;
 using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Resources;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz
@@ -395,7 +396,7 @@ namespace s3piwrappers.FreeformJazz
 
         public void RefreshJazzGraphs(bool refreshDecisionGraphs)
         {
-            int i, j, k;
+            /*int i, j, k;
             DGEdge dgEdge;
             DGNode dgNode;
             AnchorPoint ap;
@@ -403,10 +404,10 @@ namespace s3piwrappers.FreeformJazz
             StateNode stateNode;
             GraphForms.GraphElement[] children;
             GraphForms.Algorithms.Digraph<DGNode, DGEdge> decisionGraph;
-            GraphForms.Algorithms.Digraph<StateNode, StateEdge> stateGraph;
+            GraphForms.Algorithms.Digraph<StateNode, StateEdge> stateGraph;/* */
             foreach (JazzGraphContainer jgc in this.mOpenGraphs)
             {
-                if (refreshDecisionGraphs)
+                /*if (refreshDecisionGraphs)
                 {
                     jgc.Scene.StateMachine.RefreshHashNames();
                 }
@@ -452,7 +453,8 @@ namespace s3piwrappers.FreeformJazz
                     jgc.Scene.StateView.BackColor 
                         = StateMachineScene.BackColor;
                     jgc.Scene.StateView.Invalidate();
-                }
+                }/* */
+                jgc.Scene.RefreshStateGraph(refreshDecisionGraphs);
             }
         }
 
@@ -503,7 +505,7 @@ namespace s3piwrappers.FreeformJazz
 
         private void packageAllInto_Click(object sender, EventArgs e)
         {
-            this.PackageAllJazzGraphsInto();
+            this.PackageAllJazzGraphsInto(null, false);
         }
 
         private void importScript_Click(object sender, EventArgs e)
@@ -546,7 +548,7 @@ namespace s3piwrappers.FreeformJazz
             return false;
         }
 
-        private void ToggleJazzGraphMenuStrips()
+        private void RefreshJazzGraphMenuStrips()
         {
             int index = this.jazzGraphTabControl.SelectedIndex;
             if (0 > index || index >= this.mOpenGraphs.Count)
@@ -559,6 +561,8 @@ namespace s3piwrappers.FreeformJazz
 
             this.saveToolStripMenuItem.Enabled
                 = jgc.SaveState != JazzSaveState.Saved;
+
+            this.RefreshUndoRedoMenuItems();
 
             bool flag = jgc.Scene.FocusedState == null;
             this.stateGraphToolStripMenuItem.Enabled = flag;
@@ -615,6 +619,84 @@ namespace s3piwrappers.FreeformJazz
                 = crw && jgc.Scene.SelectedDGEdgeCount > 0;
         }
 
+        public void RefreshSaveAllJazzGraphsMenuItem()
+        {
+            bool saveAll = false;
+            foreach (JazzGraphContainer jgc in this.mOpenGraphs)
+            {
+                if (jgc.SaveState != JazzSaveState.Saved)
+                {
+                    saveAll = true;
+                    break;
+                }
+            }
+            this.saveAllToolStripMenuItem.Enabled = saveAll;
+        }
+
+        public void RefreshUndoRedoMenuItems()
+        {
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            if (index < 0)
+            {
+                this.undoToolStripMenuItem.Enabled = false;
+                this.undoToolStripMenuItem.ToolTipText = null;
+                this.redoToolStripMenuItem.Enabled = false;
+                this.redoToolStripMenuItem.ToolTipText = null;
+            }
+            else
+            {
+                UndoManager um = this.mOpenGraphs[index].UndoRedo;
+                if (um.CanUndo)
+                {
+                    this.undoToolStripMenuItem.Enabled = true;
+                    this.undoToolStripMenuItem.ToolTipText = um.UndoLabel;
+                }
+                else
+                {
+                    this.undoToolStripMenuItem.Enabled = false;
+                    this.undoToolStripMenuItem.ToolTipText = null;
+                }
+                if (um.CanRedo)
+                {
+                    this.redoToolStripMenuItem.Enabled = true;
+                    this.redoToolStripMenuItem.ToolTipText = um.RedoLabel;
+                }
+                else
+                {
+                    this.redoToolStripMenuItem.Enabled = false;
+                    this.redoToolStripMenuItem.ToolTipText = null;
+                }
+            }
+        }
+
+        private void CallUndo()
+        {
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.UndoRedo.Undo();
+            bool flag = jgc.UndoRedo.ChangedSinceCheckpoint;
+            jgc.SaveState = flag ? JazzSaveState.Dirty : JazzSaveState.Saved;
+            TabPage page = this.jazzGraphTabControl.TabPages[index];
+            page.Text = jgc.Name + (flag ? " *" : "");
+            this.RefreshUndoRedoMenuItems();
+            this.saveToolStripMenuItem.Enabled = flag;
+            this.RefreshSaveAllJazzGraphsMenuItem();
+        }
+
+        private void CallRedo()
+        {
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.UndoRedo.Redo();
+            bool flag = jgc.UndoRedo.ChangedSinceCheckpoint;
+            jgc.SaveState = flag ? JazzSaveState.Dirty : JazzSaveState.Saved;
+            TabPage page = this.jazzGraphTabControl.TabPages[index];
+            page.Text = jgc.Name + (flag ? " *" : "");
+            this.RefreshUndoRedoMenuItems();
+            this.saveToolStripMenuItem.Enabled = flag;
+            this.RefreshSaveAllJazzGraphsMenuItem();
+        }
+
         private void jazzGraphSelectedIndexChanged(object sender, EventArgs e)
         {
             JazzGraphContainer jgc;
@@ -632,7 +714,7 @@ namespace s3piwrappers.FreeformJazz
                     jgc.Scene.LayoutPaused = true;
                 }
             }
-            this.ToggleJazzGraphMenuStrips();
+            this.RefreshJazzGraphMenuStrips();
         }
 
         private bool CreateNewJazzGraph(StateMachine sm)
@@ -666,14 +748,10 @@ namespace s3piwrappers.FreeformJazz
                     return false;
                 }
                 jgnp.Dispose();
-                jgc = new JazzGraphContainer(
-                    this.mOpenGraphs.Count, jgnp.Name, view);
+                sm = new StateMachine(jgnp.Name);
             }
-            else
-            {
-                jgc = new JazzGraphContainer(
-                    this.mOpenGraphs.Count, sm, view);
-            }
+            jgc = new JazzGraphContainer(
+                this.mOpenGraphs.Count, sm, view, graphTab);
             jgc.Scene.LayoutStateGraphOnNodeMoved
                 = this.layoutStateNodesToolStripMenuItem.Checked;
             jgc.Scene.LayoutDecisionGraphOnNodeMoved
@@ -691,10 +769,10 @@ namespace s3piwrappers.FreeformJazz
             jgc.Scene.FocusedStateChanged +=
                 new EventHandler(Scene_FocusedStateChanged);
             // Add the opened jazz graph visually
-            graphTab.Controls.Add(view);
-            graphTab.Text = jgc.Name + " *";
-            graphTab.SizeChanged +=
-                new EventHandler(jgc.OnTabSizeChanged);
+            //graphTab.Controls.Add(view);
+            //graphTab.Text = jgc.Name + " *";
+            //graphTab.SizeChanged +=
+            //    new EventHandler(jgc.OnTabSizeChanged);
             this.jazzGraphTabControl.TabPages.Add(graphTab);
 
             if (this.mOpenGraphs.Count > 1)
@@ -706,14 +784,17 @@ namespace s3piwrappers.FreeformJazz
             else
             {
                 jgc.Scene.LayoutPaused = false;
-                this.ToggleJazzGraphMenuStrips();
+                this.RefreshJazzGraphMenuStrips();
             }
             this.closeToolStripMenuItem.Enabled = true;
             this.closeAllToolStripMenuItem.Enabled = true;
+            this.saveToolStripMenuItem.Enabled = true;
+            this.saveAllToolStripMenuItem.Enabled = true;
             this.packageIntoToolStripMenuItem.Enabled = true;
             this.packageAllIntoToolStripMenuItem.Enabled = true;
             this.exportScriptStripMenuItem.Enabled = true;
             this.exportAllScriptsToolStripMenuItem.Enabled = true;
+
             this.editToolStripMenuItem.Enabled = true;
             return true;
         }
@@ -1023,7 +1104,7 @@ namespace s3piwrappers.FreeformJazz
 
                     // Initialize the opened jazz graph internally
                     jgc = new JazzGraphContainer(
-                        this.mOpenGraphs.Count, jp, rie, view);
+                        this.mOpenGraphs.Count, jp, rie, view, graphTab);
                     if (jgc.Scene == null)
                     {
                         if (jp.Graphs.Count == 0)
@@ -1052,10 +1133,10 @@ namespace s3piwrappers.FreeformJazz
                     jgc.Scene.FocusedStateChanged +=
                         new EventHandler(Scene_FocusedStateChanged);
                     // Add the opened jazz graph visually
-                    graphTab.Controls.Add(view);
-                    graphTab.Text = jgc.Name;
-                    graphTab.SizeChanged += 
-                        new EventHandler(jgc.OnTabSizeChanged);
+                    //graphTab.Controls.Add(view);
+                    //graphTab.Text = jgc.Name;
+                    //graphTab.SizeChanged += 
+                    //    new EventHandler(jgc.OnTabSizeChanged);
                     this.jazzGraphTabControl.TabPages.Add(graphTab);
                 }
             }
@@ -1068,10 +1149,13 @@ namespace s3piwrappers.FreeformJazz
             else
             {
                 jgc.Scene.LayoutPaused = false;
-                this.ToggleJazzGraphMenuStrips();
+                this.RefreshJazzGraphMenuStrips();
             }
             this.closeToolStripMenuItem.Enabled = true;
             this.closeAllToolStripMenuItem.Enabled = true;
+            // No need to update saveAll because the number of unsaved jazz 
+            // graphs hasn't changed because the newly opened jazz graph
+            // hasn't been changed by the user yet.
             this.packageIntoToolStripMenuItem.Enabled = true;
             this.packageAllIntoToolStripMenuItem.Enabled = true;
             this.exportScriptStripMenuItem.Enabled = true;
@@ -1162,11 +1246,47 @@ namespace s3piwrappers.FreeformJazz
                 {
                     name = UnescapePathString(parts[3]);
                 }
+                else if (parts.Length == 3)
+                {
+                    ulong iid;
+                    name = parts[2];
+                    KeyNameReg.RefreshKeyNameMaps();
+                    if (!name.StartsWith("0x") ||
+                        !ulong.TryParse(name.Substring(2),
+                            System.Globalization.NumberStyles.HexNumber,
+                            null, out iid) ||
+                        !KeyNameReg.TryFindName(iid, out name))
+                    {
+                        name = Path.GetFileNameWithoutExtension(path);
+                    }
+                }
                 else
                 {
                     name = Path.GetFileNameWithoutExtension(path);
                 }
                 sm.Name = name;
+                if (sm.NameIsHash)
+                {
+                    if (CopyableMessageBox.Show("Failed resolve the name " +
+                        "of the imported JAZZ script file: \n" + path +
+                        "\nWould you like to import the jazz graph " +
+                        "anyway by providing a new name for it?",
+                        kName + ": Unable to Import Jazz Script File",
+                        CopyableMessageBoxButtons.YesNo,
+                        CopyableMessageBoxIcon.Error, 0) == 1)
+                    {
+                        return false;
+                    }
+                    JazzGraphNamePrompt jgnp 
+                        = new JazzGraphNamePrompt(sm.Name, sm.Name);
+                    if (jgnp.ShowDialog() != DialogResult.OK)
+                    {
+                        jgnp.Dispose();
+                        return false;
+                    }
+                    sm.Name = jgnp.Name;
+                    jgnp.Dispose();
+                }
             }
             return this.CreateNewJazzGraph(sm);
         }
@@ -1451,7 +1571,16 @@ namespace s3piwrappers.FreeformJazz
                     KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
                     jp.Package.ReplaceResource(rie, rcol2);
                     jp.Package.SavePackage();
+                    jgc.UndoRedo.SetCheckpoint();
                     jgc.SaveState = JazzSaveState.Saved;
+                    if (index == this.jazzGraphTabControl.SelectedIndex)
+                    {
+                        this.Text = kName + jp.Title;
+                        this.saveToolStripMenuItem.Enabled = false;
+                    }
+                    page = this.jazzGraphTabControl.TabPages[index];
+                    page.Text = jgc.Name;//Remove asterisk
+                    this.RefreshSaveAllJazzGraphsMenuItem();
                 }
                 return true;
             }
@@ -1528,10 +1657,26 @@ namespace s3piwrappers.FreeformJazz
                                     jgnp.Dispose();
                                     return false;
                                 }
-                                jgc.Key = jgnp.Key;
-                                jgc.Name = jgnp.Name;
-                                jgc.SaveState = JazzSaveState.Dirty;
-                                page.Text = jgc.Name + " *";
+                                jgc.SetName(jgnp.Name, true);
+                                //jgc.Key = jgnp.Key;
+                                //jgc.Name = jgnp.Name;
+                                //jgc.SaveState = JazzSaveState.Dirty;
+                                /*if (jgc.SaveState == JazzSaveState.Saved)
+                                {
+                                    page.Text = jgc.Name;
+                                }
+                                else
+                                {
+                                    page.Text = jgc.Name + " *";
+                                }/* */
+                                if (this.jazzGraphTabControl.SelectedIndex ==
+                                    index)
+                                {
+                                    this.RefreshUndoRedoMenuItems();
+                                    this.saveToolStripMenuItem.Enabled =
+                                        jgc.SaveState != JazzSaveState.Saved;
+                                }
+                                this.RefreshSaveAllJazzGraphsMenuItem();
                                 break;
                             case 1:// No
                                 flag = false;
@@ -1597,29 +1742,24 @@ namespace s3piwrappers.FreeformJazz
                 // in jp.Graphs have to be reset after jp.Package
                 // is reopened?
             }
-            jgc.SaveState = JazzSaveState.Saved;
-            if (index == this.jazzGraphTabControl.SelectedIndex)
+            if (jgc.SaveState != JazzSaveState.Saved)
             {
-                this.Text = kName + jp.Title;
-                this.saveToolStripMenuItem.Enabled = false;
-            }
-            page = this.jazzGraphTabControl.TabPages[index];
-            page.Text = jgc.Name;//Remove asterisk
-            bool saveAll = false;
-            for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
-            {
-                jgc = this.mOpenGraphs[i];
-                if (jgc.SaveState != JazzSaveState.Saved)
+                jgc.UndoRedo.SetCheckpoint();
+                jgc.SaveState = JazzSaveState.Saved;
+                if (index == this.jazzGraphTabControl.SelectedIndex)
                 {
-                    saveAll = true;
-                    break;
+                    this.Text = kName + jp.Title;
+                    this.saveToolStripMenuItem.Enabled = false;
                 }
+                page = this.jazzGraphTabControl.TabPages[index];
+                page.Text = jgc.Name;//Remove asterisk
+                this.RefreshSaveAllJazzGraphsMenuItem();
             }
-            this.saveAllToolStripMenuItem.Enabled = saveAll;
             return true;
         }
 
-        private bool PackageAllJazzGraphsInto()
+        private bool PackageAllJazzGraphsInto(
+            INamedResourceIndexEntry[] toSave, bool closing)
         {
             JazzPackage jp = this.OpenPackageForSaving(null);
             if (jp == null)
@@ -1629,19 +1769,28 @@ namespace s3piwrappers.FreeformJazz
             int i;
             // Prompt user for which unsaved jazz graphs to save,
             // and write the desired jazz graphs to the package
-            INamedResourceIndexEntry[] toSave
-                = new INamedResourceIndexEntry[this.mOpenGraphs.Count];
-            for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
+            if (toSave == null)
             {
-                toSave[i] = this.mOpenGraphs[i];
+                i = this.mOpenGraphs.Count;
+                toSave = new INamedResourceIndexEntry[i];
+                for (i = i - 1; i >= 0; i--)
+                {
+                    toSave[i] = this.mOpenGraphs[i];
+                }
             }
+            TabPage page;
+            JazzGraphContainer jgc;
+            TabControl.TabPageCollection pages
+                = this.jazzGraphTabControl.TabPages;
             using (SelectEditRIEDialog rieDialog
                 = new SelectEditRIEDialog(toSave))
             {
                 rieDialog.Text = kName
                     + ": Save Jazz Graphs To Sims 3 Package";
                 rieDialog.Message = "Select the jazz graphs to save " +
-                    "into the following Sims 3 package:\n" + jp.Path;
+                    "into the following Sims 3 package" +
+                    (closing ? " before they are closed" : "") + ":\n" +
+                    jp.Path;
                 rieDialog.AutomaticHashing
                     = SelectEditRIEDialog.Hashing.FNV64;
                 rieDialog.DetectConflicts = true;
@@ -1650,7 +1799,31 @@ namespace s3piwrappers.FreeformJazz
                 rieDialog.ReadonlyGID = true;
                 rieDialog.ReadonlyIID = true;
                 rieDialog.ReadonlyCompressed = true;
-                if (rieDialog.ShowDialog() == DialogResult.OK)
+                DialogResult result = rieDialog.ShowDialog();
+                // TODO: This should be handled on a case by case basis by
+                // the jgc notifying the main form that its undo stack 
+                // and save state have changed (because its name changed).
+                /*for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
+                {
+                    jgc = this.mOpenGraphs[i];
+                    page = pages[i];
+                    if (jgc.SaveState == JazzSaveState.Saved)
+                    {
+                        page.Text = jgc.Name;
+                    }
+                    else
+                    {
+                        page.Text = jgc.Name + " *";
+                    }
+                }/* */
+                this.RefreshUndoRedoMenuItems();
+                i = this.jazzGraphTabControl.SelectedIndex;
+                jgc = this.mOpenGraphs[i];
+                this.saveToolStripMenuItem.Enabled
+                    = jgc.SaveState != JazzSaveState.Saved;
+                this.RefreshSaveAllJazzGraphsMenuItem();
+
+                if (result == DialogResult.OK)
                 {
                     toSave = rieDialog.SelectedResources;
                 }
@@ -1671,7 +1844,6 @@ namespace s3piwrappers.FreeformJazz
                 }
                 return true;
             }
-            JazzGraphContainer jgc;
             IResourceIndexEntry rie;
             string overwrites = "";
             JazzRIEFinder rieFinder = new JazzRIEFinder(0, 0);
@@ -1710,11 +1882,8 @@ namespace s3piwrappers.FreeformJazz
                 }
             }
             bool update = false;
-            TabPage page;
             StateMachine sm;
             GenericRCOLResource rcol;
-            TabControl.TabPageCollection pages
-                = this.jazzGraphTabControl.TabPages;
             KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
             for (i = toSave.Length - 1; i >= 0; i--)
             {
@@ -1763,6 +1932,7 @@ namespace s3piwrappers.FreeformJazz
                     page = pages[jgc.Index];
                     page.Text = jgc.Name;//Remove asterisk
                 }
+                jgc.UndoRedo.SetCheckpoint();
                 jgc.SaveState = JazzSaveState.Saved;
             }
             KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
@@ -1944,6 +2114,10 @@ namespace s3piwrappers.FreeformJazz
             {
                 toExport[i] = this.mOpenGraphs[i];
             }
+            //TabPage page;
+            JazzGraphContainer jgc;
+            TabControl.TabPageCollection pages 
+                = this.jazzGraphTabControl.TabPages;
             using (SelectEditRIEDialog rieDialog
                 = new SelectEditRIEDialog(toExport))
             {
@@ -1960,7 +2134,31 @@ namespace s3piwrappers.FreeformJazz
                 rieDialog.ReadonlyGID = true;
                 rieDialog.ReadonlyIID = true;
                 rieDialog.ReadonlyCompressed = true;
-                if (rieDialog.ShowDialog() == DialogResult.OK)
+                DialogResult result = rieDialog.ShowDialog();
+                // TODO: This should be handled on a case by case basis by
+                // the jgc notifying the main form that its undo stack 
+                // and save state have changed (because its name changed).
+                /*for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
+                {
+                    jgc = this.mOpenGraphs[i];
+                    page = pages[i];
+                    if (jgc.SaveState == JazzSaveState.Saved)
+                    {
+                        page.Text = jgc.Name;
+                    }
+                    else
+                    {
+                        page.Text = jgc.Name + " *";
+                    }
+                }/* */
+                this.RefreshUndoRedoMenuItems();
+                i = this.jazzGraphTabControl.SelectedIndex;
+                jgc = this.mOpenGraphs[i];
+                this.saveToolStripMenuItem.Enabled
+                    = jgc.SaveState != JazzSaveState.Saved;
+                this.RefreshSaveAllJazzGraphsMenuItem();
+
+                if (result == DialogResult.OK)
                 {
                     toExport = rieDialog.SelectedResources;
                 }
@@ -1978,7 +2176,6 @@ namespace s3piwrappers.FreeformJazz
             FileStream fs;
             BinaryReader r;
             BinaryWriter w;
-            JazzGraphContainer jgc;
             StateMachine sm;
             GenericRCOLResource rcol;
             NameMapResource.NameMapResource knm
@@ -2081,11 +2278,7 @@ namespace s3piwrappers.FreeformJazz
         private bool SaveJazzGraph(int index, bool updateSaveAll)
         {
             JazzGraphContainer jgc = this.mOpenGraphs[index];
-            if (jgc.JP == null)
-            {
-                return this.PackageJazzGraphInto(index, null);
-            }
-            else if (jgc.JP.ReadOnly)
+            if (jgc.JP == null || jgc.JP.ReadOnly)
             {
                 return this.PackageJazzGraphInto(index, null);
             }
@@ -2105,6 +2298,7 @@ namespace s3piwrappers.FreeformJazz
                 jp.Package.ReplaceResource(jgc.RIE, rcol);
                 jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
                 jp.Package.SavePackage();
+                jgc.UndoRedo.SetCheckpoint();
                 jgc.SaveState = JazzSaveState.Saved;
                 if (index == this.jazzGraphTabControl.SelectedIndex)
                 {
@@ -2144,7 +2338,20 @@ namespace s3piwrappers.FreeformJazz
                 {
                     if (jgc.JP != null && !jgc.JP.ReadOnly)
                     {
-                        this.SaveJazzGraph(i, false);
+                        switch (CopyableMessageBox.Show(jgc.Name + 
+                            " has unsaved changes. Would you like " + 
+                            "to save it before closing it?",
+                            kName + ": Unsaved Jazz Graph",
+                            CopyableMessageBoxButtons.YesNoCancel, 
+                            CopyableMessageBoxIcon.Warning, 0))
+                        {
+                            case 0:// Yes
+                                this.SaveJazzGraph(i, false);
+                                break;
+                            case 2:// Cancel
+                                this.RefreshSaveAllJazzGraphsMenuItem();
+                                return false;
+                        }
                     }
                     else
                     {
@@ -2169,6 +2376,9 @@ namespace s3piwrappers.FreeformJazz
                 closing ? CopyableMessageBoxIcon.Warning
                         : CopyableMessageBoxIcon.Question, 0))
             {
+                case 0:// Yes
+                    return this.PackageAllJazzGraphsInto(
+                        unsaved.ToArray(), closing);
                 case 1:// No
                     this.saveAllToolStripMenuItem.Enabled = true;
                     return true;
@@ -2176,149 +2386,7 @@ namespace s3piwrappers.FreeformJazz
                     this.saveAllToolStripMenuItem.Enabled = true;
                     return false;
             }
-            JazzPackage jp = this.OpenPackageForSaving(null);
-            if (jp == null)
-            {
-                return false;
-            }
-            // Prompt user for which unsaved jazz graphs to save,
-            // and write the desired jazz graphs to the package
-            INamedResourceIndexEntry[] toSave = null;
-            using (SelectEditRIEDialog rieDialog 
-                = new SelectEditRIEDialog(unsaved.ToArray()))
-            {
-                rieDialog.Text = kName 
-                    + ": Save Jazz Graphs To Sims 3 Package";
-                rieDialog.Message = "Select the jazz graphs to save " +
-                    "into the following Sims 3 package" +
-                    (closing ? " before they are closed" : "") + ":\n" +
-                    jp.Path;
-                rieDialog.AutomaticHashing 
-                    = SelectEditRIEDialog.Hashing.FNV64;
-                rieDialog.DetectConflicts = true;
-                rieDialog.EnablePasteResourceKeys = false;
-                rieDialog.ReadonlyTID = true;
-                rieDialog.ReadonlyGID = true;
-                rieDialog.ReadonlyIID = true;
-                rieDialog.ReadonlyCompressed = true;
-                if (rieDialog.ShowDialog() == DialogResult.OK)
-                {
-                    toSave = rieDialog.SelectedResources;
-                }
-                else
-                {
-                    if (jp.Graphs.Count == 0)
-                    {
-                        this.CloseAndRemovePackage(jp);
-                    }
-                    return false;
-                }
-            }
-            if (toSave == null || toSave.Length == 0)
-            {
-                if (jp.Graphs.Count == 0)
-                {
-                    this.CloseAndRemovePackage(jp);
-                }
-                return true;
-            }
-            bool update = false;
-            TabPage page;
-            StateMachine sm;
-            GenericRCOLResource rcol;
-            TabControl.TabPageCollection pages
-                = this.jazzGraphTabControl.TabPages;
-            KeyNameReg.IncludedKeyNameMaps = sGameKNMs;
-            for (i = toSave.Length - 1; i >= 0; i--)
-            {
-                jgc = toSave[i] as JazzGraphContainer;
-                if (this.jazzGraphTabControl.SelectedIndex == jgc.Index)
-                {
-                    update = true;
-                }
-                if (jgc.JP != null)
-                {
-                    jgc.JP.RemoveJazzGraph(jgc);
-                    if (jp.Path.Equals(jgc.JP.Path))
-                    {
-                        jgc.JP = jp;
-                        if (jgc.NameIsValid() && 
-                            !jp.KNMapRes.ContainsKey(jgc.Key.IID))
-                        {
-                            jp.KNMapRes[jgc.Key.IID] = jgc.Name;
-                        }
-                        sm = jgc.Scene.StateMachine;
-                        rcol = sm.ExportToResource(
-                            jgc.Key.IID, jp.KNMapRes, sExportAllNames);
-                        jp.Package.ReplaceResource(jgc.RIE, rcol);
-                    }
-                    else if (jgc.JP.Graphs.Count == 0)
-                    {
-                        this.CloseAndRemovePackage(jgc.JP);
-                    }
-                }
-                else
-                {
-                    jgc.JP = jp;
-                    if (jgc.NameIsValid() && 
-                        !jp.KNMapRes.ContainsKey(jgc.Key.IID))
-                    {
-                        jp.KNMapRes[jgc.Key.IID] = jgc.Name;
-                    }
-                    sm = jgc.Scene.StateMachine;
-                    rcol = sm.ExportToResource(
-                        jgc.Key.IID, jp.KNMapRes, sExportAllNames);
-                    jp.Package.AddResource(jgc.Key, rcol.Stream, true);
-                }
-                jp.Graphs.Add(jgc);
-                if (jgc.SaveState != JazzSaveState.Saved)
-                {
-                    page = pages[jgc.Index];
-                    page.Text = jgc.Name;//Remove asterisk
-                }
-                jgc.SaveState = JazzSaveState.Saved;
-            }
-            KeyNameReg.IncludedKeyNameMaps = KeyNameReg.KNM.All;
-            jp.Package.ReplaceResource(jp.KNMapRIE, jp.KNMapRes);
-            if (File.Exists(jp.Path))
-            {
-                jp.Package.SavePackage();
-            }
-            else
-            {
-                jp.Package.SaveAs(jp.Path);
-                Package.ClosePackage(0, jp.Package);
-                s3pi.Filetable.PathPackageTuple ppt
-                    = new s3pi.Filetable.PathPackageTuple(jp.Path, true);
-                jp.Package = ppt.Package;
-                FileTableExt.Current.Add(ppt);
-                GlobalManager.RefreshCurrent();
-                // TODO: Does the RIE of every JazzGraphContainer
-                // in jp.Graphs have to be reset after jp.Package
-                // is reopened?
-            }
-            if (update)
-            {
-                this.Text = kName + jp.Title;
-            }
-            i = this.jazzGraphTabControl.SelectedIndex;
-            jgc = this.mOpenGraphs[i];
-            update = jgc.SaveState != JazzSaveState.Saved;
-            this.saveToolStripMenuItem.Enabled = update;
-            if (!update)
-            {
-                for (i = this.mOpenGraphs.Count - 1; i >= 0; i--)
-                {
-                    jgc = this.mOpenGraphs[i];
-                    if (jgc.SaveState != JazzSaveState.Saved)
-                    {
-                        update = true;
-                        break;
-                    }
-                }
-            }
-            this.saveAllToolStripMenuItem.Enabled = update;
-            return true;
+            return false;
         }
 
         private bool CloseJazzGraph(int index)
@@ -2339,8 +2407,6 @@ namespace s3piwrappers.FreeformJazz
                         {
                             return false;
                         }
-                        break;
-                    case 1:// No
                         break;
                     case 2:// Cancel
                         return false;
@@ -2383,8 +2449,7 @@ namespace s3piwrappers.FreeformJazz
                 new EventHandler(this.Scene_FocusedStateChanged);
             TabControl.TabPageCollection pages 
                 = this.jazzGraphTabControl.TabPages;
-            TabPage page = pages[index];
-            page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
+            //TabPage page = pages[index];
             for (i = this.mOpenGraphs.Count - 1; i > index; i--)
             {
                 jgc = this.mOpenGraphs[i];
@@ -2393,9 +2458,11 @@ namespace s3piwrappers.FreeformJazz
             jgc = this.mOpenGraphs[index];
             this.mOpenGraphs.RemoveAt(index);
             pages.RemoveAt(index);
-            page.Controls.Clear();
-            jgc.Scene.Dispose();
-            page.Dispose();
+            //page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
+            //page.Controls.Clear();
+            //jgc.Scene.Dispose();
+            //page.Dispose();
+            jgc.Dispose();
             if (this.mOpenGraphs.Count == 0)
             {
                 this.closeToolStripMenuItem.Enabled = false;
@@ -2437,7 +2504,7 @@ namespace s3piwrappers.FreeformJazz
             FileTableExt.Current.Clear();
             GlobalManager.RefreshCurrent();
             // Internally and visually close all jazz graphs
-            TabPage page;
+            //TabPage page;
             JazzGraphContainer jgc;
             TabControl.TabPageCollection pages
                 = this.jazzGraphTabControl.TabPages;
@@ -2454,11 +2521,12 @@ namespace s3piwrappers.FreeformJazz
                     new EventHandler(this.Scene_DGEdgeSelectionChanged);
                 jgc.Scene.FocusedStateChanged -=
                     new EventHandler(this.Scene_FocusedStateChanged);
-                page = pages[i];
-                page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
-                page.Controls.Clear();
-                jgc.Scene.Dispose();
-                page.Dispose();
+                //page = pages[i];
+                //page.SizeChanged -= new EventHandler(jgc.OnTabSizeChanged);
+                //page.Controls.Clear();
+                //jgc.Scene.Dispose();
+                //page.Dispose();
+                jgc.Dispose();
             }
             this.mOpenGraphs.Clear();
             pages.Clear();
@@ -2491,6 +2559,10 @@ namespace s3piwrappers.FreeformJazz
             bool flag = jgc.Scene.FocusedState == null;
             this.stateGraphToolStripMenuItem.Enabled = flag;
             this.decisionGraphToolStripMenuItem.Enabled = !flag;
+
+            this.addNewTransitionsToolStripMenuItem.Checked = false;
+            this.addNewDGLinksToolStripMenuItem.Checked = false;
+            jgc.Scene.AddingEdges = false;
         }
 
         private void Scene_DGEdgeSelectionChanged(object sender, EventArgs e)
@@ -2570,12 +2642,12 @@ namespace s3piwrappers.FreeformJazz
 
         private void undo_Click(object sender, EventArgs e)
         {
-
+            this.CallUndo();
         }
 
         private void redo_Click(object sender, EventArgs e)
         {
-
+            this.CallRedo();
         }
 
         private void selectAll_Click(object sender, EventArgs e)
@@ -2653,7 +2725,9 @@ namespace s3piwrappers.FreeformJazz
 
         private void addNewState_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.Scene.AddNewStateNode();
         }
 
         private void minimizeStates_Click(object sender, EventArgs e)
@@ -2688,17 +2762,25 @@ namespace s3piwrappers.FreeformJazz
 
         private void removeStates_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.Scene.RemoveSelectedStateNodes();
         }
 
         private void addNewTransitions_Click(object sender, EventArgs e)
         {
-
+            bool flag = !this.addNewTransitionsToolStripMenuItem.Checked;
+            this.addNewTransitionsToolStripMenuItem.Checked = flag;
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.Scene.AddingEdges = flag;
         }
 
         private void removeTransitions_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            jgc.Scene.RemoveSelectedStateEdges();
         }
         #endregion
 
@@ -2717,22 +2799,44 @@ namespace s3piwrappers.FreeformJazz
 
         private void addNewDGNode_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            if (jgc.Scene.FocusedState != null)
+            {
+                jgc.Scene.AddNewDGNode();
+            }
         }
 
         private void removeDGNodes_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            if (jgc.Scene.FocusedState != null)
+            {
+                jgc.Scene.RemoveSelectedDGNodes();
+            }
         }
 
         private void addNewDGLinks_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            if (jgc.Scene.FocusedState != null)
+            {
+                bool flag = !this.addNewDGLinksToolStripMenuItem.Checked;
+                this.addNewDGLinksToolStripMenuItem.Checked = flag;
+                jgc.Scene.AddingEdges = flag;
+            }
         }
 
         private void removeDGLinks_Click(object sender, EventArgs e)
         {
-
+            int index = this.jazzGraphTabControl.SelectedIndex;
+            JazzGraphContainer jgc = this.mOpenGraphs[index];
+            if (jgc.Scene.FocusedState != null)
+            {
+                jgc.Scene.RemoveSelectedDGEdges();
+            }
         }
         #endregion
 

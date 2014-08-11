@@ -46,7 +46,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                     this.mEffectIndex = value;
                     int count = this.mIndices.Count;
                     for (int i = 0; i < count; i++)
-                        this.mIndices[i].BlockIndex = value;
+                        this.mIndices[i].ComponentIndex = value;
                 }
             }
         }

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
 using System.Windows.Forms;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 using GraphForms;
 using GraphForms.Algorithms.Layout;
@@ -188,25 +189,197 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        protected abstract class DGNodePropertyCommand<D, T, P>
+            : PropertyCommand<T, P>
+            where D : DGNode
+            where T : DecisionGraphNode
+        {
+            protected D mDGNode;
+
+            public DGNodePropertyCommand(D dgNode, T thing, 
+                string property, P newValue, bool extendable)
+                : base(thing, property, newValue, extendable)
+            {
+                this.mDGNode = dgNode;
+            }
+
+            public override bool Execute()
+            {
+                bool flag = base.Execute();
+                if (flag)
+                {
+                    this.mDGNode.UpdateVisualization();
+                }
+                return flag;
+            }
+
+            public override void Undo()
+            {
+                base.Undo();
+                this.mDGNode.UpdateVisualization();
+            }
+        }
+
+        protected abstract class DGNodeRefPropertyCommand<D, T, P>
+            : DGNodePropertyCommand<D, T, P>
+            where D : DGNode
+            where T : DecisionGraphNode
+            where P : class, IHasHashedName
+        {
+            protected RefToValue<P> mRTV;
+
+            public DGNodeRefPropertyCommand(D dgNode, T thing, 
+                RefToValue<P> rtv, string property, P newValue, 
+                bool extendable)
+                : base(dgNode, thing, property, newValue, extendable)
+            {
+                this.mRTV = rtv;
+            }
+
+            public override bool Execute()
+            {
+                bool flag = base.Execute();
+                if (flag)
+                {
+                    this.mRTV.SetValue(this.mNewVal);
+                    this.mDGNode.UpdateVisualization();
+                }
+                return flag;
+            }
+
+            public override void Undo()
+            {
+                base.Undo();
+                this.mRTV.SetValue(this.mOldVal);
+                this.mDGNode.UpdateVisualization();
+            }
+        }
+
+        [Flags]
+        public enum DGFlag : byte
+        {
+            EntryPoint = 0x01,
+            DecisionMaker = 0x02,
+            Both = 0x03
+        }
+
+        private DGFlag mCategory = (DGFlag)0;
+
         private bool bInEditMode;
         private bool bVisible;
 
         private readonly DecisionGraphNode mDGN;
+        protected readonly StateNode mState;
         protected readonly StateMachineScene mScene;
         protected readonly AnchorPoint mEntryAnchor;
 
-        public DGNode(DecisionGraphNode dgn, StateMachineScene scene)
-            : base(scene)
+        public DGNode(DecisionGraphNode dgn, StateNode state)
+            : base(state.Scene)
         {
             this.bInEditMode = false;
             this.bVisible = true;
             this.mDGN = dgn;
-            this.mScene = scene;
+            this.mState = state;
+            this.mScene = state.Scene;
             this.mEntryAnchor = new AnchorPoint(this, -1, 0);
         }
 
         public virtual void UpdateVisualization()
         {
+        }
+
+        private class CategoryCommand : Command
+        {
+            private DGNode mNode;
+            private DGFlag mOldValue;
+            private DGFlag mNewValue;
+
+            public CategoryCommand(DGNode node, DGFlag newValue)
+            {
+                this.mNode = node;
+                this.mOldValue = node.mCategory;
+                this.mNewValue = newValue;
+                this.mLabel = "Change DG Node Category";
+            }
+
+            public override bool Execute()
+            {
+                this.SetValue(this.mNewValue);
+                return true;
+            }
+
+            public override void Undo()
+            {
+                this.SetValue(this.mOldValue);
+            }
+
+            public override void Redo()
+            {
+                this.SetValue(this.mNewValue);
+            }
+
+            private void SetValue(DGFlag value)
+            {
+                DecisionGraph dg = this.mNode.mState.State.DecisionGraph;
+                if (dg != null && this.mNode.mDGN != null)
+                {
+                    dg.Remove(this.mNode.mDGN);
+                    if ((DGFlag.EntryPoint & value) ==
+                         DGFlag.EntryPoint)
+                    {
+                        dg.AddEntryPoint(this.mNode.mDGN);
+                    }
+                    if ((DGFlag.DecisionMaker & value) ==
+                         DGFlag.DecisionMaker)
+                    {
+                        dg.AddDecisionMaker(this.mNode.mDGN);
+                    }
+                }
+                this.mNode.mCategory = value;
+            }
+        }
+
+        public DGFlag Category
+        {
+            get { return this.mCategory; }
+            set
+            {
+                if (this.mCategory != value)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new CategoryCommand(this, value));
+                }
+            }
+        }
+
+        public void SetCategory(DGFlag category, bool set = true)
+        {
+            if (set)
+            {
+                this.mCategory |= category;
+            }
+            else
+            {
+                this.mCategory &= ~category;
+            }
+        }
+
+        public bool IsDecisionMaker
+        {
+            get 
+            { 
+                return (DGFlag.DecisionMaker & this.mCategory) 
+                     == DGFlag.DecisionMaker; 
+            }
+        }
+
+        public bool IsEntryPoint
+        {
+            get
+            {
+                return (DGFlag.EntryPoint & this.mCategory)
+                     == DGFlag.EntryPoint;
+            }
         }
 
         public bool InEditMode
@@ -246,6 +419,11 @@ namespace s3piwrappers.FreeformJazz.Widgets
             get { return this.mDGN; }
         }
 
+        public StateNode State
+        {
+            get { return this.mState; }
+        }
+
         public StateMachineScene Scene
         {
             get { return this.mScene; }
@@ -257,6 +435,106 @@ namespace s3piwrappers.FreeformJazz.Widgets
         }
 
         public abstract AnchorPoint GetAnchorFor(DGEdge edge);
+
+        public interface IEdgeAction
+        {
+            public void Redo();
+
+            public void Undo();
+        }
+
+        public class EdgeAction : IEdgeAction
+        {
+            private bool bAdd;
+            private int mIndex;
+            private DGEdge mEdge;
+            private AnchorPoint mAP;
+
+            public EdgeAction(bool add, int i, DGEdge edge, AnchorPoint ap)
+            {
+                if (edge == null)
+                {
+                    throw new ArgumentNullException("edge");
+                }
+                if (ap == null)
+                {
+                    throw new ArgumentNullException("ap");
+                }
+                if (i < 0)
+                {
+                    throw new ArgumentOutOfRangeException("i");
+                }
+                if (add)
+                {
+                    if (i > ap.Edges.Count)
+                    {
+                        throw new ArgumentOutOfRangeException("i");
+                    }
+                }
+                else
+                {
+                    if (i >= ap.Edges.Count)
+                    {
+                        throw new ArgumentOutOfRangeException("i");
+                    }
+                    else if (ap.Edges[i] != edge)
+                    {
+                        throw new ArgumentException("ap.Edges[i] != edge");
+                    }
+                }
+                this.bAdd = add;
+                this.mIndex = i;
+                this.mEdge = edge;
+                this.mAP = ap;
+            }
+
+            public void Redo()
+            {
+                if (this.bAdd)
+                {
+                    this.mAP.Edges.Insert(this.mIndex, this.mEdge);
+                }
+                else
+                {
+                    this.mAP.Edges.RemoveAt(this.mIndex);
+                }
+            }
+
+            public void Undo()
+            {
+                if (this.bAdd)
+                {
+                    this.mAP.Edges.RemoveAt(this.mIndex);
+                }
+                else
+                {
+                    this.mAP.Edges.Insert(this.mIndex, this.mEdge);
+                }
+            }
+        }
+
+        public virtual IEdgeAction AddEdge(DGEdge edge, AnchorPoint ap)
+        {
+            if (edge != null && ap != null)
+            {
+                return new EdgeAction(true, ap.Edges.Count, edge, ap);
+            }
+            return null;
+        }
+
+        public virtual IEdgeAction RemoveEdge(DGEdge edge)
+        {
+            if (edge != null)
+            {
+                AnchorPoint ap = this.GetAnchorFor(edge);
+                if (ap != null)
+                {
+                    int i = ap.Edges.IndexOf(edge);
+                    return new EdgeAction(false, i, edge, ap);
+                }
+            }
+            return null;
+        }
 
         public Box2F LayoutBBox
         {

@@ -85,8 +85,8 @@ namespace s3piwrappers.JazzGraph
             jpan.AdditiveClipResource 
                 = string.IsNullOrEmpty(this.mAdditiveClipPattern)
                 ? this.mAdditiveClipKey : DummyKey;
-            jpan.Animation = this.mClipPattern;
-            jpan.AdditiveAnimation = this.mAdditiveClipPattern;
+            jpan.Animation = this.mClipPattern ?? "";
+            jpan.AdditiveAnimation = this.mAdditiveClipPattern ?? "";
 
             jpan.AnimationNodeFlags = this.Flags;
             jpan.AnimationPriority1 = this.Priority;

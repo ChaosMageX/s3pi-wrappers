@@ -66,6 +66,7 @@
     <Compile Include="AChunkObject.cs" />
     <Compile Include="DecisionGraphNode.cs" />
     <Compile Include="DecisionGraph.cs" />
+    <Compile Include="IHasHashedName.cs" />
     <Compile Include="PlayAnimationNode.cs" />
     <Compile Include="MulticastDecisionGraphNode.cs" />
     <Compile Include="NamespaceMap.cs" />

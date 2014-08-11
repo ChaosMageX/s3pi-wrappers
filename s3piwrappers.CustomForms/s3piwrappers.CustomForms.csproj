@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Design\ByteSliderEditor.cs" />
+    <Compile Include="Design\RKSelectionEditor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectEditRIEDialog.cs">
       <SubType>Form</SubType>

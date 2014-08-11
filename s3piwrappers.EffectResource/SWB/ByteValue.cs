@@ -30,7 +30,7 @@ namespace s3piwrappers.SWB
         }
 
         [ElementPriority(1)]
-        public Byte Data
+        public byte Data
         {
             get { return mData; }
             set

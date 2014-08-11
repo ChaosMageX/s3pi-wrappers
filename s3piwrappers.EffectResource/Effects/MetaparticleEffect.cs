@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class MetaparticleEffect : Effect, IEquatable<MetaparticleEffect>
     {
+        #region Constructors
         public MetaparticleEffect(int apiVersion, EventHandler handler, MetaparticleEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,1138 +17,926 @@ namespace s3piwrappers.Effects
         public MetaparticleEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mParticleParameters = new ParticleParams(0, handler);
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mFloatList03 = new DataList<FloatValue>(handler);
-            mFloatList04 = new DataList<FloatValue>(handler);
-            mFloatList05 = new DataList<FloatValue>(handler);
-            mFloatList06 = new DataList<FloatValue>(handler);
-            mFloatList07 = new DataList<FloatValue>(handler);
-            mFloatList08 = new DataList<FloatValue>(handler);
-            mColourList01 = new DataList<ColourValue>(handler);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler);
-            mItemBList01 = new DataList<ItemB>(handler);
-            mItemEList01 = new DataList<ItemE>(handler);
-            mItemDList01 = new DataList<ItemD>(handler);
-            mItemF01 = new ItemF(0, handler);
-            mItemF02 = new ItemF(0, handler);
-            mFloat08 = -1000000000.0f;
-            mFloat09 = 0f;
-            mFloat10 = -10000.0f;
-            mFloat11 = 10000.0f;
+            mParticleParameters = new ParticleParams(apiVersion, handler, true);
+            mRateCurve = new DataList<FloatValue>(handler);
+            mSizeCurve = new DataList<FloatValue>(handler);
+            mPitchCurve = new DataList<FloatValue>(handler);
+            mRollCurve = new DataList<FloatValue>(handler);
+            mHeadingCurve = new DataList<FloatValue>(handler);
+            mRollOffset = -1000000000.0f;
+            mHeadingOffset = 0f;
+            mColorCurve = new DataList<ColorValue>(handler);
+            mColorVary = new ColorValue(apiVersion, handler);
+            mAlphaCurve = new DataList<FloatValue>(handler);
+            mDirectionalForcesSum = new Vector3ValueLE(apiVersion, handler);
+            mGlobalForcesSum = new Vector3ValueLE(apiVersion, handler);
+            mRadialForceLocation = new Vector3ValueLE(apiVersion, handler);
+            mWiggles = new DataList<Wiggle>(handler);
+            mLoopBoxColorCurve = new DataList<ColorValue>(handler);
+            mLoopBoxAlphaCurve = new DataList<FloatValue>(handler);
+            mSurfaces = new DataList<Surface>(handler);
+            mAltitudeRange = new Vector2ValueLE(apiVersion, handler, -10000.0f, 10000.0f);
+            mRandomWalk1 = new RandomWalk(apiVersion, handler);
+            mRandomWalk2 = new RandomWalk(apiVersion, handler);
+            mRandomWalkPreferredDirection = new Vector3ValueLE(apiVersion, handler);
+            mAttractorOrigin = new Vector3ValueLE(apiVersion, handler);
+            mAttractor = new Attractor(apiVersion, handler);
+            mPathPoints = new DataList<PathPoint>(handler);
         }
 
-        public MetaparticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public MetaparticleEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt32 mInt02;
+        #region Attributes
+        private ulong mFlags;
         private ParticleParams mParticleParameters;
-        private DataList<FloatValue> mFloatList01;
-        private float mFloat01;
-        private UInt32 mFloat02;
-        private DataList<FloatValue> mFloatList02;
-        private float mFloat03;
-        private DataList<FloatValue> mFloatList03;
-        private DataList<FloatValue> mFloatList04;
-        private DataList<FloatValue> mFloatList05;
-        private float mFloat04;
-        private float mFloat05;
-        private float mFloat06;
-        private float mFloat07;
-        private float mFloat08;
-        private float mFloat09;
-        private DataList<ColourValue> mColourList01;
-        private float mFloat10; //LE
-        private float mFloat11; //LE
-        private float mFloat12; //LE
-        private DataList<FloatValue> mFloatList06;
-        private float mFloat13;
-        private String mBaseEffectName;
-        private String mDeathEffectName;
-        private Byte mByte01;
-        private float mFloat14; //LE
-        private float mFloat15; //LE
-        private float mFloat16; //LE
-        private float mFloat17; //LE
-        private float mFloat18; //LE
-        private float mFloat19; //LE
+        private DataList<FloatValue> mRateCurve;
+        private float mRateCurveTime;
+        private float mRateCurveCycles;//originally uint
+        private DataList<FloatValue> mSizeCurve;
+        private float mSizeVary;
+        private DataList<FloatValue> mPitchCurve;
+        private DataList<FloatValue> mRollCurve;
+        private DataList<FloatValue> mHeadingCurve;
+        private float mPitchVary;
+        private float mRollVary;
+        private float mHeadingVary;
+        private float mPitchOffset;
+        private float mRollOffset;
+        private float mHeadingOffset;
+        private DataList<ColorValue> mColorCurve;
+        private ColorValue mColorVary;
+        private DataList<FloatValue> mAlphaCurve;
+        private float mAlphaVary;
+        private string mComponentName = string.Empty;
+        private string mComponentType = string.Empty;
+        private byte mAlignMode;
+        private Vector3ValueLE mDirectionalForcesSum;
+        private Vector3ValueLE mGlobalForcesSum;
 
-        private float mFloat20;
-        private float mFloat21;
-        private float mFloat22;
+        private float mWindStrength;
+        private float mGravityStrength;
+        private float mRadialForce;
 
-        private float mFloat23; //LE
-        private float mFloat24; //LE
-        private float mFloat25; //LE
+        private Vector3ValueLE mRadialForceLocation;
 
-        private float mFloat26;
-        private float mFloat27;
-        private DataList<ItemE> mItemEList01;
-        private byte mByte02;
-        private byte mByte03;
-        private byte mByte04;
-        private byte mByte05;
-        private DataList<Vector3ValueLE> mVector3List01;
-        private DataList<FloatValue> mFloatList07;
-        private DataList<ItemB> mItemBList01; //25
-        private float mFloat28;
-        private float mFloat29;
-        private float mFloat30;
-        private float mFloat31;
-        private float mFloat32;
+        private float mDrag;
+        private float mScrewRate;
+        private DataList<Wiggle> mWiggles;
+        private byte mScreenBloomAlphaRate;
+        private byte mScreenBloomAlphaBase;
+        private byte mScreenBloomSizeRate;
+        private byte mScreenBloomSizeBase;
+        private DataList<ColorValue> mLoopBoxColorCurve;//originally DataList<Vector3ValueLE>
+        private DataList<FloatValue> mLoopBoxAlphaCurve;
+        private DataList<Surface> mSurfaces; //25
+        private float mMapBounce;
+        private float mMapRepulseHeight;
+        private float mMapRepulseStrength;
+        private float mMapRepulseScoutDistance;
+        private float mMapRepulseVertical;
+        private float mMapRepulseKillHeight;
+        private float mProbabilityDeath;
+        private Vector2ValueLE mAltitudeRange;
+        private ulong mForceMapId;
+        private ulong mEmitRateMapId;
+        private ulong mEmitColorMapId;
 
-        private float mFloat33;
-        private float mFloat34;
-        private float mFloat35; //LE
-        private float mFloat36; //LE
-        private UInt64 mLong01;
-        private UInt64 mLong02;
-        private UInt64 mLong03;
+        private RandomWalk mRandomWalk1;
+        private RandomWalk mRandomWalk2;
 
-        private ItemF mItemF01;
-        private ItemF mItemF02;
+        private Vector3ValueLE mRandomWalkPreferredDirection;
 
-        private float mFloat51; //LE
-        private float mFloat52; //LE
-        private float mFloat53; //LE
+        private float mAlignDamping;
+        private float mBankAmount;
+        private float mBankRestore;
 
-        private float mFloat54;
-        private float mFloat55;
-        private float mFloat56;
+        private Vector3ValueLE mAttractorOrigin;
 
-        private float mFloat57; //LE
-        private float mFloat58; //LE
-        private float mFloat59; //LE
+        private Attractor mAttractor;
+        private DataList<PathPoint> mPathPoints;
+        private float mTractorResetSpeed;
+        #endregion
 
-        private DataList<FloatValue> mFloatList08;
-        private float mFloat60;
-        private float mFloat61;
-        private DataList<ItemD> mItemDList01;
-        private float mFloat62;
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Int01
+        public ulong Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public uint Int02
-        {
-            get { return mInt02; }
-            set
-            {
-                mInt02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(3)]
         public ParticleParams ParticleParameters
         {
             get { return mParticleParameters; }
             set
             {
-                mParticleParameters = value;
+                mParticleParameters = new ParticleParams(requestedApiVersion, handler, true, value);
+                OnElementChanged();
+            }
+        }
+
+        [ElementPriority(3)]
+        public DataList<FloatValue> RateCurve
+        {
+            get { return mRateCurve; }
+            set
+            {
+                mRateCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public DataList<FloatValue> FloatList01
+        public float RateCurveTime
         {
-            get { return mFloatList01; }
+            get { return mRateCurveTime; }
             set
             {
-                mFloatList01 = value;
+                mRateCurveTime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public float Float01
+        public float RateCurveCycles
         {
-            get { return mFloat01; }
+            get { return mRateCurveCycles; }
             set
             {
-                mFloat01 = value;
+                mRateCurveCycles = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public UInt32 Float02
+        public DataList<FloatValue> SizeCurve
         {
-            get { return mFloat02; }
+            get { return mSizeCurve; }
             set
             {
-                mFloat02 = value;
+                mSizeCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public DataList<FloatValue> FloatList02
+        public float SizeVary
         {
-            get { return mFloatList02; }
+            get { return mSizeVary; }
             set
             {
-                mFloatList02 = value;
+                mSizeVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public float Float03
+        public DataList<FloatValue> PitchCurve
         {
-            get { return mFloat03; }
+            get { return mPitchCurve; }
             set
             {
-                mFloat03 = value;
+                mPitchCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public DataList<FloatValue> FloatList03
+        public DataList<FloatValue> RollCurve
         {
-            get { return mFloatList03; }
+            get { return mRollCurve; }
             set
             {
-                mFloatList03 = value;
+                mRollCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public DataList<FloatValue> FloatList04
+        public DataList<FloatValue> HeadingCurve
         {
-            get { return mFloatList04; }
+            get { return mHeadingCurve; }
             set
             {
-                mFloatList04 = value;
+                mHeadingCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public DataList<FloatValue> FloatList05
+        public float PitchVary
         {
-            get { return mFloatList05; }
+            get { return mPitchVary; }
             set
             {
-                mFloatList05 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(1)]
-        public float Float04
-        {
-            get { return mFloat04; }
-            set
-            {
-                mFloat04 = value;
+                mPitchVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(12)]
-        public float Float05
+        public float RollVary
         {
-            get { return mFloat05; }
+            get { return mRollVary; }
             set
             {
-                mFloat05 = value;
+                mRollVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(13)]
-        public float Float06
+        public float HeadingVary
         {
-            get { return mFloat06; }
+            get { return mHeadingVary; }
             set
             {
-                mFloat06 = value;
+                mHeadingVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(14)]
-        public float Float07
+        public float PitchOffset
         {
-            get { return mFloat07; }
+            get { return mPitchOffset; }
             set
             {
-                mFloat07 = value;
+                mPitchOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(15)]
-        public float Float08
+        public float RollOffset
         {
-            get { return mFloat08; }
+            get { return mRollOffset; }
             set
             {
-                mFloat08 = value;
+                mRollOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(16)]
-        public float Float09
+        public float HeadingOffset
         {
-            get { return mFloat09; }
+            get { return mHeadingOffset; }
             set
             {
-                mFloat09 = value;
+                mHeadingOffset = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(17)]
-        public DataList<ColourValue> ColourList01
+        public DataList<ColorValue> ColorCurve
         {
-            get { return mColourList01; }
+            get { return mColorCurve; }
             set
             {
-                mColourList01 = value;
+                mColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(18)]
-        public float Float10
+        public ColorValue ColorVary
         {
-            get { return mFloat10; }
+            get { return mColorVary; }
             set
             {
-                mFloat10 = value;
+                mColorVary = new ColorValue(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(19)]
-        public float Float11
+        public DataList<FloatValue> AlphaCurve
         {
-            get { return mFloat11; }
+            get { return mAlphaCurve; }
             set
             {
-                mFloat11 = value;
+                mAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(20)]
-        public float Float12
+        public float AlphaVary
         {
-            get { return mFloat12; }
+            get { return mAlphaVary; }
             set
             {
-                mFloat12 = value;
+                mAlphaVary = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(21)]
-        public DataList<FloatValue> FloatList06
+        public string ComponentName
         {
-            get { return mFloatList06; }
+            get { return mComponentName; }
             set
             {
-                mFloatList06 = value;
+                mComponentName = value ?? string.Empty;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(22)]
-        public float Float13
+        public string ComponentType
         {
-            get { return mFloat13; }
+            get { return mComponentType; }
             set
             {
-                mFloat13 = value;
+                mComponentType = value ?? string.Empty;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(23)]
-        public string BaseEffectName
+        public byte AlignMode
         {
-            get { return mBaseEffectName; }
+            get { return mAlignMode; }
             set
             {
-                mBaseEffectName = value;
+                mAlignMode = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(24)]
-        public string DeathEffectName
+        public Vector3ValueLE DirectionalForcesSum
         {
-            get { return mDeathEffectName; }
+            get { return mDirectionalForcesSum; }
             set
             {
-                mDeathEffectName = value;
+                mDirectionalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(25)]
-        public byte Byte01
+        public Vector3ValueLE GlobalForcesSum
         {
-            get { return mByte01; }
+            get { return mGlobalForcesSum; }
             set
             {
-                mByte01 = value;
+                mGlobalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(26)]
-        public float Float14
+        public float WindStrength
         {
-            get { return mFloat14; }
+            get { return mWindStrength; }
             set
             {
-                mFloat14 = value;
+                mWindStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(27)]
-        public float Float15
+        public float GravityStrength
         {
-            get { return mFloat15; }
+            get { return mGravityStrength; }
             set
             {
-                mFloat15 = value;
+                mGravityStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(28)]
-        public float Float16
+        public float RadialForce
         {
-            get { return mFloat16; }
+            get { return mRadialForce; }
             set
             {
-                mFloat16 = value;
+                mRadialForce = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(29)]
-        public float Float17
+        public Vector3ValueLE RadialForceDirection
         {
-            get { return mFloat17; }
+            get { return mRadialForceLocation; }
             set
             {
-                mFloat17 = value;
+                mRadialForceLocation = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(30)]
-        public float Float18
+        public float Drag
         {
-            get { return mFloat18; }
+            get { return mDrag; }
             set
             {
-                mFloat18 = value;
+                mDrag = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(31)]
-        public float Float19
+        public float ScrewRate
         {
-            get { return mFloat19; }
+            get { return mScrewRate; }
             set
             {
-                mFloat19 = value;
+                mScrewRate = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(32)]
-        public float Float20
+        public DataList<Wiggle> Wiggles
         {
-            get { return mFloat20; }
+            get { return mWiggles; }
             set
             {
-                mFloat20 = value;
+                mWiggles = new DataList<Wiggle>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(33)]
-        public float Float21
+        public byte ScreenBloomAlphaRate
         {
-            get { return mFloat21; }
+            get { return mScreenBloomAlphaRate; }
             set
             {
-                mFloat21 = value;
+                mScreenBloomAlphaRate = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(34)]
-        public float Float22
+        public byte ScreenBloomAlphaBase
         {
-            get { return mFloat22; }
+            get { return mScreenBloomAlphaBase; }
             set
             {
-                mFloat22 = value;
+                mScreenBloomAlphaBase = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(35)]
-        public float Float23
+        public byte ScreenBloomSizeRate
         {
-            get { return mFloat23; }
+            get { return mScreenBloomSizeRate; }
             set
             {
-                mFloat23 = value;
+                mScreenBloomSizeRate = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(36)]
-        public float Float24
+        public byte ScreenBloomSizeBase
         {
-            get { return mFloat24; }
+            get { return mScreenBloomSizeBase; }
             set
             {
-                mFloat24 = value;
+                mScreenBloomSizeBase = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(37)]
-        public float Float25
+        public DataList<ColorValue> LoopBoxColorCurve
         {
-            get { return mFloat25; }
+            get { return mLoopBoxColorCurve; }
             set
             {
-                mFloat25 = value;
+                mLoopBoxColorCurve = new DataList<ColorValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(38)]
-        public float Float26
+        public DataList<FloatValue> LoopBoxAlphaCurve
         {
-            get { return mFloat26; }
+            get { return mLoopBoxAlphaCurve; }
             set
             {
-                mFloat26 = value;
+                mLoopBoxAlphaCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(39)]
-        public float Float27
+        public DataList<Surface> Surfaces
         {
-            get { return mFloat27; }
+            get { return mSurfaces; }
             set
             {
-                mFloat27 = value;
+                mSurfaces = new DataList<Surface>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(40)]
-        public DataList<ItemE> ItemEList01
+        public float MapBounce
         {
-            get { return mItemEList01; }
+            get { return mMapBounce; }
             set
             {
-                mItemEList01 = value;
+                mMapBounce = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(41)]
-        public byte Byte02
+        public float MapRepulseHeight
         {
-            get { return mByte02; }
+            get { return mMapRepulseHeight; }
             set
             {
-                mByte02 = value;
+                mMapRepulseHeight = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(42)]
-        public byte Byte03
+        public float MapRepulseStrength
         {
-            get { return mByte03; }
+            get { return mMapRepulseStrength; }
             set
             {
-                mByte03 = value;
+                mMapRepulseStrength = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(43)]
-        public byte Byte04
+        public float MapRepulseScoutDistance
         {
-            get { return mByte04; }
+            get { return mMapRepulseScoutDistance; }
             set
             {
-                mByte04 = value;
+                mMapRepulseScoutDistance = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(44)]
-        public byte Byte05
+        public float MapRepulseVertical
         {
-            get { return mByte05; }
+            get { return mMapRepulseVertical; }
             set
             {
-                mByte05 = value;
+                mMapRepulseVertical = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(45)]
-        public DataList<Vector3ValueLE> Vector3List01
+        public float MapRepulseKillHeight
         {
-            get { return mVector3List01; }
+            get { return mMapRepulseKillHeight; }
             set
             {
-                mVector3List01 = value;
+                mMapRepulseKillHeight = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(46)]
-        public DataList<FloatValue> FloatList07
+        public float ProbabilityDeath
         {
-            get { return mFloatList07; }
+            get { return mProbabilityDeath; }
             set
             {
-                mFloatList07 = value;
+                mProbabilityDeath = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(47)]
-        public DataList<ItemB> ItemBList01
+        public Vector2ValueLE AltitudeRange
         {
-            get { return mItemBList01; }
+            get { return mAltitudeRange; }
             set
             {
-                mItemBList01 = value;
+                mAltitudeRange = new Vector2ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(48)]
-        public float Float28
+        public ulong ForceMapId
         {
-            get { return mFloat28; }
+            get { return mForceMapId; }
             set
             {
-                mFloat28 = value;
+                mForceMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(49)]
-        public float Float29
+        public ulong EmitRateMap
         {
-            get { return mFloat29; }
+            get { return mEmitRateMapId; }
             set
             {
-                mFloat29 = value;
+                mEmitRateMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(50)]
-        public float Float30
+        public ulong EmitColorMap
         {
-            get { return mFloat30; }
+            get { return mEmitColorMapId; }
             set
             {
-                mFloat30 = value;
+                mEmitColorMapId = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(51)]
-        public float Float31
+        public RandomWalk RandomWalk1
         {
-            get { return mFloat31; }
+            get { return mRandomWalk1; }
             set
             {
-                mFloat31 = value;
+                mRandomWalk1 = new RandomWalk(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(52)]
-        public float Float32
+        public RandomWalk RandomWalk2
         {
-            get { return mFloat32; }
+            get { return mRandomWalk2; }
             set
             {
-                mFloat32 = value;
+                mRandomWalk2 = new RandomWalk(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(53)]
-        public float Float33
+        public Vector3ValueLE RandomWalkPreferredDirection
         {
-            get { return mFloat33; }
+            get { return mRandomWalkPreferredDirection; }
             set
             {
-                mFloat33 = value;
+                mRandomWalkPreferredDirection = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(54)]
-        public float Float34
+        public float AlignDamping
         {
-            get { return mFloat34; }
+            get { return mAlignDamping; }
             set
             {
-                mFloat34 = value;
+                mAlignDamping = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(55)]
-        public float Float35
+        public float BankAmount
         {
-            get { return mFloat35; }
+            get { return mBankAmount; }
             set
             {
-                mFloat35 = value;
+                mBankAmount = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(56)]
-        public float Float36
+        public float BankRestore
         {
-            get { return mFloat36; }
+            get { return mBankRestore; }
             set
             {
-                mFloat36 = value;
+                mBankRestore = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(57)]
-        public ulong Long01
+        public Vector3ValueLE AttractorOrigin
         {
-            get { return mLong01; }
+            get { return mAttractorOrigin; }
             set
             {
-                mLong01 = value;
+                mAttractorOrigin = new Vector3ValueLE(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(58)]
-        public ulong Long02
+        public Attractor Attractor
         {
-            get { return mLong02; }
+            get { return mAttractor; }
             set
             {
-                mLong02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(59)]
-        public ulong Long03
-        {
-            get { return mLong03; }
-            set
-            {
-                mLong03 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(60)]
-        public ItemF ItemF01
-        {
-            get { return mItemF01; }
-            set
-            {
-                mItemF01 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(61)]
-        public ItemF ItemF02
-        {
-            get { return mItemF02; }
-            set
-            {
-                mItemF02 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(62)]
-        public float Float51
-        {
-            get { return mFloat51; }
-            set
-            {
-                mFloat51 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(63)]
-        public float Float52
-        {
-            get { return mFloat52; }
-            set
-            {
-                mFloat52 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(64)]
-        public float Float53
-        {
-            get { return mFloat53; }
-            set
-            {
-                mFloat53 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(65)]
-        public float Float54
-        {
-            get { return mFloat54; }
-            set
-            {
-                mFloat54 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(66)]
-        public float Float55
-        {
-            get { return mFloat55; }
-            set
-            {
-                mFloat55 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(67)]
-        public float Float56
-        {
-            get { return mFloat56; }
-            set
-            {
-                mFloat56 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(68)]
-        public float Float57
-        {
-            get { return mFloat57; }
-            set
-            {
-                mFloat57 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(69)]
-        public float Float58
-        {
-            get { return mFloat58; }
-            set
-            {
-                mFloat58 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(70)]
-        public float Float59
-        {
-            get { return mFloat59; }
-            set
-            {
-                mFloat59 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(71)]
-        public DataList<FloatValue> FloatList08
-        {
-            get { return mFloatList08; }
-            set
-            {
-                mFloatList08 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(72)]
-        public float Float60
-        {
-            get { return mFloat60; }
-            set
-            {
-                mFloat60 = value;
-                OnElementChanged();
-            }
-        }
-
-        [ElementPriority(73)]
-        public float Float61
-        {
-            get { return mFloat61; }
-            set
-            {
-                mFloat61 = value;
+                mAttractor = new Attractor(requestedApiVersion, handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(74)]
-        public DataList<ItemD> ItemDList01
+        public DataList<PathPoint> PathPoints
         {
-            get { return mItemDList01; }
+            get { return mPathPoints; }
             set
             {
-                mItemDList01 = value;
+                mPathPoints = new DataList<PathPoint>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(75)]
-        public float Float62
+        public float TractorResetSpeed
         {
-            get { return mFloat62; }
+            get { return mTractorResetSpeed; }
             set
             {
-                mFloat62 = value;
+                mTractorResetSpeed = value;
                 OnElementChanged();
             }
         }
+        #endregion
 
-
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mInt02);
-            mParticleParameters = new ParticleParams(0, handler, stream);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat01);
-            s.Read(out mFloat02);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat03);
-            mFloatList03 = new DataList<FloatValue>(handler, stream);
-            mFloatList04 = new DataList<FloatValue>(handler, stream);
-            mFloatList05 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat04);
-            s.Read(out mFloat05);
-            s.Read(out mFloat06);
-            s.Read(out mFloat07);
-            s.Read(out mFloat08);
-            s.Read(out mFloat09);
-            mColourList01 = new DataList<ColourValue>(handler, stream);
-            s.Read(out mFloat10, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat11, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat12, ByteOrder.LittleEndian); //LE
-            mFloatList06 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat13);
-            s.Read(out mBaseEffectName, StringType.ZeroDelimited);
-            s.Read(out mDeathEffectName, StringType.ZeroDelimited);
-            s.Read(out mByte01);
-            s.Read(out mFloat14, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat15, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat16, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat17, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat18, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat19, ByteOrder.LittleEndian); //LE
+            s.Read(out mFlags);
+            // no flag mask
 
-            s.Read(out mFloat20);
-            s.Read(out mFloat21);
-            s.Read(out mFloat22);
+            mParticleParameters = new ParticleParams(requestedApiVersion, handler, true, stream);
+            mRateCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mRateCurveTime);
+            s.Read(out mRateCurveCycles);
+            mSizeCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mSizeVary);
+            mPitchCurve = new DataList<FloatValue>(handler, stream);
+            mRollCurve = new DataList<FloatValue>(handler, stream);
+            mHeadingCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mPitchVary);
+            s.Read(out mRollVary);
+            s.Read(out mHeadingVary);
+            s.Read(out mPitchOffset);
+            s.Read(out mRollOffset);
+            s.Read(out mHeadingOffset);
+            mColorCurve = new DataList<ColorValue>(handler, stream);
+            mColorVary = new ColorValue(requestedApiVersion, handler, stream);
+            mAlphaCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mAlphaVary);
+            s.Read(out mComponentName, StringType.ZeroDelimited);
+            s.Read(out mComponentType, StringType.ZeroDelimited);
+            s.Read(out mAlignMode);
+            mDirectionalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, stream);
+            mGlobalForcesSum = new Vector3ValueLE(requestedApiVersion, handler, stream);
 
-            s.Read(out mFloat23, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat24, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat25, ByteOrder.LittleEndian); //LE
+            s.Read(out mWindStrength);
+            s.Read(out mGravityStrength);
+            s.Read(out mRadialForce);
 
-            s.Read(out mFloat26);
-            s.Read(out mFloat27);
-            mItemEList01 = new DataList<ItemE>(handler, stream);
-            s.Read(out mByte02);
-            s.Read(out mByte03);
-            s.Read(out mByte04);
-            s.Read(out mByte05);
-            mVector3List01 = new DataList<Vector3ValueLE>(handler, stream);
-            FloatList07 = new DataList<FloatValue>(handler, stream);
-            mItemBList01 = new DataList<ItemB>(handler, stream);
-            s.Read(out mFloat28);
-            s.Read(out mFloat29);
-            s.Read(out mFloat30);
-            s.Read(out mFloat31);
-            s.Read(out mFloat32);
-            s.Read(out mFloat33);
-            s.Read(out mFloat34);
+            mRadialForceLocation = new Vector3ValueLE(requestedApiVersion, handler, stream);
 
-            s.Read(out mFloat35, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat36, ByteOrder.LittleEndian); //LE
+            s.Read(out mDrag);
+            s.Read(out mScrewRate);
+            mWiggles = new DataList<Wiggle>(handler, stream);
+            s.Read(out mScreenBloomAlphaRate);
+            s.Read(out mScreenBloomAlphaBase);
+            s.Read(out mScreenBloomSizeRate);
+            s.Read(out mScreenBloomSizeBase);
+            mLoopBoxColorCurve = new DataList<ColorValue>(handler, stream);
+            mLoopBoxAlphaCurve = new DataList<FloatValue>(handler, stream);
+            mSurfaces = new DataList<Surface>(handler, stream);
+            s.Read(out mMapBounce);
+            s.Read(out mMapRepulseHeight);
+            s.Read(out mMapRepulseStrength);
+            s.Read(out mMapRepulseScoutDistance);
+            s.Read(out mMapRepulseVertical);
+            s.Read(out mMapRepulseKillHeight);
+            s.Read(out mProbabilityDeath);
 
-            s.Read(out mLong01);
-            s.Read(out mLong02);
-            s.Read(out mLong03);
+            mAltitudeRange = new Vector2ValueLE(requestedApiVersion, handler, stream);
 
-            mItemF01 = new ItemF(0, handler, stream);
-            mItemF02 = new ItemF(0, handler, stream);
+            s.Read(out mForceMapId);
+            s.Read(out mEmitRateMapId);
+            s.Read(out mEmitColorMapId);
 
-            s.Read(out mFloat51, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat52, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat53, ByteOrder.LittleEndian); //LE
+            mRandomWalk1 = new RandomWalk(0, handler, stream);
+            mRandomWalk2 = new RandomWalk(0, handler, stream);
 
-            s.Read(out mFloat54);
-            s.Read(out mFloat55);
-            s.Read(out mFloat56);
+            mRandomWalkPreferredDirection = new Vector3ValueLE(requestedApiVersion, handler, stream);
 
-            s.Read(out mFloat57, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat58, ByteOrder.LittleEndian); //LE
-            s.Read(out mFloat59, ByteOrder.LittleEndian); //LE
+            s.Read(out mAlignDamping);
+            s.Read(out mBankAmount);
+            s.Read(out mBankRestore);
 
-            mFloatList08 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mFloat60);
-            s.Read(out mFloat61);
-            mItemDList01 = new DataList<ItemD>(handler, stream);
-            s.Read(out mFloat62);
+            mAttractorOrigin = new Vector3ValueLE(requestedApiVersion, handler, stream);
+            mAttractor = new Attractor(requestedApiVersion, handler, stream);
+
+            mPathPoints = new DataList<PathPoint>(handler, stream);
+            s.Read(out mTractorResetSpeed);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
 
-            s.Write(mInt01);
-            s.Write(mInt02);
+            s.Write(mFlags);
             mParticleParameters.UnParse(stream);
-            mFloatList01.UnParse(stream);
-            s.Write(mFloat01);
-            s.Write(mFloat02);
-            mFloatList02.UnParse(stream);
-            s.Write(mFloat03);
-            mFloatList03.UnParse(stream);
-            mFloatList04.UnParse(stream);
-            mFloatList05.UnParse(stream);
-            s.Write(mFloat04);
-            s.Write(mFloat05);
-            s.Write(mFloat06);
-            s.Write(mFloat07);
-            s.Write(mFloat08);
-            s.Write(mFloat09);
-            mColourList01.UnParse(stream);
-            s.Write(mFloat10, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat11, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat12, ByteOrder.LittleEndian); //LE
-            mFloatList06.UnParse(stream);
-            s.Write(mFloat13);
-            s.Write(mBaseEffectName, StringType.ZeroDelimited);
-            s.Write(mDeathEffectName, StringType.ZeroDelimited);
-            s.Write(mByte01);
-            s.Write(mFloat14, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat15, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat16, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat17, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat18, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat19, ByteOrder.LittleEndian); //LE
+            mRateCurve.UnParse(stream);
+            s.Write(mRateCurveTime);
+            s.Write(mRateCurveCycles);
+            mSizeCurve.UnParse(stream);
+            s.Write(mSizeVary);
+            mPitchCurve.UnParse(stream);
+            mRollCurve.UnParse(stream);
+            mHeadingCurve.UnParse(stream);
+            s.Write(mPitchVary);
+            s.Write(mRollVary);
+            s.Write(mHeadingVary);
+            s.Write(mPitchOffset);
+            s.Write(mRollOffset);
+            s.Write(mHeadingOffset);
+            mColorCurve.UnParse(stream);
+            mColorVary.UnParse(stream);
+            mAlphaCurve.UnParse(stream);
+            s.Write(mAlphaVary);
+            s.Write(mComponentName, StringType.ZeroDelimited);
+            s.Write(mComponentType, StringType.ZeroDelimited);
+            s.Write(mAlignMode);
+            mDirectionalForcesSum.UnParse(stream);
+            mGlobalForcesSum.UnParse(stream);
 
-            s.Write(mFloat20);
-            s.Write(mFloat21);
-            s.Write(mFloat22);
+            s.Write(mWindStrength);
+            s.Write(mGravityStrength);
+            s.Write(mRadialForce);
 
-            s.Write(mFloat23, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat24, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat25, ByteOrder.LittleEndian); //LE
+            mRadialForceLocation.UnParse(stream);
 
-            s.Write(mFloat26);
-            s.Write(mFloat27);
-            mItemEList01.UnParse(stream);
-            s.Write(mByte02);
-            s.Write(mByte03);
-            s.Write(mByte04);
-            s.Write(mByte05);
-            mVector3List01.UnParse(stream);
-            mFloatList07.UnParse(stream);
-            mItemBList01.UnParse(stream);
-            s.Write(mFloat28);
-            s.Write(mFloat29);
-            s.Write(mFloat30);
-            s.Write(mFloat31);
-            s.Write(mFloat32);
-            s.Write(mFloat33);
-            s.Write(mFloat34);
+            s.Write(mDrag);
+            s.Write(mScrewRate);
+            mWiggles.UnParse(stream);
+            s.Write(mScreenBloomAlphaRate);
+            s.Write(mScreenBloomAlphaBase);
+            s.Write(mScreenBloomSizeRate);
+            s.Write(mScreenBloomSizeBase);
+            mLoopBoxColorCurve.UnParse(stream);
+            mLoopBoxAlphaCurve.UnParse(stream);
+            mSurfaces.UnParse(stream);
+            s.Write(mMapBounce);
+            s.Write(mMapRepulseHeight);
+            s.Write(mMapRepulseStrength);
+            s.Write(mMapRepulseScoutDistance);
+            s.Write(mMapRepulseVertical);
+            s.Write(mMapRepulseKillHeight);
+            s.Write(mProbabilityDeath);
 
-            s.Write(mFloat35, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat36, ByteOrder.LittleEndian); //LE
+            mAltitudeRange.UnParse(stream);
 
-            s.Write(mLong01);
-            s.Write(mLong02);
-            s.Write(mLong03);
+            s.Write(mForceMapId);
+            s.Write(mEmitRateMapId);
+            s.Write(mEmitColorMapId);
 
-            mItemF01.UnParse(stream);
-            mItemF02.UnParse(stream);
+            mRandomWalk1.UnParse(stream);
+            mRandomWalk2.UnParse(stream);
 
-            s.Write(mFloat51, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat52, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat53, ByteOrder.LittleEndian); //LE
+            mRandomWalkPreferredDirection.UnParse(stream);
 
-            s.Write(mFloat54);
-            s.Write(mFloat55);
-            s.Write(mFloat56);
+            s.Write(mAlignDamping);
+            s.Write(mBankAmount);
+            s.Write(mBankRestore);
 
-            s.Write(mFloat57, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat58, ByteOrder.LittleEndian); //LE
-            s.Write(mFloat59, ByteOrder.LittleEndian); //LE
+            mAttractorOrigin.UnParse(stream);
+            mAttractor.UnParse(stream);
 
-            mFloatList08.UnParse(stream);
-            s.Write(mFloat60);
-            s.Write(mFloat61);
-            mItemDList01.UnParse(stream);
-            s.Write(mFloat62);
+            mPathPoints.UnParse(stream);
+            s.Write(mTractorResetSpeed);
         }
-
+        #endregion
 
         public bool Equals(MetaparticleEffect other)
         {

@@ -82,11 +82,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\IHasGenericAdd.cs" />
+    <Compile Include="Collections\IHasReverse.cs" />
+    <Compile Include="Collections\IHasSwap.cs" />
+    <Compile Include="Cryptography\IFNVUnhasher.cs" />
+    <Compile Include="Undo\Command.cs" />
     <Compile Include="Cryptography\FNVCLIP.cs" />
     <Compile Include="Cryptography\FNVHash.cs" />
     <Compile Include="Cryptography\FNVSearchTable.cs" />
     <Compile Include="Cryptography\FNVUnhasher32.cs" />
     <Compile Include="Cryptography\FNVUnhasher64.cs" />
+    <Compile Include="Collections\IHasGenericInsert.cs" />
+    <Compile Include="Undo\IHasUndoManager.cs" />
     <Compile Include="INamedResourceIndexEntry.cs" />
     <Compile Include="IO\BinaryStreamWrapper.cs" />
     <Compile Include="IO\ByteOrder.cs" />
@@ -100,6 +107,10 @@
     <Compile Include="Resources\KeyNameReg.cs" />
     <Compile Include="Resources\ResourceMgr.cs" />
     <Compile Include="RK.cs" />
+    <Compile Include="Collections\UndoableList.cs" />
+    <Compile Include="Undo\PropertyCommand.cs" />
+    <Compile Include="Undo\UndoEventHandler.cs" />
+    <Compile Include="Undo\UndoManager.cs" />
     <Compile Include="Windows\ProcessExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +118,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

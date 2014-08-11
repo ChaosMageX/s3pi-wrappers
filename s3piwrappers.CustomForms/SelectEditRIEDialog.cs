@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
+using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
 using s3pi.Interfaces;
@@ -32,6 +32,8 @@ namespace s3piwrappers.CustomForms
             Comp = 4,
             Name = 5
         }
+
+        #region Comparers
 
         private class TagComparer : IComparer<INamedResourceIndexEntry>
         {
@@ -123,6 +125,8 @@ namespace s3piwrappers.CustomForms
         private static readonly NameComparer sNameComparer
             = new NameComparer();
 
+        #endregion
+
         private static string[] sTagDropDown;
 
         private static void LoadTagDropDown()
@@ -130,9 +134,11 @@ namespace s3piwrappers.CustomForms
             List<string> list = new List<string>();
             try
             {
-                foreach (KeyValuePair<string, List<string>> pair in ExtList.Ext)
+                foreach (KeyValuePair<string, List<string>> pair 
+                    in ExtList.Ext)
                 {
-                    if (pair.Key.StartsWith("0x"))
+                    if (pair.Key.StartsWith("0x", 
+                            StringComparison.OrdinalIgnoreCase))
                     {
                         list.Add(pair.Value[0] + " " + pair.Key);
                     }
@@ -189,6 +195,8 @@ namespace s3piwrappers.CustomForms
             this.bEnablePasteRKs = true;
             this.bDetectConflicts = false;
         }
+
+        #region Settings Properties
 
         public string Message
         {
@@ -318,6 +326,7 @@ namespace s3piwrappers.CustomForms
                 }
             }
         }
+        #endregion
 
         public INamedResourceIndexEntry[] SelectedResources
         {
@@ -338,6 +347,8 @@ namespace s3piwrappers.CustomForms
                 return ries;
             }
         }
+
+        #region Clipboard Functions
 
         public bool CopySelectedRKsToClipboard()
         {
@@ -373,9 +384,9 @@ namespace s3piwrappers.CustomForms
             return true;
         }
 
-        private List<TGIBlock> mClipboardRKs;
+        private List<RK> mClipboardRKs;
 
-        private static List<TGIBlock> ParseRKsFromClipboard()
+        private static List<RK> ParseRKsFromClipboard()
         {
             string str = Clipboard.GetText();
             if (string.IsNullOrEmpty(str))
@@ -383,18 +394,18 @@ namespace s3piwrappers.CustomForms
                 return null;
             }
             string[] rkStrs = str.Split('\n');
-            TGIBlock rk;
-            List<TGIBlock> rks = new List<TGIBlock>(rkStrs.Length);
+            RK rk;
+            List<RK> rks = new List<RK>(rkStrs.Length);
             for (int i = 0; i < rkStrs.Length; i++)
             {
-                rk = new TGIBlock(0, null);
-                if (AResourceKey.TryParse(rkStrs[i], rk))
+                if (RK.TryParse(rkStrs[i], out rk))
                 {
                     rks.Add(rk);
                 }
             }
             return rks;
         }
+        #endregion
 
         private void ClearConflictHighlighting()
         {
@@ -528,7 +539,7 @@ namespace s3piwrappers.CustomForms
                 this.mClipboardRKs != null && this.mClipboardRKs.Count > 0)
             {
                 int index;
-                TGIBlock rk;
+                RK rk;
                 INamedResourceIndexEntry rie;
                 int count = Math.Min(rows.Count, this.mClipboardRKs.Count);
                 for (int i = 0; i < count; i++)
@@ -912,16 +923,7 @@ namespace s3piwrappers.CustomForms
                 switch ((ColumnName)e.ColumnIndex)
                 {
                     case ColumnName.TID:
-                        if (str.StartsWith("0x") && !uint.TryParse(
-                            str.Substring(2),
-                            System.Globalization.NumberStyles.HexNumber,
-                            null, out val32))
-                        {
-                            e.Cancel = true;
-                            row.ErrorText = "Type ID " +
-                                "must be a 32-bit unsigned integer";
-                        }
-                        else if (!uint.TryParse(str, out val32))
+                        if (!RK.TryParseUInt32(str, out val32))
                         {
                             e.Cancel = true;
                             row.ErrorText = "Type ID " +
@@ -929,16 +931,7 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.GID:
-                        if (str.StartsWith("0x") && !uint.TryParse(
-                            str.Substring(2),
-                            System.Globalization.NumberStyles.HexNumber,
-                            null, out val32))
-                        {
-                            e.Cancel = true;
-                            row.ErrorText = "Group ID " +
-                                "must be a 32-bit unsigned integer";
-                        }
-                        else if (!uint.TryParse(str, out val32))
+                        if (!RK.TryParseUInt32(str, out val32))
                         {
                             e.Cancel = true;
                             row.ErrorText = "Group ID " +
@@ -946,16 +939,7 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.IID:
-                        if (str.StartsWith("0x") && !ulong.TryParse(
-                            str.Substring(2),
-                            System.Globalization.NumberStyles.HexNumber,
-                            null, out val64))
-                        {
-                            e.Cancel = true;
-                            row.ErrorText = "Type ID " +
-                                "must be a 64-bit unsigned integer";
-                        }
-                        else if (!ulong.TryParse(str, out val64))
+                        if (!RK.TryParseUInt64(str, out val64))
                         {
                             e.Cancel = true;
                             row.ErrorText = "Type ID " +
@@ -971,17 +955,18 @@ namespace s3piwrappers.CustomForms
         {
             if (e.RowIndex < this.mResources.Length)
             {
-                string str;
                 uint val32;
                 ulong val64;
+                string str = e.Value == null ? null : e.Value.ToString();
                 INamedResourceIndexEntry rie = this.mResources[e.RowIndex];
                 switch ((ColumnName)e.ColumnIndex)
                 {
                     case ColumnName.Tag:
-                        string[] strs = e.Value.ToString().Split(' ');
-                        val32 = uint.Parse(strs[1].Substring(2), 
-                            System.Globalization.NumberStyles.HexNumber);
-                        rie.ResourceType = val32;
+                        string[] strs = str.Split(' ');
+                        if (RK.TryParseHex32(strs[1], out val32))
+                        {
+                            rie.ResourceType = val32;
+                        }
                         if (this.mColIndex == (int)ColumnName.Tag ||
                             this.mColIndex == (int)ColumnName.TID)
                         {
@@ -1007,17 +992,10 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.TID:
-                        str = e.Value.ToString();
-                        if (str.StartsWith("0x"))
+                        if (RK.TryParseUInt32(str, out val32))
                         {
-                            val32 = uint.Parse(str.Substring(2),
-                                System.Globalization.NumberStyles.HexNumber);
+                            rie.ResourceType = val32;
                         }
-                        else
-                        {
-                            val32 = uint.Parse(str);
-                        }
-                        rie.ResourceType = val32;
                         if (this.mColIndex == (int)ColumnName.Tag ||
                             this.mColIndex == (int)ColumnName.TID)
                         {
@@ -1043,17 +1021,10 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.GID:
-                        str = e.Value.ToString();
-                        if (str.StartsWith("0x"))
+                        if (RK.TryParseUInt32(str, out val32))
                         {
-                            val32 = uint.Parse(str.Substring(2),
-                                System.Globalization.NumberStyles.HexNumber);
+                            rie.ResourceGroup = val32;
                         }
-                        else
-                        {
-                            val32 = uint.Parse(str);
-                        }
-                        rie.ResourceGroup = val32;
                         if (this.mColIndex == (int)ColumnName.GID &&
                             !this.CheckResDGVSorted(e.RowIndex))
                         {
@@ -1066,17 +1037,10 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.IID:
-                        str = e.Value.ToString();
-                        if (str.StartsWith("0x"))
+                        if (RK.TryParseUInt64(str, out val64))
                         {
-                            val64 = ulong.Parse(str.Substring(2),
-                                System.Globalization.NumberStyles.HexNumber);
+                            rie.Instance = val64;
                         }
-                        else
-                        {
-                            val64 = ulong.Parse(str);
-                        }
-                        rie.Instance = val64;
                         if (this.mColIndex == (int)ColumnName.IID &&
                             !this.CheckResDGVSorted(e.RowIndex))
                         {
@@ -1098,30 +1062,26 @@ namespace s3piwrappers.CustomForms
                         }
                         break;
                     case ColumnName.Name:
-                        str = e.Value.ToString();
                         rie.ResourceName = str;
                         if (this.mAutoHashing != Hashing.None)
                         {
-                            ulong iid = 0;
-                            if (!str.StartsWith("0x") || 
-                                !ulong.TryParse(str.Substring(2), 
-                                System.Globalization.NumberStyles.HexNumber,
-                                null, out iid))
+                            val64 = 0;
+                            if (str != null)
                             {
                                 switch (this.mAutoHashing)
                                 {
                                     case Hashing.FNV32:
-                                        iid = FNVHash.HashString32(str);
+                                        val64 = FNVHash.HashString32(str);
                                         break;
                                     case Hashing.FNV64:
-                                        iid = FNVHash.HashString64(str);
+                                        val64 = FNVHash.HashString64(str);
                                         break;
                                     case Hashing.FNVCLIP:
-                                        iid = FNVCLIP.HashString(str);
+                                        val64 = FNVCLIP.HashString(str);
                                         break;
                                 }
                             }
-                            rie.Instance = iid;
+                            rie.Instance = val64;
                             if (this.mColIndex == (int)ColumnName.IID ||
                                 this.mColIndex == (int)ColumnName.Name)
                             {

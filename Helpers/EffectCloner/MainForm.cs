@@ -71,12 +71,12 @@ namespace s3piwrappers.EffectCloner
 
         private class VisualEffectHandleContainer
         {
-            public VisualEffectHandle Handle;
+            public VisualEffectName Handle;
             public EffectResource Owner;
             //public List<MetaparticleEffect> Dependents;
             public string OriginalName;
 
-            public VisualEffectHandleContainer(VisualEffectHandle handle, EffectResource owner)
+            public VisualEffectHandleContainer(VisualEffectName handle, EffectResource owner)
             {
                 this.Handle = handle;
                 this.Owner = owner;
@@ -105,14 +105,14 @@ namespace s3piwrappers.EffectCloner
             public void AddDependent(MetaparticleEffect metaEffect)
             {
                 bool add = false;
-                if (metaEffect.BaseEffectName == this.OriginalName)
+                if (metaEffect.ComponentName == this.OriginalName)
                 {
-                    metaEffect.BaseEffectName = this.Handle.EffectName;
+                    metaEffect.ComponentName = this.Handle.EffectName;
                     add = true;
                 }
-                if (metaEffect.DeathEffectName == this.OriginalName)
+                if (metaEffect.ComponentType == this.OriginalName)
                 {
-                    metaEffect.DeathEffectName = this.Handle.EffectName;
+                    metaEffect.ComponentType = this.Handle.EffectName;
                     add = true;
                 }
                 if (add)
@@ -195,10 +195,10 @@ namespace s3piwrappers.EffectCloner
             for (i = 0; i < this.mEffectResources.Length; i++)
             {
                 effectResource = this.mEffectResources[i];
-                count = effectResource.VisualEffectHandles.Count;
+                count = effectResource.VisualEffectNames.Count;
                 for (j = 0; j < count; j++)
                     this.inputEffectLST.Items.Add(new VisualEffectHandleContainer(
-                        effectResource.VisualEffectHandles[j], effectResource));
+                        effectResource.VisualEffectNames[j], effectResource));
             }
             this.printInputBTN.Enabled = true;
         }
@@ -251,20 +251,20 @@ namespace s3piwrappers.EffectCloner
             }
         }
 
-        private void LocateMetaReferences(VisualEffectHandle handle, EffectResource resource,
+        private void LocateMetaReferences(VisualEffectName handle, EffectResource resource,
             List<VisualEffectHandleContainer> references)
         {
             MetaparticleEffect[] metaEffects = EffectHelper.FindEffects<MetaparticleEffect>(handle, resource);
             if (metaEffects != null && metaEffects.Length > 0)
             {
                 int i, j;
-                VisualEffectHandle dep;
+                VisualEffectName dep;
                 string effectName;
                 bool flag = false;
                 for (i = 0; i < metaEffects.Length; i++)
                 {
                     // compensate for variations in casing
-                    effectName = metaEffects[i].BaseEffectName.ToLowerInvariant();
+                    effectName = metaEffects[i].ComponentName.ToLowerInvariant();
                     for (j = 0; j < references.Count && !flag; j++)
                     {
                         if (references[j].OriginalName == effectName)
@@ -279,13 +279,13 @@ namespace s3piwrappers.EffectCloner
                         if (dep != null)
                         {
                             references.Add(new VisualEffectHandleContainer(
-                                new VisualEffectHandle(0, null, dep), resource));
+                                new VisualEffectName(0, null, dep), resource));
                             this.LocateMetaReferences(dep, resource, references);
                         }
                     }
                     flag = false;
                     // compensate for variations in casing
-                    effectName = metaEffects[i].DeathEffectName.ToLowerInvariant();
+                    effectName = metaEffects[i].ComponentType.ToLowerInvariant();
                     for (j = 0; j < references.Count && !flag; j++)
                     {
                         if (references[j].OriginalName == effectName)
@@ -300,7 +300,7 @@ namespace s3piwrappers.EffectCloner
                         if (dep != null)
                         {
                             references.Add(new VisualEffectHandleContainer(
-                                new VisualEffectHandle(0, null, dep), resource));
+                                new VisualEffectName(0, null, dep), resource));
                             this.LocateMetaReferences(dep, resource, references);
                         }
                     }
@@ -309,14 +309,14 @@ namespace s3piwrappers.EffectCloner
             }
         }
 
-        private void LocateSeqReferences(VisualEffectHandle handle, EffectResource resource,
+        private void LocateSeqReferences(VisualEffectName handle, EffectResource resource,
             List<VisualEffectHandleContainer> references)
         {
             SequenceEffect[] seqEffects = EffectHelper.FindEffects<SequenceEffect>(handle, resource);
             if (seqEffects != null && seqEffects.Length > 0)
             {
                 int i, j, k;
-                VisualEffectHandle dep;
+                VisualEffectName dep;
                 SequenceEffect seqEffect;
                 string effectName;
                 bool flag = false;
@@ -341,7 +341,7 @@ namespace s3piwrappers.EffectCloner
                             if (dep != null)
                             {
                                 references.Add(new VisualEffectHandleContainer(
-                                    new VisualEffectHandle(0, null, dep), resource));
+                                    new VisualEffectName(0, null, dep), resource));
                                 this.LocateSeqReferences(dep, resource, references);
                             }
                         }
@@ -353,7 +353,7 @@ namespace s3piwrappers.EffectCloner
 
         private void cloneEffect_Click(object sender, EventArgs e)
         {
-            VisualEffectHandle handle = (this.inputEffectLST.SelectedItem as VisualEffectHandleContainer).Handle;
+            VisualEffectName handle = (this.inputEffectLST.SelectedItem as VisualEffectHandleContainer).Handle;
             EffectResource owner = (this.inputEffectLST.SelectedItem as VisualEffectHandleContainer).Owner;
             if (handle != null)
             {
@@ -366,7 +366,7 @@ namespace s3piwrappers.EffectCloner
                         return;
                     }
                 }
-                con = new VisualEffectHandleContainer(new VisualEffectHandle(0, null, handle), owner);
+                con = new VisualEffectHandleContainer(new VisualEffectName(0, null, handle), owner);
                 con.SetEffectName(this.PromptForEffectName(con.OriginalName));
                 this.outputEffectLST.Items.Add(con);
 
@@ -590,7 +590,7 @@ namespace s3piwrappers.EffectCloner
             VisualEffectHandleContainer container = this.inputEffectLST.SelectedItem as VisualEffectHandleContainer;
             if (container != null)
             {
-                string[] itemBStrings = EffectHelper.GetItemBStrings(container.Handle, container.Owner);
+                string[] itemBStrings = EffectHelper.GetSurfaceStrings(container.Handle, container.Owner);
                 StringBuilder builder = new StringBuilder();
                 if (itemBStrings.Length == 0)
                 {

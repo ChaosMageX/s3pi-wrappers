@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace s3piwrappers.SWB
@@ -6,6 +7,7 @@ namespace s3piwrappers.SWB
     public class SectionDataList<T> : DataList<SectionData>
         where T : SectionData, IEquatable<SectionData>
     {
+        #region Constructors
         public SectionDataList(EventHandler handler, ISection section)
             : base(handler)
         {
@@ -17,6 +19,19 @@ namespace s3piwrappers.SWB
         {
             Parse(s);
         }
+
+        public SectionDataList(EventHandler handler, ISection section, SectionDataList<T> ilt)
+            : this(handler, section)
+        {
+            T item;
+            int count = ilt.Count;
+            for (int i = 0; i < count; i++)
+            {
+                item = (T)ilt[i];
+                this.Add((SectionData)item.Clone(handler));
+            }
+        }
+        #endregion
 
         protected ISection mSection;
 

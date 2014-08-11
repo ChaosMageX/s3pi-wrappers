@@ -10,6 +10,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
     public class DGSoPnNode : DGNode
     {
         private SelectOnParameterNode mSoPn;
+        private RefToParam mParam;
 
         private GraphicsPath mBorderPath;
         private GraphicsPath mHeadPath;
@@ -22,14 +23,15 @@ namespace s3piwrappers.FreeformJazz.Widgets
         private float mHeadMGH;
         private float mBodyMGH;
 
-        public DGSoPnNode(SelectOnParameterNode sopn, StateMachineScene scene)
-            : base(sopn, scene)
+        public DGSoPnNode(SelectOnParameterNode sopn, StateNode state)
+            : base(sopn, state)
         {
             if (sopn == null)
             {
                 throw new ArgumentNullException("sopn");
             }
             this.mSoPn = sopn;
+            this.mParam = new RefToParam(this.mScene, sopn.Parameter);
 
             this.mCaseAnchors = new AnchorPoint[0];
             this.mCaseStrings = new string[0];
@@ -38,6 +40,33 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.mBodyMGH = 7;
 
             this.UpdateVisualization();
+        }
+
+        private class ParameterCommand : DGNodeRefPropertyCommand<
+            DGSoPnNode, SelectOnParameterNode, ParamDefinition>
+        {
+            public ParameterCommand(DGSoPnNode dgsn,
+                ParamDefinition newValue, bool extendable)
+                : base(dgsn, dgsn.mSoPn, dgsn.mParam, 
+                "Parameter", newValue, extendable)
+            {
+                this.mLabel = "Set Parameter of Select On Parameter Node";
+            }
+        }
+
+        public RefToParam Parameter
+        {
+            get { return this.mParam; }
+            set
+            {
+                ParamDefinition pd 
+                    = value == null ? null : value.GetValue();
+                if (this.mSoPn.Parameter != pd)
+                {
+                    this.mScene.Container.UndoRedo.Submit(
+                        new ParameterCommand(this, pd, false));
+                }
+            }
         }
 
         private static Font sHeadFont 

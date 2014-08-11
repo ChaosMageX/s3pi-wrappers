@@ -50,10 +50,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Effects\FastParticleEffect.cs" />
+    <Compile Include="Effects\GameEffect.cs" />
+    <Compile Include="SWB\BoundingBoxValue.cs" />
     <Compile Include="SWB\ColourValue.cs" />
     <Compile Include="SWB\ByteValue.cs" />
     <Compile Include="SWB\ISection.cs" />
+    <Compile Include="SWB\RectangleValue.cs" />
     <Compile Include="SWB\Structures\Colour.cs" />
+    <Compile Include="SWB\Structures\Rectangle.cs" />
     <Compile Include="SWB\Structures\Vector2.cs" />
     <Compile Include="SWB\Structures\Vector3.cs" />
     <Compile Include="SWB\DataElement.cs" />
@@ -67,6 +72,8 @@
     <Compile Include="EffectResource.cs" />
     <Compile Include="EffectResourceHandler.cs" />
     <Compile Include="SWB\FloatValue.cs" />
+    <Compile Include="SWB\Structures\Vector4.cs" />
+    <Compile Include="SWB\TransformElement.cs" />
     <Compile Include="SWB\UInt32Value.cs" />
     <Compile Include="Effects\MetaparticleEffect.cs" />
     <Compile Include="Effects\ModelEffect.cs" />
@@ -89,8 +96,10 @@
     <Compile Include="SWB\SectionDataList.cs" />
     <Compile Include="SWB\SectionList.cs" />
     <Compile Include="SWB\ValueElement.cs" />
+    <Compile Include="SWB\Vector4ValueLE.cs" />
     <Compile Include="VisualEffects\VisualEffect.cs" />
-    <Compile Include="VisualEffects\VisualEffectHandle.cs" />
+    <Compile Include="VisualEffects\VisualEffectName.cs" />
+    <Compile Include="VisualEffects\VisualEffectId.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\RibbonEffect.cs" />

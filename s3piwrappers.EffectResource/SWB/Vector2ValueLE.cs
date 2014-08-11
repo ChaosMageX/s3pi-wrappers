@@ -8,18 +8,34 @@ namespace s3piwrappers.SWB
 {
     public class Vector2ValueLE : ValueElement<Vector2>, IEquatable<Vector2ValueLE>
     {
-        public Vector2ValueLE(int apiVersion, EventHandler handler, Vector2ValueLE basis) : base(apiVersion, handler, basis)
+        #region Constructors
+        public Vector2ValueLE(int apiVersion, EventHandler handler, Vector2ValueLE basis) 
+            : base(apiVersion, handler, basis)
         {
         }
 
-        public Vector2ValueLE(int apiVersion, EventHandler handler) : base(apiVersion, handler)
+        public Vector2ValueLE(int apiVersion, EventHandler handler) 
+            : base(apiVersion, handler)
         {
         }
 
-        public Vector2ValueLE(int apiVersion, EventHandler handler, Stream s) : base(apiVersion, handler, s)
+        public Vector2ValueLE(int apiVersion, EventHandler handler, Vector2 data) 
+            : base(apiVersion, handler, data)
+        {
+        }/* */
+
+        public Vector2ValueLE(int apiVersion, EventHandler handler, float x, float y)
+            : base(apiVersion, handler, new Vector2(x, y))
         {
         }
 
+        public Vector2ValueLE(int apiVersion, EventHandler handler, Stream s) 
+            : base(apiVersion, handler, s)
+        {
+        }
+        #endregion
+
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.LittleEndian);
@@ -33,7 +49,9 @@ namespace s3piwrappers.SWB
             s.Write(mData.X);
             s.Write(mData.Y);
         }
+        #endregion
 
+        #region Content Fields
         [ElementPriority(1)]
         public float X
         {
@@ -55,6 +73,7 @@ namespace s3piwrappers.SWB
                 OnElementChanged();
             }
         }
+        #endregion
 
         public bool Equals(Vector2ValueLE other)
         {

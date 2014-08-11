@@ -8,6 +8,7 @@ namespace s3piwrappers.Effects
 {
     public class CameraEffect : Effect, IEquatable<CameraEffect>
     {
+        #region Constructors
         public CameraEffect(int apiVersion, EventHandler handler, CameraEffect basis)
             : base(apiVersion, handler, basis)
         {
@@ -16,198 +17,207 @@ namespace s3piwrappers.Effects
         public CameraEffect(int apiVersion, EventHandler handler, ISection section)
             : base(apiVersion, handler, section)
         {
-            mFloatList01 = new DataList<FloatValue>(handler);
-            mFloatList02 = new DataList<FloatValue>(handler);
-            mFloatList03 = new DataList<FloatValue>(handler);
-            mFloatList04 = new DataList<FloatValue>(handler);
-            mFloatList05 = new DataList<FloatValue>(handler);
-            mFloatList06 = new DataList<FloatValue>(handler);
-            mFloatList07 = new DataList<FloatValue>(handler);
+            mHeadingCurve = new DataList<FloatValue>(handler);
+            mPitchCurve = new DataList<FloatValue>(handler);
+            mRollCurve = new DataList<FloatValue>(handler);
+            mDistanceCurve = new DataList<FloatValue>(handler);
+            mFOVCurve = new DataList<FloatValue>(handler);
+            mNearClipCurve = new DataList<FloatValue>(handler);
+            mFarClipCurve = new DataList<FloatValue>(handler);
         }
 
-        public CameraEffect(int apiVersion, EventHandler handler, ISection section, Stream s) : base(apiVersion, handler, section, s)
+        public CameraEffect(int apiVersion, EventHandler handler, ISection section, Stream s) 
+            : base(apiVersion, handler, section, s)
         {
         }
+        #endregion
 
-        private UInt32 mInt01;
-        private UInt16 mShort01;
-        private float mFloat01;
-        private DataList<FloatValue> mFloatList01;
-        private DataList<FloatValue> mFloatList02;
-        private DataList<FloatValue> mFloatList03;
-        private DataList<FloatValue> mFloatList04;
-        private DataList<FloatValue> mFloatList05;
-        private DataList<FloatValue> mFloatList06;
-        private DataList<FloatValue> mFloatList07;
-        private UInt64 mLong01;
-        private UInt16 mShort02;
+        #region Attributes
+        private uint mFlags;
+        private ushort mViewFlags;
+        private float mLifetime;
+        private DataList<FloatValue> mHeadingCurve;
+        private DataList<FloatValue> mPitchCurve;
+        private DataList<FloatValue> mRollCurve;
+        private DataList<FloatValue> mDistanceCurve;
+        private DataList<FloatValue> mFOVCurve;
+        private DataList<FloatValue> mNearClipCurve;
+        private DataList<FloatValue> mFarClipCurve;
+        private ulong mCameraId;
+        private ushort mCubemapResource;
+        #endregion
 
-
+        #region Content Fields
         [ElementPriority(1)]
-        public uint Int01
+        public uint Flags
         {
-            get { return mInt01; }
+            get { return mFlags; }
             set
             {
-                mInt01 = value;
+                mFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(2)]
-        public ushort Short01
+        public ushort ViewFlags
         {
-            get { return mShort01; }
+            get { return mViewFlags; }
             set
             {
-                mShort01 = value;
+                mViewFlags = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(3)]
-        public float Float01
+        public float Lifetime
         {
-            get { return mFloat01; }
+            get { return mLifetime; }
             set
             {
-                mFloat01 = value;
-                OnElementChanged();
-            }
-        }
-
-        public DataList<FloatValue> FloatList01
-        {
-            get { return mFloatList01; }
-            set
-            {
-                mFloatList01 = value;
+                mLifetime = value;
                 OnElementChanged();
             }
         }
 
         [ElementPriority(4)]
-        public DataList<FloatValue> FloatList02
+        public DataList<FloatValue> HeadingCurve
         {
-            get { return mFloatList02; }
+            get { return mHeadingCurve; }
             set
             {
-                mFloatList02 = value;
+                mHeadingCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(5)]
-        public DataList<FloatValue> FloatList03
+        public DataList<FloatValue> PitchCurve
         {
-            get { return mFloatList03; }
+            get { return mPitchCurve; }
             set
             {
-                mFloatList03 = value;
+                mPitchCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(6)]
-        public DataList<FloatValue> FloatList04
+        public DataList<FloatValue> RollCurve
         {
-            get { return mFloatList04; }
+            get { return mRollCurve; }
             set
             {
-                mFloatList04 = value;
+                mRollCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(7)]
-        public DataList<FloatValue> FloatList05
+        public DataList<FloatValue> DistanceCurve
         {
-            get { return mFloatList05; }
+            get { return mDistanceCurve; }
             set
             {
-                mFloatList05 = value;
+                mDistanceCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(8)]
-        public DataList<FloatValue> FloatList06
+        public DataList<FloatValue> FOVCurve
         {
-            get { return mFloatList06; }
+            get { return mFOVCurve; }
             set
             {
-                mFloatList06 = value;
+                mFOVCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(9)]
-        public DataList<FloatValue> FloatList07
+        public DataList<FloatValue> NearClipCurve
         {
-            get { return mFloatList07; }
+            get { return mNearClipCurve; }
             set
             {
-                mFloatList07 = value;
+                mNearClipCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(10)]
-        public ulong Long01
+        public DataList<FloatValue> FarClipCurve
         {
-            get { return mLong01; }
+            get { return mFarClipCurve; }
             set
             {
-                mLong01 = value;
+                mFarClipCurve = new DataList<FloatValue>(handler, value);
                 OnElementChanged();
             }
         }
 
         [ElementPriority(11)]
-        public ushort Short02
+        public ulong CameraId
         {
-            get { return mShort02; }
+            get { return mCameraId; }
             set
             {
-                mShort02 = value;
+                mCameraId = value;
                 OnElementChanged();
             }
         }
 
+        [ElementPriority(12)]
+        public ushort CubemapResource
+        {
+            get { return mCubemapResource; }
+            set
+            {
+                mCubemapResource = value;
+                OnElementChanged();
+            }
+        }
+        #endregion
 
+        #region Data I/O
         protected override void Parse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Read(out mInt01);
-            s.Read(out mShort01);
-            s.Read(out mFloat01);
-            mFloatList01 = new DataList<FloatValue>(handler, stream);
-            mFloatList02 = new DataList<FloatValue>(handler, stream);
-            mFloatList03 = new DataList<FloatValue>(handler, stream);
-            mFloatList04 = new DataList<FloatValue>(handler, stream);
-            mFloatList05 = new DataList<FloatValue>(handler, stream);
-            mFloatList06 = new DataList<FloatValue>(handler, stream);
-            mFloatList07 = new DataList<FloatValue>(handler, stream);
-            s.Read(out mLong01);
-            s.Read(out mShort02);
+            s.Read(out mFlags);
+            //mFlags &= 0x3FF;
+            
+            s.Read(out mViewFlags);
+            s.Read(out mLifetime);
+            mHeadingCurve = new DataList<FloatValue>(handler, stream);
+            mPitchCurve = new DataList<FloatValue>(handler, stream);
+            mRollCurve = new DataList<FloatValue>(handler, stream);
+            mDistanceCurve = new DataList<FloatValue>(handler, stream);
+            mFOVCurve = new DataList<FloatValue>(handler, stream);
+            mNearClipCurve = new DataList<FloatValue>(handler, stream);
+            mFarClipCurve = new DataList<FloatValue>(handler, stream);
+            s.Read(out mCameraId);
+            s.Read(out mCubemapResource);
         }
 
         public override void UnParse(Stream stream)
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
-            s.Write(mInt01);
-            s.Write(mShort01);
-            s.Write(mFloat01);
-            mFloatList01.UnParse(stream);
-            mFloatList02.UnParse(stream);
-            mFloatList03.UnParse(stream);
-            mFloatList04.UnParse(stream);
-            mFloatList05.UnParse(stream);
-            mFloatList06.UnParse(stream);
-            mFloatList07.UnParse(stream);
-            s.Write(mLong01);
-            s.Write(mShort02);
+            s.Write(mFlags);
+            s.Write(mViewFlags);
+            s.Write(mLifetime);
+            mHeadingCurve.UnParse(stream);
+            mPitchCurve.UnParse(stream);
+            mRollCurve.UnParse(stream);
+            mDistanceCurve.UnParse(stream);
+            mFOVCurve.UnParse(stream);
+            mNearClipCurve.UnParse(stream);
+            mFarClipCurve.UnParse(stream);
+            s.Write(mCameraId);
+            s.Write(mCubemapResource);
         }
+        #endregion
 
         public bool Equals(CameraEffect other)
         {

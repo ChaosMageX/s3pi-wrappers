@@ -14,35 +14,29 @@ namespace s3piwrappers.JazzGraph
 
         public class Slice
         {
-            public readonly float Weight;
-            public readonly DecisionGraphNode[] Targets;
-
-            public Slice(float weight, DecisionGraphNode[] targets)
-            {
-                this.Weight = weight;
-                this.Targets = targets;
-            }
-        }
-
-        private class SliceImpl
-        {
             public float Weight;
-            public List<DecisionGraphNode> Targets;
+            public readonly List<DecisionGraphNode> Targets;
 
-            public SliceImpl(float weight)
+            public Slice()
+            {
+                this.Weight = 0;
+                this.Targets = new List<DecisionGraphNode>();
+            }
+
+            public Slice(float weight)
             {
                 this.Weight = weight;
                 this.Targets = new List<DecisionGraphNode>();
             }
         }
 
-        private List<SliceImpl> mSlices;
+        private List<Slice> mSlices;
         private JazzRandomNode.Flags mFlags;
 
         public RandomNode()
             : base(ResourceType, ResourceTag)
         {
-            this.mSlices = new List<SliceImpl>();
+            this.mSlices = new List<Slice>();
             this.mFlags = JazzRandomNode.Flags.None;
         }
 
@@ -58,7 +52,7 @@ namespace s3piwrappers.JazzGraph
                 JazzRandomNode.Outcome outcome;
                 JazzRandomNode.OutcomeList oList = jrn.Outcomes;
                 JazzChunk.ChunkReferenceList dgi;
-                foreach (SliceImpl slice in this.mSlices)
+                foreach (Slice slice in this.mSlices)
                 {
                     outcome = new JazzRandomNode.Outcome(0, null);
                     outcome.Weight = slice.Weight;
@@ -74,91 +68,9 @@ namespace s3piwrappers.JazzGraph
             return new GenericRCOLResource.ChunkEntry(0, null, tgi, jrn);
         }
 
-        public void AddSliceTarget(int slice, DecisionGraphNode target)
+        public List<Slice> Slices
         {
-            if (slice < 0 || slice > this.mSlices.Count)
-            {
-                throw new ArgumentOutOfRangeException("slice");
-            }
-            if (slice == this.mSlices.Count)
-            {
-                this.mSlices.Add(new SliceImpl(1));
-            }
-            SliceImpl sli = this.mSlices[slice];
-            if (!sli.Targets.Contains(target))
-            {
-                sli.Targets.Add(target);
-            }
-        }
-
-        public bool RemoveSliceTarget(int slice, DecisionGraphNode target)
-        {
-            if (slice < 0 || slice > this.mSlices.Count)
-            {
-                throw new ArgumentOutOfRangeException("slice");
-            }
-            if (slice == this.mSlices.Count)
-            {
-                return false;
-            }
-            SliceImpl sli = this.mSlices[slice];
-            int index = sli.Targets.IndexOf(target);
-            if (index < 0)
-            {
-                return false;
-            }
-            sli.Targets.RemoveAt(index);
-            return true;
-        }
-
-        public float GetSliceWeight(int slice)
-        {
-            if (slice < 0 || slice > this.mSlices.Count)
-            {
-                throw new ArgumentOutOfRangeException("slice");
-            }
-            if (slice == this.mSlices.Count)
-            {
-                return 1;
-            }
-            return this.mSlices[slice].Weight;
-        }
-
-        public void SetSliceWeight(int slice, float weight)
-        {
-            if (slice < 0 || slice > this.mSlices.Count)
-            {
-                throw new ArgumentOutOfRangeException("slice");
-            }
-            if (slice == this.mSlices.Count)
-            {
-                this.mSlices.Add(new SliceImpl(weight));
-            }
-            else
-            {
-                SliceImpl sli = this.mSlices[slice];
-                sli.Weight = weight;
-            }
-        }
-
-        public int SliceCount
-        {
-            get { return this.mSlices.Count; }
-        }
-
-        public Slice[] Slices
-        {
-            get
-            {
-                SliceImpl sli;
-                Slice[] slices = new Slice[this.mSlices.Count];
-                for (int i = this.mSlices.Count - 1; i >= 0; i--)
-                {
-                    sli = this.mSlices[i];
-                    slices[i] = new Slice(sli.Weight, sli.Targets.ToArray());
-                }
-                return slices;
-            }
+            get { return this.mSlices; }
         }
 
         public JazzRandomNode.Flags Flags

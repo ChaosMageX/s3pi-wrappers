@@ -11,9 +11,9 @@ namespace s3piwrappers.EffectCloner.Swarm
 {
     public class EffectResourceBuilder : AResource
     {
-        private class DefaultHandleComparer : IComparer<VisualEffectHandle>
+        private class DefaultHandleComparer : IComparer<VisualEffectName>
         {
-            public int Compare(VisualEffectHandle x, VisualEffectHandle y)
+            public int Compare(VisualEffectName x, VisualEffectName y)
             {
                 return x.CompareTo(y);
             }
@@ -32,14 +32,14 @@ namespace s3piwrappers.EffectCloner.Swarm
                 : base(apiVersion, handler, 0, version, s) { }
         }/**/
 
-        public class VisualEffectHandleList : AHandlerList<VisualEffectHandle>,
+        public class VisualEffectHandleList : AHandlerList<VisualEffectName>,
             s3pi.Interfaces.IGenericAdd
         {
-            private class StringHandleComparer : IComparer<VisualEffectHandle>
+            private class StringHandleComparer : IComparer<VisualEffectName>
             {
                 private string mValue;
                 public StringHandleComparer(string value) { this.mValue = value; }
-                public int Compare(VisualEffectHandle x, VisualEffectHandle y)
+                public int Compare(VisualEffectName x, VisualEffectName y)
                 {
                     if (x == null)
                         return (y == null) ? 0 : this.mValue.CompareTo(y.EffectName);
@@ -65,7 +65,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                 uint index = wrapper.ReadUInt32();
                 while (index != uint.MaxValue)
                 {
-                    VisualEffectHandle item = new VisualEffectHandle(0, base.handler, s, index);
+                    VisualEffectName item = new VisualEffectName(0, base.handler, s, index);
                     index = wrapper.ReadUInt32();
                     base.Add(item);
                 }
@@ -87,12 +87,12 @@ namespace s3piwrappers.EffectCloner.Swarm
                 this.Add(new object[0]);
             }
 
-            public override void Add(VisualEffectHandle item)
+            public override void Add(VisualEffectName item)
             {
                 this.Add(item, true);
             }
 
-            protected void Add(VisualEffectHandle item, bool sorted)
+            protected void Add(VisualEffectName item, bool sorted)
             {
                 int num = base.BinarySearch(0, this.Count, item, sDefaultComparer);
                 if (num >= 0)
@@ -116,7 +116,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                 destinationArray[0] = 0;
                 destinationArray[1] = base.handler;
                 Array.Copy(fields, 0, destinationArray, 2, fields.Length);
-                this.Add((VisualEffectHandle)Activator.CreateInstance(typeof(VisualEffectHandle), destinationArray), true);
+                this.Add((VisualEffectName)Activator.CreateInstance(typeof(VisualEffectName), destinationArray), true);
                 return true;
             }
 
@@ -163,7 +163,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                 }
                 else if (newIndex > oldIndex)
                 {
-                    VisualEffectHandle oldHandle = base[oldIndex];
+                    VisualEffectName oldHandle = base[oldIndex];
                     oldHandle.EffectName = newName;
                     for (int i = oldIndex; i < newIndex; i++)
                         base[i] = base[i + 1];
@@ -171,7 +171,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                 }
                 else
                 {
-                    VisualEffectHandle newHandle = base[newIndex];
+                    VisualEffectName newHandle = base[newIndex];
                     newHandle.EffectName = newName;
                     for (int j = newIndex; j < oldIndex; j++)
                         base[j] = base[j + 1];
@@ -232,7 +232,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                         BinaryStreamWrapper wrapper = new BinaryStreamWrapper(s, ByteOrder.BigEndian);
                         wrapper.WriteString(key, StringType.ZeroDelimited);
                         s.Position = 0L;
-                        base.Insert(~num, new VisualEffectHandle(0, base.handler, s, value));
+                        base.Insert(~num, new VisualEffectName(0, base.handler, s, value));
                     }
                 }
             }
@@ -478,7 +478,7 @@ namespace s3piwrappers.EffectCloner.Swarm
         private void InitEffectNames()
         {
             VisualEffectBuilder builder;
-            foreach (VisualEffectHandle handle in this.mVisualEffectHandleList)
+            foreach (VisualEffectName handle in this.mVisualEffectHandleList)
             {
                 builder = this.mVisualEffectSection.Items[(int)handle.Index] as VisualEffectBuilder;
                 //builder = this.mVisualEffectBuilders[(int)handle.Index] as VisualEffectBuilder;
@@ -540,10 +540,10 @@ namespace s3piwrappers.EffectCloner.Swarm
                 for (i = 0; i < metaCount; i++)
                 {
                     metaEffect = metaSection.Items[i] as MetaparticleEffect;
-                    if (metaEffect.BaseEffectName.ToLowerInvariant() == oldEffectName)
-                        metaEffect.BaseEffectName = newEffectName;
-                    if (metaEffect.DeathEffectName.ToLowerInvariant() == oldEffectName)
-                        metaEffect.DeathEffectName = newEffectName;
+                    if (metaEffect.ComponentName.ToLowerInvariant() == oldEffectName)
+                        metaEffect.ComponentName = newEffectName;
+                    if (metaEffect.ComponentType.ToLowerInvariant() == oldEffectName)
+                        metaEffect.ComponentType = newEffectName;
                 }
             }
             EffectResource.EffectSection seqSection = GetEffectSection(VisualEffectType.Sequence);
@@ -601,14 +601,14 @@ namespace s3piwrappers.EffectCloner.Swarm
             }
         }
 
-        public static void CloneVisualEffect(VisualEffectHandle handle,
+        public static void CloneVisualEffect(VisualEffectName handle,
             EffectResourceBuilder source, EffectResourceBuilder dest)
         {
             VisualEffectBuilder builder = source.mVisualEffectSection.Items[(int)handle.Index] as VisualEffectBuilder;
             dest.mVisualEffectSection.Items.Add(item: builder.Clone(dest.OnResourceChanged, dest));
         }
 
-        public void AddVisualEffect(VisualEffectHandle handle, EffectResource resource)
+        public void AddVisualEffect(VisualEffectName handle, EffectResource resource)
         {
             VisualEffect visualEffect = EffectHelper.FindVisualEffect(handle, resource);
             this.mVisualEffectSection.Items.Add(item: new VisualEffectBuilder(handle, visualEffect, resource));
@@ -645,7 +645,7 @@ namespace s3piwrappers.EffectCloner.Swarm
         private void FlushEffectNames()
         {
             VisualEffectBuilder builder;
-            VisualEffectHandle handle;
+            VisualEffectName handle;
             string effectName;
             int num, count = this.mVisualEffectSection.Items.Count/*this.mVisualEffectBuilders.Count/**/;
             this.mVisualEffectHandleList = new VisualEffectHandleList(base.OnResourceChanged);
@@ -657,7 +657,7 @@ namespace s3piwrappers.EffectCloner.Swarm
                 num = this.mVisualEffectHandleList.BinarySearch(effectName);
                 if (num < 0)
                 {
-                    handle = new VisualEffectHandle(0, base.OnResourceChanged);
+                    handle = new VisualEffectName(0, base.OnResourceChanged);
                     handle.EffectName = effectName;
                     handle.Index = (uint)i;
                     this.mVisualEffectHandleList.Insert(~num, handle);

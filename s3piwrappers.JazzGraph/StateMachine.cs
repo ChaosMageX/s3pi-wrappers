@@ -9,7 +9,7 @@ using s3piwrappers.Helpers.Resources;
 
 namespace s3piwrappers.JazzGraph
 {
-    public class StateMachine : AChunkObject
+    public class StateMachine : AChunkObject, IHasHashedName
     {
         public const uint ResourceType = 0x02D5DF13;
         public const string ResourceTag = "S_SM";
@@ -142,12 +142,7 @@ namespace s3piwrappers.JazzGraph
                         JazzRandomNode jrand
                             = ce.RCOLBlock as JazzRandomNode;
                         RandomNode rand = new RandomNode();
-                        j = 0;
-                        foreach (JazzRandomNode.Outcome oc in jrand.Outcomes)
-                        {
-                            rand.SetSliceWeight(j++, oc.Weight);
-                        }
-                        // rand.Slices[].Targets set later
+                        // rand.Slices set later
                         rand.Flags = jrand.Properties;
                         chunks[i] = rand;
                         break;
@@ -291,24 +286,26 @@ namespace s3piwrappers.JazzGraph
                         cpn.PropActor = index < 0
                             ? null : chunks[index + 1] as ActorDefinition;
                         index = jcpn.ParameterDefinitionIndex.TGIBlockIndex;
-                        cpn.PropParameter = index < 0
+                        cpn.PropParam = index < 0
                             ? null : chunks[index + 1] as ParamDefinition;
                         break;
                     case RandomNode.ResourceType:
                         JazzRandomNode jrand = ce.RCOLBlock as JazzRandomNode;
                         RandomNode rand = chunks[i] as RandomNode;
-                        j = 0;
+                        RandomNode.Slice slice;
+                        List<RandomNode.Slice> slices = rand.Slices;
                         foreach (JazzRandomNode.Outcome oc in jrand.Outcomes)
                         {
+                            slice = new RandomNode.Slice(oc.Weight);
                             foreach (GenericRCOLResource.ChunkReference cr
                                 in oc.DecisionGraphIndexes)
                             {
                                 index = cr.TGIBlockIndex;
                                 dgn = index < 0 ? null 
                                     : chunks[index + 1] as DecisionGraphNode;
-                                rand.AddSliceTarget(j, dgn);
+                                slice.Targets.Add(dgn);
                             }
-                            j++;
+                            slices.Add(slice);
                         }
                         break;
                     case SelectOnParameterNode.ResourceType:
@@ -420,7 +417,7 @@ namespace s3piwrappers.JazzGraph
                             index = jpd.TGIBlockIndex;
                             pd = index < 0 ? null 
                                 : chunks[index + 1] as ParamDefinition;
-                            this.AddParameterDefinition(pd);
+                            this.AddParamDefinition(pd);
                         }
                         foreach (GenericRCOLResource.ChunkReference jst
                             in jazzSM.StateIndexes)
@@ -689,28 +686,32 @@ namespace s3piwrappers.JazzGraph
             {
                 nameMap[this.mNameHash] = this.mName;
             }
-            
-            this.mActorDefinitions.Sort(
+
+            ActorDefinition[] ads = this.mActorDefinitions.ToArray();
+            Array.Sort(ads, 0, ads.Length, 
                 ActorDefinition.NameComparer.Instance);
             JazzChunk.ChunkReferenceList actorList
                 = jsm.ActorDefinitionIndexes;
-            foreach (ActorDefinition ad in this.mActorDefinitions)
+            foreach (ActorDefinition ad in ads)
             {
                 actorList.Add(ad == null ? NullCRef : ad.ChunkReference);
             }
 
-            this.mParamDefinitions.Sort(
+            ParamDefinition[] pds = this.mParamDefinitions.ToArray();
+            Array.Sort(pds, 0, pds.Length,
                 ParamDefinition.NameComparer.Instance);
             JazzChunk.ChunkReferenceList paramList
                 = jsm.PropertyDefinitionIndexes;
-            foreach (ParamDefinition pd in this.mParamDefinitions)
+            foreach (ParamDefinition pd in pds)
             {
                 paramList.Add(pd == null ? NullCRef : pd.ChunkReference);
             }
 
-            this.mStates.Sort(State.NameComparer.Instance);
+            State[] states = this.mStates.ToArray();
+            Array.Sort(states, 0, states.Length, 
+                State.NameComparer.Instance);
             JazzChunk.ChunkReferenceList stateList = jsm.StateIndexes;
-            foreach (State state in this.mStates)
+            foreach (State state in states)
             {
                 stateList.Add(
                     state == null ? NullCRef : state.ChunkReference);
@@ -1147,12 +1148,12 @@ namespace s3piwrappers.JazzGraph
             else if (node is RandomNode)
             {
                 RandomNode rand = node as RandomNode;
-                if (rand.SliceCount > 0)
+                List<RandomNode.Slice> slices = rand.Slices;
+                if (slices.Count > 0)
                 {
-                    RandomNode.Slice[] slices = rand.Slices;
-                    for (i = 0; i < slices.Length; i++)
+                    for (i = slices.Count - 1; i >= 0; i--)
                     {
-                        targets = slices[i].Targets;
+                        targets = slices[i].Targets.ToArray();
                         for (j = 0; j < targets.Length; j++)
                         {
                             target = targets[j];
@@ -1266,7 +1267,7 @@ namespace s3piwrappers.JazzGraph
                             }
                         }
                     }
-                    ParamDefinition propParam = cpn.PropParameter;
+                    ParamDefinition propParam = cpn.PropParam;
                     if (propParam != null)
                     {
                         i = this.mParamDefinitions.IndexOf(propParam);
@@ -1511,12 +1512,12 @@ namespace s3piwrappers.JazzGraph
             else if (node is RandomNode)
             {
                 RandomNode rand = node as RandomNode;
-                if (rand.SliceCount > 0)
+                List<RandomNode.Slice> slices = rand.Slices;
+                if (slices.Count > 0)
                 {
-                    RandomNode.Slice[] slices = rand.Slices;
-                    for (i = 0; i < slices.Length; i++)
+                    for (i = slices.Count - 1; i >= 0; i--)
                     {
-                        targets = slices[i].Targets;
+                        targets = slices[i].Targets.ToArray();
                         for (j = 0; j < targets.Length; j++)
                         {
                             target = targets[j];
@@ -1693,6 +1694,11 @@ namespace s3piwrappers.JazzGraph
             return true;
         }
 
+        public void ClearActorDefinitions()
+        {
+            this.mActorDefinitions.Clear();
+        }
+
         public int ActorDefinitionCount
         {
             get { return this.mActorDefinitions.Count; }
@@ -1703,7 +1709,7 @@ namespace s3piwrappers.JazzGraph
             get { return this.mActorDefinitions.ToArray(); }
         }
 
-        public bool AddParameterDefinition(ParamDefinition param)
+        public bool AddParamDefinition(ParamDefinition param)
         {
             if (this.mParamDefinitions.Contains(param))
             {
@@ -1713,7 +1719,7 @@ namespace s3piwrappers.JazzGraph
             return true;
         }
 
-        public bool RemoveParameterDefinition(ParamDefinition param)
+        public bool RemoveParamDefinition(ParamDefinition param)
         {
             int index = this.mParamDefinitions.IndexOf(param);
             if (index < 0)
@@ -1724,12 +1730,17 @@ namespace s3piwrappers.JazzGraph
             return true;
         }
 
-        public int ParameterDefinitionCount
+        public void ClearParamDefinitions()
+        {
+            this.mParamDefinitions.Clear();
+        }
+
+        public int ParamDefinitionCount
         {
             get { return this.mParamDefinitions.Count; }
         }
 
-        public ParamDefinition[] ParameterDefinitions
+        public ParamDefinition[] ParamDefinitions
         {
             get { return this.mParamDefinitions.ToArray(); }
         }

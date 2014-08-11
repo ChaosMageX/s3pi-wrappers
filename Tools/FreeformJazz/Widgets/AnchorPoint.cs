@@ -32,6 +32,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public readonly List<DGEdge> Edges;
 
         private DGNode mOwner;
+        private bool bIsEntry;
 
         private float mDirX;
         private float mDirY;
@@ -57,6 +58,16 @@ namespace s3piwrappers.FreeformJazz.Widgets
         {
             this.BoundingBox = new RectangleF(
                 sRad, sRad, 2 * sRad, 2 * sRad);
+        }
+
+        public DGNode Owner
+        {
+            get { return this.mOwner; }
+        }
+
+        public bool IsEntry
+        {
+            get { return this.bIsEntry; }
         }
 
         public float DirectionX
@@ -92,6 +103,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public override bool Contains(PointF point)
         {
             return (point.X * point.X + point.Y * point.Y) <= sRadSquared;
+        }
+
+        protected override bool OnMouseDown(GraphMouseEventArgs e)
+        {
+            this.mOwner.Scene.OnAnchorPressed(this);
+            return base.OnMouseDown(e);
+        }
+
+        protected override bool OnMouseMove(GraphMouseEventArgs e)
+        {
+            this.mOwner.Scene.OnAnchorHovered(this);
+            return base.OnMouseMove(e);
         }
 
         protected override void OnPositionChanged()

@@ -72,7 +72,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             this.CastIndices();
         }
 
-        public VisualEffectBuilder(VisualEffectHandle handle, VisualEffect basis, EffectResourceBuilder builder)
+        public VisualEffectBuilder(VisualEffectName handle, VisualEffect basis, EffectResourceBuilder builder)
             : base(0, null, basis)
         {
             this.mEffectName = handle.EffectName;
@@ -80,7 +80,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             this.CreateEffectBuilders(builder);
         }
 
-        public VisualEffectBuilder(VisualEffectHandle handle, VisualEffect basis, EffectResource resource)
+        public VisualEffectBuilder(VisualEffectName handle, VisualEffect basis, EffectResource resource)
             : base(0, null, basis)
         {
             this.mEffectName = handle.EffectName;
@@ -88,7 +88,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             this.CreateEffectBuilders(resource);
         }
 
-        public VisualEffectBuilder(VisualEffectHandle handle, VisualEffect basis, 
+        public VisualEffectBuilder(VisualEffectName handle, VisualEffect basis, 
             EffectResourceBuilder builder, EffectResource resource)
             : base(0, null, basis)
         {
@@ -101,7 +101,7 @@ namespace s3piwrappers.EffectCloner.Swarm
         {
             // Cast Index to IndexBuilder
             MemoryStream s = new MemoryStream();
-            base.Items.UnParse(s);
+            base.Descriptions.UnParse(s);
             s.Position = 0L;
             this.mIndexBuilders = new SectionDataList<IndexBuilder>(base.handler, base.mSection, s);
             //base.Items = null;
@@ -112,7 +112,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             MemoryStream s = new MemoryStream();
             this.mIndexBuilders.UnParse(s);
             s.Position = 0L;
-            base.Items = new SectionDataList<Index>(base.handler, base.mSection, s);
+            base.Descriptions = new SectionDataList<Description>(base.handler, base.mSection, s);
             s.Position = 0L;
             base.UnParse(stream);
         }
@@ -132,17 +132,17 @@ namespace s3piwrappers.EffectCloner.Swarm
                 if (eType == (VisualEffectType)0)
                 {
                     string header = "Effect: " + this.mEffectName + "; Index: " + i.ToString("X2")
-                        + "; BlockIndex: " + iBldr.BlockIndex.ToString("X4");
+                        + "; BlockIndex: " + iBldr.ComponentIndex.ToString("X4");
                     System.Diagnostics.Debug.WriteLine(header + "; Unrecognized VisualEffectType (0); Assuming Particle (1)");
                     eType = VisualEffectType.Particle;
                 }
-                eBldr = new EffectBuilder(eType, iBldr.BlockIndex);
+                eBldr = new EffectBuilder(eType, iBldr.ComponentIndex);
                 index = this.mEffectBuilders.IndexOf(eBldr);
                 if (index >= 0)
                     iBldr.SetEffectBuilder(this.mEffectBuilders[index]);
                 else
                 {
-                    eBldr.Effect = resBuilder.GetEffect(eType, iBldr.BlockIndex);
+                    eBldr.Effect = resBuilder.GetEffect(eType, iBldr.ComponentIndex);
                     this.mEffectBuilders.Add(eBldr);
                     iBldr.SetEffectBuilder(eBldr);
                 }
@@ -165,17 +165,17 @@ namespace s3piwrappers.EffectCloner.Swarm
                 if (eType == (VisualEffectType)0)
                 {
                     string header = "Effect: " + this.mEffectName + "; Index: " + i.ToString("X2")
-                        + "; BlockIndex: " + iBldr.BlockIndex.ToString("X4");
+                        + "; BlockIndex: " + iBldr.ComponentIndex.ToString("X4");
                     System.Diagnostics.Debug.WriteLine(header + "; Unrecognized VisualEffectType (0); Assuming Particle (1)");
                     eType = VisualEffectType.Particle;
                 }
-                eBldr = new EffectBuilder(eType, iBldr.BlockIndex);
+                eBldr = new EffectBuilder(eType, iBldr.ComponentIndex);
                 index = this.mEffectBuilders.IndexOf(eBldr);
                 if (index >= 0)
                     iBldr.SetEffectBuilder(this.mEffectBuilders[index]);
                 else
                 {
-                    effect = EffectHelper.FindEffect(eType, iBldr.BlockIndex, resource);
+                    effect = EffectHelper.FindEffect(eType, iBldr.ComponentIndex, resource);
                     if (effect != null)
                     {
                         EffectResource.EffectSection eSection = null;
@@ -205,17 +205,17 @@ namespace s3piwrappers.EffectCloner.Swarm
                 if (eType == (VisualEffectType)0)
                 {
                     string header = "Effect: " + this.mEffectName + "; Index: " + i.ToString("X2")
-                        + "; BlockIndex: " + iBldr.BlockIndex.ToString("X4");
+                        + "; BlockIndex: " + iBldr.ComponentIndex.ToString("X4");
                     System.Diagnostics.Debug.WriteLine(header + "; Unrecognized VisualEffectType (0); Assuming Particle (1)");
                     eType = VisualEffectType.Particle;
                 }
-                eBldr = new EffectBuilder(eType, iBldr.BlockIndex);
+                eBldr = new EffectBuilder(eType, iBldr.ComponentIndex);
                 index = this.mEffectBuilders.IndexOf(eBldr);
                 if (index >= 0)
                     iBldr.SetEffectBuilder(this.mEffectBuilders[index]);
                 else
                 {
-                    eBldr.Effect = EffectHelper.FindEffect(eType, iBldr.BlockIndex, resource);
+                    eBldr.Effect = EffectHelper.FindEffect(eType, iBldr.ComponentIndex, resource);
                     this.mEffectBuilders.Add(eBldr);
                     iBldr.SetEffectBuilder(eBldr);
                 }
@@ -249,7 +249,7 @@ namespace s3piwrappers.EffectCloner.Swarm
             for (i = 0; i < count; i++)
             {
                 iBuilder = this.mIndexBuilders[i] as IndexBuilder;
-                eBuilder = new EffectBuilder(iBuilder.EffectType, iBuilder.BlockIndex);
+                eBuilder = new EffectBuilder(iBuilder.EffectType, iBuilder.ComponentIndex);
                 index = this.mEffectBuilders.IndexOf(eBuilder);
                 iBuilder.SetEffectBuilder(this.mEffectBuilders[index]);
             }

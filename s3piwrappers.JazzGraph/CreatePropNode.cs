@@ -14,14 +14,14 @@ namespace s3piwrappers.JazzGraph
         public const string ResourceTag = "Prop";
 
         private ActorDefinition mPropActor;
-        private ParamDefinition mPropParameter;
+        private ParamDefinition mPropParam;
         private RK mPropKey;
 
         public CreatePropNode()
             : base(ResourceType, ResourceTag)
         {
             this.mPropActor = null;
-            this.mPropParameter = null;
+            this.mPropParam = null;
             this.mPropKey = new RK();
         }
 
@@ -34,8 +34,8 @@ namespace s3piwrappers.JazzGraph
             JazzCreatePropNode jcpn = new JazzCreatePropNode(0, null, s);
             jcpn.ActorDefinitionIndex = this.mPropActor == null
                 ? NullCRef : this.mPropActor.ChunkReference;
-            jcpn.ParameterDefinitionIndex = this.mPropParameter == null
-                ? NullCRef : this.mPropParameter.ChunkReference;
+            jcpn.ParameterDefinitionIndex = this.mPropParam == null
+                ? NullCRef : this.mPropParam.ChunkReference;
             jcpn.PropResource = this.mPropKey;
             if (this.TargetCount > 0)
             {
@@ -64,14 +64,14 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
-        public ParamDefinition PropParameter
+        public ParamDefinition PropParam
         {
-            get { return this.mPropParameter; }
+            get { return this.mPropParam; }
             set
             {
-                if (this.mPropParameter != value)
+                if (this.mPropParam != value)
                 {
-                    this.mPropParameter = value;
+                    this.mPropParam = value;
                 }
             }
         }
