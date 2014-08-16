@@ -180,6 +180,8 @@ namespace s3piwrappers.Effects
 
         public class ResourceId : DataElement, IEquatable<ResourceId>
         {
+            private bool isTheSims4 = false;
+
             #region Constructors
             public ResourceId(int apiVersion, EventHandler handler, Filter basis)
                 : base(apiVersion, handler, basis)
@@ -211,8 +213,6 @@ namespace s3piwrappers.Effects
             }
 
             #region Data I/O
-            private bool isTheSims4 = false;
-
             protected override void Parse(Stream stream)
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);

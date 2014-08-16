@@ -53,11 +53,11 @@
     <Compile Include="Effects\FastParticleEffect.cs" />
     <Compile Include="Effects\GameEffect.cs" />
     <Compile Include="SWB\BoundingBoxValue.cs" />
-    <Compile Include="SWB\ColourValue.cs" />
+    <Compile Include="SWB\ColorValue.cs" />
     <Compile Include="SWB\ByteValue.cs" />
     <Compile Include="SWB\ISection.cs" />
     <Compile Include="SWB\RectangleValue.cs" />
-    <Compile Include="SWB\Structures\Colour.cs" />
+    <Compile Include="SWB\Structures\Color.cs" />
     <Compile Include="SWB\Structures\Rectangle.cs" />
     <Compile Include="SWB\Structures\Vector2.cs" />
     <Compile Include="SWB\Structures\Vector3.cs" />

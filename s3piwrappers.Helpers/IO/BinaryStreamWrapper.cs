@@ -47,10 +47,10 @@ namespace s3piwrappers.Helpers.IO
             mByteOrder = order;
         }
 
-        public bool ReadBool8()
+        /*public bool ReadBool8()
         {
             return mStream.ReadByte() > 0;
-        }
+        }/* */
 
         public Byte ReadByte()
         {
@@ -152,10 +152,10 @@ namespace s3piwrappers.Helpers.IO
             output = GetBytes(count, order);
         }
 
-        public void Read(out bool output)
+        /*public void Read(out bool output)
         {
             output = mStream.ReadByte() > 0;
-        }
+        }/* */
 
         public void Read(out Byte output)
         {
@@ -386,10 +386,10 @@ namespace s3piwrappers.Helpers.IO
             return bytes;
         }
 
-        public void Write(bool input)
+        /*public void Write(bool input)
         {
             mStream.WriteByte((byte)(input ? 1 : 0));
-        }
+        }/* */
 
         public void Write(Byte input)
         {

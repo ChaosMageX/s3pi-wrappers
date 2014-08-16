@@ -327,12 +327,13 @@ namespace s3piwrappers.Resources
             #region Data I/O
             protected override void Parse(Stream s)
             {
-                mValue = new BinaryStreamWrapper(s, ByteOrder.BigEndian).ReadBool8();
+                mValue = s.ReadByte() != 0;
             }
 
             public override void UnParse(Stream s)
             {
-                new BinaryStreamWrapper(s, ByteOrder.BigEndian).Write(mValue);
+                byte value = (byte)(mValue ? 0xFF : 0x00);
+                s.WriteByte(value);
             }
             #endregion
 

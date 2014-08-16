@@ -39,9 +39,10 @@ namespace s3piwrappers.Effects
             }
 
             public ResourceReference(int apiVersion, EventHandler handler, ISection section, Stream s)
-                : base(apiVersion, handler, s)
+                : base(apiVersion, handler)
             {
                 mSection = section;
+                Parse(s);
             }
             #endregion
 
@@ -373,7 +374,7 @@ namespace s3piwrappers.Effects
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 mParticleLifetime = new Vector2ValueLE(requestedApiVersion, handler, stream);
-                s.Read(out mPrerollTime, ByteOrder.LittleEndian);
+                s.Read(out mPrerollTime);
                 mEmitDelay = new Vector2ValueLE(requestedApiVersion, handler, stream);
                 mEmitRetrigger = new Vector2ValueLE(requestedApiVersion, handler, stream);
                 mEmitDirection = new BoundingBoxValue(requestedApiVersion, handler, stream);
@@ -386,7 +387,7 @@ namespace s3piwrappers.Effects
             {
                 var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
                 mParticleLifetime.UnParse(stream);
-                s.Write(mPrerollTime, ByteOrder.LittleEndian);
+                s.Write(mPrerollTime);
                 mEmitDelay.UnParse(stream);
                 mEmitRetrigger.UnParse(stream);
                 mEmitDirection.UnParse(stream);

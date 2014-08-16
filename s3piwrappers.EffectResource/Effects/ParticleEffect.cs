@@ -152,7 +152,7 @@ namespace s3piwrappers.Effects
         //The Sims 4
         private uint mUnknown160;
         private uint mUnknown164;
-        private bool mUnknown1C1;
+        private byte mUnknown1C1;
         private Vector3ValueLE mUnknown180;
         private byte mUnknown1C0;
         private Vector2ValueLE mUnknown190;
@@ -165,7 +165,7 @@ namespace s3piwrappers.Effects
         private uint mUnknown1B4;
 
         //The Sims 4 && Version 6+
-        private bool mUnknown208;
+        private byte mUnknown208;
         private uint mUnknown20C;
         private byte mUnknown209;
         private byte mUnknown20A;
@@ -220,10 +220,10 @@ namespace s3piwrappers.Effects
         [ElementPriority(76)]
         public bool Unknown208
         {
-            get { return mUnknown208; }
+            get { return mUnknown208 != 0; }
             set
             {
-                mUnknown208 = value;
+                mUnknown208 = (byte)(value ? 0xFF : 0x00);
                 OnElementChanged();
             }
         }
@@ -297,10 +297,10 @@ namespace s3piwrappers.Effects
         [ElementPriority(69)]
         public bool Unknown1C1
         {
-            get { return mUnknown1C1; }
+            get { return mUnknown1C1 != 0; }
             set
             {
-                mUnknown1C1 = value;
+                mUnknown1C1 = (byte)(value ? 0xFF : 0x00);
                 OnElementChanged();
             }
         }
@@ -1059,6 +1059,8 @@ namespace s3piwrappers.Effects
         {
             var s = new BinaryStreamWrapper(stream, ByteOrder.BigEndian);
             s.Read(out mFlags);
+            // no flag mask
+
             ParticleParameters = new ParticleParams(requestedApiVersion, handler, true, stream);
             mRateCurve = new DataList<FloatValue>(handler, stream);
             s.Read(out mRateCurveTime);
@@ -1181,7 +1183,7 @@ namespace s3piwrappers.Effects
                 s.Read(out mUnknown164);
 
                 s.Read(out mUnknown1C1);
-                if (mUnknown1C1 && stream.Position < stream.Length)
+                if (mUnknown1C1 != 0 && stream.Position < stream.Length)
                 {
                     mUnknown180 = new Vector3ValueLE(requestedApiVersion, handler, stream);
                     s.Read(out mUnknown1C0);
@@ -1209,7 +1211,7 @@ namespace s3piwrappers.Effects
                 if (mSection.Version >= 0x0006 && stream.Position < stream.Length)
                 {
                     s.Read(out mUnknown208);
-                    if (mUnknown208)
+                    if (mUnknown208 != 0)
                     {
                         s.Read(out mUnknown20C);
                         s.Read(out mUnknown209);
@@ -1341,7 +1343,7 @@ namespace s3piwrappers.Effects
                 s.Write(mUnknown164);
 
                 s.Write(mUnknown1C1);
-                if (mUnknown1C1)
+                if (mUnknown1C1 != 0)
                 {
                     mUnknown180.UnParse(stream);
                     s.Write(mUnknown1C0);
@@ -1367,7 +1369,7 @@ namespace s3piwrappers.Effects
                 if (mSection.Version >= 0x0006)
                 {
                     s.Write(mUnknown208);
-                    if (mUnknown208)
+                    if (mUnknown208 != 0)
                     {
                         s.Write(mUnknown20C);
                         s.Write(mUnknown209);
