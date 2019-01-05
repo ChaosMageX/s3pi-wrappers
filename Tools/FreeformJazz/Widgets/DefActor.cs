@@ -11,16 +11,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public DefActor(ActorDefinition actor, StateMachineScene scene)
         {
-            if (actor == null)
-            {
-                throw new ArgumentNullException("actor");
-            }
-            if (scene == null)
-            {
-                throw new ArgumentNullException("scene");
-            }
-            this.mActor = actor;
-            this.mScene = scene;
+            this.mActor = actor ?? throw new ArgumentNullException("actor");
+            this.mScene = scene ?? throw new ArgumentNullException("scene");
         }
 
         public ActorDefinition GetActor()
@@ -39,6 +31,12 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        private void CreateNameCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new NameCommand(this, value.ToString(), false));
+        }
+
+        [Undoable("CreateNameCommand")]
         public string Name
         {
             get { return this.mActor.Name; }
@@ -46,8 +44,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mActor.Name != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new NameCommand(this, value, false));
+                    this.mActor.Name = value;
                 }
             }
         }

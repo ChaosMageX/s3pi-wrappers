@@ -35,6 +35,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.UpdateVisualization();
         }
 
+        #region Visualization
+
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
 
@@ -216,5 +218,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 }
             }
         }
+
+        #endregion
     }
 }

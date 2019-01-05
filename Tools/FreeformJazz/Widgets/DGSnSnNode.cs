@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -27,18 +28,22 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.UpdateVisualization();
         }
 
-        private class NextStateCommand : DGNodeRefPropertyCommand<
-            DGSnSnNode, NextStateNode, State>
+        private class NextStateCommand : PropertyCommand<DGSnSnNode, RefToState>
         {
-            public NextStateCommand(DGSnSnNode dgsn,
-                State newValue, bool extendable)
-                : base(dgsn, dgsn.mNextStateNode, dgsn.mNextState, 
-                "NextState", newValue, extendable)
+            public NextStateCommand(DGSnSnNode dgsn, RefToState newValue)
+                : base(dgsn, "NextState", newValue, false)
             {
                 this.mLabel = "Set Next State Node Reference";
             }
         }
 
+        private void CreateNextStateCommand(object value)
+        {
+            RefToState state = value as RefToState;
+            this.mScene.Container.UndoRedo.Submit(new NextStateCommand(this, state));
+        }
+
+        [Undoable("CreateNextStateCommand")]
         public RefToState NextState
         {
             get { return this.mNextState; }
@@ -47,11 +52,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 State state = value == null ? null : value.GetValue();
                 if (this.mNextStateNode.NextState != state)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new NextStateCommand(this, state, false));
+                    this.mNextStateNode.NextState = state;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        #region Visualization
 
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -186,5 +193,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     sTextBrush, bbox, TextFormat);
             }
         }
+
+        #endregion
     }
 }

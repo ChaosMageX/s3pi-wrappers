@@ -1,6 +1,6 @@
 ﻿using System;
 using s3pi.GenericRCOLResource;
-using s3piwrappers.Helpers;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -21,12 +21,11 @@ namespace s3piwrappers.FreeformJazz.Widgets
         }
 
         private abstract class AnimNodePropertyCommand<P>
-            : DGNodePropertyCommand<DGAnimNode, AnimationNode, P>
+            : PropertyCommand<DGAnimNode, P>
         {
             public AnimNodePropertyCommand(DGAnimNode dgan, 
-                string property, P newValue, bool extendable)
-                : base(dgan, dgan.mAnimNode, 
-                    property, newValue, extendable)
+                string property, P newValue)
+                : base(dgan, property, newValue, false)
             {
                 this.mLabel = "Set " + 
                     (dgan.bPlay ? "Play" : "Stop") + " Animation Node ";
@@ -37,8 +36,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             : AnimNodePropertyCommand<JazzAnimationFlags>
         {
             public FlagsCommand(DGAnimNode dgan,
-                JazzAnimationFlags newValue, bool extendable)
-                : base(dgan, "Flags", newValue, extendable)
+                JazzAnimationFlags newValue)
+                : base(dgan, "Flags", newValue)
             {
                 this.mLabel = this.mLabel + "Flags";
             }
@@ -48,8 +47,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             : AnimNodePropertyCommand<JazzChunk.AnimationPriority>
         {
             public PriorityCommand(DGAnimNode dgan,
-                JazzChunk.AnimationPriority newValue, bool extendable)
-                : base(dgan, "Priority", newValue, extendable)
+                JazzChunk.AnimationPriority newValue)
+                : base(dgan, "Priority", newValue)
             {
                 this.mLabel = this.mLabel + "Priority";
             }
@@ -57,9 +56,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class BlendInTimeCommand : AnimNodePropertyCommand<float>
         {
-            public BlendInTimeCommand(DGAnimNode dgan,
-                float newValue, bool extendable)
-                : base(dgan, "BlendInTime", newValue, extendable)
+            public BlendInTimeCommand(DGAnimNode dgan, float newValue)
+                : base(dgan, "BlendInTime", newValue)
             {
                 this.mLabel = this.mLabel + "Blend In Time";
             }
@@ -67,9 +65,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class BlendOutTimeCommand : AnimNodePropertyCommand<float>
         {
-            public BlendOutTimeCommand(DGAnimNode dgan,
-                float newValue, bool extendable)
-                : base(dgan, "BlendOutTime", newValue, extendable)
+            public BlendOutTimeCommand(DGAnimNode dgan, float newValue)
+                : base(dgan, "BlendOutTime", newValue)
             {
                 this.mLabel = this.mLabel + "Blend Out Time";
             }
@@ -77,77 +74,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class SpeedCommand : AnimNodePropertyCommand<float>
         {
-            public SpeedCommand(DGAnimNode dgan,
-                float newValue, bool extendable)
-                : base(dgan, "Speed", newValue, extendable)
+            public SpeedCommand(DGAnimNode dgan, float newValue)
+                : base(dgan, "Speed", newValue)
             {
                 this.mLabel = this.mLabel + "Speed";
             }
         }
 
-        /*private class ActorCommand : JazzCommand
-        {
-            private DGAnimNode mDGAN;
-            private ActorDefinition mOldVal;
-            private ActorDefinition mNewVal;
-            private bool bExtendable;
-
-            public ActorCommand(DGAnimNode dgan, 
-                ActorDefinition newValue, bool extendable)
-                : base(dgan.mScene.Container)
-            {
-                this.mDGAN = dgan;
-                this.mOldVal = dgan.mAnimNode.Actor;
-                this.mNewVal = newValue;
-                this.bExtendable = extendable;
-                this.mLabel = "Set " +
-                    (dgan.bPlay ? "Play" : "Stop") + " Animation Node Actor";
-            }
-
-            public override bool Execute()
-            {
-                this.mDGAN.mAnimNode.Actor = this.mNewVal;
-                this.mDGAN.mActor.SetValue(this.mNewVal);
-                this.mDGAN.UpdateVisualization();
-                return true;
-            }
-
-            public override void Undo()
-            {
-                this.mDGAN.mAnimNode.Actor = this.mOldVal;
-                this.mDGAN.mActor.SetValue(this.mOldVal);
-                this.mDGAN.UpdateVisualization();
-            }
-
-            public override bool IsExtendable(Command possibleExt)
-            {
-                if (!this.bExtendable)
-                {
-                    return false;
-                }
-                ActorCommand ac = possibleExt as ActorCommand;
-                if (ac == null || ac.mContainer != this.mContainer ||
-                    ac.mDGAN != this.mDGAN || ac.mNewVal == this.mOldVal)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override void Extend(Command possibleExt)
-            {
-                ActorCommand ac = possibleExt as ActorCommand;
-                this.mNewVal = ac.mNewVal;
-            }
-        }/* */
-
-        private class ActorCommand : DGNodeRefPropertyCommand<
-            DGAnimNode, AnimationNode, ActorDefinition>
+        private class ActorCommand : PropertyCommand<DGAnimNode, RefToActor>
         {
             public ActorCommand(DGAnimNode dgan,
-                ActorDefinition newValue, bool extendable)
-                : base(dgan, dgan.mAnimNode, dgan.mActor, 
-                "Actor", newValue, extendable)
+                RefToActor newValue)
+                : base(dgan, "Actor", newValue, false)
             {
                 this.mLabel = "Set " +
                     (dgan.bPlay ? "Play" : "Stop") + " Animation Node Actor";
@@ -158,13 +96,20 @@ namespace s3piwrappers.FreeformJazz.Widgets
             : AnimNodePropertyCommand<JazzChunk.AnimationPriority>
         {
             public TimingPriorityCommand(DGAnimNode dgan,
-                JazzChunk.AnimationPriority newValue, bool extendable)
-                : base(dgan, "TimingPriority", newValue, extendable)
+                JazzChunk.AnimationPriority newValue)
+                : base(dgan, "TimingPriority", newValue)
             {
                 this.mLabel = this.mLabel + "Priority";
             }
         }
 
+        private void CreateFlagsCommand(object value)
+        {
+            JazzAnimationFlags flags = (JazzAnimationFlags)value;
+            this.mScene.Container.UndoRedo.Submit(new FlagsCommand(this, flags));
+        }
+
+        [Undoable("CreateFlagsCommand")]
         public JazzAnimationFlags Flags
         {
             get { return this.mAnimNode.Flags; }
@@ -172,12 +117,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.Flags != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new FlagsCommand(this, value, false));
+                    this.mAnimNode.Flags = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreatePriorityCommand(object value)
+        {
+            JazzChunk.AnimationPriority priority = (JazzChunk.AnimationPriority)value;
+            this.mScene.Container.UndoRedo.Submit(new PriorityCommand(this, priority));
+        }
+
+        [Undoable("CreatePriorityCommand")]
         public JazzChunk.AnimationPriority Priority
         {
             get { return this.mAnimNode.Priority; }
@@ -185,12 +137,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.Priority != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new PriorityCommand(this, value, false));
+                    this.mAnimNode.Priority = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateBlendInTimeCommand(object value)
+        {
+            float time = (float)value;
+            this.mScene.Container.UndoRedo.Submit(new BlendInTimeCommand(this, time));
+        }
+
+        [Undoable("CreateBlendInTimeCommand")]
         public float BlendInTime
         {
             get { return this.mAnimNode.BlendInTime; }
@@ -198,12 +157,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.BlendInTime != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new BlendInTimeCommand(this, value, false));
+                    this.mAnimNode.BlendInTime = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateBlendOutTimeCommand(object value)
+        {
+            float time = (float)value;
+            this.mScene.Container.UndoRedo.Submit(new BlendOutTimeCommand(this, time));
+        }
+
+        [Undoable("CreateBlendOutTimeCommand")]
         public float BlendOutTime
         {
             get { return this.mAnimNode.BlendOutTime; }
@@ -211,12 +177,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.BlendOutTime != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new BlendOutTimeCommand(this, value, false));
+                    this.mAnimNode.BlendOutTime = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateSpeedCommand(object value)
+        {
+            float speed = (float)value;
+            this.mScene.Container.UndoRedo.Submit(new SpeedCommand(this, speed));
+        }
+
+        [Undoable("CreateSpeedCommand")]
         public float Speed
         {
             get { return this.mAnimNode.Speed; }
@@ -224,12 +197,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.Speed != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new SpeedCommand(this, value, false));
+                    this.mAnimNode.Speed = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateActorCommand(object value)
+        {
+            RefToActor rta = value as RefToActor;
+            this.mScene.Container.UndoRedo.Submit(new ActorCommand(this, rta));
+        }
+
+        [Undoable("CreateActorCommand")]
         public RefToActor Actor
         {
             get { return this.mActor; }
@@ -241,6 +221,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     {
                         this.mActor = new RefToActor(
                             this.mScene, value.GetValue());
+                        this.UpdateVisualization();
                     }
                 }
                 else
@@ -249,13 +230,20 @@ namespace s3piwrappers.FreeformJazz.Widgets
                         = value == null ? null : value.GetValue();
                     if (this.mAnimNode.Actor != ad)
                     {
-                        this.mScene.Container.UndoRedo.Submit(
-                            new ActorCommand(this, ad, false));
+                        this.mAnimNode.Actor = ad;
+                        this.UpdateVisualization();
                     }
                 }
             }
         }
 
+        private void CreateTimingPriorityCommand(object value)
+        {
+            JazzChunk.AnimationPriority priority = (JazzChunk.AnimationPriority)value;
+            this.mScene.Container.UndoRedo.Submit(new TimingPriorityCommand(this, priority));
+        }
+
+        [Undoable("CreateTimingPriorityCommand")]
         public JazzChunk.AnimationPriority TimingPriority
         {
             get { return this.mAnimNode.TimingPriority; }
@@ -263,8 +251,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAnimNode.TimingPriority != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new TimingPriorityCommand(this, value, false));
+                    this.mAnimNode.TimingPriority = value;
+                    this.UpdateVisualization();
                 }
             }
         }

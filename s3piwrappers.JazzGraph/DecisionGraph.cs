@@ -85,6 +85,15 @@ namespace s3piwrappers.JazzGraph
             }
         }
 
+        public void RemoveDecisionMaker(DecisionGraphNode node)
+        {
+            int index = this.mDecisionMakers.IndexOf(node);
+            if (index >= 0)
+            {
+                this.mDecisionMakers.RemoveAt(index);
+            }
+        }
+
         public void ClearDecisionMakers()
         {
             /*DecisionGraphNode dgn;
@@ -115,6 +124,15 @@ namespace s3piwrappers.JazzGraph
                     this.mDecisionMakers.RemoveAt(index);
                 }/* */
                 this.mEntryPoints.Add(node);
+            }
+        }
+
+        public void RemoveEntryPoint(DecisionGraphNode node)
+        {
+            int index = this.mEntryPoints.IndexOf(node);
+            if (index >= 0)
+            {
+                this.mEntryPoints.RemoveAt(index);
             }
         }
 

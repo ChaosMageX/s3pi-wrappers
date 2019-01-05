@@ -8,7 +8,7 @@ namespace s3piwrappers.Helpers.Collections
     public class UndoableList<T> : IList<T>, IList, IHasGenericInsert, 
         IHasReverse, IHasSwap, IHasUndoManager
     {
-        [Flags]
+        /*[Flags]
         public enum Actions : byte
         {
             None = 0x00,
@@ -19,22 +19,23 @@ namespace s3piwrappers.Helpers.Collections
             Remove = 0x10,
             Clear = 0x20,
             All = 0x3f
-        }
+        }/* */
 
         private static readonly T[] sEmpty = new T[0];
         private static readonly EqualityComparer<T> sEC 
             = EqualityComparer<T>.Default;
 
         private UndoManager mUndoManager;
-        private Actions mUndoActions;
+        //private Actions mUndoActions;
         private T[] mItems;
         private int mSize;
         private int mVersion;
         private object mSyncRoot;
 
-        public UndoableList()
+        public UndoableList(UndoManager manager)
         {
             this.mItems = sEmpty;
+            this.mUndoManager = manager;
         }
 
         public UndoManager UndoManager
@@ -42,10 +43,10 @@ namespace s3piwrappers.Helpers.Collections
             get { return this.mUndoManager; }
         }
 
-        public bool GetUndoOn(Actions action)
+        /*public bool GetUndoOn(Actions action)
         {
             return (this.mUndoActions & action) != Actions.None;
-        }
+        }/* */
 
         private void EnsureCapacity()
         {
@@ -64,14 +65,73 @@ namespace s3piwrappers.Helpers.Collections
             }
         }
 
+        #region Addition and Insertion Functions
+
+        private class AddInsertCommand : Command
+        {
+            private UndoableList<T> mList;
+            private int mIndex;
+            private T mItem;
+
+            public AddInsertCommand(UndoableList<T> list, int index, T item)
+            {
+                this.mList = list;
+                this.mIndex = index;
+                this.mItem = item;
+                if (index == -1)
+                {
+                    this.mLabel = "Add item to list";
+                }
+                else
+                {
+                    this.mLabel = string.Concat("Insert item in list at index ", index.ToString());
+                }
+            }
+
+            public override bool Execute()
+            {
+                if (this.mIndex == -1)
+                {
+                    this.mList.mItems[this.mList.mSize++] = this.mItem;
+                }
+                else
+                {
+                    if (this.mIndex < this.mList.mSize)
+                    {
+                        Array.Copy(this.mList.mItems, this.mIndex, 
+                                   this.mList.mItems, this.mIndex + 1,
+                                   this.mList.mSize - this.mIndex);
+                    }
+                    this.mList.mItems[this.mIndex] = this.mItem;
+                    this.mList.mSize++;
+                }
+                this.mList.mVersion++;
+                return true;
+            }
+
+            public override void Undo()
+            {
+                this.mList.mSize--;
+                if (this.mIndex != -1 && this.mIndex < this.mList.mSize)
+                {
+                    Array.Copy(this.mList.mItems, this.mIndex + 1, 
+                               this.mList.mItems, this.mIndex,
+                               this.mList.mSize - this.mIndex);
+                }
+                this.mList.mItems[this.mList.mSize] = default(T);
+                this.mList.mVersion--;
+            }
+        }
+
         private void Add(T item, bool viaCmd)
         {
+            this.EnsureCapacity();
             if (viaCmd)
             {
+                this.mUndoManager.Submit(new AddInsertCommand(this, -1, item));
             }
             else
             {
-                this.EnsureCapacity();
                 this.mItems[this.mSize++] = item;
                 this.mVersion++;
             }
@@ -83,12 +143,13 @@ namespace s3piwrappers.Helpers.Collections
             {
                 throw new ArgumentOutOfRangeException("index");
             }
+            this.EnsureCapacity();
             if (viaCmd)
             {
+                this.mUndoManager.Submit(new AddInsertCommand(this, index, item));
             }
             else
             {
-                this.EnsureCapacity();
                 if (index < this.mSize)
                 {
                     Array.Copy(this.mItems, index, this.mItems, index + 1, 
@@ -100,6 +161,58 @@ namespace s3piwrappers.Helpers.Collections
             }
         }
 
+        #endregion
+
+        #region Removal Functions
+
+        private class RemoveAtCommand : Command
+        {
+            private UndoableList<T> mList;
+            private int mIndex;
+            private T mItem;
+
+            public RemoveAtCommand(UndoableList<T> list, int index)
+            {
+                this.mList = list;
+                this.mIndex = index;
+                this.mItem = this.mList.mItems[index];
+            }
+
+            public override bool Execute()
+            {
+                this.mList.mSize--;
+                if (this.mIndex != -1 && this.mIndex < this.mList.mSize)
+                {
+                    Array.Copy(this.mList.mItems, this.mIndex + 1,
+                               this.mList.mItems, this.mIndex,
+                               this.mList.mSize - this.mIndex);
+                }
+                this.mList.mItems[this.mList.mSize] = default(T);
+                this.mList.mVersion++;
+                return true;
+            }
+
+            public override void Undo()
+            {
+                if (this.mIndex == -1)
+                {
+                    this.mList.mItems[this.mList.mSize++] = this.mItem;
+                }
+                else
+                {
+                    if (this.mIndex < this.mList.mSize)
+                    {
+                        Array.Copy(this.mList.mItems, this.mIndex,
+                                   this.mList.mItems, this.mIndex + 1,
+                                   this.mList.mSize - this.mIndex);
+                    }
+                    this.mList.mItems[this.mIndex] = this.mItem;
+                    this.mList.mSize++;
+                }
+                this.mList.mVersion--;
+            }
+        }
+
         private void RemoveAt(int index, bool viaCmd)
         {
             if (index < 0 || index >= this.mSize)
@@ -108,6 +221,7 @@ namespace s3piwrappers.Helpers.Collections
             }
             if (viaCmd)
             {
+                this.mUndoManager.Submit(new RemoveAtCommand(this, index));
             }
             else
             {
@@ -122,12 +236,46 @@ namespace s3piwrappers.Helpers.Collections
             }
         }
 
+        #endregion
+
+        #region Clear Functions
+
+        private class ClearCommand : Command
+        {
+            private UndoableList<T> mList;
+            private T[] mBackup;
+
+            public ClearCommand(UndoableList<T> list)
+            {
+                this.mList = list;
+                this.mBackup = new T[this.mList.mSize];
+                Array.Copy(this.mList.mItems, this.mBackup, this.mList.mSize);
+                this.mLabel = "Clear list";
+            }
+
+            public override bool Execute()
+            {
+                Array.Clear(this.mList.mItems, 0, this.mList.mSize);
+                this.mList.mSize = 0;
+                this.mList.mVersion++;
+                return true;
+            }
+
+            public override void Undo()
+            {
+                Array.Copy(this.mBackup, this.mList.mItems, this.mBackup.Length);
+                this.mList.mSize = this.mBackup.Length;
+                this.mList.mVersion--;
+            }
+        }
+
         private void Clear(bool viaCmd)
         {
             if (this.mSize > 0)
             {
                 if (viaCmd)
                 {
+                    this.mUndoManager.Submit(new ClearCommand(this));
                 }
                 else
                 {
@@ -138,7 +286,43 @@ namespace s3piwrappers.Helpers.Collections
             }
         }
 
-        public void Swap(int index1, int index2)
+        #endregion
+
+        #region Swap Functions
+
+        private class SwapCommand : Command
+        {
+            private UndoableList<T> mList;
+            private int mIndex1;
+            private int mIndex2;
+
+            public SwapCommand(UndoableList<T> list, int index1, int index2)
+            {
+                this.mList = list;
+                this.mIndex1 = index1;
+                this.mIndex2 = index2;
+                this.mLabel = string.Concat("Swap list items at indices ", index1, " and ", index2);
+            }
+
+            public override bool Execute()
+            {
+                T item = this.mList.mItems[this.mIndex1];
+                this.mList.mItems[this.mIndex1] = this.mList.mItems[this.mIndex2];
+                this.mList.mItems[this.mIndex2] = item;
+                this.mList.mVersion++;
+                return true;
+            }
+
+            public override void Undo()
+            {
+                T item = this.mList.mItems[this.mIndex1];
+                this.mList.mItems[this.mIndex1] = this.mList.mItems[this.mIndex2];
+                this.mList.mItems[this.mIndex2] = item;
+                this.mList.mVersion--;
+            }
+        }
+
+        public void Swap(int index1, int index2, bool viaCmd)
         {
             if (index1 < 0 || index1 >= this.mSize)
             {
@@ -150,20 +334,55 @@ namespace s3piwrappers.Helpers.Collections
                 {
                     throw new ArgumentOutOfRangeException("index2");
                 }
-                T item = this.mItems[index1];
-                this.mItems[index1] = this.mItems[index2];
-                this.mItems[index2] = item;
-                this.mVersion++;
+                if (viaCmd)
+                {
+                    this.mUndoManager.Submit(new SwapCommand(this, index1, index2));
+                }
+                else
+                {
+                    T item = this.mItems[index1];
+                    this.mItems[index1] = this.mItems[index2];
+                    this.mItems[index2] = item;
+                    this.mVersion++;
+                }
             }
         }
 
-        public void Reverse()
+        public void Swap(int index1, int index2)
         {
-            Array.Reverse(this.mItems, 0, this.mSize);
-            this.mVersion++;
+            this.Swap(index1, index2, false);
         }
 
-        public void Reverse(int index, int count)
+        #endregion
+
+        #region Reverse Functions
+
+        private class ReverseCommand : Command
+        {
+            private UndoableList<T> mList;
+            private int mIndex;
+            private int mCount;
+
+            public ReverseCommand(UndoableList<T> list, int index, int count)
+            {
+                this.mList = list;
+                this.mIndex = index;
+                this.mCount = count;
+                this.mLabel = "Reverse list";
+            }
+
+            public override bool Execute()
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Undo()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void Reverse(int index, int count, bool viaCmd)
         {
             if (this.mSize - index < count)
             {
@@ -172,6 +391,18 @@ namespace s3piwrappers.Helpers.Collections
             Array.Reverse(this.mItems, index, count);
             this.mVersion++;
         }
+
+        public void Reverse()
+        {
+            this.Reverse(0, this.mSize, false);
+        }
+
+        public void Reverse(int index, int count)
+        {
+            this.Reverse(index, count, false);
+        }
+
+        #endregion
 
         public int IndexOf(T item)
         {
@@ -203,12 +434,47 @@ namespace s3piwrappers.Helpers.Collections
 
         public void Insert(int index, T item)
         {
-            this.Insert(index, item, this.GetUndoOn(Actions.Insert));
+            this.Insert(index, item, false);
         }
 
         public void RemoveAt(int index)
         {
-            this.RemoveAt(index, this.GetUndoOn(Actions.Remove));
+            this.RemoveAt(index, false);
+        }
+
+        private class SetAtIndexCommand : Command
+        {
+            private UndoableList<T> mList;
+            private int mIndex;
+            private T mBackup;
+            private T mItem;
+
+            public SetAtIndexCommand(UndoableList<T> list, int index, T item)
+            {
+                this.mList = list;
+                this.mIndex = index;
+                this.mBackup = list.mItems[index];
+                this.mItem = item;
+                this.mLabel = string.Concat("Set list item at index ", index.ToString());
+            }
+
+            public override bool Execute()
+            {
+                this.mList.mItems[this.mIndex] = this.mItem;
+                this.mList.mVersion++;
+                return true;
+            }
+
+            public override void Undo()
+            {
+                this.mList.mItems[this.mIndex] = this.mBackup;
+                this.mList.mVersion--;
+            }
+        }
+
+        private void CreateCommandSetAtIndex(int index, object value)
+        {
+            this.mUndoManager.Submit(new SetAtIndexCommand(this, index, (T)value));
         }
 
         public T this[int index]
@@ -237,12 +503,12 @@ namespace s3piwrappers.Helpers.Collections
 
         public void Add(T item)
         {
-            this.Add(item, this.GetUndoOn(Actions.Add));
+            this.Add(item, false);
         }
 
         public void Clear()
         {
-            this.Clear(this.GetUndoOn(Actions.Clear));
+            this.Clear(false);
         }
 
         public bool Contains(T item)
@@ -308,7 +574,7 @@ namespace s3piwrappers.Helpers.Collections
             int index = Array.IndexOf<T>(this.mItems, item, 0, this.mSize);
             if (index >= 0)
             {
-                this.RemoveAt(index, this.GetUndoOn(Actions.Remove));
+                this.RemoveAt(index, false);
                 return true;
             }
             return false;
@@ -324,14 +590,16 @@ namespace s3piwrappers.Helpers.Collections
             throw new NotImplementedException();
         }
 
-        public bool Add()
+        public virtual bool Add()
         {
-            throw new NotImplementedException();
+            this.Add(default(T), false);
+            return true;
         }
 
-        public bool Insert(int index)
+        public virtual bool Insert(int index)
         {
-            throw new NotImplementedException();
+            this.Insert(index, default(T), false);
+            return true;
         }
 
         private static bool isCompatibleObject(object value)
@@ -339,13 +607,15 @@ namespace s3piwrappers.Helpers.Collections
             return value is T || (value == null && default(T) == null);
         }
 
+        #region IList Functions
+
         int IList.Add(object value)
         {
             if (value == null && default(T) != null)
             {
                 throw new ArgumentNullException("value");
             }
-            this.Add((T)value, this.GetUndoOn(Actions.Add));
+            this.Add((T)value, false);
             return this.mSize - 1;
         }
 
@@ -369,7 +639,7 @@ namespace s3piwrappers.Helpers.Collections
             {
                 throw new ArgumentNullException("value");
             }
-            this.Insert(index, (T)value, this.GetUndoOn(Actions.Insert));
+            this.Insert(index, (T)value, false);
         }
 
         bool IList.IsFixedSize
@@ -396,6 +666,10 @@ namespace s3piwrappers.Helpers.Collections
                 this[index] = (T)value;
             }
         }
+
+        #endregion
+
+        #region ICollection Functions
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -424,5 +698,7 @@ namespace s3piwrappers.Helpers.Collections
                 return this.mSyncRoot;
             }
         }
+
+        #endregion
     }
 }

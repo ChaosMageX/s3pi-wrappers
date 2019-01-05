@@ -66,17 +66,15 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
-        //public static readonly Brush TextBrush;
+        //public static readonly Brush TextBrush = new SolidBrush(Color.Black);
         public static readonly StringFormat TextFormat;
-        //public static readonly Font TextFont;
+        //public static readonly Font TextFont = new Font(FontFamily.GenericSansSerif, 5);
 
         static DGNode()
         {
-            //TextBrush = new SolidBrush(Color.Black);
             TextFormat = new StringFormat();
             TextFormat.Alignment = StringAlignment.Center;
             TextFormat.LineAlignment = StringAlignment.Center;
-            //TextFont = new Font(FontFamily.GenericSansSerif, 5);
         }
 
         [Flags]
@@ -189,72 +187,6 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
-        protected abstract class DGNodePropertyCommand<D, T, P>
-            : PropertyCommand<T, P>
-            where D : DGNode
-            where T : DecisionGraphNode
-        {
-            protected D mDGNode;
-
-            public DGNodePropertyCommand(D dgNode, T thing, 
-                string property, P newValue, bool extendable)
-                : base(thing, property, newValue, extendable)
-            {
-                this.mDGNode = dgNode;
-            }
-
-            public override bool Execute()
-            {
-                bool flag = base.Execute();
-                if (flag)
-                {
-                    this.mDGNode.UpdateVisualization();
-                }
-                return flag;
-            }
-
-            public override void Undo()
-            {
-                base.Undo();
-                this.mDGNode.UpdateVisualization();
-            }
-        }
-
-        protected abstract class DGNodeRefPropertyCommand<D, T, P>
-            : DGNodePropertyCommand<D, T, P>
-            where D : DGNode
-            where T : DecisionGraphNode
-            where P : class, IHasHashedName
-        {
-            protected RefToValue<P> mRTV;
-
-            public DGNodeRefPropertyCommand(D dgNode, T thing, 
-                RefToValue<P> rtv, string property, P newValue, 
-                bool extendable)
-                : base(dgNode, thing, property, newValue, extendable)
-            {
-                this.mRTV = rtv;
-            }
-
-            public override bool Execute()
-            {
-                bool flag = base.Execute();
-                if (flag)
-                {
-                    this.mRTV.SetValue(this.mNewVal);
-                    this.mDGNode.UpdateVisualization();
-                }
-                return flag;
-            }
-
-            public override void Undo()
-            {
-                base.Undo();
-                this.mRTV.SetValue(this.mOldVal);
-                this.mDGNode.UpdateVisualization();
-            }
-        }
-
         [Flags]
         public enum DGFlag : byte
         {
@@ -288,7 +220,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
         {
         }
 
-        private class CategoryCommand : Command
+        /*private class CategoryCommand : Command
         {
             private DGNode mNode;
             private DGFlag mOldValue;
@@ -337,8 +269,23 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 }
                 this.mNode.mCategory = value;
             }
+        }/* */
+
+        private class CategoryCommand : PropertyCommand<DGNode, DGFlag>
+        {
+            public CategoryCommand(DGNode dgNode, DGFlag flags)
+                : base(dgNode, "Category", flags, false)
+            {
+                this.mLabel = "Change DG Node Category";
+            }
         }
 
+        private void CreateCategoryCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new CategoryCommand(this, (DGFlag)value));
+        }
+
+        [Undoable("CreateCategoryCommand")]
         public DGFlag Category
         {
             get { return this.mCategory; }
@@ -346,21 +293,38 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mCategory != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new CategoryCommand(this, value));
+                    this.mCategory = value;
+                    this.UpdateDecisionGraph();
                 }
             }
         }
 
         public void SetCategory(DGFlag category, bool set = true)
         {
-            if (set)
+            DGFlag flags = set ? this.mCategory | category : this.mCategory & ~category;
+            if (this.mCategory != flags)
             {
-                this.mCategory |= category;
+                this.mCategory = flags;
+                this.UpdateDecisionGraph();
             }
-            else
+        }
+
+        private void UpdateDecisionGraph()
+        {
+            DecisionGraph dg = this.mState.State.DecisionGraph;
+            if (dg != null && this.mDGN != null)
             {
-                this.mCategory &= ~category;
+                dg.Remove(this.mDGN);
+                if ((DGFlag.EntryPoint & this.mCategory) ==
+                     DGFlag.EntryPoint)
+                {
+                    dg.AddEntryPoint(this.mDGN);
+                }
+                if ((DGFlag.DecisionMaker & this.mCategory) ==
+                     DGFlag.DecisionMaker)
+                {
+                    dg.AddDecisionMaker(this.mDGN);
+                }
             }
         }
 
@@ -438,9 +402,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public interface IEdgeAction
         {
-            public void Redo();
+            void Redo();
 
-            public void Undo();
+            void Undo();
         }
 
         public class EdgeAction : IEdgeAction

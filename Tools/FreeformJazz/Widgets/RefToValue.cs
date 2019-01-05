@@ -22,21 +22,9 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public RefToValue(StateMachineScene scene, 
             string arrayProperty, string countProperty, T value)
         {
-            if (scene == null)
-            {
-                throw new ArgumentNullException("scene");
-            }
-            if (arrayProperty == null)
-            {
-                throw new ArgumentNullException("arrayProperty");
-            }
-            if (countProperty == null)
-            {
-                throw new ArgumentNullException("countProperty");
-            }
-            this.mScene = scene;
+            this.mScene = scene ?? throw new ArgumentNullException("scene");
 
-            this.mArrayPropName = arrayProperty;
+            this.mArrayPropName = arrayProperty ?? throw new ArgumentNullException("arrayProperty");
             this.mArrayProperty 
                 = typeof(StateMachine).GetProperty(arrayProperty);
             if (this.mArrayProperty == null)
@@ -45,7 +33,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     " does not exist or is inaccessible.", "arrayProperty");
             }
 
-            this.mCountPropName = countProperty;
+            this.mCountPropName = countProperty ?? throw new ArgumentNullException("countProperty");
             this.mCountProperty
                 = typeof(StateMachine).GetProperty(countProperty);
             if (this.mCountProperty == null)

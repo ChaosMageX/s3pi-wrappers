@@ -6,6 +6,7 @@ using System.Text;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Resources;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -37,42 +38,40 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.UpdateVisualization();
         }
 
-        private class PropActorCommand : DGNodeRefPropertyCommand<
-            DGPropNode, CreatePropNode, ActorDefinition>
+        private class PropActorCommand : PropertyCommand<DGPropNode, RefToActor>
         {
-            public PropActorCommand(DGPropNode dgpn,
-                ActorDefinition newValue, bool extendable)
-                : base(dgpn, dgpn.mPropNode, dgpn.mPropActor, 
-                "PropActor", newValue, extendable)
+            public PropActorCommand(DGPropNode dgpn, RefToActor newValue)
+                : base(dgpn, "PropActor", newValue, false)
             {
                 this.mLabel = "Set Create Prop Node Actor";
             }
         }
 
-        private class PropParamCommand : DGNodeRefPropertyCommand<
-            DGPropNode, CreatePropNode, ParamDefinition>
+        private class PropParamCommand : PropertyCommand<DGPropNode, RefToParam>
         {
-            public PropParamCommand(DGPropNode dgpn,
-                ParamDefinition newValue, bool extendable)
-                : base(dgpn, dgpn.mPropNode, dgpn.mPropParam,
-                "PropParameter", newValue, extendable)
+            public PropParamCommand(DGPropNode dgpn, RefToParam newValue)
+                : base(dgpn, "PropParameter", newValue, false)
             {
                 this.mLabel = "Set Create Prop Node Parameter";
             }
         }
 
-        private class PropKeyCommand
-            : DGNodePropertyCommand<DGPropNode, CreatePropNode, RK>
+        private class PropKeyCommand : PropertyCommand<DGPropNode, RK>
         {
-            public PropKeyCommand(DGPropNode dgpn,
-                RK newValue, bool extendable)
-                : base(dgpn, dgpn.mPropNode, 
-                    "PropKey", newValue, extendable)
+            public PropKeyCommand(DGPropNode dgpn, RK newValue)
+                : base(dgpn, "PropKey", newValue, false)
             {
                 this.mLabel = "Set Create Prop Node Prop Key";
             }
         }
 
+        private void CreatePropActorCommand(object value)
+        {
+            RefToActor actor = value as RefToActor;
+            this.mScene.Container.UndoRedo.Submit(new PropActorCommand(this, actor));
+        }
+
+        [Undoable("CreatePropActorCommand")]
         public RefToActor PropActor
         {
             get { return this.mPropActor; }
@@ -82,12 +81,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     = value == null ? null : value.GetValue();
                 if (this.mPropNode.PropActor != ad)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new PropActorCommand(this, ad, false));
+                    this.mPropNode.PropActor = ad;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreatePropParamCommand(object value)
+        {
+            RefToParam param = value as RefToParam;
+            this.mScene.Container.UndoRedo.Submit(new PropParamCommand(this, param));
+        }
+
+        [Undoable("CreatePropParamCommand")]
         public RefToParam PropParam
         {
             get { return this.mPropParam; }
@@ -97,12 +103,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     = value == null ? null : value.GetValue();
                 if (this.mPropNode.PropParam != pd)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new PropParamCommand(this, pd, false));
+                    this.mPropNode.PropParam = pd;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreatePropKeyCommand(object value)
+        {
+            RK key = (RK)value;
+            this.mScene.Container.UndoRedo.Submit(new PropKeyCommand(this, key));
+        }
+
+        [Undoable("CreatePropKeyCommand")]
         public RK PropKey
         {
             get { return this.mPropNode.PropKey; }
@@ -110,11 +123,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (!this.mPropNode.PropKey.Equals(value))
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new PropKeyCommand(this, value, false));
+                    this.mPropNode.PropKey = value;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        #region Visualization
 
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -262,5 +277,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 sTextBrush, bbox, TextFormat);
             TextFormat.Alignment = sa;
         }
+
+        #endregion
     }
 }

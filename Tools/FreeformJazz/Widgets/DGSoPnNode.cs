@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -42,18 +43,23 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.UpdateVisualization();
         }
 
-        private class ParameterCommand : DGNodeRefPropertyCommand<
-            DGSoPnNode, SelectOnParameterNode, ParamDefinition>
+        private class ParameterCommand : PropertyCommand<
+            DGSoPnNode, RefToParam>
         {
-            public ParameterCommand(DGSoPnNode dgsn,
-                ParamDefinition newValue, bool extendable)
-                : base(dgsn, dgsn.mSoPn, dgsn.mParam, 
-                "Parameter", newValue, extendable)
+            public ParameterCommand(DGSoPnNode dgsn, RefToParam newValue)
+                : base(dgsn, "Parameter", newValue, false)
             {
                 this.mLabel = "Set Parameter of Select On Parameter Node";
             }
         }
 
+        private void CreateParameterCommand(object value)
+        {
+            RefToParam param = value as RefToParam;
+            this.mScene.Container.UndoRedo.Submit(new ParameterCommand(this, param));
+        }
+
+        [Undoable("CreateParameterCommand")]
         public RefToParam Parameter
         {
             get { return this.mParam; }
@@ -63,11 +69,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     = value == null ? null : value.GetValue();
                 if (this.mSoPn.Parameter != pd)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new ParameterCommand(this, pd, false));
+                    this.mSoPn.Parameter = pd;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        #region Visualization
 
         private static Font sHeadFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -328,5 +336,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 }
             }
         }
+
+        #endregion
     }
 }

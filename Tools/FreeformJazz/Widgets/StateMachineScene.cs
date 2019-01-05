@@ -468,57 +468,6 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.mTempDGEdge.Update();
         }
 
-        /*private class FlagsCommand : JazzCommand
-        {
-            private StateMachineScene mSMS;
-            private JazzStateMachine.Flags mOldVal;
-            private JazzStateMachine.Flags mNewVal;
-            private bool bExtendable;
-
-            public FlagsCommand(StateMachineScene sms,
-                JazzStateMachine.Flags newValue, bool extendable)
-                : base(sms.mContainer)
-            {
-                this.mSMS = sms;
-                this.mOldVal = sms.mStateMachine.Flags;
-                this.mNewVal = newValue;
-                this.bExtendable = extendable;
-                this.mLabel = "Set State Machine Flags";
-            }
-
-            public override bool Execute()
-            {
-                this.mSMS.mStateMachine.Flags = this.mNewVal;
-                return true;
-            }
-
-            public override void Undo()
-            {
-                this.mSMS.mStateMachine.Flags = this.mOldVal;
-            }
-
-            public override bool IsExtendable(Helpers.Command possibleExt)
-            {
-                if (!this.bExtendable)
-                {
-                    return false;
-                }
-                FlagsCommand fc = possibleExt as FlagsCommand;
-                if (fc == null || fc.mSMS != this.mSMS ||
-                    fc.mNewVal == this.mOldVal)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override void Extend(Helpers.Command possibleExt)
-            {
-                FlagsCommand fc = possibleExt as FlagsCommand;
-                this.mNewVal = fc.mNewVal;
-            }
-        }/* */
-
         private class FlagsCommand
             : PropertyCommand<StateMachine, JazzStateMachine.Flags>
         {
@@ -529,57 +478,6 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 this.mLabel = "Set State Machine Flags";
             }
         }
-
-        /*private class PriorityCommand : JazzCommand
-        {
-            private StateMachineScene mSMS;
-            private JazzChunk.AnimationPriority mOldVal;
-            private JazzChunk.AnimationPriority mNewVal;
-            private bool bExtendable;
-
-            public PriorityCommand(StateMachineScene sms,
-                JazzChunk.AnimationPriority newValue, bool extendable)
-                : base(sms.mContainer)
-            {
-                this.mSMS = sms;
-                this.mOldVal = sms.mStateMachine.DefaultPriority;
-                this.mNewVal = newValue;
-                this.bExtendable = extendable;
-                this.mLabel = "Set State Machine Default Priority";
-            }
-
-            public override bool Execute()
-            {
-                this.mSMS.mStateMachine.DefaultPriority = this.mNewVal;
-                return true;
-            }
-
-            public override void Undo()
-            {
-                this.mSMS.mStateMachine.DefaultPriority = this.mOldVal;
-            }
-
-            public override bool IsExtendable(Helpers.Command possibleExt)
-            {
-                if (!this.bExtendable)
-                {
-                    return false;
-                }
-                PriorityCommand pc = possibleExt as PriorityCommand;
-                if (pc == null || pc.mSMS != this.mSMS ||
-                    pc.mNewVal == this.mOldVal)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override void Extend(Helpers.Command possibleExt)
-            {
-                PriorityCommand pc = possibleExt as PriorityCommand;
-                this.mNewVal = pc.mNewVal;
-            }
-        }/* */
 
         private class PriorityCommand
             : PropertyCommand<StateMachine, JazzChunk.AnimationPriority>
@@ -592,57 +490,6 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 this.mLabel = "Set State Machine Default Priority";
             }
         }
-
-        /*private class AwarenessCommand : JazzCommand
-        {
-            private StateMachineScene mSMS;
-            private JazzChunk.AwarenessLevel mOldVal;
-            private JazzChunk.AwarenessLevel mNewVal;
-            private bool bExtendable;
-
-            public AwarenessCommand(StateMachineScene sms,
-                JazzChunk.AwarenessLevel newValue, bool extendable)
-                : base(sms.mContainer)
-            {
-                this.mSMS = sms;
-                this.mOldVal = sms.mStateMachine.AwarenessOverlayLevel;
-                this.mNewVal = newValue;
-                this.bExtendable = extendable;
-                this.mLabel = "Set State Machine Awareness Overlay Level";
-            }
-
-            public override bool Execute()
-            {
-                this.mSMS.mStateMachine.AwarenessOverlayLevel = this.mNewVal;
-                return true;
-            }
-
-            public override void Undo()
-            {
-                this.mSMS.mStateMachine.AwarenessOverlayLevel = this.mOldVal;
-            }
-
-            public override bool IsExtendable(Helpers.Command possibleExt)
-            {
-                if (!this.bExtendable)
-                {
-                    return false;
-                }
-                AwarenessCommand ac = possibleExt as AwarenessCommand;
-                if (ac == null || ac.mSMS != this.mSMS ||
-                    ac.mNewVal == this.mOldVal)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override void Extend(Helpers.Command possibleExt)
-            {
-                AwarenessCommand ac = possibleExt as AwarenessCommand;
-                this.mNewVal = ac.mNewVal;
-            }
-        }/* */
 
         private class AwarenessCommand
             : PropertyCommand<StateMachine, JazzChunk.AwarenessLevel>
@@ -1195,6 +1042,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        private void CreateCommandFlags(object value)
+        {
+            JazzStateMachine.Flags flags = (JazzStateMachine.Flags)value;
+            this.mContainer.UndoRedo.Submit(new FlagsCommand(this, flags, false));
+        }
+
+        [Undoable("CreateCommandFlags")]
         public JazzStateMachine.Flags Flags
         {
             get { return this.mStateMachine.Flags; }
@@ -1202,12 +1056,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mStateMachine.Flags != value)
                 {
-                    this.mContainer.UndoRedo.Submit(
-                        new FlagsCommand(this, value, false));
+                    this.mStateMachine.Flags = value;
                 }
             }
         }
 
+        private void CreateCommandDefaultPriority(object value)
+        {
+            JazzChunk.AnimationPriority priority = (JazzChunk.AnimationPriority)value;
+            this.mContainer.UndoRedo.Submit(new PriorityCommand(this, priority, false));
+        }
+
+        [Undoable("CreateCommandDefaultPriority")]
         public JazzChunk.AnimationPriority DefaultPriority
         {
             get { return this.mStateMachine.DefaultPriority; }
@@ -1215,12 +1075,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mStateMachine.DefaultPriority != value)
                 {
-                    this.mContainer.UndoRedo.Submit(
-                        new PriorityCommand(this, value, false));
+                    this.mStateMachine.DefaultPriority = value;
                 }
             }
         }
 
+        private void CreateCommandAwarenessOverlayLevel(object value)
+        {
+            JazzChunk.AwarenessLevel level = (JazzChunk.AwarenessLevel)value;
+            this.mContainer.UndoRedo.Submit(new AwarenessCommand(this, level, false));
+        }
+
+        [Undoable("CreateCommandAwarenessOverlayLevel")]
         public JazzChunk.AwarenessLevel AwarenessOverlayLevel
         {
             get { return this.mStateMachine.AwarenessOverlayLevel; }
@@ -1228,8 +1094,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mStateMachine.AwarenessOverlayLevel != value)
                 {
-                    this.mContainer.UndoRedo.Submit(
-                        new AwarenessCommand(this, value, false));
+                    this.mStateMachine.AwarenessOverlayLevel = value;
                 }
             }
         }
@@ -3096,10 +2961,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             this.mTempDGEdge.SetParent(stateNode);
             this.mTempDGEdge.Update();
 
-            if (this.FocusedStateChanged != null)
-            {
-                this.FocusedStateChanged(this, new EventArgs());
-            }
+            this.FocusedStateChanged?.Invoke(this, new EventArgs());
         }
 
         private bool bAddingEdges = false;

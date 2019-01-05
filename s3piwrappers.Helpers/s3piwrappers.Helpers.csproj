@@ -109,6 +109,7 @@
     <Compile Include="RK.cs" />
     <Compile Include="Collections\UndoableList.cs" />
     <Compile Include="Undo\PropertyCommand.cs" />
+    <Compile Include="Undo\UndoableAttribute.cs" />
     <Compile Include="Undo\UndoEventHandler.cs" />
     <Compile Include="Undo\UndoManager.cs" />
     <Compile Include="Windows\ProcessExtensions.cs" />

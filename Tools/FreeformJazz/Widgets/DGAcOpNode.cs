@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Text;
 using s3pi.GenericRCOLResource;
-using s3piwrappers.Helpers;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -21,94 +21,65 @@ namespace s3piwrappers.FreeformJazz.Widgets
         public DGAcOpNode(ActorOperationNode aon, StateNode state)
             : base(aon, state)
         {
-            if (aon == null)
-            {
-                throw new ArgumentNullException("aon");
-            }
-            this.mAcOpNode = aon;
+            this.mAcOpNode = aon ?? throw new ArgumentNullException("aon");
+            this.mActor = new RefToActor(this.mScene, aon.Actor);
 
             this.UpdateVisualization();
         }
 
-        /*private class ActorCommand : JazzCommand
-        {
-            private DGAcOpNode mDGAN;
-            private ActorDefinition mOldVal;
-            private ActorDefinition mNewVal;
-            private bool bExtendable;
+        #region Properties
 
-            public ActorCommand(DGAcOpNode dgan,
-                ActorDefinition newValue, bool extendable)
-                : base(dgan.mScene.Container)
-            {
-                this.mDGAN = dgan;
-                this.mOldVal = dgan.mAcOpNode.Actor;
-                this.mNewVal = newValue;
-                this.bExtendable = extendable;
-                this.mLabel = "Set Actor Operation Node Actor";
-            }
-
-            public override bool Execute()
-            {
-                this.mDGAN.mAcOpNode.Actor = this.mNewVal;
-                this.mDGAN.mActor.SetValue(this.mNewVal);
-                this.mDGAN.UpdateVisualization();
-                return true;
-            }
-
-            public override void Undo()
-            {
-                this.mDGAN.mAcOpNode.Actor = this.mOldVal;
-                this.mDGAN.mActor.SetValue(this.mOldVal);
-                this.mDGAN.UpdateVisualization();
-            }
-
-            public override bool IsExtendable(Command possibleExt)
-            {
-                if (!this.bExtendable)
-                {
-                    return false;
-                }
-                ActorCommand ac = possibleExt as ActorCommand;
-                if (ac == null || ac.mContainer != this.mContainer ||
-                    ac.mDGAN != this.mDGAN || ac.mNewVal == this.mOldVal)
-                {
-                    return false;
-                }
-                return true;
-            }
-
-            public override void Extend(Command possibleExt)
-            {
-                ActorCommand ac = possibleExt as ActorCommand;
-                this.mNewVal = ac.mNewVal;
-            }
-        }/* */
-
-        private class ActorCommand : DGNodeRefPropertyCommand<
-            DGAcOpNode, ActorOperationNode, ActorDefinition>
+        private class ActorCommand : PropertyCommand<DGAcOpNode, RefToActor>
         {
             public ActorCommand(DGAcOpNode dgan,
-                ActorDefinition newValue, bool extendable)
-                : base(dgan, dgan.mAcOpNode, dgan.mActor,
-                "Actor", newValue, extendable)
+                RefToActor newValue, bool extendable)
+                : base(dgan, "Actor", newValue, extendable)
             {
                 this.mLabel = "Set Actor Operation Node Actor";
             }
         }
 
-        private class OperandCommand
-            : DGNodePropertyCommand<DGAcOpNode, ActorOperationNode, bool>
+        private void CreateActorCommand(object value)
+        {
+            RefToActor rta = value as RefToActor;
+            this.mScene.Container.UndoRedo.Submit(new ActorCommand(this, rta, false));
+        }
+
+        private class OperandCommand : PropertyCommand<DGAcOpNode, bool>
         {
             public OperandCommand(DGAcOpNode dgan, 
                 bool newValue, bool extendable)
-                : base(dgan, dgan.mAcOpNode, 
+                : base(dgan, 
                 "Operand", newValue, extendable)
             {
                 this.mLabel = "Set Actor Operation Node Operand";
             }
         }
 
+        private void CreateOperandCommand(object value)
+        {
+            bool op = (bool)value;
+            this.mScene.Container.UndoRedo.Submit(new OperandCommand(this, op, false));
+        }
+
+        private class OperationCommand : PropertyCommand<
+            DGAcOpNode, JazzActorOperationNode.ActorOperation>
+        {
+            public OperationCommand(DGAcOpNode dgan, 
+                JazzActorOperationNode.ActorOperation newValue, bool extendable)
+                : base(dgan, "Operation", newValue, extendable)
+            {
+                this.mLabel = "Set Actor Operation Node Operation";
+            }
+        }
+
+        private void CreateOperationCommand(object value)
+        {
+            JazzActorOperationNode.ActorOperation ao = (JazzActorOperationNode.ActorOperation)value;
+            this.mScene.Container.UndoRedo.Submit(new OperationCommand(this, ao, false));
+        }
+
+        [Undoable("CreateActorCommand")]
         public RefToActor Actor
         {
             get { return this.mActor; }
@@ -118,12 +89,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
                     = value == null ? null : value.GetValue();
                 if (this.mAcOpNode.Actor != ad)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new ActorCommand(this, ad, false));
+                    this.mAcOpNode.Actor = ad;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        [Undoable("CreateOperandCommand")]
         public bool Operand
         {
             get { return this.mAcOpNode.Operand; }
@@ -131,11 +103,29 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mAcOpNode.Operand != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new OperandCommand(this, value, false));
+                    this.mAcOpNode.Operand = value;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        [Undoable("CreateOperationCommand")]
+        public JazzActorOperationNode.ActorOperation Operation
+        {
+            get { return this.mAcOpNode.Operation; }
+            set
+            {
+                if (this.mAcOpNode.Operation != value)
+                {
+                    this.mAcOpNode.Operation = value;
+                    this.UpdateVisualization();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Visualization
 
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -257,5 +247,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 sTextBrush, bbox, TextFormat);
             TextFormat.Alignment = sa;
         }
+
+        #endregion
     }
 }

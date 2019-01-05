@@ -4,6 +4,16 @@ using System.Reflection;
 
 namespace s3piwrappers.Helpers.Undo
 {
+    /// <summary><para>
+    /// This command changes the value of a property of type <typeparamref name="P"/> 
+    /// in an object of type <typeparamref name="T"/>.
+    /// </para><para>
+    /// For example, if there's a Table class with an "IsRound" boolean property, 
+    /// <typeparamref name="T"/> would be "Table" and 
+    /// <typeparamref name="P"/> would be "bool" for this command to change that property. 
+    /// </para></summary>
+    /// <typeparam name="T">The object type that contains the given Property to be changed.</typeparam>
+    /// <typeparam name="P">The type for the value stored in the given Property to be changed.</typeparam>
     public class PropertyCommand<T, P> : Command
     {
         private static readonly EqualityComparer<T> sTEC 
@@ -44,13 +54,7 @@ namespace s3piwrappers.Helpers.Undo
 
         public override bool Execute()
         {
-            object newVal = this.mNewVal;
-            if (this.mProperty.PropertyType.IsPrimitive)
-            {
-                newVal = Convert.ChangeType(this.mNewVal, 
-                    this.mProperty.PropertyType);
-            }
-            this.mProperty.SetValue(this.mThing, newVal, null);
+            this.mProperty.SetValue(this.mThing, this.mNewVal, null);
             return true;
         }
 

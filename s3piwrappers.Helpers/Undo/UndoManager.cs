@@ -1,17 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace s3piwrappers.Helpers.Undo
 {
+    /// <summary>
+    /// Specialized stack used for managing an Undo/Redo system and
+    /// executing <see cref="Command"/> instances submitted by user actions.
+    /// </summary>
     public class UndoManager
     {
+        /// <summary>
+        /// A singleton instance of <see cref="UndoManager"/> for most general uses,
+        /// since typically only one Undo/Redo system is present in an application.
+        /// </summary>
         public static readonly UndoManager Instance = new UndoManager();
 
         private static readonly Command[] sEmptyStack = new Command[0];
 
+        /// <summary>
+        /// Event triggered when a new <see cref="Command"/> instance is
+        /// pushed onto the internal stack after being successfully executed.
+        /// </summary>
         public event UndoEventHandler CommandAddedToHistory;
+        /// <summary>
+        /// Event triggered when a newly submitted <see cref="Command"/> instance
+        /// has its <see cref="Command.Execute"/> function invoked by the 
+        /// <see cref="UndoManager.Submit(Command)"/> function before being pushed 
+        /// onto the internal stack or disposed if the execution wasn't successful.
+        /// </summary>
         public event UndoEventHandler CommandExecuted;
         public event UndoEventHandler CommandUndone;
         public event UndoEventHandler CommandRedone;
@@ -23,6 +38,10 @@ namespace s3piwrappers.Helpers.Undo
         private int mLastCmdIndex;
         private Command mCheckpoint;
 
+        /// <summary>
+        /// Create a new <see cref="UndoManager"/> instance 
+        /// with an empty internal <see cref="Command"/> stack.
+        /// </summary>
         public UndoManager()
         {
             this.mStack = sEmptyStack;
@@ -32,6 +51,13 @@ namespace s3piwrappers.Helpers.Undo
             this.mCheckpoint = null;
         }
 
+        /// <summary>
+        /// Create an new <see cref="UndoManager"/> instance
+        /// with an internal <see cref="Command"/> stack
+        /// with the given <paramref name="stackCapacity"/>.
+        /// </summary>
+        /// <param name="stackCapacity">The initial storage capacity 
+        /// of the internal <see cref="Command"/> stack.</param>
         public UndoManager(int stackCapacity)
         {
             if (stackCapacity < 0)
@@ -203,10 +229,7 @@ namespace s3piwrappers.Helpers.Undo
                 command.Dispose();
                 return false;
             }
-            if (this.CommandExecuted != null)
-            {
-                this.CommandExecuted(this, command);
-            }
+            this.CommandExecuted?.Invoke(this, command);
             Command cmd;
             if (this.mLastCmdIndex < this.mStackSize - 1)
             {
@@ -289,10 +312,7 @@ namespace s3piwrappers.Helpers.Undo
                 }
             }
             this.mStack[this.mStackSize++] = command;
-            if (this.CommandAddedToHistory != null)
-            {
-                this.CommandAddedToHistory(this, command);
-            }
+            this.CommandAddedToHistory?.Invoke(this, command);
             return true;
         }
 
@@ -340,10 +360,7 @@ namespace s3piwrappers.Helpers.Undo
                     groupWithPrevCmd = cmd.GroupWithPreviousCommand;
                     cmd.Undo();
                     this.mLastCmdIndex--;
-                    if (this.CommandUndone != null)
-                    {
-                        this.CommandUndone(this, cmd);
-                    }
+                    this.CommandUndone?.Invoke(this, cmd);
                 }
             }
         }
@@ -382,10 +399,7 @@ namespace s3piwrappers.Helpers.Undo
                     cmd = this.mStack[i];
                     cmd.Redo();
                     this.mLastCmdIndex++;
-                    if (this.CommandRedone != null)
-                    {
-                        this.CommandRedone(this, cmd);
-                    }
+                    this.CommandRedone?.Invoke(this, cmd);
                     i = this.mLastCmdIndex + 1;
                 }
                 while (i < this.mStackSize && 

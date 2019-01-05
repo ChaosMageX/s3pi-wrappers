@@ -1,0 +1,23 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/bin
+/Helpers/AnimatedTextureEditor/obj
+/Helpers/EffectCloner/obj
+/Helpers/FootprintEditor/obj
+/Helpers/ModelViewer/obj
+/Helpers/RigEditorWPF/obj
+/Helpers/RigExport/obj
+/s3piwrappers.AnimationResources/obj
+/s3piwrappers.AudioResources/obj
+/s3piwrappers.CustomForms/obj
+/s3piwrappers.EffectResource/obj
+/s3piwrappers.Helpers/obj
+/s3piwrappers.JazzGraph/obj
+/s3piwrappers.SceneGraph/obj
+/s3piwrappers.TextureResources/obj
+/s3piwrappers.ToneResources/obj
+/Tools/FNVUnhasher/obj
+/Tools/FreeformJazz/obj

@@ -607,18 +607,22 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
-        private class FlagsCommand : DGNodePropertyCommand<
-            DGRandNode, RandomNode, JazzRandomNode.Flags>
+        private class FlagsCommand : PropertyCommand<DGRandNode, JazzRandomNode.Flags>
         {
-            public FlagsCommand(DGRandNode dgrn,
-                JazzRandomNode.Flags newValue, bool extendable)
-                : base(dgrn, dgrn.mRandomNode, 
-                "Flags", newValue, extendable)
+            public FlagsCommand(DGRandNode dgrn, JazzRandomNode.Flags newValue)
+                : base(dgrn, "Flags", newValue, false)
             {
                 this.mLabel = "Set Random Node Flags";
             }
         }
 
+        private void CreateFlagsCommand(object value)
+        {
+            JazzRandomNode.Flags flags = (JazzRandomNode.Flags)value;
+            this.mScene.Container.UndoRedo.Submit(new FlagsCommand(this, flags));
+        }
+
+        [Undoable("CreateFlagsCommand")]
         public JazzRandomNode.Flags Flags
         {
             get { return this.mRandomNode.Flags; }
@@ -626,11 +630,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mRandomNode.Flags != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new FlagsCommand(this, value, false));
+                    this.mRandomNode.Flags = value;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        #region Visualization
 
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -970,5 +976,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 }
             }
         }
+
+        #endregion
     }
 }

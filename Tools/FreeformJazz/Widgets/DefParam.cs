@@ -11,16 +11,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         public DefParam(ParamDefinition param, StateMachineScene scene)
         {
-            if (param == null)
-            {
-                throw new ArgumentNullException("param");
-            }
-            if (scene == null)
-            {
-                throw new ArgumentNullException("scene");
-            }
-            this.mParam = param;
-            this.mScene = scene;
+            this.mParam = param ?? throw new ArgumentNullException("param");
+            this.mScene = scene ?? throw new ArgumentNullException("scene");
         }
 
         public ParamDefinition GetParam()
@@ -39,6 +31,12 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        private void CreateNameCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new NameCommand(this, value.ToString(), false));
+        }
+
+        [Undoable("CreateNameCommand")]
         public string Name
         {
             get { return this.mParam.Name; }
@@ -46,8 +44,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mParam.Name != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new NameCommand(this, value, false));
+                    this.mParam.Name = value;
                 }
             }
         }
@@ -63,6 +60,12 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        private void CreateDefaultValueCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new DefaultValueCommand(this, value.ToString(), false));
+        }
+
+        [Undoable("CreateDefaultValueCommand")]
         public string DefaultValue
         {
             get { return this.mParam.DefaultValue; }
@@ -70,8 +73,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mParam.DefaultValue != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new DefaultValueCommand(this, value, false));
+                    this.mParam.DefaultValue = value;
                 }
             }
         }

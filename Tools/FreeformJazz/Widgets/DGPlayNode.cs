@@ -7,6 +7,7 @@ using s3pi.GenericRCOLResource;
 using s3pi.Interfaces;
 using s3piwrappers.Helpers;
 using s3piwrappers.Helpers.Resources;
+using s3piwrappers.Helpers.Undo;
 using s3piwrappers.JazzGraph;
 
 namespace s3piwrappers.FreeformJazz.Widgets
@@ -44,24 +45,21 @@ namespace s3piwrappers.FreeformJazz.Widgets
         }
 
         private abstract class PlayNodePropertyCommand<P>
-            : DGNodePropertyCommand<DGPlayNode, PlayAnimationNode, P>
+            : PropertyCommand<DGPlayNode, P>
         {
             protected const string kLabelPrefix 
                 = "Set Play Animation Node ";
 
-            public PlayNodePropertyCommand(DGPlayNode dgpn, 
-                string property, P newValue, bool extendable)
-                : base(dgpn, dgpn.mPlayNode, 
-                    property, newValue, extendable)
+            public PlayNodePropertyCommand(DGPlayNode dgpn, string property, P newValue)
+                : base(dgpn, property, newValue, false)
             {
             }
         }
 
         private class ClipKeyCommand : PlayNodePropertyCommand<RK>
         {
-            public ClipKeyCommand(DGPlayNode dgpn, 
-                RK newValue, bool extendable)
-                : base(dgpn, "ClipKey", newValue, extendable)
+            public ClipKeyCommand(DGPlayNode dgpn, RK newValue)
+                : base(dgpn, "ClipKey", newValue)
             {
                 this.mLabel = kLabelPrefix + "Base Clip Key";
             }
@@ -69,9 +67,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class TrackMaskKeyCommand : PlayNodePropertyCommand<RK>
         {
-            public TrackMaskKeyCommand(DGPlayNode dgpn,
-                RK newValue, bool extendable)
-                : base(dgpn, "TrackMaskKey", newValue, extendable)
+            public TrackMaskKeyCommand(DGPlayNode dgpn, RK newValue)
+                : base(dgpn, "TrackMaskKey", newValue)
             {
                 this.mLabel = kLabelPrefix + "Track Mask Key";
             }
@@ -79,9 +76,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class AdditiveClipKeyCommand : PlayNodePropertyCommand<RK>
         {
-            public AdditiveClipKeyCommand(DGPlayNode dgpn,
-                RK newValue, bool extendable)
-                : base(dgpn, "AdditiveClipKey", newValue, extendable)
+            public AdditiveClipKeyCommand(DGPlayNode dgpn, RK newValue)
+                : base(dgpn, "AdditiveClipKey", newValue)
             {
                 this.mLabel = kLabelPrefix + "Additive Clip Key";
             }
@@ -89,9 +85,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
 
         private class ClipPatternCommand : PlayNodePropertyCommand<string>
         {
-            public ClipPatternCommand(DGPlayNode dgpn,
-                string newValue, bool extendable)
-                : base(dgpn, "ClipPattern", newValue, extendable)
+            public ClipPatternCommand(DGPlayNode dgpn, string newValue)
+                : base(dgpn, "ClipPattern", newValue)
             {
                 this.mLabel = kLabelPrefix + "Base Clip Pattern";
             }
@@ -100,14 +95,20 @@ namespace s3piwrappers.FreeformJazz.Widgets
         private class AdditiveClipPatternCommand
             : PlayNodePropertyCommand<string>
         {
-            public AdditiveClipPatternCommand(DGPlayNode dgpn,
-                string newValue, bool extendable)
-                : base(dgpn, "AdditiveClipPattern", newValue, extendable)
+            public AdditiveClipPatternCommand(DGPlayNode dgpn, string newValue)
+                : base(dgpn, "AdditiveClipPattern", newValue)
             {
                 this.mLabel = kLabelPrefix + "Additive Clip Pattern";
             }
         }
 
+        private void CreateClipKeyCommand(object value)
+        {
+            RK key = (RK)value;
+            this.mScene.Container.UndoRedo.Submit(new ClipKeyCommand(this, key));
+        }
+
+        [Undoable("CreateClipKeyCommand")]
         public RK ClipKey
         {
             get { return this.mPlayNode.ClipKey; }
@@ -115,12 +116,19 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (!this.mPlayNode.ClipKey.Equals(value))
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new ClipKeyCommand(this, value, false));
+                    this.mPlayNode.ClipKey = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateTrackMaskKeyCommand(object value)
+        {
+            RK key = (RK)value;
+            this.mScene.Container.UndoRedo.Submit(new TrackMaskKeyCommand(this, key));
+        }
+
+        [Undoable("CreateTrackMaskKeyCommand")]
         public RK TrackMaskKey
         {
             get { return this.mPlayNode.TrackMaskKey; }
@@ -128,8 +136,8 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (!this.mPlayNode.TrackMaskKey.Equals(value))
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new TrackMaskKeyCommand(this, value, false));
+                    this.mPlayNode.TrackMaskKey = value;
+                    this.UpdateVisualization();
                 }
             }
         }
@@ -147,6 +155,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             }
         }
 
+        private void CreateAdditiveClipKeyCommand(object value)
+        {
+            RK key = (RK)value;
+            this.mScene.Container.UndoRedo.Submit(new AdditiveClipKeyCommand(this, key));
+        }
+
+        [Undoable("CreateAdditiveClipKeyCommand")]
         public RK AdditiveClipKey
         {
             get { return this.mPlayNode.AdditiveClipKey; }
@@ -154,12 +169,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (!this.mPlayNode.AdditiveClipKey.Equals(value))
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new AdditiveClipKeyCommand(this, value, false));
+                    this.mPlayNode.AdditiveClipKey = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateClipPatternCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new ClipPatternCommand(this, value.ToString()));
+        }
+
+        [Undoable("CreateClipPatternCommand")]
         public string ClipPattern
         {
             get { return this.mPlayNode.ClipPattern; }
@@ -167,12 +188,18 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mPlayNode.ClipPattern != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new ClipPatternCommand(this, value, false));
+                    this.mPlayNode.ClipPattern = value;
+                    this.UpdateVisualization();
                 }
             }
         }
 
+        private void CreateAdditiveClipPatternCommand(object value)
+        {
+            this.mScene.Container.UndoRedo.Submit(new AdditiveClipPatternCommand(this, value.ToString()));
+        }
+
+        [Undoable("CreateAdditiveClipPatternCommand")]
         public string AdditiveClipPattern
         {
             get { return this.mPlayNode.AdditiveClipPattern; }
@@ -180,11 +207,13 @@ namespace s3piwrappers.FreeformJazz.Widgets
             {
                 if (this.mPlayNode.AdditiveClipPattern != value)
                 {
-                    this.mScene.Container.UndoRedo.Submit(
-                        new AdditiveClipPatternCommand(this, value, false));
+                    this.mPlayNode.AdditiveClipPattern = value;
+                    this.UpdateVisualization();
                 }
             }
         }
+
+        #region Visualization
 
         private static Font sTextFont 
             = new Font(FontFamily.GenericSansSerif, 5);
@@ -529,5 +558,7 @@ namespace s3piwrappers.FreeformJazz.Widgets
                 sTextBrush, bbox, TextFormat);
             TextFormat.Alignment = sa;
         }
+
+        #endregion
     }
 }

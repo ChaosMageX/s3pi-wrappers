@@ -13,7 +13,7 @@ namespace s3piwrappers.JazzGraph
         public const string ResourceTag = "AcOp";
 
         private ActorDefinition mActor;
-        protected readonly JazzActorOperationNode.ActorOperation mOperation;
+        private JazzActorOperationNode.ActorOperation mOperation;
         private uint mOperand;
 
         public ActorOperationNode(
@@ -67,6 +67,13 @@ namespace s3piwrappers.JazzGraph
         public JazzActorOperationNode.ActorOperation Operation
         {
             get { return this.mOperation; }
+            set
+            {
+                if (this.mOperation != value)
+                {
+                    this.mOperation = value;
+                }
+            }
         }
 
         public bool Operand
