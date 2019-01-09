@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
-using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using s3pi.Interfaces;
@@ -72,8 +71,13 @@ namespace s3piwrappers.CustomForms.PropertyGrid
                 IDictionaryCTD field = (IDictionaryCTD)value;
                 if (field.Value == null) return value;
 
-                Type[] interfaces = field.Value.GetType().GetInterfaces().Where(x => x.Name == "IDictionary`2").ToArray();
-                if (interfaces.Length != 1) return value;
+                int count = 0;
+                Type[] interfaces = field.Value.GetType().GetInterfaces();
+                for (int i = 0; i < interfaces.Length; i++)
+                {
+                    if (interfaces[i].Name == "IDictionary`2") count++;
+                }
+                if (count != 1) return value;
                 DictionaryEntry entry = getDefault(field.Value.GetType());
 
                 List<object> oldKeys = new List<object>();
